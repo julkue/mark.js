@@ -1,0 +1,58 @@
+<!doctype html>
+<!-- 
+jmHighlight
+
+Fork of
+highlight v5
+
+Highlights arbitrary terms.
+
+<http://johannburkard.de/blog/programming/javascript/highlight-javascript-text-higlighting-jquery-plugin.html>
+
+MIT license.
+
+Modified by julmot to allow custom css classes.
+<https://github.com/julmot>
+
+Johann Burkard
+<http://johannburkard.de>
+<mailto:jb@eaio.com>
+-->
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>jmHighlight</title>
+		<style>
+			.customHighlight{
+				background:yellow;
+			}
+			.highlight{
+				background:blue;
+			}
+		</style>
+	</head>
+<body>
+
+<div class="test">
+	<p>
+		Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+	</p>
+	<div>
+		<p>
+			Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+		</p>
+	</div>
+</div>
+
+<script type="text/javascript" src="../lib/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="../src/jquery.jmHighlight.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		// Test without custom class
+		$(".test").highlight("justo");
+		// Test with custom class
+		$(".test").highlight("rebum", "customHighlight");
+	});
+</script>
+</body>
+</html>
