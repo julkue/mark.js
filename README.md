@@ -7,9 +7,12 @@ Usage
 --------
 ```javascript
 	// With default class name "highlight"
-	$("yourSelector").highlight("yourKeyword");
+	$("yourSelector").jmHighlight("yourKeyword");
 	// With custom class name
-	$("yourSelector").highlight("yourKeyword", "yourClass");
+	$("yourSelector").jmHighlight("yourKeyword", "yourClass");
+	// To remove highlighting
+	$("yourSelector").jmRemoveHighlight("yourOptionalClass");
+	
 	
 ```
 
