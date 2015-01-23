@@ -49,9 +49,10 @@ Johann Burkard
 <script type="text/javascript">
 	$(document).ready(function(){
 		// Test without custom class
-		$(".test").highlight("justo");
+		$(".test").jmHighlight("justo");
 		// Test with custom class
-		$(".test").highlight("rebum", "customHighlight");
+		$(".test").jmRemoveHighlight("customHighlight");
+		$(".test").jmHighlight("rebum", "customHighlight");
 	});
 </script>
 </body>
