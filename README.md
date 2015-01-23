@@ -6,14 +6,12 @@ jmHighlight
 Usage
 --------
 ```javascript
-	// With default class name "highlight"
-	$("yourSelector").jmHighlight("yourKeyword");
-	// With custom class name
-	$("yourSelector").jmHighlight("yourKeyword", "yourClass");
-	// To remove highlighting
-	$("yourSelector").jmRemoveHighlight("yourOptionalClass");
-	
-	
+// With default class name "highlight"
+$("yourSelector").jmHighlight("yourKeyword");
+// With custom class name
+$("yourSelector").jmHighlight("yourKeyword", "yourClass");
+// To remove highlighting
+$("yourSelector").jmRemoveHighlight("yourOptionalClass");
 ```
 
 Demo
