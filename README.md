@@ -13,14 +13,18 @@ $("yourSelector").jmHighlight("yourKeyword", "yourClass");
 // To remove highlighting
 $("yourSelector").jmRemoveHighlight("yourOptionalClass");
 ```
+If you want to ignore some elements then filter the elements yourself like
+```javascript
+$("yourSelector").filter(function(){
+	// Make your filter (return false if the
+	// element should be removed from stack
+	// otherwise true)
+}).jmHighlight("yourKeyword");
+```
 
 Demo
 --------
 See /test folder.
-
-TODO
---------
-* Add option to ignore a stack of elements on the highlight process
 
 
 
