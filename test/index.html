@@ -1,22 +1,10 @@
 <!doctype html>
-<!-- 
-jmHighlight
-
-Fork of
-highlight v5
-
-Highlights arbitrary terms.
-
-<http://johannburkard.de/blog/programming/javascript/highlight-javascript-text-higlighting-jquery-plugin.html>
-
-MIT license.
-
-Modified by julmot to allow custom css classes.
-<https://github.com/julmot>
-
-Johann Burkard
-<http://johannburkard.de>
-<mailto:jb@eaio.com>
+<!--
+/*!***************************************************
+ * jmHighlight
+ * Copyright (c) 2015, Julian Motz
+ * Released under the MIT license
+ *****************************************************/
 -->
 <html>
 	<head>
@@ -39,20 +27,57 @@ Johann Burkard
 	</p>
 	<div>
 		<p>
-			Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+			Hello World <span class="ignore">justo</span> I am a paragraph inside a DIV
 		</p>
 	</div>
+	<div class="noHighlight">
+		justo justo justo this should be ignored
+	</div>
+	<span>I should not be ignored Justo hihi</span>
 </div>
 
 <script type="text/javascript" src="../lib/jquery-1.11.0.min.js"></script>
 <script type="text/javascript" src="../src/jquery.jmHighlight.js"></script>
 <script type="text/javascript">
 	$(document).ready(function(){
-		// Test without custom class
-		$(".test").jmHighlight("justo");
-		// Test with custom class
-		$(".test").jmRemoveHighlight("customHighlight");
-		$(".test").jmHighlight("rebum", "customHighlight");
+		
+		// Highlight all keywords inside .test
+		// but do not highlight text inside .noHighlight and .ignore
+		// Also create a "span" element with class customHighlight
+		// for the highlighting.
+		$(".test").jmHighlight("justo", {
+			"filter": [
+				".noHighlight",
+				".ignore"
+			],
+			"element": "span",
+			"className": "customHighlight"
+		});
+		
+		// Highlight another keyword
+		setTimeout(function(){
+			$(".test").jmHighlight("lorem", {
+				"filter": [
+					".noHighlight",
+					".ignore"
+				],
+				"element": "span",
+				"className": "customHighlight"
+			});
+		}, 1500);
+		
+		// Remove highlight of a keyword
+		setTimeout(function(){
+			$(".test").jmRemoveHighlight({
+				"filter": [
+					".noHighlight",
+					".ignore"
+				],
+				"element": "span",
+				"className": "customHighlight"
+			}, "justo");
+		}, 3000);
+		
 	});
 </script>
 </body>
