@@ -14,6 +14,9 @@ pass a object "filter" in the option-object. The filter-object should contain an
 of all selectors, that should be ignored.
 
 You can also highlight multiple keywords/phrases in the context. Just clone this code below.
+Also you can highlight a sentence/phrase instead of a single word. You can use `separateWordSearch`
+to define if the search for the keywords (separeted with a blank) should
+be separately or together.
 ```javascript
 // Will highlight each keyword "lorem" in the context ".test"
 // It will ignore all keywords inside ".noHighlight" and ".ignore".
@@ -27,7 +30,13 @@ $(".test").jmHighlight("lorem", {
     // Optional. Default is "span"
     "element": "em",
     // Optional. Default is "highlight"
-    "className": "customHighlight"
+    "className": "customHighlight",
+    // Optional: If your search keyword is more than one word
+    // separeted with a blank, you can define this property with true
+    // if you want a separeted search for the keywords. If you define
+    // nothing the default value is false, so it will be searched
+    // for the complete sentence
+    "separateWordSearch": true
 });
 ```
 You can remove the highlight in a specific context by
