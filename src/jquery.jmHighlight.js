@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.0.0
+ * Version 2.0.1
  * Copyright (c) 2015, Julian Motz
  * Released under the MIT license
  *****************************************************/
@@ -120,6 +120,18 @@
 			return false;
 		}
 		
+		// If it are multiple keywords than highlight them
+		// all separately
+		var spl = keyword_.split(" ");
+		if(spl.length > 1){
+			for(var i = 0, length = spl.length; i < length; i++){
+				if(highlight(spl[i], $elements_, options_) == false){
+					return false;
+				}
+			}
+			return true;
+		}
+		
 		if(_debug){
 			console.log("Highlighting keyword '" + keyword_ + "' in elements:");
 			console.log($elements_);
@@ -182,9 +194,10 @@
 		}
 		
 		if(_debug){
-			console.log("Remove highlight");
 			if(typeof keyword_ === "string" && keyword_ != ""){
-				console.log("with keyword: '" + keyword_ + "'");
+				console.log("Remove highlight with keyword: '" + keyword_ + "'");
+			} else {
+				console.log("Remove highlight");
 			}
 		}
 		
