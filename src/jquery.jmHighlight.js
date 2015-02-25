@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.0.1
+ * Version 2.1.0
  * Copyright (c) 2015, Julian Motz
  * Released under the MIT license
  *****************************************************/
@@ -34,9 +34,11 @@
 	/**
 	 * Default options
 	 */
-	var defaults = {
+	var _defaults = {
 		"element": "span",
-		"className": "highlight"
+		"className": "highlight",
+		"filter": [],
+		"separateWordSearch": false
 	};
 	
 	/**
@@ -54,11 +56,14 @@
 			return false;
 		}
 		
+		// Merge defaults with options
+		options_ = $.extend({}, _defaults, options_);
+		
 		// Get all nodes inside the context, but do not search in nodes
 		// that were already highlighted
 		var $contextElements = $context_.find("*:not([data-jmHighlight])");
 		
-		// Filter elements
+		// Filter elements if filter is defined
 		if(typeof options_ === "object" && typeof options_["filter"] === "object"){
 			var tmp = filter($contextElements, options_["filter"]);
 			if(tmp != false){
@@ -67,9 +72,7 @@
 		}
 		
 		// Highlight elements
-		highlight(keyword_, $contextElements, options_);
-		
-		return true;
+		return highlight(keyword_, $contextElements, options_);
 		
 	}
 	
@@ -85,10 +88,13 @@
 			return false;
 		}
 		
+		// Merge defaults with options
+		options_ = $.extend({}, _defaults, options_);
+		
 		// Get all nodes inside the context
 		var $contextElements = $context_.find("*:not([data-jmHighlight])");
 		
-		// Filter elements
+		// Filter elements if filter is defined
 		if(typeof options_ === "object" && typeof options_["filter"] === "object"){
 			var tmp = filter($contextElements, options_["filter"]);
 			if(tmp != false){
@@ -97,9 +103,7 @@
 		}
 		
 		// Remove highlight
-		removeHighlight($contextElements, options_, keyword_);
-		
-		return true;
+		return removeHighlight($contextElements, options_, keyword_);
 		
 	}
 	
@@ -120,31 +124,29 @@
 			return false;
 		}
 		
-		// If it are multiple keywords than highlight them
+		// If it are multiple keywords and separate word search
+		// is configured then highlight them
 		// all separately
-		var spl = keyword_.split(" ");
-		if(spl.length > 1){
-			for(var i = 0, length = spl.length; i < length; i++){
-				if(highlight(spl[i], $elements_, options_) == false){
-					return false;
+		if(typeof options_["separateWordSearch"] === "boolean"
+			&& options_["separateWordSearch"]
+		){
+			var spl = keyword_.split(" ");
+			if(spl.length > 1){
+				if(_debug){
+					console.log("Highlighting keywords separately");
 				}
+				for(var i = 0, length = spl.length; i < length; i++){
+					if(highlight(spl[i], $elements_, options_) == false){
+						return false;
+					}
+				}
+				return true;
 			}
-			return true;
 		}
 		
 		if(_debug){
 			console.log("Highlighting keyword '" + keyword_ + "' in elements:");
 			console.log($elements_);
-		}
-		
-		if(typeof options_ !== "object"){
-			options_ = {};
-		}
-		if(typeof options_["element"] !== "string"){
-			options_["element"] = defaults["element"];
-		}
-		if(typeof options_["className"] !== "string"){
-			options_["className"] = defaults["highlight"];
 		}
 		
 		// Iterate over all text nodes and replace
@@ -201,16 +203,6 @@
 			}
 		}
 		
-		if(typeof options_ !== "object"){
-			options_ = {};
-		}
-		if(typeof options_["element"] !== "string"){
-			options_["element"] = defaults["element"];
-		}
-		if(typeof options_["className"] !== "string"){
-			options_["className"] = defaults["highlight"];
-		}
-		
 		// Iterate over all text nodes
 		$elements_.each(function(){
 			
@@ -247,35 +239,34 @@
 	function filter($elements_, filter_){
 		
 		// Filter elements if defined
-		if(typeof filter_ !== "object" || $elements_ instanceof $ == false){
+		if(typeof filter_ !== "object" || $elements_ instanceof $ == false
+			|| Object.prototype.toString.call(filter_) != '[object Array]'){
 			return false;
 		}
 		var $contextElements = $elements_;
-		if(Object.prototype.toString.call(filter_) === '[object Array]'){
-			$contextElements = $contextElements.filter(function(){
-				
-				var $this = $(this);
-				var filterArr = filter_;
-				
-				// Check if match in element itself
-				var foundInElement = false;
-				filterArr.forEach(function(filter){
-					// We use is() instead of hasClass() to
-					// support complex selectors
-					if($this.is(filter)){
-						foundInElement = true;
-						return;
-					}
-				});
-				if(foundInElement){
-					// Delete entry
-					return false;
-				} else {
-					// Remain entry
-					return true;
+		$contextElements = $contextElements.filter(function(){
+			
+			var $this = $(this);
+			var filterArr = filter_;
+			
+			// Check if match in element itself
+			var foundInElement = false;
+			filterArr.forEach(function(filter){
+				// We use is() instead of hasClass() to
+				// support complex selectors
+				if($this.is(filter)){
+					foundInElement = true;
+					return;
 				}
 			});
-		}
+			if(foundInElement){
+				// Delete entry
+				return false;
+			} else {
+				// Remain entry
+				return true;
+			}
+		});
 		return $contextElements;
 		
 	}
