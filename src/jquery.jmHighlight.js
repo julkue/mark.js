@@ -52,7 +52,8 @@
 	function initHighlight(keyword_, $context_, options_){
 		
 		if($context_ instanceof $ == false || typeof keyword_ !== "string"
-			|| keyword_ == ""){
+			|| keyword_ == ""
+		){
 			return false;
 		}
 		
@@ -120,11 +121,12 @@
 	function highlight(keyword_, $elements_, options_){
 		
 		if($elements_ instanceof $ == false || $elements_.length == 0
-			|| typeof keyword_ !== "string" || keyword_ == ""){
+			|| typeof keyword_ !== "string" || keyword_ == ""
+		){
 			return false;
 		}
 		
-		// If it are multiple keywords and separate word search
+		// If there are multiple keywords and separate word search
 		// is configured then highlight them
 		// all separately
 		if(typeof options_["separateWordSearch"] === "boolean"
@@ -217,7 +219,7 @@
 					$highlightEl.text().toLowerCase().indexOf(keyword_.toLowerCase()) == -1){
 					return;
 				} else {
-					// Remove element with his text
+					// Remove element with this text
 					$highlightEl.replaceWith($highlightEl.text());
 				}
 				
@@ -230,7 +232,7 @@
 	}
 	
 	/**
-	 * Filters elements defined in a array
+	 * Filters elements defined in an array
 	 * 
 	 * @param jquery-object $elements_
 	 * @param array filter_
@@ -240,7 +242,8 @@
 		
 		// Filter elements if defined
 		if(typeof filter_ !== "object" || $elements_ instanceof $ == false
-			|| Object.prototype.toString.call(filter_) != '[object Array]'){
+			|| Object.prototype.toString.call(filter_) != '[object Array]'
+		){
 			return false;
 		}
 		var $contextElements = $elements_;
