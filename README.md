@@ -5,7 +5,7 @@ jmHighlight
 
 Usage
 --------
-To highlight a keyword/phrase you can define a element that will be wrapped around the
+To highlight a keyword/phrase you can define an element that will be wrapped around the
 keyword. The default element is `span`. Also you can define a class that will be appended
 to the wrapper. The default class is `highlight`. 
 
