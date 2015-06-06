@@ -62,6 +62,3 @@ $(".test").jmRemoveHighlight({
 Demo
 --------
 See /test folder.
-
-
-_License: The MIT License (MIT)_
