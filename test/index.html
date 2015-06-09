@@ -58,7 +58,7 @@
 		
 		// Highlight another keyword
 		setTimeout(function(){
-			$(".test").jmHighlight("lorem ipsum", {
+			$(".test").jmHighlight("lorem ipsum justo", {
 				"filter": [
 					".noHighlight",
 					".ignore"
@@ -67,18 +67,14 @@
 				"className": "customHighlight",
 				"separateWordSearch": true
 			});
-		}, 1500);
+		}, 5000);
 		
 		// Remove highlight of a keyword
 		setTimeout(function(){
 			$(".test").jmRemoveHighlight({
-				"filter": [
-					".noHighlight",
-					".ignore"
-				],
 				"element": "span",
 				"className": "customHighlight"
-			}, "justo");
+			});
 		}, 3000);
 		
 	});
