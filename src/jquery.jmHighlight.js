@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.1.0
+ * Version 2.1.1
  * Copyright (c) 2014-2015, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -158,6 +158,9 @@
 		forEachTextNodes($elements_, function(node_){
 			
 			var node = node_;
+			if(typeof node !== "object" || typeof node.nodeValue !== "string"){
+				return;
+			}
 			if(node.nodeValue.toLowerCase().indexOf(keyword_.toLowerCase()) == -1){
 				return true;
 			}
