@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.1.1
+ * Version 2.2.0
  * Copyright (c) 2014-2015, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 

@@ -62,3 +62,12 @@ $(".test").jmRemoveHighlight({
 Demo
 --------
 See /test folder.
+
+Contributing
+------------
+If you would like to implement new features or fix some [issues](http://github.com/julmot/jmHighlight/issues) 
+then just clone this repository and run `bower install`.
+If you're feeling ambitious, you can submit a pull request - how thoughtful
+of you!
+
+Happy hacking!
