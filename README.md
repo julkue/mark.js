@@ -3,6 +3,8 @@ jmHighlight
 
 ###### JavaScript: Highlight keywords/phrases in a context with a defined class. Can be used e.g. to highlight search results on page.
 
+[![Dependency Status](https://www.versioneye.com/user/projects/55893384306662001e0000e8/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55893384306662001e0000e8)
+
 Usage
 --------
 To highlight a keyword/phrase you can define an element that will be wrapped around the
