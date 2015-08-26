@@ -23,9 +23,9 @@
 	</head>
 <body>
 
-<div class="test">
+<div class="context">
 	<p>
-		Lorem ipsum dolor sit amet, consetetur sadipscing elitr, ipsum sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+		Lorem ipsum dolor sit amet, consetetur sadipscing elitr, ipsum sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem data ipsum dolor sit amet.
 	</p>
 	<div>
 		<p>
@@ -47,7 +47,7 @@
 		// but do not highlight text inside .noHighlight and .ignore
 		// Also create a "span" element with class customHighlight
 		// for the highlighting.
-		$(".test").jmHighlight("justo", {
+		$(".context").jmHighlight("justo", {
 			"filter": [
 				".noHighlight",
 				".ignore"
@@ -58,7 +58,7 @@
 		
 		// Highlight another keyword
 		setTimeout(function(){
-			$(".test").jmHighlight("lorem ipsum justo", {
+			$(".context").jmHighlight("lorem ipsum justo", {
 				"filter": [
 					".noHighlight",
 					".ignore"
@@ -71,7 +71,7 @@
 		
 		// Remove highlight of a keyword
 		setTimeout(function(){
-			$(".test").jmRemoveHighlight({
+			$(".context").jmRemoveHighlight({
 				"element": "span",
 				"className": "customHighlight"
 			});

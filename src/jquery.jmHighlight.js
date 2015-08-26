@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.2.0
+ * Version 2.2.1
  * Copyright (c) 2014-2015, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -44,7 +44,7 @@
 	};
 	
 	/**
-	 * Inits the highlight component
+	 * Init the highlighting component
 	 * 
 	 * @param string keyword_
 	 * @param jquery-object $context_
@@ -80,7 +80,7 @@
 	}
 	
 	/**
-	 * Inits the remove highlight component
+	 * Init the remove highlighting component
 	 * 
 	 * @param jquery-object $context_
 	 * @param string keyword_ (optional)
@@ -140,7 +140,15 @@
 					console.log("Highlighting keywords separately");
 				}
 				for(var i = 0, length = spl.length; i < length; i++){
-					if(highlight(spl[i], $elements_, options_) == false){
+					// Call the highlight function for each
+					// separate keyword.
+					// Don't highlight in already highlighted
+					// terms.
+					if(highlight(
+							spl[i],
+							$elements_.filter("*:not([data-jmHighlight])"),
+							options_
+						) == false){
 						return false;
 					}
 				}
@@ -168,7 +176,9 @@
 						"' data-jmHighlight='true'>";
 			var tagC = "</" + options_["element"] + ">";
 			if(node.parentNode != null){
-				var regex = new RegExp(keyword_, "gi");
+				// Don't search inside HTML tags (e.g. keyword "data"
+				// would match because of data-xyz inside HTML tag)
+				var regex = new RegExp("(?![^<]*>)" + keyword_, "gim");
 				// Save the original keyword before replacing since
 				// the original keyword may contain some letters upper/lower-case.
 				// The keyword maybe not.
@@ -186,8 +196,8 @@
 	}
 	
 	/**
-	 * Removes the highlight in a stack of elements. The keyword
-	 * is optional. If none is defined, every keywords will be removed.
+	 * Removes the highlighting in a stack of elements. The keyword
+	 * is optional. If none is defined, all keywords will be removed.
 	 * 
 	 * @param jquery-object $elements_
 	 * @param object options
@@ -322,7 +332,7 @@
 	}
 		
 	/**
-	 * Highlight component for jQuery
+	 * Highlighting component exposure for jQuery
 	 * 
 	 * @return boolean
 	 */
