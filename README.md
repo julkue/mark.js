@@ -37,7 +37,7 @@ $(".test").jmHighlight("lorem", {
     // separeted with a blank, you can define this property with true
     // if you want a separeted search for the keywords. If you define
     // nothing the default value is false, so it will be searched
-    // for the complete sentence
+    // for the complete term
     "separateWordSearch": true
 });
 ```
