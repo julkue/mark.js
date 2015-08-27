@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.2.1
+ * Version 2.2.2
  * Copyright (c) 2014-2015, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -29,14 +29,10 @@
 	var $ = jQuery;
 	
 	/**
-	 * For debug purposes
-	 */
-	var _debug = false;
-	
-	/**
 	 * Default options
 	 */
 	var _defaults = {
+		"debug": false,
 		"element": "span",
 		"className": "highlight",
 		"filter": [],
@@ -136,7 +132,7 @@
 		){
 			var spl = keyword_.split(" ");
 			if(spl.length > 1){
-				if(_debug){
+				if(options_["debug"]){
 					console.log("Highlighting keywords separately");
 				}
 				for(var i = 0, length = spl.length; i < length; i++){
@@ -156,7 +152,7 @@
 			}
 		}
 		
-		if(_debug){
+		if(options_["debug"]){
 			console.log("Highlighting keyword '" + keyword_ + "' in elements:");
 			console.log($elements_);
 		}
@@ -172,20 +168,21 @@
 			if(node.nodeValue.toLowerCase().indexOf(keyword_.toLowerCase()) == -1){
 				return true;
 			}
+			if(options_["debug"]){
+				console.log(node);
+			}
 			var tagO = "<" + options_["element"] + " class='" + options_["className"] +
 						"' data-jmHighlight='true'>";
 			var tagC = "</" + options_["element"] + ">";
 			if(node.parentNode != null){
 				// Don't search inside HTML tags (e.g. keyword "data"
-				// would match because of data-xyz inside HTML tag)
-				var regex = new RegExp("(?![^<]*>)" + keyword_, "gim");
-				// Save the original keyword before replacing since
-				// the original keyword may contain some letters upper/lower-case.
-				// The keyword maybe not.
-				var originalKeyword = regex.exec(node.parentNode.innerHTML)[0];
+				// would match because of data-xyz inside HTML tag).
+				// Replace it with the original match, e.g. if the 
+				// search keyword is "g" replace it with "g" and not "G"
+				var regex = new RegExp("((?![^<]*>)" + keyword_ + ")", "gim");
 				node.parentNode.innerHTML = node.parentNode.innerHTML.replace(
 					regex,
-					tagO + originalKeyword + tagC
+					tagO + "$1" + tagC
 				);
 			}
 			
@@ -212,7 +209,7 @@
 			return false;
 		}
 		
-		if(_debug){
+		if(options_["debug"]){
 			if(typeof keyword_ === "string" && keyword_ != ""){
 				console.log("Remove highlight with keyword: '" + keyword_ + "'");
 			} else {
@@ -235,7 +232,29 @@
 					return;
 				} else {
 					// Remove element with this text
-					$highlightEl.replaceWith($highlightEl.text());
+					// @notice: When removing the HTML node
+					// with just the text, it will remain a separate
+					// text node for the replaced text. Because
+					// the highlighting finds only text nodes
+					// with the whole keyword inside, we need
+					// to append the next text node with the text. That will
+					// avoid having separate text nodes.
+					if($highlightEl.length > 0 
+						&& typeof $highlightEl[0] !== "undefined"
+						&& $highlightEl[0] != null 
+						&& typeof $highlightEl[0].nextSibling !== "undefined"
+						&& $highlightEl[0].nextSibling != null 
+						&& typeof $highlightEl[0].nextSibling.nodeValue !== "undefined"
+						&& $highlightEl[0].nextSibling.nodeValue != null
+					){
+						$highlightEl[0].nextSibling.nodeValue = $highlightEl.text() +
+							$highlightEl[0].nextSibling.nodeValue;
+						$highlightEl.remove();
+					} else {
+						// Just a fallback (it's ok to remain a separate
+						// text node if there is no next text node).
+						$highlightEl.replaceWith($highlightEl.text());
+					}
 				}
 				
 			});

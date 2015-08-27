@@ -38,7 +38,9 @@ $(".test").jmHighlight("lorem", {
     // if you want a separeted search for the keywords. If you define
     // nothing the default value is false, so it will be searched
     // for the complete term
-    "separateWordSearch": true
+    "separateWordSearch": true,
+    // set "debug" to true if you want to see console logs
+    "debug": true
 });
 ```
 You can remove the highlight in a specific context by
