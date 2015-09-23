@@ -10,6 +10,7 @@
 -->
 <html>
 	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=EDGE">
 		<meta charset="utf-8">
 		<title>jmHighlight</title>
 		<style>
@@ -25,7 +26,18 @@
 
 <div class="context">
 	<p>
-		Lorem ipsum dolor sit amet, consetetur sadipscing elitr, ipsum sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem data ipsum dolor sit amet.
+		Consetetur Lorem ipsum justô sit amet, consetetur sadipscing elitr,
+		<!-- One span element with a "s" at the end of the keyword -->
+		<span style="color:green;">dolors</span>
+		<span style="color:green;">dolor</span>
+		ipsum seddiam nonumy eirmod tempor invidunt ut labore et dolore magna
+		aliquyam erat, sed diam voluptua. At vero eos et accusam et justò duo
+		dolores et ea rebum. Stet clita kasd gubergren justo, no sea takimata
+		sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet,
+		consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
+		ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero
+		eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+		no sea takimata sanctus est Lorem data ipsum dolor sit amet.
 	</p>
 	<div>
 		<p>
@@ -35,30 +47,51 @@
 	<div class="noHighlight">
 		justo justo justo this should be ignored
 	</div>
-	<span>I should not be ignored Justo hihi</span>
+	<span>I should not be ignored JÚsto lorem</span>
 </div>
 
-<script type="text/javascript" src="../lib/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="../lib/jquery/dist/jquery.js"></script>
 <script type="text/javascript" src="../src/jquery.jmHighlight.js"></script>
 <script type="text/javascript">
+	/**
+	 * Test Protocol
+	 */
 	$(document).ready(function(){
 		
-		// Highlight all keywords inside .test
-		// but do not highlight text inside .noHighlight and .ignore
-		// Also create a "span" element with class customHighlight
-		// for the highlighting.
-		$(".context").jmHighlight("justo", {
+		console.log("Highlighting 'lorem ipsum justò' separately: Should appear with yellow background");
+		$(".context").jmHighlight("lorem ipsum justò", {
 			"filter": [
 				".noHighlight",
 				".ignore"
 			],
 			"element": "span",
-			"className": "customHighlight"
+			"className": "customHighlight",
+			"separateWordSearch": true
 		});
 		
-		// Highlight another keyword
 		setTimeout(function(){
-			$(".context").jmHighlight("lorem ipsum justo", {
+			console.log("Highlighting 'lgubergren': Should appear with blue background");
+			$(".context").jmHighlight("gubergren", {
+				"filter": [
+					".noHighlight",
+					".ignore"
+				],
+				"element": "span",
+				"className": "highlight"
+			});
+		}, 1000);
+		
+		setTimeout(function(){
+			console.log("Removing highlighting with yellow background");
+			$(".context").jmRemoveHighlight({
+				"element": "span",
+				"className": "customHighlight"
+			});
+		}, 3000);
+		
+		setTimeout(function(){
+			console.log("Highlighting separately 'lorem dolor': Should appear with yellow background");
+			$(".context").jmHighlight("lorem dolor", {
 				"filter": [
 					".noHighlight",
 					".ignore"
@@ -67,15 +100,65 @@
 				"className": "customHighlight",
 				"separateWordSearch": true
 			});
-		}, 5000);
+		}, 6000);
 		
-		// Remove highlight of a keyword
 		setTimeout(function(){
+			console.log("Removing highlighting with blue background");
 			$(".context").jmRemoveHighlight({
+				"element": "span",
+				"className": "highlight"
+			});
+		}, 9000);
+		
+		setTimeout(function(){
+			console.log("Highlighting 'justo': Should appear with blue background and as a i-element");
+			$(".context").jmHighlight("justo", {
+				"filter": [
+					".noHighlight",
+					".ignore"
+				],
+				"element": "i",
+				"className": "highlight"
+			});
+		}, 12000);
+		
+		setTimeout(function(){
+			console.log("Removing highlighting 'justo' with blue background and as a i-element");
+			$(".context").jmRemoveHighlight({
+				"filter": [
+					".noHighlight",
+					".ignore"
+				],
+				"element": "i",
+				"className": "highlight"
+			});
+		}, 15000);
+		
+		setTimeout(function(){
+			console.log("Clear highlighting with yellow background");
+			$(".context").jmRemoveHighlight({
+				"filter": [
+					".noHighlight",
+					".ignore"
+				],
 				"element": "span",
 				"className": "customHighlight"
 			});
-		}, 3000);
+		}, 18000);
+		
+		setTimeout(function(){
+			console.log("Highlighting 'lorem ipsum': Should appear with yellow background");
+			$(".context").jmHighlight("lorem ipsum", {
+				"filter": [
+					".noHighlight",
+					".ignore"
+				],
+				"element": "span",
+				"className": "customHighlight",
+				"separateWordSearch": false
+			});
+		}, 21000);
+		
 		
 	});
 </script>
