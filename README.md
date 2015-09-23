@@ -12,7 +12,7 @@ keyword. The default element is `span`. Also you can define a class that will be
 to the wrapper. The default class is `highlight`. 
 
 If you want to ignore some elements in the context, e.g. a specific element with a class you need to
-pass a array "filter" in the option-object. The filter-array should contain all selectors, that should be ignored.
+pass an array "filter" in the option-object. The filter-array should contain all selectors that should be ignored.
 
 You can also highlight multiple keywords/phrases with different classes in the context. Just clone this code below for each keyword.
 
@@ -39,17 +39,18 @@ $(".test").jmHighlight("lorem", {
     // nothing the default value is false, so it will be searched
     // for the complete term
     "separateWordSearch": true,
+    // if diacritics should be matched too
+    "diacritics": true, // default true
     // set "debug" to true if you want to see console logs
     "debug": true
 });
 ```
 You can remove the highlight in a specific context by
- * a specific class (in our example above "customHighlight")
- * a specific element
- * or a keyword
+ - a specific class (in our example above "customHighlight")
+ - a specific element
+ - or a keyword
  
-You can combine them as the code below shows. If you don't
-pass any constraint all highlights will be removed.
+You can combine them like below. Everything inside the option-object is optionally, also the keyword itself.
 
 ```javascript
 $(".test").jmRemoveHighlight({
@@ -62,10 +63,27 @@ $(".test").jmRemoveHighlight({
 }, "lorem");
 		
 ```
+Options overview
+--------
+
+|       Option       	| Type    	| Default     	| Description                                                                                   	|
+|:------------------:	|---------	|-------------	|-----------------------------------------------------------------------------------------------	|
+| debug              	| boolean 	| false       	| Set this option to true if you want to see console logs                                       	|
+| element            	| string  	| "span"      	| A valid HTML element to wrap matched elements with, e.g. a `span`-element                     	|
+| className          	| string  	| "highlight" 	| A class name that will be appended to the element                                             	|
+| filter             	| array   	| []          	| An array with all selectors where the plugin should not check for matching elements           	|
+| separateWordSearch 	| boolean 	| false       	| If the plugin should search for each word (separated by a blank) instead of the complete term 	|
+| diacritics         	| boolean 	| true        	| If diacritic characters should be matched. For example "justo" would also match "justò"       	|
 
 Demo
 --------
 See /test folder.
+
+Browser compatibility
+--------
+The plugin works in all modern browsers. It has been tested in Firefox, Chrome, Safari and IE9+. The reason why it's not supported in IE8 and lower is not the API (like missing forEach or arr.indexOf). Instead it's because the DOM is different to modern browsers and it would take unnecessary expense to adjust the plugin to add/remove highlights compatible in these browsers.
+
+![IE9-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) ![IE10-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png) ![Firefox](https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_48x48.png) ![Chrome](https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_48x48.png) ![Safari](https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png)
 
 Contributing
 ------------
