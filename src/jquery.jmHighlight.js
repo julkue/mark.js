@@ -20,7 +20,7 @@
 		// Browser globals
 		factory(global.jQuery, global);
 	}
-})(this, function (jQuery, global_) {
+})(this, function (jQuery) {
 	"use strict";
 	
 	/**
@@ -132,7 +132,7 @@
 			return arr;
 		}
 		// Iterate over all items in the stack
-		var $tmp = $elements_.each(function(){
+		$elements_.each(function(){
 			var $this = $(this);
 			
 			// Get all text nodes of this element (not recursive!)
