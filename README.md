@@ -3,7 +3,7 @@ jmHighlight
 
 ###### JavaScript: Highlight keywords/phrases in a context with a defined class. Can be used e.g. to highlight search results on page.
 
-[![Dependency Status](https://www.versioneye.com/user/projects/55893384306662001e0000e8/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55893384306662001e0000e8)
+[![Dependency Status](https://www.versioneye.com/user/projects/55893384306662001e0000e8/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55893384306662001e0000e8) [![GitHub issues](https://img.shields.io/github/issues/julmot/jmHighlight.svg)](https://github.com/julmot/jmHighlight/issues) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/julmot/jmHighlight/master/LICENSE)
 
 Usage
 --------
