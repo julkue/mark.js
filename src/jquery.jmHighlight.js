@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.3.0
+ * Version 2.3.1
  * Copyright (c) 2014-2015, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -46,15 +46,14 @@
 		// Initialize keyword
 		this.keyword = typeof keyword_ === "string" ? keyword_: "";
 		// Initialize elements
+		this.$elements = $();
 		if($context_ instanceof $ && $context_.length > 0){
-			this.$elements = $context_.find("*");
+			this.$elements = $context_.add($context_.find("*"));
 			// Filter elements if filter is defined
 			var tmp = this.getFilteredElements();
 			if(tmp != false){
 				this.$elements = tmp;
 			}
-		} else {
-			this.$elements = $();
 		}
 		return this;
 	}

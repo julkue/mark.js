@@ -47,7 +47,7 @@
 	<div class="noHighlight">
 		justo justo justo this should be ignored
 	</div>
-	<span>I should not be ignored JÚsto lorem</span>
+	<span>I should not be ignored JÚsto lorem inside this span</span>
 </div>
 
 <script type="text/javascript" src="../lib/jquery/dist/jquery.js"></script>
@@ -159,6 +159,16 @@
 			});
 		}, 21000);
 		
+		setTimeout(function(){
+			console.log("Highlighting 'inside' in created specific list of elements: Should appear with blue background");
+			var $elements = $(".context").find("> div").first().find("> p");
+			$elements = $elements.add($(".context").find("> span"));
+			$elements.jmHighlight("inside", {
+				"element": "span",
+				"className": "highlight",
+				"separateWordSearch": false
+			});
+		}, 24000);
 		
 	});
 </script>
