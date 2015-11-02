@@ -170,6 +170,32 @@
 			});
 		}, 24000);
 		
+		setTimeout(function(){
+			console.log("Clear highlighting with yellow background");
+			$(".context").jmRemoveHighlight({
+				"filter": [
+					".noHighlight",
+					".ignore"
+				],
+				"element": "span",
+				"className": "customHighlight"
+			});
+		}, 27000);
+		
+		setTimeout(function(){
+			console.log("Highlighting ' lorem  ipsum': Should appear with yellow background");
+			console.log("Should return 'true':");
+			console.log($(".context").jmHighlight(" lorem  ipsum", {
+				"filter": [
+					".noHighlight",
+					".ignore"
+				],
+				"element": "span",
+				"className": "customHighlight",
+				"separateWordSearch": true
+			}));
+		}, 30000);
+		
 	});
 </script>
 </body>

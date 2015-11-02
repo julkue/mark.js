@@ -1,11 +1,12 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.3.1
+ * Version 2.3.2
  * Copyright (c) 2014-2015, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
  * with this source code.
  *****************************************************/
+// TODO: Provide option to remove highlight on the same instance
 (function (global, factory) {
 	"use strict";
 	if(typeof define === "function" && define.amd) {
@@ -204,8 +205,17 @@
 	 * @return bool
 	 */
 	jmHighlight.prototype.highlight = function(keyword_){
+		// If the keyword is a blank it is not a error because
+		// the user does not expect that anything will be highlighted.
+		// So we will still return true
 		var keyword = typeof keyword_ !== "string" ? this.keyword: keyword_;
-		if(this.$elements.length == 0 || keyword == ""){
+		if(keyword == ""){
+			return true;
+		}
+		if(this.$elements.length == 0){
+			if(this.options["debug"]){
+				console.log("No search context provided");
+			}
 			return false;
 		}
 		
@@ -226,6 +236,7 @@
 				for(var j = 0, jlength = spl.length; j < jlength; j++){
 					// Call the highlight function for each
 					// separate keyword.
+					
 					if(!this.highlight(spl[j])){
 						return false;
 					}
@@ -282,6 +293,9 @@
 	 */
 	jmHighlight.prototype.removeHighlight = function(){
 		if(this.$elements.length == 0){
+			if(this.options["debug"]){
+				console.log("No search context provided");
+			}
 			return false;
 		}
 		if(this.options["debug"]){
