@@ -81,7 +81,7 @@ See /test folder.
 
 Browser compatibility
 --------
-The plugin works in all modern browsers. It has been tested in Firefox, Chrome, Safari and IE9+. The reason why it's not supported in IE8 and lower is not the API (like missing forEach or arr.indexOf). Instead it's because the DOM is different to modern browsers and it would take unnecessary expense to adjust the plugin to add/remove highlights compatible in these browsers.
+The plugin works in all modern browsers. It has been tested in Firefox, Chrome, Safari and IE9+. The reason why it's not supported in IE8 and lower is not the API (like missing forEach or arr.indexOf). Instead it's because the DOM is different to modern browsers and it would take unnecessary expense to adjust the plugin to add/remove highlights compatible in a dead browser.
 
 ![IE9-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) ![IE10-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png) ![Firefox](https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_48x48.png) ![Chrome](https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_48x48.png) ![Safari](https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png)
 
