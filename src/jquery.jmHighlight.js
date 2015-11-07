@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.3.2
+ * Version 2.3.3
  * Copyright (c) 2014-2015, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -249,24 +249,28 @@
 			console.log("Highlighting keyword '" + keyword + "' in elements:");
 			console.log(this.$elements);
 		}
-		
-		// Iterate over all text nodes and replace
-		// the search keyword after finding (case insensitive)
+		// Get the regular expression including diacritics if defined
 		var regexp = this.getKeywordRegexp(keyword);
-		var testRegex = new RegExp(regexp, "gmi");
+		// Build the expression to search in node values
+		// Note: Don't search with the "g" flag: http://tinyurl.com/q5hdctj
+		var nodeMatchRegex = new RegExp(regexp, "mi");
+		// Iterate over all text nodes, find matches and replace
+		// the search keyword with the highlighting element
 		var textNodes = this.getTextNodes(this.$elements);
 		for(var i = 0, length = textNodes.length; i < length; i++){
 			var node = textNodes[i];
-			if(typeof node !== "object" || typeof node.nodeValue !== "string" 
-				|| node.nodeValue.trim() == ""
+			if(
+				typeof node !== "object" ||
+				typeof node.nodeValue !== "string" ||
+				node.nodeValue.trim() == ""
 			){
 				continue;
 			}
-			if(!testRegex.test(node.nodeValue)){
+			if(nodeMatchRegex.test(node.nodeValue) === false){
 				continue;
 			}
 			if(this.options["debug"]){
-				console.log(regexp, node.nodeValue);
+				console.log("Regex: '" + regexp + "'. Node value: '" + node.nodeValue + "'");
 			}
 			var tagO = "<" + this.options["element"] + " class='" + this.options["className"] +
 						"' data-jmHighlight='true'>";
@@ -305,7 +309,7 @@
 				console.log("Removing highlighting");
 			}
 		}
-		var regex = new RegExp(this.getKeywordRegexp(), "gmi");
+		var regex = new RegExp(this.getKeywordRegexp(), "mi");
 		var find = this.options["element"] + "[data-jmHighlight]." + this.options["className"];
 		var parentScope = this;
 		var $stack = this.$elements.filter(find);
