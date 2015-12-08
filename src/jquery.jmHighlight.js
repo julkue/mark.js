@@ -7,6 +7,7 @@
  * with this source code.
  *****************************************************/
 // TODO: Provide option to remove highlight on the same instance
+//       Add synonym option
 (function (global, factory) {
 	"use strict";
 	if(typeof define === "function" && define.amd) {
