@@ -73,7 +73,7 @@ Options overview
 | className          	| string  	| "highlight" 	| A class name that will be appended to the element                                             	|
 | filter             	| array   	| []          	| An array with all selectors where the plugin should not check for matching elements           	|
 | separateWordSearch 	| boolean 	| false       	| If the plugin should search for each word (separated by a blank) instead of the complete term 	|
-| diacritics         	| boolean 	| true        	| If diacritic characters should be matched. For example "justo" would also match "justò"       	|
+| diacritics         	| boolean 	| true        	| If diacritic characters should be matched. For example "justo" would also match "justÃ²"       	|
 
 Demo
 --------
@@ -93,3 +93,7 @@ If you're feeling ambitious, you can submit a pull request - how thoughtful
 of you!
 
 Happy hacking!
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/julmot/jmhighlight/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
