@@ -129,7 +129,7 @@
 			}
 		});
 		return $contextElements;
-	}
+	};
 	
 	/**
 	 * Gets non recursive nodes of an element
@@ -162,7 +162,7 @@
 			});
 		});
 		return arr;
-	}
+	};
 	
 	/**
 	 * Creates a regular expression
@@ -185,7 +185,7 @@
 		} else {
 			return keyword;
 		}
-	}
+	};
 	
 	/**
 	 * Creates an regular expression based on a keyword
