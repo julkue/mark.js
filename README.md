@@ -42,7 +42,9 @@ $(".test").jmHighlight("lorem", {
     // if diacritics should be matched too
     "diacritics": true, // default true
     // set "debug" to true if you want to see console logs
-    "debug": true
+    "debug": true,
+    // set a custom log object if "debug" is true
+    "log": window.console
 });
 ```
 You can remove the highlight in a specific context by
@@ -66,14 +68,15 @@ $(".test").jmRemoveHighlight({
 Options overview
 --------
 
-|       Option       	| Type    	| Default     	| Description                                                                                   	|
-|:------------------:	|---------	|-------------	|-----------------------------------------------------------------------------------------------	|
-| debug              	| boolean 	| false       	| Set this option to true if you want to see console logs                                       	|
-| element            	| string  	| "span"      	| A valid HTML element to wrap matched elements with, e.g. a `span`-element                     	|
-| className          	| string  	| "highlight" 	| A class name that will be appended to the element                                             	|
-| filter             	| array   	| []          	| An array with all selectors where the plugin should not check for matching elements           	|
-| separateWordSearch 	| boolean 	| false       	| If the plugin should search for each word (separated by a blank) instead of the complete term 	|
+|       Option       	| Type    	| Default     	| Description                                                                                    	|
+|:------------------:	|---------	|-------------	|------------------------------------------------------------------------------------------------	|
+| element            	| string  	| "span"      	| A valid HTML element to wrap matched elements with, e.g. a `span`-element                    	|
+| className          	| string  	| "highlight" 	| A class name that will be appended to the element                                              	|
+| filter             	| array   	| []          	| An array with all selectors where the plugin should not check for matching elements            	|
+| separateWordSearch 	| boolean 	| false       	| If the plugin should search for each word (separated by a blank) instead of the complete term  	|
 | diacritics         	| boolean 	| true        	| If diacritic characters should be matched. For example "justo" would also match "justò"       	|
+| debug              	| boolean 	| false       	| Set this option to true if you want to see console logs                                        	|
+| log                	| object  	| console     	| Log messages to a specific object (only if `debug` is true)                                  	|
 
 Demo
 --------

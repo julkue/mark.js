@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.3.3
+ * Version 2.4.0
  * Copyright (c) 2014-2015, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -12,7 +12,7 @@
 	"use strict";
 	if(typeof define === "function" && define.amd) {
 		// RequireJS. Register as an anonymous module.
-		define(["jquery"], function(jQuery) {
+		define(["jquery"], function(jQuery, global) {
 			return factory(jQuery, global);
 		});
 	} else if (typeof exports === "object") {
@@ -22,7 +22,7 @@
 		// Browser globals
 		factory(global.jQuery, global);
 	}
-})(this, function (jQuery) {
+})(this, function (jQuery, global) {
 	"use strict";
 	
 	/**
@@ -39,17 +39,24 @@
 		// Initialize options
 		this.options = $.extend({}, {
 			"debug": false,
+			"log": global.console,
 			"element": "span",
 			"className": "highlight",
 			"filter": [],
 			"separateWordSearch": false,
 			"diacritics": true
 		}, options_);
+		if(typeof this.options["log"] !== "object"){
+			this.options["log"] = {
+				"debug": function(){}
+			};
+		}
 		// Initialize keyword
 		this.keyword = typeof keyword_ === "string" ? keyword_: "";
 		// Initialize elements
 		this.$elements = $();
 		if($context_ instanceof $ && $context_.length > 0){
+			// Search in context itself and in children
 			this.$elements = $context_.add($context_.find("*"));
 			// Filter elements if filter is defined
 			var tmp = this.getFilteredElements();
@@ -167,37 +174,52 @@
 		if(typeof keyword !== "string" || keyword == ""){
 			return keyword;
 		}
-		var regexp = keyword;
 		// If diacritics is defined we need to phrase
 		// the regexp to match also diacritic characters
 		if(this.options["diacritics"]){
-			var charArr = keyword.split('');
-			var handled = [];
-			for(var k = 0, klength = charArr.length; k < klength; k++){
-				var ch = charArr[k];
-				for(var j = 0, jlength = this.diacritics.length; j < jlength; j++){
-					var diacritic = this.diacritics[j];
-					if(diacritic.indexOf(ch) != -1){
-						if(handled.indexOf(diacritic) > -1){// check if already handled
-							continue;
-						}
-						// Match found. Now replace all
-						// characters in this diacritic-list
-						// with the regex expression
-						// (replace all characters in a diacritic-list
-						// since all characters in that list will not get
-						// handled anymore)
-						regexp = regexp.replace(
-							new RegExp("[" + diacritic + "]", "gmi"),
-							"[" + diacritic + "]"
-						);
-						handled.push(diacritic);
+			return this.getDiacriticRegex(keyword);
+		} else {
+			return keyword;
+		}
+	}
+	
+	/**
+	 * Creates an regular expression based on a keyword
+	 * that will match diacritics
+	 * 
+	 * @param regex_
+	 * @returns RegExp
+	 */
+	jmHighlight.prototype.getDiacriticRegex = function(str_){
+		if(typeof str_ === "undefined"){
+			return str_;
+		}
+		var regexp = str_;
+		var charArr = regexp.split('');
+		var handled = [];
+		for(var k = 0, klength = charArr.length; k < klength; k++){
+			var ch = charArr[k];
+			for(var j = 0, jlength = this.diacritics.length; j < jlength; j++){
+				var diacritic = this.diacritics[j];
+				if(diacritic.indexOf(ch) != -1){
+					if(handled.indexOf(diacritic) > -1){// check if already handled
+						continue;
 					}
+					// Match found. Now replace all
+					// characters in this diacritic-list
+					// with the regex expression
+					// (since all characters in that list will not get
+					// handled anymore)
+					regexp = regexp.replace(
+						new RegExp("[" + diacritic + "]", "gmi"),
+						"[" + diacritic + "]"
+					);
+					handled.push(diacritic);
 				}
 			}
 		}
 		return regexp;
-	}
+	};
 	
 	/**
 	 * Highlighting
@@ -215,7 +237,7 @@
 		}
 		if(this.$elements.length == 0){
 			if(this.options["debug"]){
-				console.log("No search context provided");
+				this.options["log"].debug("No search context provided");
 			}
 			return false;
 		}
@@ -232,7 +254,7 @@
 			var spl = keyword.split(" ");
 			if(spl.length > 1){
 				if(this.options["debug"]){
-					console.log("Highlighting keywords separately");
+					this.options["log"].debug("Highlighting keywords separately");
 				}
 				for(var j = 0, jlength = spl.length; j < jlength; j++){
 					// Call the highlight function for each
@@ -247,8 +269,8 @@
 		}
 		
 		if(this.options["debug"]){
-			console.log("Highlighting keyword '" + keyword + "' in elements:");
-			console.log(this.$elements);
+			this.options["log"].debug("Highlighting keyword '" + keyword + "' in elements:");
+			this.options["log"].debug(this.$elements);
 		}
 		// Get the regular expression including diacritics if defined
 		var regexp = this.getKeywordRegexp(keyword);
@@ -271,7 +293,7 @@
 				continue;
 			}
 			if(this.options["debug"]){
-				console.log("Regex: '" + regexp + "'. Node value: '" + node.nodeValue + "'");
+				this.options["log"].debug("Regex: '" + regexp + "'. Node value: '" + node.nodeValue + "'");
 			}
 			var tagO = "<" + this.options["element"] + " class='" + this.options["className"] +
 						"' data-jmHighlight='true'>";
@@ -299,15 +321,15 @@
 	jmHighlight.prototype.removeHighlight = function(){
 		if(this.$elements.length == 0){
 			if(this.options["debug"]){
-				console.log("No search context provided");
+				this.options["log"].debug("No search context provided");
 			}
 			return false;
 		}
 		if(this.options["debug"]){
 			if(typeof this.keyword === "string" && this.keyword != ""){
-				console.log("Removing highlighting with keyword: '" + this.keyword + "'");
+				this.options["log"].debug("Removing highlighting with keyword: '" + this.keyword + "'");
 			} else {
-				console.log("Removing highlighting");
+				this.options["log"].debug("Removing highlighting");
 			}
 		}
 		var regex = new RegExp(this.getKeywordRegexp(), "mi");
@@ -315,8 +337,8 @@
 		var parentScope = this;
 		var $stack = this.$elements.filter(find);
 		if(this.options["debug"]){
-			console.log(find);
-			console.log($stack);
+			this.options["log"].debug(find);
+			this.options["log"].debug($stack);
 		}
 		$stack.each(function(){
 			var $this = $(this);
