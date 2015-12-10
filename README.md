@@ -1,7 +1,7 @@
 jmHighlight
 ==============
 
-###### JavaScript: Highlight keywords/phrases in a context with a defined class. Can be used e.g. to highlight search results on page.
+###### Highlight keywords/phrases with a defined class. Can be used e.g. to highlight search results on page.
 
 [![Dependency Status](https://www.versioneye.com/user/projects/55893384306662001e0000e8/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55893384306662001e0000e8) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/julmot/jmHighlight/master/LICENSE) [![Percentage of issues still open](http://isitmaintained.com/badge/open/julmot/jmHighlight.svg)](http://isitmaintained.com/project/julmot/jmHighlight "Percentage of issues still open")
 
@@ -98,4 +98,4 @@ of you!
 Happy hacking!
 
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/julmot/jmhighlight/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/julmot/jmhighlight/trend.png)](https://github.com/julmot/jmHighlight)
