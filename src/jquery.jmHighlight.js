@@ -60,10 +60,7 @@
 			// Search in context itself and in children
 			this.$elements = $context_.add($context_.find("*"));
 			// Filter elements if filter is defined
-			var tmp = this.getFilteredElements();
-			if(tmp != false){
-				this.$elements = tmp;
-			}
+			this.$elements = this.getFilteredElements();
 		}
 		return this;
 	}
@@ -97,13 +94,15 @@
 	 * @return jquery-object
 	 */
 	jmHighlight.prototype.getFilteredElements = function(){
-		var filterArr = this.options["filter"];
-		if(typeof filterArr !== "object" || this.$elements instanceof $ == false
-			|| Object.prototype.toString.call(filterArr) != '[object Array]'
-		){
-			return false;
-		}
 		var $contextElements = this.$elements;
+		var filterArr = this.options["filter"];
+		if(
+			typeof filterArr !== "object" ||
+			$contextElements instanceof $ === false ||
+			Object.prototype.toString.call(filterArr) !== '[object Array]'
+		){
+			return $contextElements;
+		}
 		$contextElements = $contextElements.filter(function(){
 			var $this = $(this);
 			// Check if match in element itself
@@ -137,7 +136,7 @@
 	 */
 	jmHighlight.prototype.getTextNodes = function($elements_){
 		var arr = [];
-		if($elements_ instanceof $ == false || $elements_.length == 0){
+		if($elements_ instanceof $ === false || $elements_.length === 0){
 			return arr;
 		}
 		// Iterate over all items in the stack
@@ -146,7 +145,7 @@
 			
 			// Get all text nodes of this element (not recursive!)
 			var $nodes = $this.contents().filter(function(){
-				if(this.nodeType == 3){
+				if(this.nodeType === 3){
 					return true;
 				} else {
 					return false;
@@ -172,7 +171,7 @@
 	 */
 	jmHighlight.prototype.getKeywordRegexp = function(keyword_){
 		var keyword = typeof keyword_ !== "string" ? this.keyword: keyword_;
-		if(typeof keyword !== "string" || keyword == ""){
+		if(typeof keyword !== "string" || keyword === ""){
 			return keyword;
 		}
 		// If diacritics is defined we need to phrase
@@ -202,7 +201,7 @@
 			var ch = charArr[k];
 			for(var j = 0, jlength = this.diacritics.length; j < jlength; j++){
 				var diacritic = this.diacritics[j];
-				if(diacritic.indexOf(ch) != -1){
+				if(diacritic.indexOf(ch) !== -1){
 					if(handled.indexOf(diacritic) > -1){// check if already handled
 						continue;
 					}
@@ -233,10 +232,10 @@
 		// the user does not expect that anything will be highlighted.
 		// So we will still return true
 		var keyword = typeof keyword_ !== "string" ? this.keyword: keyword_;
-		if(keyword == ""){
+		if(keyword === ""){
 			return true;
 		}
-		if(this.$elements.length == 0){
+		if(this.$elements.length === 0){
 			if(this.options["debug"]){
 				this.options["log"].debug("No search context provided");
 			}
@@ -260,7 +259,6 @@
 				for(var j = 0, jlength = spl.length; j < jlength; j++){
 					// Call the highlight function for each
 					// separate keyword.
-					
 					if(!this.highlight(spl[j])){
 						return false;
 					}
@@ -286,7 +284,7 @@
 			if(
 				typeof node !== "object" ||
 				typeof node.nodeValue !== "string" ||
-				node.nodeValue.trim() == ""
+				node.nodeValue.trim() === ""
 			){
 				continue;
 			}
@@ -341,7 +339,7 @@
 			return false;
 		}
 		if(this.options["debug"]){
-			if(typeof this.keyword === "string" && this.keyword != ""){
+			if(typeof this.keyword === "string" && this.keyword !== ""){
 				this.options["log"].debug("Removing highlighting with keyword: '" + this.keyword + "'");
 			} else {
 				this.options["log"].debug("Removing highlighting");
@@ -385,7 +383,7 @@
 	 * @return bool
 	 */
 	jmHighlight.prototype.appendTextNodes = function($domElement, $stack){
-		if($domElement instanceof $ == false || $domElement.length == 0){
+		if($domElement instanceof $ === false || $domElement.length === 0){
 			return false;
 		}
 		
@@ -400,7 +398,7 @@
 		// highlight element. If so, append those two elements
 		// with the text content
 		if($prevSibling.length > 0){
-			if(prevSibling.nodeType == 3){
+			if(prevSibling.nodeType === 3){
 				// It's a text node
 				prevSibling.nodeValue = prevSibling.nodeValue + $domElement.text();
 				$domElement.remove();
@@ -418,8 +416,8 @@
 		// highlight element. If so, append those two elements
 		// with the text node
 		if($nextSibling.length > 0){
-			if(nextSibling.nodeType == 3){
-				if($prevSibling.length == 0){
+			if(nextSibling.nodeType === 3){
+				if($prevSibling.length === 0){
 					nextSibling.nodeValue = $domElement.text() + nextSibling.nodeValue;
 					$domElement.remove();
 				} else {
@@ -435,7 +433,7 @@
 					$prevSibling.remove();
 				}
 			} else {
-				if($prevSibling.length == 0){
+				if($prevSibling.length === 0){
 					$domElement.replaceWith($domElement.text());
 				}
 			}
@@ -444,7 +442,7 @@
 		
 		// If there is no next or prev element
 		// simply remove the element with it's content
-		if(handled == false){
+		if(handled === false){
 			$domElement.replaceWith($domElement.text());
 		}
 		
