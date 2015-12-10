@@ -6,8 +6,7 @@
  * please view the LICENSE file that was distributed 
  * with this source code.
  *****************************************************/
-// TODO: Provide option to remove highlight on the same instance
-//       Add synonym option
+// TODO: Add synonym option
 //       Add dynamic test
 (function (global, factory) {
 	"use strict";
@@ -33,6 +32,11 @@
 	
 	/**
 	 * Instance initialization
+	 * Note: It is only possible to highlight or
+	 * remove highlight once per instance because the
+	 * initialization of elements will be done on start
+	 * only. Changes through element manipulation will not
+	 * be detected.
 	 * 
 	 * @return this
 	 */
@@ -332,7 +336,7 @@
 	 * @return bool
 	 */
 	jmHighlight.prototype.removeHighlight = function(){
-		if(this.$elements.length == 0){
+		if(this.$elements.length === 0){
 			if(this.options["debug"]){
 				this.options["log"].debug("No search context provided");
 			}
@@ -425,7 +429,7 @@
 					$prevSibling.remove();
 				}
 			} else if($stack instanceof $ && $stack.length > 0 && $stack.is($nextSibling)){
-				if($prevSibling.length == 0){
+				if($prevSibling.length === 0){
 					$nextSibling.replaceWith($nextSibling.text() + $domElement.text());
 					$domElement.remove();
 				} else {
