@@ -8,6 +8,7 @@
  *****************************************************/
 // TODO: Provide option to remove highlight on the same instance
 //       Add synonym option
+//       Add dynamic test
 (function (global, factory) {
 	"use strict";
 	if(typeof define === "function" && define.amd) {
@@ -68,8 +69,8 @@
 	}
 	
 	/**
-	 * Diacritic symbols
-	 * for multilanguage purposes
+	 * Diacritics for multilanguage 
+	 * purposes
 	 */
 	jmHighlight.prototype.diacritics = [
 		"aÀÁÂÃÄÅàáâãäåĀāąĄ",
@@ -128,8 +129,8 @@
 	}
 	
 	/**
-	 * Gets non recursive nodes of an element and returns
-	 * it as an array
+	 * Gets non recursive nodes of an element
+	 * as an array
 	 * 
 	 * @param jquery-object $elements_
 	 * @return array
@@ -187,8 +188,8 @@
 	 * Creates an regular expression based on a keyword
 	 * that will match diacritics
 	 * 
-	 * @param regex_
-	 * @returns RegExp
+	 * @param string str_
+	 * @return RegExp
 	 */
 	jmHighlight.prototype.getDiacriticRegex = function(str_){
 		if(typeof str_ === "undefined"){
@@ -228,7 +229,7 @@
 	 * @return bool
 	 */
 	jmHighlight.prototype.highlight = function(keyword_){
-		// If the keyword is a blank it is not a error because
+		// If the keyword is a blank it is not an error because
 		// the user does not expect that anything will be highlighted.
 		// So we will still return true
 		var keyword = typeof keyword_ !== "string" ? this.keyword: keyword_;
@@ -295,9 +296,6 @@
 			if(this.options["debug"]){
 				this.options["log"].debug("Regex: '" + regexp + "'. Node value: '" + node.nodeValue + "'");
 			}
-			var tagO = "<" + this.options["element"] + " class='" + this.options["className"] +
-						"' data-jmHighlight='true'>";
-			var tagC = "</" + this.options["element"] + ">";
 			if(node.parentNode != null){
 				// Don't search inside HTML tags (e.g. keyword "data"
 				// would match because of data-xyz inside HTML tag).
@@ -306,11 +304,28 @@
 				var regex = new RegExp("((?![^<]*>)" + regexp + ")", "gim");
 				node.parentNode.innerHTML = node.parentNode.innerHTML.replace(
 					regex,
-					tagO + "$1" + tagC
+					this.getHighlightTag("$1")
 				);
 			}
 		}
 		return true;
+	};
+	
+	/**
+	 * Gets the highlighting HTML tag
+	 * with optionally content inside
+	 * 
+	 * @param string content_ (optional)
+	 * @return string
+	 */
+	jmHighlight.prototype.getHighlightTag = function(content_){
+		var tagO = "<" + this.options["element"] + " class='" + this.options["className"] +
+					"' data-jmHighlight='true'>";
+		var tagC = "</" + this.options["element"] + ">";
+		if(typeof content_ !== "string"){
+			content_ = "";
+		}
+		return tagO + content_ + tagC;
 	};
 	
 	/**
@@ -439,6 +454,8 @@
 	/**
 	 * jmHighlight component exposure for jQuery
 	 * 
+	 * @param string keyword_
+	 * @param object options_
 	 * @return boolean
 	 */
 	$.fn.jmHighlight = function(keyword_, options_){
