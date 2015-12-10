@@ -99,6 +99,3 @@ If you're feeling ambitious, you can submit a pull request - how thoughtful
 of you!
 
 Happy hacking!
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/julmot/jmhighlight/trend.png)](https://github.com/julmot/jmHighlight)
