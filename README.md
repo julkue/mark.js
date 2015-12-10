@@ -3,7 +3,10 @@ jmHighlight
 
 ###### Highlight keywords/phrases with a defined class. Can be used e.g. to highlight search results on page.
 
-[![Dependency Status](https://www.versioneye.com/user/projects/55893384306662001e0000e8/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55893384306662001e0000e8) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/julmot/jmHighlight/master/LICENSE) [![Percentage of issues still open](http://isitmaintained.com/badge/open/julmot/jmHighlight.svg)](http://isitmaintained.com/project/julmot/jmHighlight "Percentage of issues still open")
+[![Dependency Status](https://www.versioneye.com/user/projects/55893384306662001e0000e8/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55893384306662001e0000e8)
+[![Codacy Badge](https://api.codacy.com/project/badge/grade/27a3ed45370f41e89b02073b214c18a7)](https://www.codacy.com/app/julmot/jmHighlight)
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/julmot/jmHighlight.svg)](http://isitmaintained.com/project/julmot/jmHighlight "Percentage of issues still open")
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/julmot/jmHighlight/master/LICENSE)
 
 Usage
 --------
@@ -70,13 +73,13 @@ Options overview
 
 |       Option       	| Type    	| Default     	| Description                                                                                    	|
 |:------------------:	|---------	|-------------	|------------------------------------------------------------------------------------------------	|
-| element            	| string  	| "span"      	| A valid HTML element to wrap matched elements with, e.g. a `span`-element                    	|
+| element            	| string  	| "span"      	| A valid HTML element to wrap matched elements with, e.g. a `span`-element                      	|
 | className          	| string  	| "highlight" 	| A class name that will be appended to the element                                              	|
 | filter             	| array   	| []          	| An array with all selectors where the plugin should not check for matching elements            	|
 | separateWordSearch 	| boolean 	| false       	| If the plugin should search for each word (separated by a blank) instead of the complete term  	|
 | diacritics         	| boolean 	| true        	| If diacritic characters should be matched. For example "justo" would also match "justò"       	|
 | debug              	| boolean 	| false       	| Set this option to true if you want to see console logs                                        	|
-| log                	| object  	| console     	| Log messages to a specific object (only if `debug` is true)                                  	|
+| log                	| object  	| console     	| Log messages to a specific object (only if `debug` is true)                                    	|
 
 Demo
 --------
