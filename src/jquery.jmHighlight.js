@@ -1,13 +1,11 @@
 /*!***************************************************
  * jmHighlight
- * Version 2.4.0
- * Copyright (c) 2014-2015, Julian Motz
+ * Version 3.0.0
+ * Copyright (c) 2014–2016, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
  * with this source code.
  *****************************************************/
-// TODO: Add synonym option
-//       Add dynamic test
 (function (global, factory) {
 	"use strict";
 	if(typeof define === "function" && define.amd) {

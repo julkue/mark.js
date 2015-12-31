@@ -1,6 +1,7 @@
-.settings
+.settings/
+.idea/
+node_modules/
+vendor/
 .project
-lib/
-.idea
 .buildpath
 TODO

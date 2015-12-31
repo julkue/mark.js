@@ -1,6 +1,6 @@
 {
   "name": "jmHighlight",
-  "version": "2.4.0",
+  "version": "3.0.0",
   "keywords": [
     "jmHighlight",
     "highlight",
@@ -21,10 +21,9 @@
       "homepage": "http://github.com/julmot"
     }
   ],
-  "description": "JavaScript: Highlight keywords/phrases in a context with a defined class. Can be used e.g. to highlight search results on page.",
+  "description": "Highlight keywords/phrases with a defined class. Can be used e.g. to highlight search results on page.",
   "main": [
-    "src/jquery.jmHighlight.js",
-    "src/jquery.jmHighlight.min.js"
+    "src/jquery.jmHighlight.js"
   ],
   "repository": {
     "type": "git",
@@ -33,8 +32,11 @@
   "dependencies": {
     "jquery": ">1.10"
   },
- "ignore": [
-    "*.md*",
-    "**/test"
+  "devDependencies": {},
+  "ignore": [
+    "*",
+    "!dist/*",
+    "!src/jquery.jmHighlight.js",
+    "!LICENSE"
   ]
 }

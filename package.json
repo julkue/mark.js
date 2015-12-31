@@ -1,0 +1,34 @@
+{
+  "name": "jmHighlight",
+  "version": "3.0.0",
+  "keywords": [
+    "jmHighlight",
+    "highlight",
+    "html",
+    "javascript",
+    "web",
+    "julmot"
+  ],
+  "description": "Highlight keywords/phrases with a defined class. Can be used e.g. to highlight search results on page.",
+  "author": "Julian Motz",
+  "license": "MIT",
+  "repository": "julmot/jmHighlight",
+  "contributors": [
+    {
+      "name": "Julian Motz"
+    }
+  ],
+  "devDependencies": {
+    "grunt": "^0.4",
+    "grunt-contrib-uglify": "^0.11.0",
+    "grunt-karma": "^0.12.1",
+    "jasmine-core": "^2.4.1",
+    "karma": "^0.13.15",
+    "karma-jasmine": "^0.3.6",
+    "karma-jasmine-jquery": "^0.1.1",
+    "karma-phantomjs-launcher": "^0.2.1",
+    "karma-spec-reporter": "0.0.23",
+    "matchdep": "^1.0",
+    "phantomjs": "^1.9.19"
+  }
+}
