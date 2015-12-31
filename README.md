@@ -4,6 +4,7 @@ jmHighlight
 ###### Highlight keywords/phrases with a defined class. Can be used e.g. to highlight search results on page.
 
 [![Dependency Status](https://www.versioneye.com/user/projects/55893384306662001e0000e8/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55893384306662001e0000e8)
+[![Build Status](https://travis-ci.org/julmot/jmHighlight.svg?branch=master)](https://travis-ci.org/julmot/jmHighlight)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/27a3ed45370f41e89b02073b214c18a7)](https://www.codacy.com/app/julmot/jmHighlight)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/julmot/jmHighlight.svg)](http://isitmaintained.com/project/julmot/jmHighlight "Percentage of issues still open")
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/julmot/jmHighlight/master/LICENSE)
