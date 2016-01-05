@@ -9,7 +9,7 @@
     "web",
     "julmot"
   ],
-  "description": "Highlight keywords/phrases with a defined class. Can be used e.g. to highlight search results on page.",
+  "description": "JavaScript keyword highlighting. Can be used e.g. to highlight search results on page.",
   "author": "Julian Motz",
   "license": "MIT",
   "repository": "julmot/jmHighlight",

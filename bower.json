@@ -21,7 +21,7 @@
       "homepage": "http://github.com/julmot"
     }
   ],
-  "description": "Highlight keywords/phrases with a defined class. Can be used e.g. to highlight search results on page.",
+  "description": "JavaScript keyword highlighting. Can be used e.g. to highlight search results on page.",
   "main": [
     "src/jquery.jmHighlight.js"
   ],
