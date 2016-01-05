@@ -1,5 +1,12 @@
-jmHighlight
-==============
+```
+   _           _   _ _       _     _ _       _     _   
+  (_)_ __ ___ | | | (_) __ _| |__ | (_) __ _| |__ | |_ 
+  | | '_ ` _ \| |_| | |/ _` | '_ \| | |/ _` | '_ \| __|
+  | | | | | | |  _  | | (_| | | | | | | (_| | | | | |_ 
+ _/ |_| |_| |_|_| |_|_|\__, |_| |_|_|_|\__, |_| |_|\__|
+|__/                   |___/           |___/           
+
+```
 
 ###### Highlight keywords/phrases with a defined class. Can be used e.g. to highlight search results on page.
 
@@ -9,8 +16,16 @@ jmHighlight
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/julmot/jmHighlight.svg)](http://isitmaintained.com/project/julmot/jmHighlight "Percentage of issues still open")
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/julmot/jmHighlight/master/LICENSE)
 
-Usage
---------
+##1. Getting started
+
+Choose between:
+- Run `$ bower install jmHighlight --save-dev`
+- Download "[jquery.jmHighlight.min.js](https://github.com/julmot/jmHighlight/blob/master/dist/jquery.jmHighlight.min.js)" inside the "dist" folder and include it in your project
+
+You are ready to start!
+
+##2. Highlight usage
+
 To highlight a keyword/phrase you can define an element that will be wrapped around the
 keyword. The default element is `span`. Also you can define a class that will be appended
 to the wrapper. The default class is `highlight`. 
@@ -21,8 +36,8 @@ pass an array "filter" in the option-object. The filter-array should contain all
 You can also highlight multiple keywords/phrases with different classes in the context. Just clone this code below for each keyword.
 
 Also you can highlight a sentence/phrase instead of a single word. You can use `separateWordSearch`
-to define if the search for the keywords (separeted with a blank) should
-be separately or together.
+to define if the keyword search should be separately (separeted with a blank) or together.
+
 ```javascript
 // Will highlight each keyword "lorem" in the context ".test"
 // It will ignore all keywords inside ".noHighlight" and ".ignore".
@@ -51,10 +66,25 @@ $(".test").jmHighlight("lorem", {
     "log": window.console
 });
 ```
+
+**Options overview**
+
+|       Option       | Type    | Default     | Description                                                                                   |
+|:------------------:|---------|-------------|-----------------------------------------------------------------------------------------------|
+|       element      | string  | "span"      | HTML element to wrap matched elements, e.g. `span`                                            |
+|      className     | string  | "highlight" | A class name that will be appended to the element                                             |
+|       filter       | array   | []          | An array with exclusion selectors where the plugin should not check for matching elements     |
+| separateWordSearch | boolean | false       | If the plugin should search for each word (separated by a blank) instead of the complete term |
+|     diacritics     | boolean | true        | If diacritic characters should be matched. For example "justo" would also match "justò"       |
+|        debug       | boolean | false       | Set this option to true if you want to see console logs                                       |
+|         log        | object  | console     | Log messages to a specific object (only if  `debug` is true)                                  |
+
+##3. Highlight removal usage
+
 You can remove the highlight in a specific context by
  - a specific class (in our example above "customHighlight")
  - a specific element
- - or a keyword
+ - a keyword
  
 You can combine them like below. Everything inside the option-object is optionally, also the keyword itself.
 
@@ -69,34 +99,51 @@ $(".test").jmRemoveHighlight({
 }, "lorem");
 		
 ```
-Options overview
---------
 
-|       Option       	| Type    	| Default     	| Description                                                                                    	|
-|:------------------:	|---------	|-------------	|------------------------------------------------------------------------------------------------	|
-| element            	| string  	| "span"      	| A valid HTML element to wrap matched elements with, e.g. a `span`-element                      	|
-| className          	| string  	| "highlight" 	| A class name that will be appended to the element                                              	|
-| filter             	| array   	| []          	| An array with all selectors where the plugin should not check for matching elements            	|
-| separateWordSearch 	| boolean 	| false       	| If the plugin should search for each word (separated by a blank) instead of the complete term  	|
-| diacritics         	| boolean 	| true        	| If diacritic characters should be matched. For example "justo" would also match "justò"       	|
-| debug              	| boolean 	| false       	| Set this option to true if you want to see console logs                                        	|
-| log                	| object  	| console     	| Log messages to a specific object (only if `debug` is true)                                    	|
+**Options overview**
 
-Demo
---------
-See /test folder.
+|   Option  | Type    | Default     | Description                                                  |
+|:---------:|---------|-------------|--------------------------------------------------------------|
+|  element  | string  | "span"      | HTML element to wrap matched elements, e.g. `span`           |
+| className | string  | "highlight" | A class name that will be appended to the element            |
+|   debug   | boolean | false       | Set this option to true if you want to see console logs      |
+|    log    | object  | console     | Log messages to a specific object (only if  `debug` is true) |
 
-Browser compatibility
---------
-The plugin works in all modern browsers. It has been tested in Firefox, Chrome, Safari and IE9+. The reason why it's not supported in IE8 and lower is not the API (like missing forEach or arr.indexOf). Instead it's because the DOM is different to modern browsers and it would take unnecessary expense to adjust the plugin to add/remove highlights compatible in a dead browser.
+##4. Browser compatibility
 
-![IE9-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png) ![IE10-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png) ![Firefox](https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_48x48.png) ![Chrome](https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_48x48.png) ![Safari](https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png)
+The plugin works in all modern browsers.
+It has been tested in Firefox, Chrome, Safari, Edge and IE9+.
 
-Contributing
-------------
-If you would like to implement new features or fix some [issues](http://github.com/julmot/jmHighlight/issues) 
-then just clone this repository and run `bower install`.
-If you're feeling ambitious, you can submit a pull request - how thoughtful
+![IE9-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png)
+![IE10-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png)
+![Firefox](https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_48x48.png)
+![Chrome](https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_48x48.png)
+![Safari](https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png)
+
+
+##5. Contributing
+
+The project is using Grunt as a base, Karma as a task runner
+and Jasmine as testing framework.
+Before you start contributing, you should clone or download this repository and run:
+
+```bash
+bower install
+npm install
+```
+
+Now you are ready to develop. Developer API:
+
+| Grunt task | Description                                                                                                                      |
+|------------|----------------------------------------------------------------------------------------------------------------------------------|
+| dev        | Will create a server that you can open in your prefered browser. It will track file changes and re-run the test in your browser. |
+| dist       | Will run a test and generate the .min.js file inside the "dist" folder                                                           |
+| minify     | Will just generate the .min.js file inside "dist"                                                                                |
+| test       | Will just run the test                                                                                                           |
+
+Note: Run the tasks with `$ grunt [task]` (Replace "[task]" with the actual task).
+
+If you're feeling ambitious, you can submit a pull request – how thoughtful
 of you!
-
 Happy hacking!
+
