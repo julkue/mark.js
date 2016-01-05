@@ -97,7 +97,6 @@ $(".test").jmRemoveHighlight({
     "element": "span",
     "className": "customHighlight"
 }, "lorem");
-		
 ```
 
 **Options overview**
@@ -109,7 +108,10 @@ $(".test").jmRemoveHighlight({
 |   debug   | boolean | false       | Set this option to true if you want to see console logs      |
 |    log    | object  | console     | Log messages to a specific object (only if  `debug` is true) |
 
-##4. Browser compatibility
+##4. Usage example
+See this [fiddle](https://jsfiddle.net/julmot/vpav6tL1/).
+
+##5. Browser compatibility
 
 The plugin works in all modern browsers.
 It has been tested in Firefox, Chrome, Safari, Edge and IE9+.
@@ -121,7 +123,7 @@ It has been tested in Firefox, Chrome, Safari, Edge and IE9+.
 ![Safari](https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png)
 
 
-##5. Contributing
+##6. Contributing
 
 The project is using Grunt as a base, Karma as a task runner
 and Jasmine as testing framework.
