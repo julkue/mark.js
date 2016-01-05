@@ -5,10 +5,9 @@
   | | | | | | |  _  | | (_| | | | | | | (_| | | | | |_ 
  _/ |_| |_| |_|_| |_|_|\__, |_| |_|_|_|\__, |_| |_|\__|
 |__/                   |___/           |___/           
-
 ```
 
-###### Highlight keywords/phrases with a defined class. Can be used e.g. to highlight search results on page.
+#### JavaScript keyword highlighting. Can be used e.g. to highlight search results on page.
 
 [![Dependency Status](https://www.versioneye.com/user/projects/55893384306662001e0000e8/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55893384306662001e0000e8)
 [![Build Status](https://travis-ci.org/julmot/jmHighlight.svg?branch=master)](https://travis-ci.org/julmot/jmHighlight)
@@ -148,4 +147,3 @@ Note: Run the tasks with `$ grunt [task]` (Replace "[task]" with the actual task
 If you're feeling ambitious, you can submit a pull request – how thoughtful
 of you!
 Happy hacking!
-
