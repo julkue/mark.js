@@ -6,14 +6,14 @@
  * please view the LICENSE file that was distributed 
  * with this source code.
  *****************************************************/
-(function (global, factory) {
+(function (global, factory){
 	"use strict";
-	if(typeof define === "function" && define.amd) {
+	if(typeof define === "function" && define.amd){
 		// RequireJS. Register as an anonymous module.
-		define(["jquery"], function(jQuery, global) {
+		define(["jquery"], function(jQuery, global){
 			return factory(jQuery, global);
 		});
-	} else if (typeof exports === "object") {
+	} else if (typeof exports === "object"){
 		 // Node/CommonJS
 		 factory(require("jquery"), global);
 	} else {
@@ -468,6 +468,3 @@
 	};
 	
 });
-
-
-
