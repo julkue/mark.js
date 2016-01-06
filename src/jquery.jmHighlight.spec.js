@@ -14,6 +14,7 @@ jasmine.getFixtures().appendLoad("basic.html");
 jasmine.getFixtures().appendLoad("basic-separate.html");
 jasmine.getFixtures().appendLoad("basic-only-context.html");
 jasmine.getFixtures().appendLoad("basic-diacritics.html");
+jasmine.getFixtures().appendLoad("basic-synonyms.html");
 jasmine.getFixtures().appendLoad("nested.html");
 
 // check environment
@@ -222,4 +223,45 @@ describe("nested highlight removal by keyword", function(){
 	it("should remove all nested highlights", function(){
 		expect($items.length).toBe(0);
 	});
+	
+});
+
+// check synonym highlight
+describe("synonym highlight", function(){
+	
+	// check against normal synonyms in combination with diacritics
+	var instance1 = $(".basic-synonyms-test > p:first-child").jmHighlight("lorem ipsum", {
+		"element": "span",
+		"className": "customHighlight",
+		"separateWordSearch": false,
+		"diacritics": true,
+		"synonyms": {
+			"ipsum": "justo"
+		}
+	});
+	// check against numbers and umlauts
+	var instance2 = $(".basic-synonyms-test > p:not(:first-child)").jmHighlight("one luefte", {
+		"element": "span",
+		"className": "customHighlight",
+		"separateWordSearch": true,
+		"diacritics": true,
+		"synonyms": {
+			"one": "1",
+			"ü": "ue"
+		}
+	});
+	var $items1 = $(".basic-synonyms-test > p:first-child span.customHighlight");
+	var $items2 = $(".basic-synonyms-test > p:not(:first-child) span.customHighlight");
+	
+	it("should return true", function(){
+		expect(instance1).toBe(true);
+		expect(instance2).toBe(true);
+	});
+	it("should highlight 4 matches in the first paragraph", function(){
+		expect($items1.length).toBe(4);
+	});
+	it("should highlight 3 matches in the other paragraphs", function(){
+		expect($items2.length).toBe(3);
+	});
+	
 });

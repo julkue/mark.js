@@ -30,12 +30,16 @@ keyword. The default element is `span`. Also you can define a class that will be
 to the wrapper. The default class is `highlight`. 
 
 If you want to ignore some elements in the context, e.g. a specific element with a class you need to
-pass an array "filter" in the option-object. The filter-array should contain all selectors that should be ignored.
-
-You can also highlight multiple keywords/phrases with different classes in the context. Just clone this code below for each keyword.
+pass an array `filter` in the option-object. The filter-array should contain all selectors that should be ignored.
 
 Also you can highlight a sentence/phrase instead of a single word. You can use `separateWordSearch`
 to define if the keyword search should be separately (separeted with a blank) or together.
+
+If you are searching for keywords in a language with diacritics, you can
+use the `diacritics` option. Then for example "justo" would also match "justò".
+
+Last but not least you have the option to define `synonyms`. With this you can match
+aliases like "two" and "2".
 
 ```javascript
 // Will highlight each keyword "lorem" in the context ".test"
@@ -59,6 +63,12 @@ $(".test").jmHighlight("lorem", {
     "separateWordSearch": true,
     // if diacritics should be matched too
     "diacritics": true, // default true
+    // match e.g. "1" and also "one".
+    // This can also be used to match dissolved umlauts like ä and ae
+    "synonyms": {
+        "one": "1",
+        "ä": "ae"
+    },
     // set "debug" to true if you want to see console logs
     "debug": true,
     // set a custom log object if "debug" is true
@@ -75,6 +85,7 @@ $(".test").jmHighlight("lorem", {
 |       filter       | array   | []          | An array with exclusion selectors where the plugin should not check for matching elements     |
 | separateWordSearch | boolean | false       | If the plugin should search for each word (separated by a blank) instead of the complete term |
 |     diacritics     | boolean | true        | If diacritic characters should be matched. For example "justo" would also match "justò"       |
+| synonyms           | object  | {}          | An object with synonyms. The plugin will search for the key or the value and highlight both   |
 |        debug       | boolean | false       | Set this option to true if you want to see console logs                                       |
 |         log        | object  | console     | Log messages to a specific object (only if  `debug` is true)                                  |
 

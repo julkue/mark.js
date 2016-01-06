@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 3.0.0
+ * Version 3.1.0
  * Copyright (c) 2014–2016, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -47,7 +47,8 @@
 			"className": "highlight",
 			"filter": [],
 			"separateWordSearch": false,
-			"diacritics": true
+			"diacritics": true,
+			"synonyms": {}
 		}, options_);
 		if(typeof this.options["log"] !== "object"){
 			this.options["log"] = {
@@ -178,25 +179,52 @@
 		}
 		// If diacritics is defined we need to phrase
 		// the regexp to match also diacritic characters
-		if(this.options["diacritics"]){
-			return this.getDiacriticRegex(keyword);
-		} else {
-			return keyword;
+		var regexString = keyword;
+		if(!$.isEmptyObject(this.options["synonyms"])){
+			regexString = this.getSynonymsRegex(regexString);
 		}
+		if(this.options["diacritics"]){
+			regexString = this.getDiacriticRegex(regexString);
+		}
+		return regexString;
 	};
 	
 	/**
-	 * Creates an regular expression based on a keyword
-	 * that will match diacritics
+	 * Creates an regular expression (string) based on a keyword
+	 * or an existing expression that will match 
+	 * synonyms (synonym option) too
 	 * 
 	 * @param string str_
-	 * @return RegExp
+	 * @return string
+	 */
+	jmHighlight.prototype.getSynonymsRegex = function(str_){
+		var regexp = str_;
+		if(typeof regexp !== "string"){
+			return regexp;
+		}
+		$.each(this.options["synonyms"], function(index, value){
+			var search = index;
+			var synonym = value;
+			regexp = regexp.replace(
+				new RegExp("(" + search + "|" + synonym + ")", "gmi"),
+				"(" + search + "|" + synonym + ")"
+			);
+		});
+		return regexp;
+	};
+	
+	/**
+	 * Creates an regular expression (string) based on a keyword
+	 * or an existing expression that will match diacritics too
+	 * 
+	 * @param string str_
+	 * @return string
 	 */
 	jmHighlight.prototype.getDiacriticRegex = function(str_){
-		if(typeof str_ === "undefined"){
-			return str_;
-		}
 		var regexp = str_;
+		if(typeof regexp !== "string"){
+			return regexp;
+		}
 		var charArr = regexp.split('');
 		var handled = [];
 		for(var k = 0, klength = charArr.length; k < klength; k++){
