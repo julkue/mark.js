@@ -23,6 +23,8 @@ Choose between:
 
 You are ready to start!
 
+*Note: The plugin requires jQuery!*
+
 ##2. Highlight usage
 
 To highlight a keyword/phrase you can define an element that will be wrapped around the
