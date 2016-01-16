@@ -121,7 +121,8 @@ $(".test").jmRemoveHighlight({
 |    log    | object  | console     | Log messages to a specific object (only if  `debug` is true) |
 
 ##4. Usage example
-See this [fiddle](https://jsfiddle.net/julmot/vpav6tL1/).
+[Default example](https://jsfiddle.net/julmot/vpav6tL1/) and
+[table example](https://jsfiddle.net/julmot/1at87fnu/)
 
 ##5. Browser compatibility
 
