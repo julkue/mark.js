@@ -12,8 +12,9 @@ jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 // load all fixtures and append them to the DOM
 jasmine.getFixtures().appendLoad("basic.html");
 jasmine.getFixtures().appendLoad("basic-escape.html");
-jasmine.getFixtures().appendLoad("basic-separate.html");
 jasmine.getFixtures().appendLoad("basic-only-context.html");
+jasmine.getFixtures().appendLoad("basic-script-style.html");
+jasmine.getFixtures().appendLoad("basic-separate.html");
 jasmine.getFixtures().appendLoad("basic-diacritics.html");
 jasmine.getFixtures().appendLoad("basic-synonyms.html");
 jasmine.getFixtures().appendLoad("nested.html");
@@ -82,7 +83,7 @@ describe("basic highlight removal by element and class", function(){
 });
 
 // check highlight escape
-describe("highlight escape", function(){
+describe("basic highlight escape", function(){
 	
 	var instance1 = $(".basic-escape > table:nth-child(1)").jmHighlight("39,00 €", {
 		"element": "span",
@@ -121,23 +122,25 @@ describe("highlight escape", function(){
 	
 });
 
-
-// check basic highlight with separate word search
-describe("basic highlight with separate word search", function(){
+// check basic highlight with script-tags and style-tags
+describe("basic highlight with script-tags and style-tags", function(){
 	
-	var instance = $(".basic-separate-test").jmHighlight("lorem ipsum", {
+	var instance = $(".basic-script-style").jmHighlight("lorem", {
 		"element": "span",
 		"className": "customHighlight",
-		"separateWordSearch": true,
+		"separateWordSearch": false,
 		"diacritics": false
 	});
-	var $items = $(".basic-separate-test span.customHighlight");
+	var $items = $(".basic-script-style span.customHighlight");
 	
 	it("should return true", function(){
 		expect(instance).toBe(true);
 	});
-	it("should highlight 9 matches", function(){
-		expect($items.length).toBe(9);
+	it("should highlight 4 matches", function(){
+		expect($items.length).toBe(4);
+	});
+	it("should not highlight script-tags or style-tags", function(){
+		expect($items.filter("style, script").length).toBe(0);
 	});
 	it("should add a data attribute and class to matched elements", function(){
 		$items.each(function(){
@@ -178,6 +181,34 @@ describe("basic highlight when searching directly in the context", function(){
 	
 });
 
+// check basic highlight with separate word search
+describe("basic highlight with separate word search", function(){
+	
+	var instance = $(".basic-separate-test").jmHighlight("lorem ipsum", {
+		"element": "span",
+		"className": "customHighlight",
+		"separateWordSearch": true,
+		"diacritics": false
+	});
+	var $items = $(".basic-separate-test span.customHighlight");
+	
+	it("should return true", function(){
+		expect(instance).toBe(true);
+	});
+	it("should highlight 9 matches", function(){
+		expect($items.length).toBe(9);
+	});
+	it("should add a data attribute and class to matched elements", function(){
+		$items.each(function(){
+			var $this = $(this);
+			var attr = $this.attr("data-jmHighlight");
+			expect(attr).toEqual("true");
+			expect($this.hasClass("customHighlight")).toBe(true);
+		});
+	});
+	
+});
+
 // check basic highlight with diacritics
 describe("basic highlight with diacritics", function(){
 	
@@ -197,6 +228,54 @@ describe("basic highlight with diacritics", function(){
 	});
 	it("should add a data attribute and class to matched elements", function(){
 		$items.each(function(){
+			var $this = $(this);
+			var attr = $this.attr("data-jmHighlight");
+			expect(attr).toEqual("true");
+			expect($this.hasClass("customHighlight")).toBe(true);
+		});
+	});
+	
+});
+
+// check synonym highlight
+describe("basic synonym highlight", function(){
+	
+	// check against normal synonyms in combination with diacritics
+	var instance1 = $(".basic-synonyms-test > p:first-child").jmHighlight("lorem ipsum", {
+		"element": "span",
+		"className": "customHighlight",
+		"separateWordSearch": false,
+		"diacritics": true,
+		"synonyms": {
+			"ipsum": "justo"
+		}
+	});
+	// check against numbers and umlauts
+	var instance2 = $(".basic-synonyms-test > p:not(:first-child)").jmHighlight("one luefte", {
+		"element": "span",
+		"className": "customHighlight",
+		"separateWordSearch": true,
+		"diacritics": true,
+		"synonyms": {
+			"one": "1",
+			"ü": "ue"
+		}
+	});
+	var $items1 = $(".basic-synonyms-test > p:first-child span.customHighlight");
+	var $items2 = $(".basic-synonyms-test > p:not(:first-child) span.customHighlight");
+	
+	it("should return true", function(){
+		expect(instance1).toBe(true);
+		expect(instance2).toBe(true);
+	});
+	it("should highlight 4 matches in the first paragraph", function(){
+		expect($items1.length).toBe(4);
+	});
+	it("should highlight 3 matches in the other paragraphs", function(){
+		expect($items2.length).toBe(3);
+	});
+	it("should add a data attribute and class to matched elements", function(){
+		$items1.add($items2).each(function(){
 			var $this = $(this);
 			var attr = $this.attr("data-jmHighlight");
 			expect(attr).toEqual("true");
@@ -264,54 +343,6 @@ describe("nested highlight removal by keyword", function(){
 	});
 	it("should remove all nested highlights", function(){
 		expect($items.length).toBe(0);
-	});
-	
-});
-
-// check synonym highlight
-describe("synonym highlight", function(){
-	
-	// check against normal synonyms in combination with diacritics
-	var instance1 = $(".basic-synonyms-test > p:first-child").jmHighlight("lorem ipsum", {
-		"element": "span",
-		"className": "customHighlight",
-		"separateWordSearch": false,
-		"diacritics": true,
-		"synonyms": {
-			"ipsum": "justo"
-		}
-	});
-	// check against numbers and umlauts
-	var instance2 = $(".basic-synonyms-test > p:not(:first-child)").jmHighlight("one luefte", {
-		"element": "span",
-		"className": "customHighlight",
-		"separateWordSearch": true,
-		"diacritics": true,
-		"synonyms": {
-			"one": "1",
-			"ü": "ue"
-		}
-	});
-	var $items1 = $(".basic-synonyms-test > p:first-child span.customHighlight");
-	var $items2 = $(".basic-synonyms-test > p:not(:first-child) span.customHighlight");
-	
-	it("should return true", function(){
-		expect(instance1).toBe(true);
-		expect(instance2).toBe(true);
-	});
-	it("should highlight 4 matches in the first paragraph", function(){
-		expect($items1.length).toBe(4);
-	});
-	it("should highlight 3 matches in the other paragraphs", function(){
-		expect($items2.length).toBe(3);
-	});
-	it("should add a data attribute and class to matched elements", function(){
-		$items1.add($items2).each(function(){
-			var $this = $(this);
-			var attr = $this.attr("data-jmHighlight");
-			expect(attr).toEqual("true");
-			expect($this.hasClass("customHighlight")).toBe(true);
-		});
 	});
 	
 });

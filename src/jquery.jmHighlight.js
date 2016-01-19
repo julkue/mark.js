@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 3.1.1
+ * Version 3.1.2
  * Copyright (c) 2014–2016, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -62,7 +62,7 @@
 		this.keyword = typeof keyword_ === "string" ? this.escapeStr(keyword_): "";
 		// Initialize elements
 		this.$elements = $();
-		if($context_ instanceof $ && $context_.length > 0){
+		if($context_ instanceof $ && $context_.length > 0 && !$context_.is($("html"))){
 			// Search in context itself and in children
 			this.$elements = $context_.add($context_.find("*"));
 			// Filter elements if filter is defined
@@ -115,7 +115,7 @@
 		if(
 			typeof filterArr !== "object" ||
 			$contextElements instanceof $ === false ||
-			Object.prototype.toString.call(filterArr) !== '[object Array]'
+			Object.prototype.toString.call(filterArr) !== "[object Array]"
 		){
 			return $contextElements;
 		}
@@ -140,6 +140,10 @@
 				return true;
 			}
 		});
+		// Do not highlight inside scripts and styles
+		// in the context. All other elements, like e.g. code-tags
+		// are optional and should be passed in the filter object
+		$contextElements = $contextElements.filter(":not(script):not(style)");
 		return $contextElements;
 	};
 	
