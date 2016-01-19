@@ -91,6 +91,8 @@ $(".test").jmHighlight("lorem", {
 |        debug       | boolean | false       | Set this option to true if you want to see console logs                                       |
 |         log        | object  | console     | Log messages to a specific object (only if  `debug` is true)                                  |
 
+_Note: Do not use "html" as the context, choose at least "body"!_
+
 ##3. Highlight removal usage
 
 You can remove the highlight in a specific context by
