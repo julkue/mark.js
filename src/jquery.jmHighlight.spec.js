@@ -11,6 +11,7 @@ jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
 // load all fixtures and append them to the DOM
 jasmine.getFixtures().appendLoad("basic.html");
+jasmine.getFixtures().appendLoad("basic-escape.html");
 jasmine.getFixtures().appendLoad("basic-separate.html");
 jasmine.getFixtures().appendLoad("basic-only-context.html");
 jasmine.getFixtures().appendLoad("basic-diacritics.html");
@@ -79,6 +80,47 @@ describe("basic highlight removal by element and class", function(){
 	});
 	
 });
+
+// check highlight escape
+describe("highlight escape", function(){
+	
+	var instance1 = $(".basic-escape > table:nth-child(1)").jmHighlight("39,00 €", {
+		"element": "span",
+		"className": "customHighlight",
+		"separateWordSearch": false
+	});
+	var $items1 = $(".basic-escape > table:nth-child(1) span.customHighlight");
+	var instance2 = $(".basic-escape > table:nth-child(2)").jmHighlight("0.009 €", {
+		"element": "span",
+		"className": "customHighlight",
+		"separateWordSearch": false
+	});
+	var $items2 = $(".basic-escape > table:nth-child(2) span.customHighlight");
+	
+	it("should return true", function(){
+		expect(instance1).toBe(true);
+		expect(instance2).toBe(true);
+	});
+	it("should highlight 1 match in the first table", function(){
+		expect($items1.length).toBe(1);
+	});
+	it("should highlight 1 match in the second table", function(){
+		expect($items2.length).toBe(1);
+	});
+	it("should not modify text node values when searching with regex characters like '.'", function(){
+		expect($items2.first().text()).toBe("0.009 €");
+	});
+	it("should add a data attribute and class to matched elements", function(){
+		$items1.add($items2).each(function(){
+			var $this = $(this);
+			var attr = $this.attr("data-jmHighlight");
+			expect(attr).toEqual("true");
+			expect($this.hasClass("customHighlight")).toBe(true);
+		});
+	});
+	
+});
+
 
 // check basic highlight with separate word search
 describe("basic highlight with separate word search", function(){
@@ -262,6 +304,14 @@ describe("synonym highlight", function(){
 	});
 	it("should highlight 3 matches in the other paragraphs", function(){
 		expect($items2.length).toBe(3);
+	});
+	it("should add a data attribute and class to matched elements", function(){
+		$items1.add($items2).each(function(){
+			var $this = $(this);
+			var attr = $this.attr("data-jmHighlight");
+			expect(attr).toEqual("true");
+			expect($this.hasClass("customHighlight")).toBe(true);
+		});
 	});
 	
 });

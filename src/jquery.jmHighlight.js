@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 3.1.0
+ * Version 3.1.1
  * Copyright (c) 2014–2016, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -36,6 +36,9 @@
 	 * only. Changes through element manipulation will not
 	 * be detected.
 	 * 
+	 * @param jquery-object $context_
+	 * @param string keyword_
+	 * @param object options_
 	 * @return this
 	 */
 	function jmHighlight($context_, keyword_, options_){
@@ -56,7 +59,7 @@
 			};
 		}
 		// Initialize keyword
-		this.keyword = typeof keyword_ === "string" ? keyword_: "";
+		this.keyword = typeof keyword_ === "string" ? this.escapeStr(keyword_): "";
 		// Initialize elements
 		this.$elements = $();
 		if($context_ instanceof $ && $context_.length > 0){
@@ -88,6 +91,16 @@
 		"yŸÿýÝ",
 		"zŽžżŻźŹ"
 	];
+	
+	/**
+	 * Escapes a string for regex usage
+	 * 
+	 * @param string str_
+	 * @return string
+	 */
+	jmHighlight.prototype.escapeStr = function(str_){
+		return str_.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+	};
 	
 	/**
 	 * Filters elements based on the
@@ -202,9 +215,10 @@
 		if(typeof regexp !== "string"){
 			return regexp;
 		}
+		var that = this;
 		$.each(this.options["synonyms"], function(index, value){
-			var search = index;
-			var synonym = value;
+			var search = that.escapeStr(index);
+			var synonym = that.escapeStr(value);
 			regexp = regexp.replace(
 				new RegExp("(" + search + "|" + synonym + ")", "gmi"),
 				"(" + search + "|" + synonym + ")"
@@ -249,6 +263,23 @@
 			}
 		}
 		return regexp;
+	};
+	
+	/**
+	 * Gets the highlighting HTML tag
+	 * with optionally content inside
+	 * 
+	 * @param string content_ (optional)
+	 * @return string
+	 */
+	jmHighlight.prototype.getHighlightTag = function(content_){
+		var tagO = "<" + this.options["element"] + " class='" + this.options["className"] +
+					"' data-jmHighlight='true'>";
+		var tagC = "</" + this.options["element"] + ">";
+		if(typeof content_ !== "string"){
+			content_ = "";
+		}
+		return tagO + content_ + tagC;
 	};
 	
 	/**
@@ -337,23 +368,6 @@
 			}
 		}
 		return true;
-	};
-	
-	/**
-	 * Gets the highlighting HTML tag
-	 * with optionally content inside
-	 * 
-	 * @param string content_ (optional)
-	 * @return string
-	 */
-	jmHighlight.prototype.getHighlightTag = function(content_){
-		var tagO = "<" + this.options["element"] + " class='" + this.options["className"] +
-					"' data-jmHighlight='true'>";
-		var tagC = "</" + this.options["element"] + ">";
-		if(typeof content_ !== "string"){
-			content_ = "";
-		}
-		return tagO + content_ + tagC;
 	};
 	
 	/**
