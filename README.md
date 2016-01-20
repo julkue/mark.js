@@ -13,6 +13,7 @@
 [![Build Status](https://travis-ci.org/julmot/jmHighlight.svg?branch=master)](https://travis-ci.org/julmot/jmHighlight)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/27a3ed45370f41e89b02073b214c18a7)](https://www.codacy.com/app/julmot/jmHighlight)
 [![Percentage of issues still open](http://isitmaintained.com/badge/open/julmot/jmHighlight.svg)](http://isitmaintained.com/project/julmot/jmHighlight "Percentage of issues still open")
+[![Bower version](https://badge.fury.io/bo/jmHighlight.svg)](https://badge.fury.io/bo/jmHighlight)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/julmot/jmHighlight/master/LICENSE)
 
 ##1. Getting started
