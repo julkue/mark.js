@@ -122,9 +122,10 @@ $(".test").jmRemoveHighlight({
 |   debug   | boolean | false       | Set this option to true if you want to see console logs      |
 |    log    | object  | console     | Log messages to a specific object (only if  `debug` is true) |
 
-##4. Usage example
-[Default example](https://jsfiddle.net/julmot/vpav6tL1/) and
-[table example](https://jsfiddle.net/julmot/1at87fnu/)
+##4. Usage examples
+ - [Default usage example](https://jsfiddle.net/julmot/vpav6tL1/)
+ - [Table column highlighting example](https://jsfiddle.net/julmot/1at87fnu/)
+ - [DataTables highlighting example](https://jsfiddle.net/julmot/buh9h2r8/)
 
 ##5. Browser compatibility
 
