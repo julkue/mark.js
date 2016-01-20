@@ -162,4 +162,6 @@ Note: Run the tasks with `$ grunt [task]` (Replace "[task]" with the actual task
 
 If you're feeling ambitious, you can submit a pull request – how thoughtful
 of you!
+Also if you experiencing troubles with the plugin, please open an [issue](https://github.com/julmot/jmHighlight/issues/new).
+
 Happy hacking!
