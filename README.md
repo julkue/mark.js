@@ -151,7 +151,9 @@ bower install
 npm install
 ```
 
-Now you are ready to develop. Developer API:
+Now you are ready to develop.
+
+**Developer API**
 
 | Grunt task | Description                                                                                                                      |
 |------------|----------------------------------------------------------------------------------------------------------------------------------|
