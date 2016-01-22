@@ -24,7 +24,7 @@ Choose between:
 
 You are ready to start!
 
-*Note: The plugin requires jQuery! If you are not using RequireJS, NodeJS oder CommonJS you should make sure that jQuery was embedded.*
+*Note: The plugin requires jQuery! If you are not using RequireJS, NodeJS or CommonJS you should make sure that jQuery was embedded.*
 
 ##2. Highlight usage
 
