@@ -162,7 +162,7 @@ Now you are ready to develop.
 | minify     | Will just generate the .min.js file inside "dist"                                                                                |
 | test       | Will just run the test                                                                                                           |
 
-Note: Run the tasks with `$ grunt [task]` (Replace "[task]" with the actual task).
+_Note: Run the tasks with `$ grunt [task]` (Replace "[task]" with the actual task)._
 
 If you're feeling ambitious, you can submit a pull request – how thoughtful
 of you!
