@@ -30,7 +30,7 @@ manually embedded.*
 ##2. Highlight usage
 
 To highlight a keyword/phrase you can define an element that will be wrapped around the
-keyword. The default element is `span`. Also you can define a class that will be appended
+keyword. The default element is `span`. You can also define a class that will be appended
 to the wrapper. The default class is `highlight`. 
 
 If you want to ignore some elements in the context, e.g. a specific element with a class you need to
