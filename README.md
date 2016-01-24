@@ -37,7 +37,7 @@ If you want to ignore some elements in the context, e.g. a specific element with
 pass an array `filter` in the option-object. The filter-array should contain all selectors that should be ignored.
 
 Also you can highlight a sentence/phrase instead of a single word. You can use `separateWordSearch`
-to define if the keyword search should be separately (separeted with a blank) or together.
+to define whether the keyword search should be separately (separeted with a blank) or together.
 
 If you are searching for keywords in a language with diacritics, you can
 use the `diacritics` option. Then for example "justo" would also match "justò".
