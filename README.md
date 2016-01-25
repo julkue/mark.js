@@ -128,6 +128,7 @@ $(".test").jmRemoveHighlight({
  - [Default usage example](https://jsfiddle.net/julmot/vpav6tL1/)
  - [Table column highlighting example](https://jsfiddle.net/julmot/1at87fnu/)
  - [DataTables highlighting example](https://jsfiddle.net/julmot/buh9h2r8/)
+ - [Referrer keyword highlighting example](https://jsfiddle.net/julmot/bL6bb5oo/)
 
 ##5. Browser compatibility
 
