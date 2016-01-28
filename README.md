@@ -20,7 +20,7 @@
 
 Choose between:
 - Run `$ bower install jmHighlight --save-dev`
-- Download "[jquery.jmHighlight.min.js](https://github.com/julmot/jmHighlight/blob/master/dist/jquery.jmHighlight.min.js)" inside the "dist" folder and include it in your project (Note: the file must be saved as UTF-8)
+- Download "[dist/jquery.jmHighlight.min.js](https://github.com/julmot/jmHighlight/blob/master/dist/jquery.jmHighlight.min.js)" and include it in your project (Note: the file must be saved as UTF-8)
 
 You are ready to start!
 
