@@ -14,13 +14,13 @@
 			return factory(jQuery, global);
 		});
 	} else if (typeof exports === "object"){
-		 // Node/CommonJS
-		 factory(require("jquery"), global);
+		// Node/CommonJS
+		factory(require("jquery"), global);
 	} else {
-		// Browser globals
+		// No dependency management
 		factory(global.jQuery, global);
 	}
-})(this, function (jQuery, global) {
+})(this, function (jQuery, global_){
 	"use strict";
 	
 	/**
@@ -35,17 +35,19 @@
 	 * initialization of elements will be done on start
 	 * only. Changes through element manipulation will not
 	 * be detected.
+	 * If the keyword or context is empty no error will be
+	 * thrown. The user doesn't expect that anything happens.
 	 * 
 	 * @param jquery-object $context_
 	 * @param string keyword_
 	 * @param object options_
-	 * @return this
+	 * @returns this
 	 */
 	function jmHighlight($context_, keyword_, options_){
 		// Initialize options
 		this.options = $.extend({}, {
 			"debug": false,
-			"log": global.console,
+			"log": global_.console,
 			"element": "span",
 			"className": "highlight",
 			"filter": [],
@@ -53,27 +55,23 @@
 			"diacritics": true,
 			"synonyms": {}
 		}, options_);
-		if(typeof this.options["log"] !== "object"){
-			this.options["log"] = {
-				"debug": function(){}
-			};
-		}
+		
 		// Initialize keyword
 		this.keyword = typeof keyword_ === "string" ? this.escapeStr(keyword_): "";
+		
 		// Initialize elements
 		this.$elements = $();
 		if($context_ instanceof $ && $context_.length > 0 && !$context_.is($("html"))){
 			// Search in context itself and in children
 			this.$elements = $context_.add($context_.find("*"));
 			// Filter elements if filter is defined
-			this.$elements = this.getFilteredElements();
+			this.filterElements();
 		}
 		return this;
 	}
 	
 	/**
-	 * Diacritics for multilanguage 
-	 * purposes
+	 * Diacritics for multilingual usage 
 	 */
 	jmHighlight.prototype.diacritics = [
 		"aÀÁÂÃÄÅàáâãäåĀāąĄ",
@@ -96,123 +94,95 @@
 	 * Escapes a string for regex usage
 	 * 
 	 * @param string str_
-	 * @return string
+	 * @returns string
 	 */
 	jmHighlight.prototype.escapeStr = function(str_){
 		return str_.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 	};
 	
 	/**
-	 * Filters elements based on the
-	 * defined filter and saves the result
-	 * in the elements variable
+	 * Log
 	 * 
-	 * @return jquery-object
+	 * @param mixed param_
+	 * @param string level_
+	 * @return void
 	 */
-	jmHighlight.prototype.getFilteredElements = function(){
-		var $contextElements = this.$elements;
+	jmHighlight.prototype.log = function(param_, level_){
+		if(typeof level_ !== "string"){
+			level_ = "debug";
+		}
+		if(typeof param_ === "string" && this.options["debug"]){
+			this.options["log"][level_]("jmHighlight: " + param_);
+		}
+		if(typeof param_ === "object" && this.options["debug"]){
+			this.options["log"][level_]("jmHighlight: ", param_);
+		}
+	};
+	
+	/**
+	 * Filters elements by specified filter
+	 * and script and style tags
+	 * 
+	 * @returns void
+	 */
+	jmHighlight.prototype.filterElements = function(){
 		var filterArr = this.options["filter"];
 		if(
 			typeof filterArr !== "object" ||
-			$contextElements instanceof $ === false ||
-			Object.prototype.toString.call(filterArr) !== "[object Array]"
+			Object.prototype.toString.call(filterArr) !== "[object Array]" ||
+			this.$elements instanceof $ === false
 		){
-			return $contextElements;
+			return;
 		}
-		$contextElements = $contextElements.filter(function(){
-			var $this = $(this);
-			// Check if match in element itself
-			var foundInElement = false;
+		this.$elements = this.$elements.filter(function(){
+			// Check if a filter matches this element
 			for(var i = 0, ilength = filterArr.length; i < ilength; i++){
-				var filter = filterArr[i];
 				// Use is() instead of hasClass() to
 				// support complex selectors
-				if($this.is(filter)){
-					foundInElement = true;
-					continue;
-				}
-			}
-			if(foundInElement){
-				// Delete entry
-				return false;
-			} else {
-				// Remain entry
-				return true;
-			}
-		});
-		// Do not highlight inside scripts and styles
-		// in the context. All other elements, like e.g. code-tags
-		// are optional and should be passed in the filter object
-		$contextElements = $contextElements.filter(":not(script):not(style)");
-		return $contextElements;
-	};
-	
-	/**
-	 * Gets non recursive nodes of an element
-	 * as an array
-	 * 
-	 * @param jquery-object $elements_
-	 * @return array
-	 */
-	jmHighlight.prototype.getTextNodes = function($elements_){
-		var arr = [];
-		if($elements_ instanceof $ === false || $elements_.length === 0){
-			return arr;
-		}
-		// Iterate over all items in the stack
-		$elements_.each(function(){
-			var $this = $(this);
-			
-			// Get all text nodes of this element (not recursive!)
-			var $nodes = $this.contents().filter(function(){
-				if(this.nodeType === 3){
-					return true;
-				} else {
+				if($(this).is(filterArr[i])){
+					// Delete entry
 					return false;
 				}
-			});
-			
-			// Iterate over that text nodes and call callback
-			$nodes.each(function(){
-				arr.push(this);
-			});
-		});
-		return arr;
+			}
+			// Remain entry
+			return true;
+		}).filter(":not(script):not(style)");
 	};
 	
 	/**
-	 * Creates a regular expression
-	 * based on the current keyword
-	 * and includes the diacritics
-	 * if defined
+	 * Creates an regular expression (string)
+	 * to match a keyword
 	 * 
 	 * @param string keyword_ (optional if you don't want to use this.keyword)
-	 * @return string
+	 * @returns string
 	 */
 	jmHighlight.prototype.getKeywordRegexp = function(keyword_){
 		var keyword = typeof keyword_ !== "string" ? this.keyword: keyword_;
 		if(typeof keyword !== "string" || keyword === ""){
 			return keyword;
 		}
-		// If diacritics is defined we need to phrase
-		// the regexp to match also diacritic characters
 		var regexString = keyword;
-		if(!$.isEmptyObject(this.options["synonyms"])){
+		if(
+			typeof this.options["synonyms"] === "object" &&
+			!$.isEmptyObject(this.options["synonyms"])
+		){
 			regexString = this.getSynonymsRegex(regexString);
 		}
-		if(this.options["diacritics"]){
-			regexString = this.getDiacriticRegex(regexString);
+		if(
+			typeof this.options["diacritics"] === "boolean" &&
+			this.options["diacritics"]
+		){
+			regexString = this.getDiacriticsRegex(regexString);
 		}
 		return regexString;
 	};
 	
 	/**
-	 * Creates an regular expression (string) based on a keyword
-	 * or an existing expression that will match 
-	 * synonyms (synonym option) too
+	 * Creates an regular expression (string)
+	 * to match synonyms
 	 * 
 	 * @param string str_
-	 * @return string
+	 * @returns string
 	 */
 	jmHighlight.prototype.getSynonymsRegex = function(str_){
 		var regexp = str_;
@@ -232,13 +202,13 @@
 	};
 	
 	/**
-	 * Creates an regular expression (string) based on a keyword
-	 * or an existing expression that will match diacritics too
+	 * Creates an regular expression (string)
+	 * to match diacritics
 	 * 
 	 * @param string str_
-	 * @return string
+	 * @returns string
 	 */
-	jmHighlight.prototype.getDiacriticRegex = function(str_){
+	jmHighlight.prototype.getDiacriticsRegex = function(str_){
 		var regexp = str_;
 		if(typeof regexp !== "string"){
 			return regexp;
@@ -255,7 +225,7 @@
 					}
 					// Match found. Now replace all
 					// characters in this diacritic-list
-					// with the regex expression
+					// with the regular expression
 					// (since all characters in that list will not get
 					// handled anymore)
 					regexp = regexp.replace(
@@ -270,137 +240,98 @@
 	};
 	
 	/**
-	 * Gets the highlighting HTML tag
-	 * with optionally content inside
+	 * Searches for a keyword in element text nodes
+	 * and replaces matches with an HTML highlight element
 	 * 
-	 * @param string content_ (optional)
-	 * @return string
-	 */
-	jmHighlight.prototype.getHighlightTag = function(content_){
-		var tagO = "<" + this.options["element"] + " class='" + this.options["className"] +
-					"' data-jmHighlight='true'>";
-		var tagC = "</" + this.options["element"] + ">";
-		if(typeof content_ !== "string"){
-			content_ = "";
-		}
-		return tagO + content_ + tagC;
-	};
-	
-	/**
-	 * Highlighting
-	 * 
-	 * @param string keyword_ (optional, will be used for recursive calls)
-	 * @return bool
+	 * @param string keyword_ (optional, will be used for separateWordSearch)
+	 * @returns bool
 	 */
 	jmHighlight.prototype.highlight = function(keyword_){
-		// If the keyword is a blank it is not an error because
+		// Allow overwriting the keyword to allow separate word search
+		var keyword = typeof keyword_ !== "string" ? this.keyword: keyword_;
+		// If the keyword is a blank then it is not an error because
 		// the user does not expect that anything will be highlighted.
 		// So we will still return true
-		var keyword = typeof keyword_ !== "string" ? this.keyword: keyword_;
 		if(keyword === ""){
 			return true;
 		}
 		if(this.$elements.length === 0){
-			if(this.options["debug"]){
-				this.options["log"].debug("No search context provided");
-			}
+			this.log("No search context provided", "warn");
 			return false;
+		}
+		
+		// If there are multiple keywords and separate word search
+		// is configured then highlight them all separately
+		var sepWS = this.options["separateWordSearch"];
+		var spl = keyword.split(" ");
+		if(typeof sepWS === "boolean" && sepWS && spl.length > 1){
+			for(var j = 0, jlength = spl.length; j < jlength; j++){
+				// Call the highlighting function for each
+				// separate keyword
+				if(!this.highlight(spl[j])){
+					return false;
+				}
+			}
+			return true;
 		}
 		
 		// Filter all elements that were already highlighted
 		// (e.g. if separateWordSearch is true)
 		this.$elements = this.$elements.filter("*:not([data-jmHighlight])");
 		
-		// If there are multiple keywords and separate word search
-		// is configured then highlight them
-		// all separately
-		var sepWS = this.options["separateWordSearch"];
-		if(typeof sepWS === "boolean" && sepWS){
-			var spl = keyword.split(" ");
-			if(spl.length > 1){
-				if(this.options["debug"]){
-					this.options["log"].debug("Highlighting keywords separately");
-				}
-				for(var j = 0, jlength = spl.length; j < jlength; j++){
-					// Call the highlight function for each
-					// separate keyword.
-					if(!this.highlight(spl[j])){
-						return false;
-					}
-				}
-				return true;
-			}
-		}
-		
-		if(this.options["debug"]){
-			this.options["log"].debug("Highlighting keyword '" + keyword + "' in elements:");
-			this.options["log"].debug(this.$elements);
-		}
-		// Get the regular expression including diacritics if defined
 		var regexp = this.getKeywordRegexp(keyword);
-		// Build the expression to search in node values
-		// Note: Don't search with the "g" flag: http://tinyurl.com/q5hdctj
-		var nodeMatchRegex = new RegExp(regexp, "mi");
-		// Iterate over all text nodes, find matches and replace
-		// the search keyword with the highlighting element
-		var textNodes = this.getTextNodes(this.$elements);
-		for(var i = 0, length = textNodes.length; i < length; i++){
-			var node = textNodes[i];
-			if(
-				typeof node !== "object" ||
-				typeof node.nodeValue !== "string" ||
-				node.nodeValue.trim() === ""
-			){
-				continue;
+		var regex = new RegExp(regexp, "gmi");
+		var highlightElement = this.options["element"];
+		var highlightClass = this.options["className"];
+		this.log(
+			"Highlighting keyword '" + keyword + "' with regex '" +
+			regexp + "' in elements:"
+		);
+		this.log(this.$elements);
+		this.$elements.contents().filter(function(){
+			return this.nodeType == 3 && this.textContent.trim() !== "";
+		}).each(function(){
+			// The DOM reference of this will get lost due to splitText.
+			// Therefore we need to save the new created element in "node"
+			var node = this;
+			var match;
+			while((match = regex.exec(node.textContent)) !== null){
+				// Split the text node and
+				// replace match with highlight element
+				var startNode = node.splitText(match.index);
+				node = startNode.splitText(match[0].length);
+				regex.lastIndex = 0; // http://tinyurl.com/htsudjd
+				$(startNode).replaceWith($("<" + highlightElement + " />", {
+					"class": highlightClass,
+					"data-jmHighlight": true,
+					"text": match[0]
+				}));
 			}
-			if(nodeMatchRegex.test(node.nodeValue) === false){
-				continue;
-			}
-			if(this.options["debug"]){
-				this.options["log"].debug("Regex: '" + regexp + "'. Node value: '" + node.nodeValue + "'");
-			}
-			if(node.parentNode != null){
-				// Don't search inside HTML tags (e.g. keyword "data"
-				// would match because of data-xyz inside HTML tag).
-				// Replace it with the original match, e.g. if the 
-				// search keyword is "g" replace it with "g" and not "G"
-				var regex = new RegExp("((?![^<]*>)" + regexp + ")", "gim");
-				node.parentNode.innerHTML = node.parentNode.innerHTML.replace(
-					regex,
-					this.getHighlightTag("$1")
-				);
-			}
-		}
+		});
 		return true;
 	};
 	
 	/**
 	 * Highlighting removal
 	 * 
-	 * @return bool
+	 * @returns bool
 	 */
 	jmHighlight.prototype.removeHighlight = function(){
 		if(this.$elements.length === 0){
-			if(this.options["debug"]){
-				this.options["log"].debug("No search context provided");
-			}
+			this.log("No search context provided");
 			return false;
 		}
-		if(this.options["debug"]){
-			if(typeof this.keyword === "string" && this.keyword !== ""){
-				this.options["log"].debug("Removing highlighting with keyword: '" + this.keyword + "'");
-			} else {
-				this.options["log"].debug("Removing highlighting");
-			}
+		if(typeof this.keyword === "string" && this.keyword !== ""){
+			this.log("Removing highlighting with keyword: '" + this.keyword + "'");
+		} else {
+			this.log("Removing highlighting");
 		}
 		var regex = new RegExp(this.getKeywordRegexp(), "mi");
 		var find = this.options["element"] + "[data-jmHighlight]." + this.options["className"];
 		var parentScope = this;
 		var $stack = this.$elements.filter(find);
-		if(this.options["debug"]){
-			this.options["log"].debug(find);
-			this.options["log"].debug($stack);
-		}
+		this.log(find);
+		this.log($stack);
 		$stack.each(function(){
 			var $this = $(this);
 			if(!regex.test($this.text())){
@@ -412,7 +343,7 @@
 				// text node for the replaced text. Because
 				// the highlighting finds only text nodes
 				// with the whole keyword inside, we need
-				// to append the next text node with the text. That will
+				// to append the next text node with the text. This will
 				// avoid having separate text nodes.
 				parentScope.appendTextNodes($this, $stack);
 			}
@@ -428,7 +359,7 @@
 	 * 
 	 * @param jquery-object $domElement
 	 * @param jquery-object $stack
-	 * @return bool
+	 * @returns bool
 	 */
 	jmHighlight.prototype.appendTextNodes = function($domElement, $stack){
 		if($domElement instanceof $ === false || $domElement.length === 0){
@@ -502,7 +433,7 @@
 	 * 
 	 * @param string keyword_
 	 * @param object options_
-	 * @return boolean
+	 * @returns boolean
 	 */
 	$.fn.jmHighlight = function(keyword_, options_){
 		var highlightInstance = new jmHighlight($(this), keyword_, options_);
