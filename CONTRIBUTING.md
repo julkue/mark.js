@@ -8,7 +8,8 @@ please open an [issue](https://github.com/julmot/jmHighlight/issues/new).
 ###1.1 Questions, problems and bugs
 
 For each issue please provide:
-- What kind of browser and version you are using
+- What kind of browser and version you are using. If you are not sure visit 
+  [WhatsMyBrowser](http://www.whatsmybrowser.org/)
 - What kind of jmHighlight version you are using
 - A detailed description
 - The exact steps to reproduce (bugs and problems)
