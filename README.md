@@ -145,31 +145,6 @@ It has been tested in Firefox, Chrome, Safari, Edge and IE9+.
 
 ##6. Contributing
 
-The project is using Grunt as a base, Karma as a task runner
-and Jasmine as testing framework.
-Before you start contributing, you should clone or download this repository and run:
-
-```bash
-bower install
-npm install
-```
-
-Now you are ready to develop.
-
-**Developer API**
-
-| Grunt task | Description                                                                                                                      |
-|------------|----------------------------------------------------------------------------------------------------------------------------------|
-| dev        | Will create a server that you can open in your prefered browser. It will track file changes and re-run the test in your browser. |
-| dist       | Will run a test and generate the .min.js file inside the "dist" folder                                                           |
-| minify     | Will just generate the .min.js file inside "dist"                                                                                |
-| test       | Will just run the test                                                                                                           |
-
-_Note: Run the tasks with `$ grunt [task]` (Replace "[task]" with the actual task)._
-
-If you're feeling ambitious, you can submit a pull request – how thoughtful
-of you!
-Also if you experiencing troubles with the plugin or you have a feature request,
-please open an [issue](https://github.com/julmot/jmHighlight/issues/new).
+See [the contribution guideline](https://github.com/julmot/jmHighlight/blob/master/CONTRIBUTING.md).
 
 Happy hacking!
