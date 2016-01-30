@@ -58,7 +58,7 @@ Please note the following things when doing a pull request:
   - Add a fixture (test/fixtures/)
   - Add the test in `src/jmHighlight.spec.js`
 - Reference related issues
-- Describe your changes and why they were necessary
+- Describe your changes and why they are necessary
   (if not stated in referenced issues)
 
 
