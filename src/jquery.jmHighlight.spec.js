@@ -58,12 +58,9 @@ describe("basic highlight", function(){
 });
 
 // check basic highlight removal
-describe("basic highlight removal by element and class", function(){
+describe("basic highlight removal without specific class name or element", function(){
 	
-	var instance = $(".basic-test").jmRemoveHighlight({
-		"element": "span",
-		"className": "customHighlight"
-	});
+	var instance = $(".basic-test").jmRemoveHighlight();
 	var $container = $(".basic-test");
 	var $items = $container.find("span.customHighlight");
 	
@@ -332,9 +329,11 @@ describe("nested highlight", function(){
 });
 
 // check nested highlight removal by keyword
-describe("nested highlight removal by keyword", function(){
+describe("nested highlight removal by element", function(){
 	
-	var instance = $(".nested-test").jmRemoveHighlight({}, "justo");
+	var instance = $(".nested-test").jmRemoveHighlight({
+		"element": "span"
+	});
 	var $container = $(".nested-test");
 	var $items = $container.find("span.highlight");
 	

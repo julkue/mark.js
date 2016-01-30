@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 3.1.3
+ * Version 4.0.0
  * Copyright (c) 2014–2016, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -39,17 +39,17 @@
 	 * thrown. The user doesn't expect that anything happens.
 	 * 
 	 * @param jquery-object $context_
-	 * @param string keyword_
 	 * @param object options_
+	 * @param string keyword_
 	 * @returns this
 	 */
-	function jmHighlight($context_, keyword_, options_){
+	function jmHighlight($context_, options_, keyword_){
 		// Initialize options
 		this.options = $.extend({}, {
 			"debug": false,
 			"log": global_.console,
-			"element": "span",
-			"className": "highlight",
+			"element": "*",
+			"className": "*",
 			"filter": [],
 			"separateWordSearch": false,
 			"diacritics": true,
@@ -166,13 +166,13 @@
 			typeof this.options["synonyms"] === "object" &&
 			!$.isEmptyObject(this.options["synonyms"])
 		){
-			regexString = this.getSynonymsRegex(regexString);
+			regexString = this.getSynonymsRegexp(regexString);
 		}
 		if(
 			typeof this.options["diacritics"] === "boolean" &&
 			this.options["diacritics"]
 		){
-			regexString = this.getDiacriticsRegex(regexString);
+			regexString = this.getDiacriticsRegexp(regexString);
 		}
 		return regexString;
 	};
@@ -184,7 +184,7 @@
 	 * @param string str_
 	 * @returns string
 	 */
-	jmHighlight.prototype.getSynonymsRegex = function(str_){
+	jmHighlight.prototype.getSynonymsRegexp = function(str_){
 		var regexp = str_;
 		if(typeof regexp !== "string"){
 			return regexp;
@@ -208,7 +208,7 @@
 	 * @param string str_
 	 * @returns string
 	 */
-	jmHighlight.prototype.getDiacriticsRegex = function(str_){
+	jmHighlight.prototype.getDiacriticsRegexp = function(str_){
 		var regexp = str_;
 		if(typeof regexp !== "string"){
 			return regexp;
@@ -283,13 +283,17 @@
 		var regex = new RegExp(regexp, "gmi");
 		var highlightElement = this.options["element"];
 		var highlightClass = this.options["className"];
+		// element and class can be "*" because highlight removal has no default
+		// so we need to set the default for highlight if needed
+		highlightElement = highlightElement == "*" ? "span": highlightElement;
+		highlightClass = highlightClass == "*" ? "highlight": highlightClass;
 		this.log(
 			"Highlighting keyword '" + keyword + "' with regex '" +
 			regexp + "' in elements:"
 		);
 		this.log(this.$elements);
 		this.$elements.contents().filter(function(){
-			return this.nodeType == 3 && this.textContent.trim() !== "";
+			return this.nodeType === 3 && this.textContent.trim() !== "";
 		}).each(function(){
 			// The DOM reference of this will get lost due to splitText.
 			// Therefore we need to save the new created element in "node"
@@ -311,7 +315,8 @@
 	};
 	
 	/**
-	 * Highlight removal
+	 * Searches for highlight elements and converts
+	 * them to text nodes
 	 * 
 	 * @returns bool
 	 */
@@ -320,127 +325,44 @@
 			this.log("No search context provided", "warn");
 			return false;
 		}
-		if(typeof this.keyword === "string" && this.keyword !== ""){
-			this.log("Removing highlighting with keyword: '" + this.keyword + "'");
-		} else {
-			this.log("Removing highlighting");
+		// Generate selector to match highlight elements
+		var find = this.options["element"] + "[data-jmHighlight]";
+		if(this.options["className"] != "*"){
+			find += "." + this.options["className"];
 		}
-		var regex = new RegExp(this.getKeywordRegexp(), "mi");
-		var find = this.options["element"] + "[data-jmHighlight]." + this.options["className"];
-		var parentScope = this;
+		
+		this.log("Removing highlight elements with selector: '" + find + "'");
 		var $stack = this.$elements.filter(find);
-		this.log(find);
-		this.log($stack);
 		$stack.each(function(){
 			var $this = $(this);
-			if(!regex.test($this.text())){
-				return true;
-			} else {
-				// Remove element with this text
-				// @notice: When removing the HTML node
-				// with just the text, it will remain a separate
-				// text node for the replaced text. Because
-				// the highlighting finds only text nodes
-				// with the whole keyword inside, we need
-				// to append the next text node with the text. This will
-				// avoid having separate text nodes.
-				parentScope.appendTextNodes($this, $stack);
-			}
+			var $parent = $this.parent();
+			$this.replaceWith($this.text());
+			// Normalize parent (merge splitted text nodes)
+			$parent[0].normalize();
 		});
 		return true;
 	};
 	
 	/**
-	 * Will append the domElement with previous
-	 * or next elements if they are text nodes
-	 * or also highlighting elements. This prevents
-	 * that the highlight removal will split text nodes.
-	 * 
-	 * @param jquery-object $domElement
-	 * @param jquery-object $stack
-	 * @returns bool
-	 */
-	jmHighlight.prototype.appendTextNodes = function($domElement, $stack){
-		if($domElement instanceof $ === false || $domElement.length === 0){
-			return false;
-		}
-		
-		var domElement = $domElement.first()[0];
-		var prevSibling = domElement.previousSibling;
-		var nextSibling = domElement.nextSibling;
-		var $prevSibling = $(prevSibling);
-		var $nextSibling = $(nextSibling);
-		
-		var handled = false;
-		// Check if there is a previous text node or
-		// highlight element. If so, append those two elements
-		// with the text content
-		if($prevSibling.length > 0){
-			if(prevSibling.nodeType === 3){
-				// It's a text node
-				prevSibling.nodeValue = prevSibling.nodeValue + $domElement.text();
-				$domElement.remove();
-			} else if($stack instanceof $ && $stack.length > 0 && $stack.is($prevSibling)){
-				// It's another highlighting element
-				$prevSibling.replaceWith($domElement.text() + $prevSibling.text());
-				$domElement.remove();
-			} else {
-				$domElement.replaceWith($domElement.text());
-			}
-			handled = true;
-		}
-		
-		// Check if there is a next text node or
-		// highlight element. If so, append those two elements
-		// with the text node
-		if($nextSibling.length > 0){
-			if(nextSibling.nodeType === 3){
-				if($prevSibling.length === 0){
-					nextSibling.nodeValue = $domElement.text() + nextSibling.nodeValue;
-					$domElement.remove();
-				} else {
-					nextSibling.nodeValue = $prevSibling.text() + nextSibling.nodeValue;
-					$prevSibling.remove();
-				}
-			} else if($stack instanceof $ && $stack.length > 0 && $stack.is($nextSibling)){
-				if($prevSibling.length === 0){
-					$nextSibling.replaceWith($nextSibling.text() + $domElement.text());
-					$domElement.remove();
-				} else {
-					$nextSibling.replaceWith($prevSibling.text() + $nextSibling.text());
-					$prevSibling.remove();
-				}
-			} else {
-				if($prevSibling.length === 0){
-					$domElement.replaceWith($domElement.text());
-				}
-			}
-			handled = true;
-		}
-		
-		// If there is no next or prev element
-		// simply remove the element with it's content
-		if(handled === false){
-			$domElement.replaceWith($domElement.text());
-		}
-		
-		return true;
-	};
-		
-	/**
-	 * jmHighlight component exposure for jQuery
+	 * Register jmHighlight highlight as jQuery plugin
 	 * 
 	 * @param string keyword_
 	 * @param object options_
 	 * @returns boolean
 	 */
 	$.fn.jmHighlight = function(keyword_, options_){
-		var highlightInstance = new jmHighlight($(this), keyword_, options_);
-		return highlightInstance.highlight();
+		var instance = new jmHighlight($(this), options_, keyword_);
+		return instance.highlight();
 	};
-	$.fn.jmRemoveHighlight = function(options_, keyword_){
-		var highlightInstance = new jmHighlight($(this), keyword_, options_);
-		return highlightInstance.removeHighlight();
+	/**
+	 * Register jmHighlight remove highlight as jQuery plugin
+	 * 
+	 * @param object options_
+	 * @returns boolean
+	 */
+	$.fn.jmRemoveHighlight = function(options_){
+		var instance = new jmHighlight($(this), options_);
+		return instance.removeHighlight();
 	};
 	
 });

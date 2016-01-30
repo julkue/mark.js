@@ -7,7 +7,7 @@
 |__/                   |___/           |___/           
 ```
 
-#### JavaScript keyword highlighting. Can be used e.g. to highlight search results on page.
+#### JavaScript keyword highlighting. Can be used e.g. to highlight text in search results.
 
 [![Dependency Status](https://www.versioneye.com/user/projects/55893384306662001e0000e8/badge.svg?style=flat)](https://www.versioneye.com/user/projects/55893384306662001e0000e8)
 [![Build Status](https://travis-ci.org/julmot/jmHighlight.svg?branch=master)](https://travis-ci.org/julmot/jmHighlight)
@@ -29,100 +29,49 @@ manually embedded.*
 
 ##2. Highlight usage
 
-To highlight a keyword/phrase you can define an element that will be wrapped around the
-keyword. The default element is `span`. You can also define a class that will be appended
-to the wrapper. The default class is `highlight`. 
-
-If you want to ignore some elements in the context, e.g. a specific element with a class you need to
-pass an array `filter` in the option-object. The filter-array should contain all selectors that should be ignored.
-
-Also you can highlight a sentence/phrase instead of a single word. You can use `separateWordSearch`
-to define whether the keyword search should be separately (separeted with a blank) or together.
-
-If you are searching for keywords in a language with diacritics, you can
-use the `diacritics` option. Then for example "justo" would also match "justò".
-
-Last but not least you have the option to define `synonyms`. With this you can match
-aliases like "two" and "2".
-
+Syntax:
 ```javascript
-// Will highlight each keyword "lorem" in the context ".test"
-// It will ignore all keywords inside ".noHighlight" and ".ignore".
-// The wrapper element will be a "em"-element with the class "customHighlight"
-$(".test").jmHighlight("lorem", {
-     // Optional
-    "filter": [
-        ".noHighlight",
-        ".ignore"
-    ],
-    // Optional. Default is "span"
-    "element": "em",
-    // Optional. Default is "highlight"
-    "className": "customHighlight",
-    // Optional: If your search keyword is more than one word
-    // separeted with a blank, you can define this property with true
-    // if you want a separeted search for the keywords. If you define
-    // nothing the default value is false, so it will be searched
-    // for the complete term
-    "separateWordSearch": true,
-    // if diacritics should be matched too
-    "diacritics": true, // default true
-    // match e.g. "1" and also "one".
-    // This can also be used to match dissolved umlauts like ä and ae
-    "synonyms": {
-        "one": "1",
-        "ä": "ae"
-    },
-    // set "debug" to true if you want to see console logs
-    "debug": true,
-    // set a custom log object if "debug" is true
-    "log": window.console
-});
+$(".context").jmHighlight(keyword [, options]);
 ```
 
-**Options overview**
+Parameters:
 
-|       Option       | Type    | Default     | Description                                                                                   |
-|:------------------:|---------|-------------|-----------------------------------------------------------------------------------------------|
-|       element      | string  | "span"      | HTML element to wrap matched elements, e.g. `span`                                            |
-|      className     | string  | "highlight" | A class name that will be appended to the element                                             |
-|       filter       | array   | []          | An array with exclusion selectors where the plugin should not check for matching elements     |
-| separateWordSearch | boolean | false       | If the plugin should search for each word (separated by a blank) instead of the complete term |
-|     diacritics     | boolean | true        | If diacritic characters should be matched. For example "justo" would also match "justò"       |
-| synonyms           | object  | {}          | An object with synonyms. The plugin will search for the key or the value and highlight both   |
-|        debug       | boolean | false       | Set this option to true if you want to see console logs                                       |
-|         log        | object  | console     | Log messages to a specific object (only if  `debug` is true)                                  |
+_**keyword**_: A JavaScript string containing the keyword
 
-_Note: Do not use "html" as the context, choose at least "body"!_
+_**options**_: A JavaScript object containing optional settings:
+
+| Option             | Type    | Default     | Description                                                                                                                                                         |
+|--------------------|---------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| element            | string  | "span"      | HTML element to wrap matches, e.g. `span`                                                                                                                           |
+| className          | string  | "highlight" | A class name that will be appended to `element`                                                                                                                     |
+| filter             | array   | []          | An array with exclusion selectors. No highlights will be performed within these selectors. Example: `"filter": [".noHighlight", ".ignore"]`                         |
+| separateWordSearch | boolean | false       | If the plugin should search for each word (separated by a blank) instead of the complete term                                                                       |
+| diacritics         | boolean | true        | If diacritic characters should be matched. For example "justo" would also match "justò"                                                                             |
+| synonyms           | object  | {}          | An object with synonyms. The plugin will search for the key or the value and highlight both. Example: `"synonyms": {"one": "1"}` will add the synonym "1" for "one" |
+| debug              | boolean | false       | Set this option to true if you want to log messages                                                                                                                 |
+| log                | object  | console     | Log messages to a specific object (only if  `debug` is true)                                                                                                        |
+
+_Note: Do not use `$("html")` as the context, choose at least `$("body")`!_
 
 ##3. Highlight removal usage
 
-You can remove the highlight in a specific context by
- - a specific class (in our example above "customHighlight")
- - a specific element
- - a keyword
- 
-You can combine them like below. Everything inside the option-object is optionally, also the keyword itself.
-
+Syntax:
 ```javascript
-$(".test").jmRemoveHighlight({
-    "filter": [
-        ".noHighlight",
-        ".ignore"
-    ],
-    "element": "span",
-    "className": "customHighlight"
-}, "lorem");
+$(".context").jmRemoveHighlight(options);
 ```
 
-**Options overview**
+Parameters:
 
-|   Option  | Type    | Default     | Description                                                  |
-|:---------:|---------|-------------|--------------------------------------------------------------|
-|  element  | string  | "span"      | HTML element to wrap matched elements, e.g. `span`           |
-| className | string  | "highlight" | A class name that will be appended to the element            |
-|   debug   | boolean | false       | Set this option to true if you want to see console logs      |
-|    log    | object  | console     | Log messages to a specific object (only if  `debug` is true) |
+_**options**_:
+A JavaScript object containing optional settings:
+
+| Option    | Type    | Default | Description                                                                                                                                         |
+|-----------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| element   | string  | "*"     | If you want to remove the highlight for a specific element only, define it here, e.g. `span`                                                        |
+| className | string  | "*"     | If you want to remove the highlight for elements with a specific class name, define it here, e.g. `highlight`                                       |
+| filter    | array   | []      | An array with exclusion selectors. No highlight removals will be performed within these selectors. Example: `"filter": [".noHighlight", ".ignore"]` |
+| debug     | boolean | false   | Set this option to true if you want to log messages                                                                                                 |
+| log       | object  | console | Log messages to a specific object (only if  `debug` is true)                                                                                        |
 
 ##4. Usage examples
  - [Default usage example](https://jsfiddle.net/julmot/vpav6tL1/)
