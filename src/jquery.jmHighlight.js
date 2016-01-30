@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 3.1.2
+ * Version 3.1.3
  * Copyright (c) 2014–2016, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -293,12 +293,11 @@
 		}).each(function(){
 			// The DOM reference of this will get lost due to splitText.
 			// Therefore we need to save the new created element in "node"
-			var node = this;
-			var match;
+			var node = this, match, startNode;
 			while((match = regex.exec(node.textContent)) !== null){
 				// Split the text node and
 				// replace match with highlight element
-				var startNode = node.splitText(match.index);
+				startNode = node.splitText(match.index);
 				node = startNode.splitText(match[0].length);
 				regex.lastIndex = 0; // http://tinyurl.com/htsudjd
 				$(startNode).replaceWith($("<" + highlightElement + " />", {
@@ -312,13 +311,13 @@
 	};
 	
 	/**
-	 * Highlighting removal
+	 * Highlight removal
 	 * 
 	 * @returns bool
 	 */
 	jmHighlight.prototype.removeHighlight = function(){
 		if(this.$elements.length === 0){
-			this.log("No search context provided");
+			this.log("No search context provided", "warn");
 			return false;
 		}
 		if(typeof this.keyword === "string" && this.keyword !== ""){
