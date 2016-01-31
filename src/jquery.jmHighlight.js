@@ -285,8 +285,8 @@
 		var highlightClass = this.options["className"];
 		// element and class can be "*" because highlight removal has no default
 		// so we need to set the default for highlight if needed
-		highlightElement = highlightElement == "*" ? "span": highlightElement;
-		highlightClass = highlightClass == "*" ? "highlight": highlightClass;
+		highlightElement = highlightElement === "*" ? "span": highlightElement;
+		highlightClass = highlightClass === "*" ? "highlight": highlightClass;
 		this.log(
 			"Highlighting keyword '" + keyword + "' with regex '" +
 			regexp + "' in elements:"
@@ -303,12 +303,17 @@
 				// replace match with highlight element
 				startNode = node.splitText(match.index);
 				node = startNode.splitText(match[0].length);
+				if(startNode.parentNode !== null){
+					startNode.parentNode.replaceChild(
+						$("<" + highlightElement + " />", {
+							"class": highlightClass,
+							"data-jmHighlight": true,
+							"text": match[0]
+						})[0],
+						startNode
+					);
+				}
 				regex.lastIndex = 0; // http://tinyurl.com/htsudjd
-				$(startNode).replaceWith($("<" + highlightElement + " />", {
-					"class": highlightClass,
-					"data-jmHighlight": true,
-					"text": match[0]
-				}));
 			}
 		});
 		return true;
@@ -327,7 +332,7 @@
 		}
 		// Generate selector to match highlight elements
 		var find = this.options["element"] + "[data-jmHighlight]";
-		if(this.options["className"] != "*"){
+		if(this.options["className"] !== "*"){
 			find += "." + this.options["className"];
 		}
 		
