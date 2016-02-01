@@ -6,12 +6,10 @@
     "highlight",
     "search",
     "jquery",
-    "dynamic",
-    "jm.Highlight",
-    "motz",
-    "julmot",
-    "mark",
-    "jquery.highlight"
+    "javascript",
+    "text",
+    "keyword",
+    "julmot"
   ],
   "license": "MIT",
   "homepage": "http://github.com/julmot/jmHighlight",
