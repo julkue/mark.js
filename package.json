@@ -4,9 +4,11 @@
   "keywords": [
     "jmHighlight",
     "highlight",
-    "html",
+    "search",
+    "jquery",
     "javascript",
-    "web",
+    "text",
+    "keyword",
     "julmot"
   ],
   "description": "JavaScript keyword highlighting. Can be used e.g. to highlight search results on page.",
