@@ -19,7 +19,7 @@
       "homepage": "http://github.com/julmot"
     }
   ],
-  "description": "JavaScript keyword highlighting. Can be used e.g. to highlight search results on page.",
+  "description": "JavaScript keyword highlighting. Can be used e.g. to highlight text in search results.",
   "main": [
     "src/jquery.jmHighlight.js"
   ],

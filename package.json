@@ -11,7 +11,7 @@
     "keyword",
     "julmot"
   ],
-  "description": "JavaScript keyword highlighting. Can be used e.g. to highlight search results on page.",
+  "description": "JavaScript keyword highlighting. Can be used e.g. to highlight text in search results.",
   "author": "Julian Motz",
   "license": "MIT",
   "repository": "julmot/jmHighlight",
