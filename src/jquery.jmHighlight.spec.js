@@ -49,7 +49,7 @@ describe("basic highlight", function(){
 	it("should add a data attribute and class to matched elements", function(){
 		$items.each(function(){
 			var $this = $(this);
-			var attr = $this.attr("data-jmHighlight");
+			var attr = $this.attr("data-jmhighlight");
 			expect(attr).toEqual("true");
 			expect($this.hasClass("customHighlight")).toBe(true);
 		});
@@ -111,7 +111,7 @@ describe("basic highlight escape", function(){
 	it("should add a data attribute and class to matched elements", function(){
 		$items1.add($items2).each(function(){
 			var $this = $(this);
-			var attr = $this.attr("data-jmHighlight");
+			var attr = $this.attr("data-jmhighlight");
 			expect(attr).toEqual("true");
 			expect($this.hasClass("customHighlight")).toBe(true);
 		});
@@ -142,7 +142,7 @@ describe("basic highlight with script-tags and style-tags", function(){
 	it("should add a data attribute and class to matched elements", function(){
 		$items.each(function(){
 			var $this = $(this);
-			var attr = $this.attr("data-jmHighlight");
+			var attr = $this.attr("data-jmhighlight");
 			expect(attr).toEqual("true");
 			expect($this.hasClass("customHighlight")).toBe(true);
 		});
@@ -170,7 +170,7 @@ describe("basic highlight when searching directly in the context", function(){
 	it("should add a data attribute and class to matched elements", function(){
 		$items.each(function(){
 			var $this = $(this);
-			var attr = $this.attr("data-jmHighlight");
+			var attr = $this.attr("data-jmhighlight");
 			expect(attr).toEqual("true");
 			expect($this.hasClass("customHighlight")).toBe(true);
 		});
@@ -198,7 +198,7 @@ describe("basic highlight with separate word search", function(){
 	it("should add a data attribute and class to matched elements", function(){
 		$items.each(function(){
 			var $this = $(this);
-			var attr = $this.attr("data-jmHighlight");
+			var attr = $this.attr("data-jmhighlight");
 			expect(attr).toEqual("true");
 			expect($this.hasClass("customHighlight")).toBe(true);
 		});
@@ -226,7 +226,7 @@ describe("basic highlight with diacritics", function(){
 	it("should add a data attribute and class to matched elements", function(){
 		$items.each(function(){
 			var $this = $(this);
-			var attr = $this.attr("data-jmHighlight");
+			var attr = $this.attr("data-jmhighlight");
 			expect(attr).toEqual("true");
 			expect($this.hasClass("customHighlight")).toBe(true);
 		});
@@ -274,7 +274,7 @@ describe("basic synonym highlight", function(){
 	it("should add a data attribute and class to matched elements", function(){
 		$items1.add($items2).each(function(){
 			var $this = $(this);
-			var attr = $this.attr("data-jmHighlight");
+			var attr = $this.attr("data-jmhighlight");
 			expect(attr).toEqual("true");
 			expect($this.hasClass("customHighlight")).toBe(true);
 		});
@@ -311,7 +311,7 @@ describe("nested highlight", function(){
 	it("should add a data attribute and class to matched elements", function(){
 		$items.each(function(){
 			var $this = $(this);
-			var attr = $this.attr("data-jmHighlight");
+			var attr = $this.attr("data-jmhighlight");
 			expect(attr).toEqual("true");
 			expect($this.hasClass("highlight")).toBe(true);
 		});

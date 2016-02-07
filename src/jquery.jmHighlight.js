@@ -1,6 +1,6 @@
 /*!***************************************************
  * jmHighlight
- * Version 4.0.0
+ * Version 4.0.1
  * Copyright (c) 2014–2016, Julian Motz
  * For the full copyright and license information, 
  * please view the LICENSE file that was distributed 
@@ -277,7 +277,7 @@
 		
 		// Filter all elements that were already highlighted
 		// (e.g. if separateWordSearch is true)
-		this.$elements = this.$elements.filter("*:not([data-jmHighlight])");
+		this.$elements = this.$elements.filter("*:not([data-jmhighlight])");
 		
 		var regexp = this.getKeywordRegexp(keyword);
 		var regex = new RegExp(regexp, "gmi");
@@ -307,7 +307,7 @@
 					startNode.parentNode.replaceChild(
 						$("<" + highlightElement + " />", {
 							"class": highlightClass,
-							"data-jmHighlight": true,
+							"data-jmhighlight": true,
 							"text": match[0]
 						})[0],
 						startNode
@@ -331,7 +331,7 @@
 			return false;
 		}
 		// Generate selector to match highlight elements
-		var find = this.options["element"] + "[data-jmHighlight]";
+		var find = this.options["element"] + "[data-jmhighlight]";
 		if(this.options["className"] !== "*"){
 			find += "." + this.options["className"];
 		}
