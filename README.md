@@ -34,7 +34,7 @@ $(".context").jmHighlight(keyword [, options]);
 
 Parameters:
 
-_**keyword**_: A JavaScript string containing the keyword
+_**keyword**_: A JavaScript string containing the keyword. Note that this will be escaped.
 
 _**options**_: A JavaScript object containing optional settings:
 
