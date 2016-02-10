@@ -12,6 +12,7 @@
 [![Dependency Status](https://img.shields.io/versioneye/d/javascript/julmot:jmhighlight.svg)](https://www.versioneye.com/user/projects/55893384306662001e0000e8)
 [![Build Status](https://img.shields.io/travis/julmot/jmHighlight.svg)](https://travis-ci.org/julmot/jmHighlight)
 [![Codacy Badge](https://img.shields.io/codacy/27a3ed45370f41e89b02073b214c18a7.svg)](https://www.codacy.com/app/julmot/jmHighlight)
+[![Issue Stats](http://issuestats.com/github/julmot/jmHighlight/badge/issue?style=flat)](http://issuestats.com/github/julmot/jmHighlight)
 [![Bower version](https://img.shields.io/bower/v/jmHighlight.svg)](https://github.com/julmot/jmHighlight)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/julmot/jmHighlight/master/LICENSE)
 
