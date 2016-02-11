@@ -93,6 +93,6 @@ It has been tested in Firefox, Chrome, Safari, Edge and IE9+.
 
 ##6. Contributing
 
-See [the contribution guideline](https://github.com/julmot/jmHighlight/blob/master/CONTRIBUTING.md).
+See [the contribution guidelines](https://github.com/julmot/jmHighlight/blob/master/CONTRIBUTING.md).
 
 Happy hacking!
