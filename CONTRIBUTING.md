@@ -39,12 +39,12 @@ Now you are ready to develop.
 
 **Developer API**
 
-| Grunt task | Description                                                                                                                      |
-|------------|----------------------------------------------------------------------------------------------------------------------------------|
-| dev        | Will create a server that you can open in your prefered browser. It will track file changes and re-run the test in your browser. |
-| dist       | Will run a test and generate the .min.js file inside the "dist" folder                                                           |
-| minify     | Will just generate the .min.js file inside "dist"                                                                                |
-| test       | Will just run the test                                                                                                           |
+| Grunt task | Description                                                                                                                  |
+|------------|------------------------------------------------------------------------------------------------------------------------------|
+| dev        | Creates a server that you can open in your prefered browser. It will track file changes and re-run the test in your browser. |
+| dist       | Will trigger `test` and `minify`                                                                                         |
+| minify     | Generates the .min.js file inside "dist"                                                                                     |
+| test       | Runs the test                                                                                                                |
 
 _Note: Run the tasks with `$ grunt [task]` (Replace "[task]" with the actual task)._
 
@@ -60,6 +60,9 @@ Please note the following things when doing a pull request:
 - Reference related issues
 - Describe your changes and why they are necessary
   (if not stated in referenced issues)
+- When changing something inside `jquery.jmHighlight.js`, please
+  run `$ grunt dist` at the end to generate a `.min.js`.
 
 
 __Thank you for contributing!__
+
