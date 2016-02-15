@@ -24,7 +24,7 @@ Choose between:
 
 You are ready to start!
 
-*Note: jmHighlight is a jQuery plugin! Make sure that jQuery is embedded.*
+*Note: jmHighlight is a jQuery plugin compatible with RequireJS, NodeJS/CommonJS or without any module loader! Howsoever you are using it, make sure that jQuery is embedded.*
 
 ##2. Highlight usage
 
