@@ -10,7 +10,7 @@
 	"use strict";
 	if(typeof define === "function" && define.amd){
 		// RequireJS. Register as an anonymous module.
-		define(["jquery"], function(jQuery, global){
+		define(["jquery"], function(jQuery){
 			return factory(jQuery, global);
 		});
 	} else if (typeof exports === "object"){
