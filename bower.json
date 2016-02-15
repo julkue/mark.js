@@ -35,6 +35,7 @@
     "*",
     "!dist/*",
     "!src/jquery.jmHighlight.js",
-    "!LICENSE"
+    "!LICENSE",
+    "!README.md"
   ]
 }
