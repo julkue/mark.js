@@ -46,17 +46,17 @@ module.exports = function(grunt){
 	/**
 	 * Register tasks
 	 */
-	grunt.log.subhead(grunt.config().banner);
+	grunt.log.writeln(banner['yellow']);
 	grunt.registerTask('dev', function(){
 		grunt.task.run(['karma:dev']);
 	});
-	grunt.registerTask('dist', function(){
-		grunt.task.run(['karma:unit', 'uglify:dist']);
+	grunt.registerTask('test', function(){
+		grunt.task.run(['karma:unit']);
 	});
 	grunt.registerTask('minify', function(){
 		grunt.task.run(['uglify:dist']);
 	});
-	grunt.registerTask('test', function(){
-		grunt.task.run(['karma:unit']);
+	grunt.registerTask('dist', function(){
+		grunt.task.run(['test', 'minify']);
 	});
 };
