@@ -11,5 +11,5 @@ The problem can be reproduced using the following fiddle: [JSFiddle URL]
 
 ### Environment
 
-Browser: [name] [version]   
+Browser: [name] [version] 
 jmHighlight: [version]
