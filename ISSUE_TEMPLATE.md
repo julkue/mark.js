@@ -1,15 +1,12 @@
-### Problem
+### Subject of the issue
 
-Detailed description
+Describe your issue here.
 
 ### Steps to reproduce
 
-The problem can be reproduced using the following fiddle: [JSFiddle URL]
-
-1. Step one
-2. Step two
+Describe how to reproduce the issue. Provide a [fiddle](https://jsfiddle.net) if possible. You can also fork an [existing fiddle](https://github.com/julmot/jmHighlight#4-usage-examples).
 
 ### Environment
 
-Browser: [name] [version] 
-jmHighlight: [version]
+- Browser name and version
+- jmHighlight version
