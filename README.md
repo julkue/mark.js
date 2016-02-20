@@ -10,7 +10,7 @@
 #### JavaScript keyword highlighting. Can be used e.g. to highlight text in search results.
 
 [![Dependency Status](https://img.shields.io/versioneye/d/javascript/julmot:jmhighlight.svg)](https://www.versioneye.com/user/projects/55893384306662001e0000e8)
-[![Build Status](https://img.shields.io/travis/julmot/jmHighlight.svg)](https://travis-ci.org/julmot/jmHighlight)
+[![Build Status](https://travis-ci.org/julmot/jmHighlight.svg?branch=master)](https://travis-ci.org/julmot/jmHighlight)
 [![Codacy Badge](https://img.shields.io/codacy/27a3ed45370f41e89b02073b214c18a7.svg)](https://www.codacy.com/app/julmot/jmHighlight)
 [![Issue Stats](http://issuestats.com/github/julmot/jmHighlight/badge/issue?style=flat)](http://issuestats.com/github/julmot/jmHighlight)
 [![Bower version](https://img.shields.io/bower/v/jmHighlight.svg)](https://github.com/julmot/jmHighlight)
@@ -82,14 +82,16 @@ A JavaScript object containing optional settings:
 ##5. Browser compatibility
 
 The plugin works in all modern browsers.
-It has been tested in Firefox, Chrome, Safari, Edge and IE9+.
+It has been tested in Firefox, Chrome, Opera, Safari, Edge and IE9+.
 
-![IE9-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png)
-![IE10-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png)
 ![Firefox](https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_48x48.png)
 ![Chrome](https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_48x48.png)
+![Opera](https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_48x48.png)
 ![Safari](https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png)
-
+![Edge](https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge_48x48.png)
+![IE9-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png)
+![IE10-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png)  
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/jmHighlight.svg)](https://saucelabs.com/u/jmHighlight)
 
 ##6. Contributing
 
