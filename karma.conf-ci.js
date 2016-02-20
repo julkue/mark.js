@@ -62,18 +62,6 @@ module.exports = function(config) {
 			platform: 'OS X 10.11',
 			version: '9'
 		},
-		'SL_Win_IE_7': {
-			base: 'SauceLabs',
-			browserName: 'internet explorer',
-			platform: 'Windows XP',
-			version: '7'
-		},
-		'SL_Win_IE_8': {
-			base: 'SauceLabs',
-			browserName: 'internet explorer',
-			platform: 'Windows 7',
-			version: '8'
-		},
 		'SL_Win_IE_9': {
 			base: 'SauceLabs',
 			browserName: 'internet explorer',
