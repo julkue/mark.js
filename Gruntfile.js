@@ -6,7 +6,6 @@
  * with this source code.
  *****************************************************/
 module.exports = function(grunt){
-	// Determine dist header
 	var fc = grunt.file.read('src/jquery.jmHighlight.js');
 	var regex = /(\/\*\![^]*Copyright[^/]*\/)/gmi;
 	var banner = fc.match(regex)[0];
@@ -16,14 +15,17 @@ module.exports = function(grunt){
 	grunt.initConfig({
 		banner: banner,
 		karma: {
-			unit: {
-				configFile: 'karma.conf.js'
+			options: {
+				configFile: 'karma.conf.js' // shared config
 			},
+			prod: {},
 			dev: {
-				configFile: 'karma.conf.js',
 				autoWatch: true,
 				singleRun: false,
 				browsers: [], // open your prefered browser manually
+			},
+			saucelabs: {
+				configFile: 'karma.conf-ci.js'
 			}
 		},
 		uglify: {
@@ -47,16 +49,20 @@ module.exports = function(grunt){
 	 * Register tasks
 	 */
 	grunt.log.writeln(banner['yellow']);
-	grunt.registerTask('dev', function(){
-		grunt.task.run(['karma:dev']);
+	grunt.registerTask('dev', ['karma:dev']);
+	grunt.registerTask('test', ['karma:prod']);
+	grunt.registerTask('test-saucelabs', function(){
+		if (!process.env.SAUCE_USERNAME || !process.env.SAUCE_ACCESS_KEY) {
+			grunt.log.error(
+				'Make sure SAUCE_USERNAME and SAUCE_ACCESS_KEY ' +
+				'environment variables are set.'
+			);
+			return;
+		}
+		grunt.task.run(['karma:saucelabs']);
 	});
-	grunt.registerTask('test', function(){
-		grunt.task.run(['karma:unit']);
-	});
-	grunt.registerTask('minify', function(){
-		grunt.task.run(['uglify:dist']);
-	});
-	grunt.registerTask('dist', function(){
-		grunt.task.run(['test', 'minify']);
-	});
+	grunt.registerTask('minify', ['uglify:dist']);
+	grunt.registerTask('dist', ['test', 'minify']);
 };
+
+

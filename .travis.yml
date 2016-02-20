@@ -6,4 +6,6 @@ before_script:
   - npm install bower -g
   - bower install
   - gem update --system
-script: grunt test
+script:
+  - grunt test
+  - grunt test-saucelabs
