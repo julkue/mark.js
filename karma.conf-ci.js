@@ -92,6 +92,12 @@ module.exports = function(config) {
 			platform: 'OS X 10.10',
 			version: '9.2'
 		},
+		'SL_iOS_8': {
+			base: 'SauceLabs',
+			browserName: 'iphone',
+			platform: 'OS X 10.10',
+			version: '8.0'
+		},
 		'SL_Android_4': {
 			base: 'SauceLabs',
 			browserName: 'android',
