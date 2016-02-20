@@ -82,14 +82,16 @@ A JavaScript object containing optional settings:
 ##5. Browser compatibility
 
 The plugin works in all modern browsers.
-It has been tested in Firefox, Chrome, Safari, Edge and IE9+.
+It has been tested in Firefox, Chrome, Opera, Safari, Edge and IE9+.
 
-![IE9-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png)
-![IE10-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png)
 ![Firefox](https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_48x48.png)
 ![Chrome](https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_48x48.png)
+![Opera](https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_48x48.png)
 ![Safari](https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png)
-
+![Edge](https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge_48x48.png)
+![IE9-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png)
+![IE10-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png)  
+[![Sauce Test Status](https://saucelabs.com/browser-matrix/jmHighlight.svg)](https://saucelabs.com/u/jmHighlight)
 
 ##6. Contributing
 
