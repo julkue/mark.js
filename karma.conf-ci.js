@@ -50,6 +50,12 @@ module.exports = function(config) {
 			platform: 'Windows 7',
 			version: '12.12'
 		},
+		'SL_Win_Safari_5': {
+			base: 'SauceLabs',
+			browserName: 'safari',
+			platform: 'Windows 7',
+			version: '5.1'
+		},
 		'SL_OSX_Safari_6': {
 			base: 'SauceLabs',
 			browserName: 'safari',
@@ -103,6 +109,12 @@ module.exports = function(config) {
 			browserName: 'android',
 			platform: 'Linux',
 			version: '4.4'
+		},
+		'SL_Android_5': {
+			base: 'SauceLabs',
+			browserName: 'android',
+			platform: 'Linux',
+			version: '5.1'
 		}
 	};
 	config.set({
