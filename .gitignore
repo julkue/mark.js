@@ -1,7 +1,18 @@
+# Eclipse
 .settings/
-.idea/
-node_modules/
-vendor/
 .project
 .buildpath
+
+# Webstorm
+.idea/
+
+# Dependencies
+node_modules/
+vendor/
+
+# Personal
 TODO
+
+# JSDOC dev (just to see if tags are correctly generated)
+jsdoc.bat
+dist/jsdoc/
