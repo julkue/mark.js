@@ -1,8 +1,8 @@
 ```
    _           _   _ _       _     _ _       _     _   
-  (_)_ __ ___ | | | (_) __ _| |__ | (_) __ _| |__ | |_ 
+  (_)_ __ ___ | | | (_) __ _| |__ | (_) __ _| |__ | |_
   | | '_ ` _ \| |_| | |/ _` | '_ \| | |/ _` | '_ \| __|
-  | | | | | | |  _  | | (_| | | | | | | (_| | | | | |_ 
+  | | | | | | |  _  | | (_| | | | | | | (_| | | | | |_
  _/ |_| |_| |_|_| |_|_|\__, |_| |_|_|_|\__, |_| |_|\__|
 |__/                   |___/           |___/           
 ```
@@ -96,5 +96,11 @@ It has been tested in Firefox, Chrome, Opera, Safari, Edge and IE9+.
 ##6. Contributing
 
 See [the contribution guidelines](https://github.com/julmot/jmHighlight/blob/master/CONTRIBUTING.md).
+
+##7. Changelog
+
+Changes are documented in [release descriptions](https://github.com/julmot/jmHighlight/releases).
+
+---
 
 Happy hacking!
