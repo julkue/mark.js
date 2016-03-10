@@ -292,7 +292,14 @@
 			regexp + "' in elements:"
 		);
 		this.log(this.$elements);
-		this.$elements.contents().filter(function(){
+		this.$elements.filter(function(){
+		    if (this.tagName == 'IFRAME') {
+		        var iframe = document.createElement('a');
+		        iframe.href = this.src;
+		        return iframe.origin == document.location.origin;
+		    }
+		    return true;
+		}).contents().filter(function(){
 			return this.nodeType === 3 && this.textContent.trim() !== "";
 		}).each(function(){
 			// The DOM reference of this will get lost due to splitText.
