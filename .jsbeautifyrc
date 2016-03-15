@@ -1,0 +1,31 @@
+{
+    "js": {
+        "indent_char": " ",
+        "indent_level": 0,
+        "indent_with_tabs": false,
+        "wrap_line_length": 120,
+        "indent_size": 4,
+        "keep_array_indentation": false,
+        "jslint_happy": true,
+        "end_with_newline": true,
+        "preserve_newlines": true
+    },
+    "html": {
+        "indent_char": " ",
+        "indent_level": 0,
+        "indent_with_tabs": false,
+        "indent_size": 4,
+        "extra_liners": [],
+        "wrap_line_length": 80
+    },
+    "css": {
+        "indent_char": " ",
+        "indent_level": 0,
+        "indent_with_tabs": false,
+        "indent_size": 4,
+        "align_assignments": false,
+        "convert_quotes": "double",
+        "preserve_newlines": true,
+        "newline_between_rules": false
+    }
+}
