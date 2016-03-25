@@ -1,31 +1,33 @@
 {
-  "name": "jmHighlight",
-  "version": "4.0.2",
+  "name": "jquery.mark",
+  "version": "5.0.0",
   "keywords": [
+    "jquery.mark",
+    "mark",
     "jmHighlight",
     "highlight",
     "search",
     "jquery",
     "javascript",
     "text",
-    "keyword",
-    "julmot"
+    "keyword"
   ],
   "license": "MIT",
-  "homepage": "http://github.com/julmot/jmHighlight",
+  "homepage": "https://github.com/julmot/jquery.mark",
   "authors": [
     {
       "name": "Julian Motz",
-      "homepage": "http://github.com/julmot"
+      "homepage": "https://github.com/julmot"
     }
   ],
-  "description": "JavaScript keyword highlighting. Can be used e.g. to highlight text in search results.",
-  "main": [
-    "src/jquery.jmHighlight.js"
+  "description": "jQuery keyword highlighting. Highlight text with JavaScript. Can e.g. be used to mark text in search results.",
+  "main": "dist/jquery.mark.min.js",
+  "moduleType": [
+    "global", "amd", "node"
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/julmot/jmHighlight.git"
+    "url": "git://github.com/julmot/jquery.mark.git"
   },
   "dependencies": {
     "jquery": ">1.10"
@@ -34,7 +36,7 @@
   "ignore": [
     "*",
     "!dist/*",
-    "!src/jquery.jmHighlight.js",
+    "!src/jquery.mark.js",
     "!LICENSE",
     "!README.md"
   ]

@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<!--
+/*!***************************************************
+ * jquery.mark
+ * https://github.com/julmot/jquery.mark
+ * Copyright (c) 2014–2016, Julian Motz
+ * Released under the MIT license https://git.io/vaizN
+ *****************************************************/
+-->
+<head>
+    <meta charset="utf-8">
+    <title>jquery.mark manual test (dev purposes)</title>
+    <style>
+        .mark {
+            background: yellow;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+        invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero
+        eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+        no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor
+        sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
+        ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et
+        accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
+        takimata sanctus est Lorem ipsum dolor sit amet.
+    </div>
+    <script src="../vendor/jquery/dist/jquery.min.js"></script>
+    <script src="../src/jquery.mark.js"></script>
+    <script>
+        $(function() {
+            $("div").mark("lorem", {
+                "debug": true,
+                "each": function($element) {
+                    console.log($element, "each called");
+                },
+                "complete": function() {
+                    console.log("complete called");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
