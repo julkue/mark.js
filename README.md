@@ -1,106 +1,154 @@
-```
-   _           _   _ _       _     _ _       _     _   
-  (_)_ __ ___ | | | (_) __ _| |__ | (_) __ _| |__ | |_
-  | | '_ ` _ \| |_| | |/ _` | '_ \| | |/ _` | '_ \| __|
-  | | | | | | |  _  | | (_| | | | | | | (_| | | | | |_
- _/ |_| |_| |_|_| |_|_|\__, |_| |_|_|_|\__, |_| |_|\__|
-|__/                   |___/           |___/           
-```
+# jquery.mark (previously jmHighlight)
 
-#### JavaScript keyword highlighting. Can be used e.g. to highlight text in search results.
+#### jQuery keyword highlighting. Highlight text with JavaScript. <br> Can e.g. be used to mark text in search results.
 
-[![Dependency Status](https://img.shields.io/versioneye/d/javascript/julmot:jmhighlight.svg)](https://www.versioneye.com/user/projects/55893384306662001e0000e8)
-[![Build Status](https://img.shields.io/travis/julmot/jmHighlight/master.svg)](https://travis-ci.org/julmot/jmHighlight)
-[![Codacy Badge](https://img.shields.io/codacy/27a3ed45370f41e89b02073b214c18a7.svg)](https://www.codacy.com/app/julmot/jmHighlight)
-[![Issue Stats](http://issuestats.com/github/julmot/jmHighlight/badge/issue?style=flat)](http://issuestats.com/github/julmot/jmHighlight)
-[![Bower version](https://img.shields.io/bower/v/jmHighlight.svg)](https://github.com/julmot/jmHighlight)
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/julmot/jmHighlight/master/LICENSE)
+[![Dependency Status][dependency-status-image]][dependency-status]
+[![Build Status][build-status-image]][build-status]
+[![Code quality][code-quality-image]][code-quality]
+[![Bower Version][bower-version-image]][bower-version]
+[![License][license-image]][license]
 
-##1. Getting started
+## 1. Getting started
 
 Choose between:
-- Run `$ bower install jmHighlight --save-dev`
-- Download "[dist/jquery.jmHighlight.min.js](https://github.com/julmot/jmHighlight/blob/master/dist/jquery.jmHighlight.min.js)" and include it in your project (Note: the file must be saved as UTF-8)
+- Run `$ bower install jquery.mark --save-dev` (assuming you have pre-installed
+  [Node.js][nodejs] and [Bower][bower])
+- Download "[dist/jquery.mark.min.js][minified]" and include it in your project.
+  Make sure that the file is saved as UTF-8
 
 You are ready to start!
 
-*Note: jmHighlight is a jQuery plugin compatible with RequireJS, NodeJS/CommonJS or without any module loader! Howsoever you are using it, make sure that jQuery is embedded.*
+*Note: jquery.mark is a jQuery plugin compatible with RequireJS, NodeJS/CommonJS
+or without any module loader! Anyhow you are using it, make sure that jQuery
+is embedded.*
 
-##2. Highlight usage
+## 2. Mark usage
 
 Syntax:
+
 ```javascript
-$(".context").jmHighlight(keyword [, options]);
+$(".context").mark(keyword [, options]);
 ```
 
 Parameters:
 
-_**keyword**_: A JavaScript string containing the keyword. Note that this will be escaped.
+##### keyword
 
-_**options**_: A JavaScript object containing optional settings:
+Type: `string` or `array` of `string`
 
-| Option             | Type    | Default     | Description                                                                                                                                                         |
-|--------------------|---------|-------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| element            | string  | "span"      | HTML element to wrap matches, e.g. `span`                                                                                                                           |
-| className          | string  | "highlight" | A class name that will be appended to `element`                                                                                                                     |
-| filter             | array   | []          | An array with exclusion selectors. No highlights will be performed within these selectors. Example: `"filter": [".noHighlight", ".ignore"]`                         |
-| separateWordSearch | boolean | false       | If the plugin should search for each word (separated by a blank) instead of the complete term                                                                       |
-| diacritics         | boolean | true        | If diacritic characters should be matched. For example "justo" would also match "justò"                                                                             |
-| synonyms           | object  | {}          | An object with synonyms. The plugin will search for the key or the value and highlight both. Example: `"synonyms": {"one": "1"}` will add the synonym "1" for "one" |
-| debug              | boolean | false       | Set this option to true if you want to log messages                                                                                                                 |
-| log                | object  | console     | Log messages to a specific object (only if  `debug` is true)                                                                                                        |
+The keyword to be marked. Can also be an array with multiple keywords. Note that they will be escaped.
 
-_Note: Do not use `$("html")` as the context, choose at least `$("body")`!_
+##### options
 
-##3. Highlight removal usage
+Type: `object`
+
+Optional options:
+
+| Option             | Type     | Default      | Description                                                                                                                                                                                                                                                                                                              |
+|--------------------|----------|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| element            | string   | "span"       | HTML element to wrap matches, e.g. `span`                                                                                                                                                                                                                                                                                |
+| className          | string   | "mark"       | A class name that will be appended to <code>element</code>                                                                                                                                                                                                                                                               |
+| filter             | array    | [ ]          | An array with exclusion selectors. Elements matching those selectors will be ignored. Example: `"filter": [".ignore", "*[data-ignore]"]`                                                                                                                                                                                 |
+| separateWordSearch | boolean  | false        | If the plugin should search for each word (separated by a blank) instead of the complete term                                                                                                                                                                                                                            |
+| diacritics         | boolean  | true         | If [diacritic][diacritic] characters should be matched. For example "piękny" would also match "piekny" and "doner" would also match "döner"                                                                                                                                                                              |
+| synonyms           | object   | {}           | An object with synonyms. The key will be a synonym for the value and the value for the key. Example: `"synonyms": {"one": "1"}` will add the synonym "1" for "one" and vice versa                                                                                                                                        |
+| iframes            | boolean  | false        | Whether to search also inside iframes. If you don't have permissions to some iframes (e.g. because they have a [different origin][SOP]) they will be silently skipped. If you don't want to search inside specific iframes (e.g. facebook share), you can pass a <code>filter</code> selector that matches these iframe. |
+| each               | function | function(){} | A callback for each marked element. This function receives the marked jQuery element as a parameter                                                                                                                                                                                                                      |
+| complete           | function | function(){} | As jquery.mark is asynchronous this callback function is called after all marks are completed                                                                                                                                                                                                                            |
+| debug              | boolean  | false        | Set this option to `true` if you want to log messages                                                                                                                                                                                                                                                                    |
+| log                | object   | console      | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                             |
+
+## 3. Mark removal usage
 
 Syntax:
 ```javascript
-$(".context").jmRemoveHighlight(options);
+$(".context").removeMark(options);
 ```
 
 Parameters:
 
-_**options**_:
-A JavaScript object containing optional settings:
+##### options
 
-| Option    | Type    | Default | Description                                                                                                                                         |
-|-----------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| element   | string  | "*"     | If you want to remove the highlight for a specific element only, define it here, e.g. `span`                                                        |
-| className | string  | "*"     | If you want to remove the highlight for elements with a specific class name, define it here, e.g. `highlight`                                       |
-| filter    | array   | []      | An array with exclusion selectors. No highlight removals will be performed within these selectors. Example: `"filter": [".noHighlight", ".ignore"]` |
-| debug     | boolean | false   | Set this option to true if you want to log messages                                                                                                 |
-| log       | object  | console | Log messages to a specific object (only if  `debug` is true)                                                                                        |
+Type: `object`
 
-##4. Usage examples
- - [Default usage example](https://jsfiddle.net/julmot/vpav6tL1/)
- - [Table column highlighting example](https://jsfiddle.net/julmot/1at87fnu/)
- - [DataTables highlighting example with global search](https://jsfiddle.net/julmot/buh9h2r8/)
- - [DataTables highlighting example with column search](https://jsfiddle.net/julmot/c2am6zfr/)
- - [Referrer keyword highlighting example](https://jsfiddle.net/julmot/bL6bb5oo/)
+Optional options:
 
-##5. Browser compatibility
+| Option    | Type     | Default      | Description                                                                                                                                                                                                                                                                                                                         |
+|-----------|----------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| element   | string   | "*"          | Removal element, e.g. `span`                                                                                                                                                                                                                                                                                                        |
+| className | string   | "*"          | Removal class name, e.g. `mark`                                                                                                                                                                                                                                                                                                     |
+| filter    | array    | [ ]          | An array with exclusion selectors. Elements matching those selectors will be ignored. Example: `"filter": [".ignore", "*[data-ignore]"]`                                                                                                                                                                                            |
+| iframes   | boolean  | false        | Whether to remove marks also inside iframes. If you don't have permissions to some iframes (e.g. because they have a [different origin][SOP]) they will be silently skipped. If you don't want to remove marks inside specific iframes (e.g. facebook share), you can pass a <code>filter</code> selector that matches these iframe |
+| complete  | function | function(){} | As jquery.mark is asynchronous this callback function is called after all marks are removed                                                                                                                                                                                                                                         |
+| debug     | boolean  | false        | Set this option to `true` if you want to log messages                                                                                                                                                                                                                                                                               |
+| log       | object   | console      | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                                        |
+
+## 4. Usage examples
+ - [Default example][jsfiddle-default]
+ - [Table column example][jsfiddle-table-column]
+ - [DataTables example with global search][jsfiddle-datatables-global]
+ - [DataTables example with column search][jsfiddle-datatables-column]
+ - [URL Referrer mark example][jsfiddle-referrer]
+
+## 5. Browser compatibility
 
 The plugin works in all modern browsers.
 It has been tested in Firefox, Chrome, Opera, Safari, Edge and IE9+.
 
-![Firefox](https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_48x48.png)
-![Chrome](https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_48x48.png)
-![Opera](https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_48x48.png)
-![Safari](https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png)
-![Edge](https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge_48x48.png)
-![IE9-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png)
-![IE10-11](https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png)  
-[![Sauce Test Status](https://saucelabs.com/browser-matrix/jmHighlight.svg)](https://saucelabs.com/u/jmHighlight)
+![Firefox][firefox-icon]
+![Chrome][chrome-icon]
+![Opera][opera-icon]
+![Safari][safari-icon]
+![Edge][edge-icon]
+![IE9-11][ie-icon]
+![IE10-11][ie-tile-icon]  
+[![Sauce Labs Test Status][sauce-matrix-image]][sauce-matrix]
 
-##6. Contributing
+## 6. Contributing
 
-See [the contribution guidelines](https://github.com/julmot/jmHighlight/blob/master/CONTRIBUTING.md).
+See [the contribution guidelines][contribution-guidelines].
 
-##7. Changelog
+## 7. Changelog
 
-Changes are documented in [release descriptions](https://github.com/julmot/jmHighlight/releases).
+Changes are documented in [release descriptions][releases].
 
 ---
 
 Happy hacking!
+
+[dependency-status]: https://www.versioneye.com/user/projects/55893384306662001e0000e8
+[build-status]: https://travis-ci.org/julmot/jquery.mark
+[code-quality]: https://www.codacy.com/app/julmot/jquery.mark
+[bower-version]: https://github.com/julmot/jquery.mark
+[license]: https://raw.githubusercontent.com/julmot/jquery.mark/master/LICENSE
+
+[dependency-status-image]:https://img.shields.io/versioneye/d/javascript/julmot:jquery.mark.svg
+[build-status-image]: https://img.shields.io/travis/julmot/jquery.mark/master.svg
+[code-quality-image]:https://img.shields.io/codacy/27a3ed45370f41e89b02073b214c18a7.svg
+[bower-version-image]:https://img.shields.io/bower/v/jquery.mark.svg
+[license-image]:https://img.shields.io/badge/license-MIT-blue.svg
+
+[nodejs]: https://nodejs.org/en/
+[bower]: http://bower.io/
+[diacritic]: https://en.wikipedia.org/wiki/Diacritic
+[SOP]: https://en.wikipedia.org/wiki/Same-origin_policy
+
+[contribution-guidelines]: https://github.com/julmot/jquery.mark/blob/master/CONTRIBUTING.md
+[minified]: https://github.com/julmot/jquery.mark/blob/master/dist/jquery.mark.min.js
+[releases]: https://github.com/julmot/jquery.mark/releases
+
+[jsfiddle-default]: https://jsfiddle.net/julmot/vpav6tL1/ "Default mark example"
+[jsfiddle-table-column]: https://jsfiddle.net/julmot/1at87fnu/ "Table column highlighting"
+[jsfiddle-datatables-global]: https://jsfiddle.net/julmot/buh9h2r8/ "DataTables global mark"
+[jsfiddle-datatables-column]: https://jsfiddle.net/julmot/c2am6zfr/ "DataTables column highlighting"
+[jsfiddle-referrer]: https://jsfiddle.net/julmot/bL6bb5oo/ "URL Referrer highlighting"
+
+[firefox-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_48x48.png
+[chrome-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_48x48.png
+[opera-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_48x48.png
+[safari-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png
+[edge-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge_48x48.png
+[ie-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png
+[ie-tile-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png
+[sauce-matrix]: https://saucelabs.com/u/jquery-mark
+[sauce-matrix-image]: https://saucelabs.com/browser-matrix/jquery-mark.svg
