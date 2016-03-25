@@ -202,17 +202,21 @@
 
         /**
          * Returns an array containing keywords dependent on whether separate
-         * word search was defined
+         * word search was defined. Also it filters empty keywords
          * @return {array.<string>}
          */
         getSeparatedKeywords() {
             let stack = [];
             this.kw.forEach(kw => {
                 if(!this.opt.separateWordSearch) {
-                    stack.push(kw);
+                    if(kw !== ""){
+                        stack.push(kw);
+                    }
                 } else {
                     kw.split(" ").forEach(kwSplitted => {
-                        stack.push(kwSplitted);
+                        if(kwSplitted !== ""){
+                            stack.push(kwSplitted);
+                        }
                     });
                 }
             });
@@ -443,7 +447,8 @@
             let hEl = this.opt.element === "*" ? "span" : this.opt.element;
             let hCl = this.opt.className === "*" ? "mark" : this.opt.className;
             let kwArr = this.getSeparatedKeywords(),
-                kwArrLen = kwArr.length;
+                kwArrLen = kwArr.length
+            if(kwArrLen === 0) this.opt.complete();
             kwArr.forEach(kw => {
                 let exp = this.getRegexp(this.escapeStr(kw));
                 let regex = new RegExp(exp, "gmi");
@@ -473,9 +478,7 @@
                         regex.lastIndex = 0; // http://tinyurl.com/htsudjd
                     }
                 }, () => {
-                    if(kwArr[kwArrLen - 1] === kw) {
-                        this.opt.complete();
-                    }
+                    if(kwArr[kwArrLen - 1] === kw) this.opt.complete();
                 });
             });
         }

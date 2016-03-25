@@ -293,6 +293,45 @@ describe("basic mark with separate word search", function () {
     });
 });
 
+describe("basic mark with separateWordSearch and blanks", function () {
+    var $ctx1, $ctx2, $ctx3;
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("basic-separate-blank.html");
+
+        $ctx1 = $(".basic-separate-blank > p:nth-child(1)");
+        $ctx2 = $(".basic-separate-blank > p:nth-child(2)");
+        $ctx3 = $(".basic-separate-blank > p:nth-child(3)");
+        $ctx1.mark("lorem ", {
+            "diacritics": false,
+            "separateWordSearch": true,
+            "complete": function () {
+                $ctx2.mark(" lorem ", {
+                    "diacritics": false,
+                    "separateWordSearch": true,
+                    "complete": function () {
+                        $ctx3.mark([""], {
+                            "diacritics": false,
+                            "separateWordSearch": true,
+                            "complete": function () {
+                                done();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+    afterEach(function () {
+        $ctx1.add($ctx2).add($ctx3).remove();
+    });
+
+    it("should wrap matches, ignore blanks and call complete", function () {
+        expect($ctx1.find("span.mark")).toHaveLength(4);
+        expect($ctx2.find("span.mark")).toHaveLength(4);
+        expect($ctx3.find("span.mark")).toHaveLength(0);
+    });
+});
+
 describe("basic mark with diacritics", function () {
     var $ctx;
     beforeEach(function (done) {
