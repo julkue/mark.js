@@ -155,12 +155,14 @@
             }
             let syn = this.opt.synonyms;
             for(let index in syn) {
-                let value = syn[index];
-                let k1 = this.escapeStr(index);
-                let k2 = this.escapeStr(value);
-                str = str.replace(
-                    new RegExp(`(${k1}|${k2})`, "gmi"), `(${k1}|${k2})`
-                );
+                if(syn.hasOwnProperty(index)){
+                    let value = syn[index];
+                    let k1 = this.escapeStr(index);
+                    let k2 = this.escapeStr(value);
+                    str = str.replace(
+                        new RegExp(`(${k1}|${k2})`, "gmi"), `(${k1}|${k2})`
+                    );
+                }
             }
             return str;
         }
