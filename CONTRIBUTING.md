@@ -71,7 +71,7 @@ Please note the following things when doing a pull request:
 - Reference related issues in the pull request description
 - Describe your changes and why they are necessary
   (if not stated in referenced issues)
-- When changing something inside `jquery.jquery.mark.js`, please
+- When changing something inside `jquery.mark.js`, please
   run `$ grunt dist` at the end to generate a `.min.js`
 - Make sure that you format code to fit the [code style][code-style]
 

@@ -447,7 +447,7 @@
             let hEl = this.opt.element === "*" ? "span" : this.opt.element;
             let hCl = this.opt.className === "*" ? "mark" : this.opt.className;
             let kwArr = this.getSeparatedKeywords(),
-                kwArrLen = kwArr.length
+                kwArrLen = kwArr.length;
             if(kwArrLen === 0) this.opt.complete();
             kwArr.forEach(kw => {
                 let exp = this.getRegexp(this.escapeStr(kw));
