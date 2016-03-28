@@ -1,5 +1,5 @@
 /*!***************************************************
- * jquery.mark v5.0.0
+ * jquery.mark v5.1.0
  * https://github.com/julmot/jquery.mark
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vaizN
@@ -38,6 +38,8 @@
          * value and the value for the key.
          * @param {boolean} [opt.iframes=false] - Whether to search inside
          * iframes
+         * @param {boolean} [opt.wordBoundary] - Whether to mark only matches
+         * with a word boundary
          * @param {function} [opt.complete] - Callback after all marks are
          * completed
          * @param {function} [opt.each] - A callback for each marked element.
@@ -62,6 +64,7 @@
                 "diacritics": true,
                 "synonyms": {},
                 "iframes": false,
+                "wordBoundary": false,
                 "complete": function () {},
                 "each": function () {},
                 "debug": false,
@@ -127,7 +130,7 @@
 
         /**
          * Creates a regular expression string to match the specified search
-         * term including synonyms and diacritics if defined
+         * term including synonyms, diacritics and wordBoundary if defined
          * @param  {string} str - The search term
          * @return {string}
          */
@@ -140,6 +143,9 @@
             }
             if(this.opt.diacritics) {
                 str = this.getDiacriticsRegexp(str);
+            }
+            if(this.opt.wordBoundary){
+                str = this.getWordBoundaryRegexp(str);
             }
             return str;
         }
@@ -198,6 +204,16 @@
                 });
             });
             return str;
+        }
+
+        /**
+         * Creates a regular expression string to match the specified string
+         * only with a word boundary
+         * @param  {string} str - The searm term
+         * @return {str}
+         */
+        getWordBoundaryRegexp(str){
+            return `\\b${str}\\b`;
         }
 
         /**

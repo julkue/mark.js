@@ -389,6 +389,45 @@ describe("basic mark with synonyms", function () {
     });
 });
 
+describe("basic mark with word boundary", function () {
+    var $ctx1, $ctx2, $ctx3;
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("basic-word-boundary.html");
+
+        $ctx1 = $(".basic-word-boundary > p:nth-child(1)");
+        $ctx2 = $(".basic-word-boundary > p:nth-child(2)");
+        $ctx3 = $(".basic-word-boundary > p:nth-child(3)");
+        $ctx1.mark("lore", {
+            "wordBoundary": true,
+            "complete": function () {
+                $ctx2.mark("lorem ipsum", {
+                    "wordBoundary": true,
+                    "complete": function () {
+                        $ctx3.mark("lorem ipsum dolo", {
+                            "wordBoundary": true,
+                            "separateWordSearch": true,
+                            "complete": function () {
+                                done();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+    afterEach(function () {
+        $ctx1.add($ctx2).add($ctx3).remove();
+    });
+
+    it("should only wrap matches with a word boundary", function () {
+        expect($ctx1.find("span.mark")).toHaveLength(0);
+        expect($ctx2.find("span.mark")).toHaveLength(4);
+    });
+    it("should work with separateWordSearch", function(){
+        expect($ctx3.find("span.mark")).toHaveLength(8);
+    });
+});
+
 describe("nested mark", function () {
     var $ctx;
     beforeEach(function (done) {
