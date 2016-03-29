@@ -423,7 +423,7 @@ describe("basic mark with word boundary", function () {
         expect($ctx1.find("span.mark")).toHaveLength(0);
         expect($ctx2.find("span.mark")).toHaveLength(4);
     });
-    it("should work with separateWordSearch", function(){
+    it("should work with separateWordSearch", function () {
         expect($ctx3.find("span.mark")).toHaveLength(8);
     });
 });
@@ -592,7 +592,7 @@ describe("mark removal with iframes", function () {
         $ctx.mark("lorem", {
             "diacritics": false,
             "iframes": true,
-            "each": function($el){
+            "each": function ($el) {
                 $elements = $elements.add($el);
             },
             "complete": function () {
@@ -615,7 +615,7 @@ describe("mark removal with iframes", function () {
     });
 
     it("should remove all marked elements recursively", function () {
-        $elements.each(function(){
+        $elements.each(function () {
             expect(this).not.toBeInDOM();
         });
     });

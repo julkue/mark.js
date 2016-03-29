@@ -476,7 +476,7 @@
          * @param {object} node - The DOM text node
          * @param {RegExp} regex - The regular expression to be searched for
          */
-        wrapMatches(node, regex){
+        wrapMatches(node, regex) {
             let hEl = this.opt.element === "*" ? "span" : this.opt.element;
             let hCl = this.opt.className === "*" ? "mark" : this.opt.className;
             let match;
@@ -508,7 +508,7 @@
          * Performs the mark of either the specified RegExp or all keywords
          */
         perform() {
-            if(this.sv instanceof RegExp){
+            if(this.sv instanceof RegExp) {
                 this.log(`Searching with expression "${this.sv}"`);
                 this.forEachNode(node => {
                     this.wrapMatches(node, this.sv);
