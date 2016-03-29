@@ -141,7 +141,7 @@ module.exports = function (config) {
             'karma-sauce-launcher'
         ],
         sauceLabs: {
-            testName: 'jmHighlight Unit Tests'
+            testName: 'jquery.mark Unit Tests'
         },
         customLaunchers: customLaunchers,
         browsers: Object.keys(customLaunchers),
