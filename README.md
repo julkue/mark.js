@@ -24,7 +24,7 @@ is embedded.*
 
 ## 2. API
 
-### 2.1 .mark()
+### 2.1 mark()
 
 Syntax:
 
@@ -61,7 +61,7 @@ Optional options:
 | debug              | boolean  | false        | Set this option to `true` if you want to log messages                                                                                                                                                                                                                                                                     |
 | log                | object   | console      | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                              |
 
-### 2.2 .markRegExp()
+### 2.2 markRegExp()
 
 Syntax:
 
@@ -94,7 +94,7 @@ Optional options:
 | debug     | boolean  | false        | Set this option to `true` if you want to log messages                                                                                                                                                                                                                                                                     |
 | log       | object   | console      | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                              |
 
-### 2.3 .removeMark()
+### 2.3 removeMark()
 
 Syntax:
 ```javascript
