@@ -121,6 +121,7 @@ Optional options:
 
 ## 3. Usage examples
  - [Default example][jsfiddle-default]
+ - [Mark example with regular expression][jsfiddle-regex]
  - [Table column example][jsfiddle-table-column]
  - [DataTables example with global search][jsfiddle-datatables-global]
  - [DataTables example with column search][jsfiddle-datatables-column]
@@ -174,6 +175,7 @@ Happy hacking!
 [releases]: https://github.com/julmot/jquery.mark/releases
 
 [jsfiddle-default]: https://jsfiddle.net/julmot/vpav6tL1/ "Default mark example"
+[jsfiddle-regex]: https://jsfiddle.net/julmot/ova17daa/ "Mark example with regular expression"
 [jsfiddle-table-column]: https://jsfiddle.net/julmot/1at87fnu/ "Table column highlighting"
 [jsfiddle-datatables-global]: https://jsfiddle.net/julmot/buh9h2r8/ "DataTables global mark"
 [jsfiddle-datatables-column]: https://jsfiddle.net/julmot/c2am6zfr/ "DataTables column highlighting"
