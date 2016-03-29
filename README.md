@@ -22,7 +22,9 @@ You are ready to start!
 or without any module loader! Anyhow you are using it, make sure that jQuery
 is embedded.*
 
-## 2. Mark usage
+## 2. API
+
+### 2.1 .mark()
 
 Syntax:
 
@@ -59,7 +61,40 @@ Optional options:
 | debug              | boolean  | false        | Set this option to `true` if you want to log messages                                                                                                                                                                                                                                                                     |
 | log                | object   | console      | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                              |
 
-## 3. Mark removal usage
+### 2.2 .markRegExp()
+
+Syntax:
+
+```javascript
+$(".context").markRegExp(regexp [, options]);
+```
+
+Parameters:
+
+##### regexp
+
+Type: `RegExp`
+
+The regular expression to be marked. Example: `/Lor[^]?m/gmi`.
+
+##### options
+
+Type: `object`
+
+Optional options:
+
+| Option    | Type     | Default      | Description                                                                                                                                                                                                                                                                                                               |
+|-----------|----------|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| element   | string   | "span"       | HTML element to wrap matches, e.g. `span`                                                                                                                                                                                                                                                                                 |
+| className | string   | "mark"       | A class name that will be appended to <code>element</code>                                                                                                                                                                                                                                                                |
+| filter    | array    | [ ]          | An array with exclusion selectors. Elements matching those selectors will be ignored. Example: `"filter": [".ignore", "*[data-ignore]"]`                                                                                                                                                                                  |
+| iframes   | boolean  | false        | Whether to search also inside iframes. If you don't have permissions to some iframes (e.g. because they have a [different origin][SOP]) they will be silently skipped. If you don't want to search inside specific iframes (e.g. facebook share), you can pass a <code>filter</code> selector that matches these iframes. |
+| each      | function | function(){} | A callback for each marked element. This function receives the marked jQuery element as a parameter                                                                                                                                                                                                                       |
+| complete  | function | function(){} | As jquery.mark is asynchronous this callback function is called after all marks are completed                                                                                                                                                                                                                             |
+| debug     | boolean  | false        | Set this option to `true` if you want to log messages                                                                                                                                                                                                                                                                     |
+| log       | object   | console      | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                              |
+
+### 2.3 .removeMark()
 
 Syntax:
 ```javascript
@@ -84,14 +119,14 @@ Optional options:
 | debug     | boolean  | false        | Set this option to `true` if you want to log messages                                                                                                                                                                                                                                                                               |
 | log       | object   | console      | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                                        |
 
-## 4. Usage examples
+## 3. Usage examples
  - [Default example][jsfiddle-default]
  - [Table column example][jsfiddle-table-column]
  - [DataTables example with global search][jsfiddle-datatables-global]
  - [DataTables example with column search][jsfiddle-datatables-column]
  - [URL Referrer mark example][jsfiddle-referrer]
 
-## 5. Browser compatibility
+## 4. Browser compatibility
 
 The plugin works in all modern browsers.
 It has been tested in Firefox, Chrome, Opera, Safari, Edge and IE9+.
@@ -105,11 +140,11 @@ It has been tested in Firefox, Chrome, Opera, Safari, Edge and IE9+.
 ![IE10-11][ie-tile-icon]  
 [![Sauce Labs Test Status][sauce-matrix-image]][sauce-matrix]
 
-## 6. Contributing
+## 5. Contributing
 
 See [the contribution guidelines][contribution-guidelines].
 
-## 7. Changelog
+## 6. Changelog
 
 Changes are documented in [release descriptions][releases].
 

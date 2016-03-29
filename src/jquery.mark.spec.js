@@ -620,3 +620,24 @@ describe("mark removal with iframes", function () {
         });
     });
 });
+
+describe("mark with regular expression", function () {
+    var $ctx;
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("regexp.html");
+
+        $ctx = $(".regexp");
+        $ctx.markRegExp(/Lor[^]?m/gmi, {
+            "complete": function () {
+                done();
+            }
+        });
+    });
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should wrap matches", function () {
+        expect($ctx.find("span.mark")).toHaveLength(4);
+    });
+});

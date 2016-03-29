@@ -1,5 +1,5 @@
 /*!***************************************************
- * jquery.mark v5.1.0
+ * jquery.mark v5.2.0
  * https://github.com/julmot/jquery.mark
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vaizN
@@ -28,28 +28,33 @@
          * @param {string} [opt.element=span] - HTML element tag name
          * @param {string} [opt.className=mark] - A class name
          * @param {array} [opt.filter] - An array with exclusion selectors.
-         * Elements matching those selectors will be ignored.
-         * @param {boolean} [opt.separateWordSearch=false] - If the plugin
-         * should search for each word (separated by a blank) instead of the
-         * complete term
+         * Elements matching those selectors will be ignored
+         * @param {boolean} [opt.separateWordSearch=false] - If it should be
+         * searched for each word (separated by a blank) instead of the complete
+         * term (will only be used in <code>.perform()</code> and only if
+         * <code>sv</code> is not a RegExp)
          * @param {boolean} [opt.diacritics=true] - If diacritic characters
          * should be matched. For example "justo" would also match "justò"
+         * (will only be used in <code>.perform()</code> and only if
+         * <code>sv</code> is not a RegExp)
          * @param {object} [opt.synonyms] - The key will be a synonym for the
-         * value and the value for the key.
+         * value and the value for the key (will only be used in
+         * <code>.perform()</code> and only if <code>sv</code> is not a RegExp)
+         * @param {boolean} [opt.wordBoundary] - Whether to mark only matches
+         * with a word boundary (will only be used in <code>.perform()</code>
+         * and only if <code>sv</code> is not a RegExp)
          * @param {boolean} [opt.iframes=false] - Whether to search inside
          * iframes
-         * @param {boolean} [opt.wordBoundary] - Whether to mark only matches
-         * with a word boundary
-         * @param {function} [opt.complete] - Callback after all marks are
-         * completed
+         * @param {function} [opt.complete] - Callback on complete
          * @param {function} [opt.each] - A callback for each marked element.
          * This function receives the marked jQuery element as a parameter
+         * (will only be used in <code>.perform()</code>)
          * @param {boolean} [opt.debug=false] - Set this option to true if you
          * want to log messages
          * @param {object} [opt.log=console] - Log messages to a specific
          * object (only if debug is true)
-         * @param {string|array} [sv] - Search value, either a search string
-         * or an array containing multiple search strings
+         * @param {string|array|RegExp} [sv] - Search value, either a search
+         * string, an array containing multiple search strings or a RegExp
          */
         constructor($ctx, opt, sv) {
             /**
@@ -71,10 +76,10 @@
                 "log": window.console
             }, opt);
             /**
-             * List of keywords
-             * @type {array.<string>}
+             * The search value. Can be an array of keywords or a RegExp
+             * @type {array.<string>|RegExp}
              */
-            this.kw = typeof sv === "string" ? [sv] : sv;
+            this.sv = typeof sv === "string" ? [sv] : sv;
             /**
              * The context element
              * @type {jquery}
@@ -104,15 +109,6 @@
         }
 
         /**
-         * Escapes a string for usage within a regular expression
-         * @param {string} str - The string to escape
-         * @return {string}
-         */
-        escapeStr(str) {
-            return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
-        }
-
-        /**
          * Logs a message if log is enabled
          * @param {string} msg - The message to log
          * @param {string} [level=debug] - The log level, e.g. <code>warn</code>
@@ -129,39 +125,49 @@
         }
 
         /**
-         * Creates a regular expression string to match the specified search
-         * term including synonyms, diacritics and wordBoundary if defined
-         * @param  {string} str - The search term
+         * Escapes a string for usage within a regular expression
+         * @param {string} str - The string to escape
          * @return {string}
          */
-        getRegexp(str) {
+        escapeStr(str) {
+            return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+        }
+
+        /**
+         * Creates a regular expression string to match the specified search
+         * term including synonyms, diacritics and wordBoundary if defined
+         * @param  {string} str - The search term to be used
+         * @return {string}
+         */
+        createRegExp(str) {
             if(str === "") {
                 return str;
             }
+            str = this.escapeStr(str);
             if(Object.keys(this.opt.synonyms).length > 0) {
-                str = this.getSynonymsRegexp(str);
+                str = this.createSynonymsRegExp(str);
             }
             if(this.opt.diacritics) {
-                str = this.getDiacriticsRegexp(str);
+                str = this.createDiacriticsRegExp(str);
             }
-            if(this.opt.wordBoundary){
-                str = this.getWordBoundaryRegexp(str);
+            if(this.opt.wordBoundary) {
+                str = this.createWordBoundaryRegExp(str);
             }
             return str;
         }
 
         /**
-         * Creates a regular expression string to match the specified synonyms
-         * @param  {string} str - The search term
+         * Creates a regular expression string to match the instance synonyms
+         * @param  {string} str - The search term to be used
          * @return {string}
          */
-        getSynonymsRegexp(str) {
+        createSynonymsRegExp(str) {
             if(str === "") {
                 return str;
             }
             let syn = this.opt.synonyms;
             for(let index in syn) {
-                if(syn.hasOwnProperty(index)){
+                if(syn.hasOwnProperty(index)) {
                     let value = syn[index];
                     let k1 = this.escapeStr(index);
                     let k2 = this.escapeStr(value);
@@ -175,10 +181,10 @@
 
         /**
          * Creates a regular expression string to match diacritics
-         * @param  {string} str - The search term
+         * @param  {string} str - The search term to be used
          * @return {string}
          */
-        getDiacriticsRegexp(str) {
+        createDiacriticsRegExp(str) {
             if(str === "") {
                 return str;
             }
@@ -209,34 +215,43 @@
         /**
          * Creates a regular expression string to match the specified string
          * only with a word boundary
-         * @param  {string} str - The searm term
+         * @param  {string} str - The searm term to be used
          * @return {str}
          */
-        getWordBoundaryRegexp(str){
+        createWordBoundaryRegExp(str) {
             return `\\b${str}\\b`;
         }
 
         /**
-         * Returns an array containing keywords dependent on whether separate
-         * word search was defined. Also it filters empty keywords
-         * @return {array.<string>}
+         * @typedef Mark~separatedKeywords
+         * @type {object.<string>}
+         * @property {array.<string>} keywords - The list of keywords
+         * @property {number} length - The length
+         */
+        /**
+         * Returns a list of keywords dependent on whether separate word search
+         * was defined. Also it filters empty keywords
+         * @return {Mark~separatedKeywords}
          */
         getSeparatedKeywords() {
             let stack = [];
-            this.kw.forEach(kw => {
+            this.sv.forEach(kw => {
                 if(!this.opt.separateWordSearch) {
-                    if(kw !== ""){
+                    if(kw !== "") {
                         stack.push(kw);
                     }
                 } else {
                     kw.split(" ").forEach(kwSplitted => {
-                        if(kwSplitted !== ""){
+                        if(kwSplitted !== "") {
                             stack.push(kwSplitted);
                         }
                     });
                 }
             });
-            return stack;
+            return {
+                "keywords": stack,
+                "length": stack.length
+            };
         }
 
         /**
@@ -456,47 +471,64 @@
         }
 
         /**
-         * Wraps the specified element and class around keywords in all text
-         * nodes of instance elements
+         * Wraps the specified element and class around matches in the defined
+         * DOM text node element
+         * @param {object} node - The DOM text node
+         * @param {RegExp} regex - The regular expression to be searched for
          */
-        perform() {
+        wrapMatches(node, regex){
             let hEl = this.opt.element === "*" ? "span" : this.opt.element;
             let hCl = this.opt.className === "*" ? "mark" : this.opt.className;
-            let kwArr = this.getSeparatedKeywords(),
-                kwArrLen = kwArr.length;
-            if(kwArrLen === 0) this.opt.complete();
-            kwArr.forEach(kw => {
-                let exp = this.getRegexp(this.escapeStr(kw));
-                let regex = new RegExp(exp, "gmi");
-                this.log(`Searching with expression "${exp}"`);
+            let match;
+            while((match = regex.exec(node.textContent)) !== null) {
+                // Split the text node and
+                // replace match with mark element
+                let startNode = node.splitText(match.index);
+                // The DOM reference of node will get lost due to
+                // splitText. Therefore it is necessary to save the new
+                // created element in "node"
+                node = startNode.splitText(match[0].length);
+                if(startNode.parentNode !== null) {
+                    let $repl = $(`<${hEl} />`, {
+                        "class": hCl,
+                        "data-jquery-mark": true,
+                        "text": match[0]
+                    });
+                    startNode.parentNode.replaceChild(
+                        $repl[0],
+                        startNode
+                    );
+                    this.opt.each($repl);
+                }
+                regex.lastIndex = 0; // http://tinyurl.com/htsudjd
+            }
+        }
+
+        /**
+         * Performs the mark of either the specified RegExp or all keywords
+         */
+        perform() {
+            if(this.sv instanceof RegExp){
+                this.log(`Searching with expression "${this.sv}"`);
                 this.forEachNode(node => {
-                    let match;
-                    while((match = regex.exec(node.textContent)) !== null) {
-                        // Split the text node and
-                        // replace match with mark element
-                        let startNode = node.splitText(match.index);
-                        // The DOM reference of node will get lost due to
-                        // splitText. Therefore it is necessary to save the new
-                        // created element in "node"
-                        node = startNode.splitText(match[0].length);
-                        if(startNode.parentNode !== null) {
-                            let $repl = $(`<${hEl} />`, {
-                                "class": hCl,
-                                "data-jquery-mark": true,
-                                "text": match[0]
-                            });
-                            startNode.parentNode.replaceChild(
-                                $repl[0],
-                                startNode
-                            );
-                            this.opt.each($repl);
-                        }
-                        regex.lastIndex = 0; // http://tinyurl.com/htsudjd
-                    }
-                }, () => {
-                    if(kwArr[kwArrLen - 1] === kw) this.opt.complete();
+                    this.wrapMatches(node, this.sv);
+                }, this.opt.complete);
+            } else {
+                let {
+                    keywords: kwArr,
+                    length: kwArrLen
+                } = this.getSeparatedKeywords();
+                if(kwArrLen === 0) this.opt.complete();
+                kwArr.forEach(kw => {
+                    let regex = new RegExp(this.createRegExp(kw), "gmi");
+                    this.log(`Searching with expression "${regex}"`);
+                    this.forEachNode(node => {
+                        this.wrapMatches(node, regex);
+                    }, () => {
+                        if(kwArr[kwArrLen - 1] === kw) this.opt.complete();
+                    });
                 });
-            });
+            }
         }
 
         /**
@@ -527,15 +559,14 @@
      * @external "$.fn"
      */
     /**
-     * Initializes an instance of Mark and calls the perform function
+     * Initializes an instance of Mark with the specified keywords and calls the
+     * perform function
      * @param {string} kw - The keyword
      * @param {object} [opt] - The options
-     * @see [Detailed parameter information]{@link
-     * https://github.com/julmot/jquery.mark#2-mark-usage}
-     * @see [Mark class]{@link Mark}
+     * @see [Mark class options]{@link Mark}
      * @function external:"$.fn".mark
      * @example $(".context").mark("keyword", {
-     *     "separateWordSearch": true
+     *     "debug": true
      * })
      */
     $.fn.mark = function (kw, opt) {
@@ -543,13 +574,28 @@
         return instance.perform();
     };
     /**
+     * Initializes an instance of Mark with the specified RegExp and calls the
+     * perform function
+     * @param {RegExp} reg - The regular expression
+     * @param {object} [opt] - The options
+     * @see [Mark class options]{@link Mark}
+     * @function external:"$.fn".markRegExp
+     * @example $(".context").markRegExp(/Lor[^]?m/gmi, {
+     *     "debug": true
+     * })
+     */
+    $.fn.markRegExp = function (reg, opt) {
+        let instance = new Mark($(this), opt, reg);
+        return instance.perform();
+    };
+    /**
      * Initializes an instance of Mark and calls the remove function
      * @param {object} [opt] - The options
-     * @see [Detailed parameter information]{@link
-     * https://github.com/julmot/jquery.mark#3-mark-removal-usage}
-     * @see [Mark class]{@link Mark}
+     * @see [Mark class options]{@link Mark}
      * @function external:"$.fn".removeMark
-     * @example $(".context").removeMark();
+     * @example $(".context").removeMark({
+     *     "debug": true
+     * });
      */
     $.fn.removeMark = function (opt) {
         let instance = new Mark($(this), opt);
