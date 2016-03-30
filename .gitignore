@@ -13,6 +13,11 @@ vendor/
 # Personal
 TODO
 
-# JSDOC dev (just to see if tags are correctly generated)
-jsdoc.bat
-dist/jsdoc/
+# Build (in case of errors)
+build/
+
+# JSDOC
+doc/
+
+# Coverage
+coverage/

@@ -6,31 +6,39 @@
  *****************************************************/
 module.exports = function (config) {
     config.set({
-        basePath: '',
-        frameworks: ['jasmine-jquery', 'jasmine'],
+        basePath: "",
+        frameworks: ["jasmine-jquery", "jasmine"],
         files: [
-            'vendor/jquery/dist/jquery.min.js',
-            'dist/jquery.mark.min.js',
-            'src/*.spec.js', {
-                pattern: 'test/fixtures/*.html',
+            "vendor/jquery/dist/jquery.min.js",
+            "build/jquery.mark.js",
+            "src/*.spec.js", {
+                pattern: "test/fixtures/*.html",
                 included: false,
                 served: true
             }
         ],
         exclude: [],
-        reporters: ['spec'],
+        reporters: ["spec", "coverage"],
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
         autoWatch: false,
         plugins: [
-            'karma-jasmine',
-            'karma-jasmine-jquery',
-            'karma-phantomjs-launcher',
-            'karma-spec-reporter'
+            "karma-jasmine",
+            "karma-jasmine-jquery",
+            "karma-phantomjs-launcher",
+            "karma-spec-reporter",
+            "karma-coverage"
         ],
-        browsers: ['PhantomJS'],
+        browsers: ["PhantomJS"],
         captureTimeout: 30000,
-        singleRun: true
+        singleRun: true,
+        preprocessors: {
+            "build/jquery.mark.js": ["coverage"]
+        },
+        coverageReporter: {
+            type: "html",
+            dir: "coverage/"
+        }
     });
 };

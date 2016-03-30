@@ -42,12 +42,12 @@ The project is using [Grunt][grunt] as a base, [Karma][karma] as a task runner
 and [Jasmine][jasmine] (with [jasmine-jquery][jasmine-jquery]) as a testing
 framework.
 
-| Grunt task | Description                                      |
-|------------|--------------------------------------------------|
-| dev        | For development. Will run `test` on file changes |
-| dist       | Will trigger `minify` and `test`                 |
-| minify     | Generates a `.min.js` in `./dist`                |
-| test       | Runs the test                                    |
+| Grunt task | Description                                                        |
+|------------|--------------------------------------------------------------------|
+| dev        | For development. Will run `test` on file changes                   |
+| dist       | Will trigger `test` and `minify` and creates a JSDOC documentation |
+| minify     | Generates a `.min.js` in `./dist`                                  |
+| test       | Runs the test and creates test coverage                            |
 
 _Note: Run tasks with `$ grunt [task]` (Replace "[task]" with the actual task name)._
 

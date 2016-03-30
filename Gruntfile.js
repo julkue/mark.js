@@ -19,21 +19,42 @@ module.exports = function (grunt) {
     grunt.initConfig({
         babel: {
             options: {
+                presets: ["es2015"],
+                plugins: ["transform-object-assign"],
                 compact: true,
                 comments: false
             },
             es5: {
-                options: {
-                    presets: ["es2015"],
-                    plugins: ["transform-object-assign"]
-                },
                 files: {
                     "dist/jquery.mark.min.js": "src/jquery.mark.js"
                 }
             },
             es6: {
+                options: {
+                    presets: [],
+                    plugins: []
+                },
                 files: {
                     "dist/jquery.mark.es6.min.js": "src/jquery.mark.js"
+                }
+            },
+            build: {
+                options: {
+                    compact: false
+                },
+                files: {
+                    "build/jquery.mark.js": "src/jquery.mark.js"
+                }
+            }
+        },
+        clean: {
+            build: ["build/"]
+        },
+        jsdoc: {
+            dist: {
+                src: ["src/jquery.mark.js", "README.md"],
+                options: {
+                    destination: "doc"
                 }
             }
         },
@@ -41,7 +62,7 @@ module.exports = function (grunt) {
             options: {
                 configFile: "karma.conf.js" // shared config
             },
-            dist: {},
+            build: {},
             dev: {
                 singleRun: false,
                 autoWatch: true,
@@ -79,7 +100,7 @@ module.exports = function (grunt) {
         watch: {
             dist: {
                 files: ["src/*", "test/*"],
-                tasks: ["minify", "karma:dev:run"]
+                tasks: ["babel:build", "karma:dev:run", "clean:build"]
             }
         }
     });
@@ -88,9 +109,11 @@ module.exports = function (grunt) {
     grunt.log.writeln(banner["yellow"]);
     grunt.registerTask("dev", ["karma:dev:start", "watch"]);
     grunt.registerTask("test", function () {
-        // minify first, as es5 version will be tested
-        grunt.task.run(["minify", "karma:dist"]);
-        // continuous integration
+        // local test against an uncompressed ES5 variant as ES6 is not
+        // supported in PhantomJS and the normal ES5 variant is already
+        // compressed (bad to determine coverage issues)
+        grunt.task.run(["babel:build", "karma:build"]);
+        // continuous integration cross browser test
         if(process.env.CI) {
             if(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
                 grunt.task.run(["karma:saucelabs"]);
@@ -101,11 +124,14 @@ module.exports = function (grunt) {
                 );
             }
         }
+        // delete build folder
+        grunt.task.run(["clean:build"]);
     });
-    grunt.registerTask("minify", ["babel", "uglify", "usebanner"]);
-    grunt.registerTask("dist", ["test"]);
-    // there may be a time where ES6 is supported in PhantomJS, then
-    // there will no "minify" necessary in "test". If so there would be
-    // no option to generate ".min.js" files, so let's keep it here even if it
-    // is not necessary at the moment.
+    grunt.registerTask("minify", [
+        "babel:es5",
+        "babel:es6",
+        "uglify",
+        "usebanner"
+    ]);
+    grunt.registerTask("dist", ["test", "minify", "jsdoc"]);
 };
