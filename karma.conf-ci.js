@@ -147,7 +147,11 @@ module.exports = function (config) {
         customLaunchers: customLaunchers,
         browsers: Object.keys(customLaunchers),
         reporters: ["spec", "saucelabs", "coverage"],
-        captureTimeout: 120000, // in case connection in CI is slow
+        // in case Sauce Labs is slow
+        captureTimeout: 180000, // 3 min
+        browserDisconnectTimeout: 60000, // 1 min
+        browserNoActivityTimeout: 60000, // 1 min
+        browserDisconnectTolerance: 15,
         singleRun: true,
         preprocessors: {
             "build/jquery.mark.js": ["coverage"]
