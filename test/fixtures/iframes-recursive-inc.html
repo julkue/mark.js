@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8">
     <title>Test iframe document</title>
-    <base href="http://www.google.com/" target="_blank">
     <style>
         .mark{
             background: yellow;
@@ -28,7 +27,7 @@
             // included after the document was fully loaded
             var target = document.getElementById("target");
             var iframe = document.createElement("iframe");
-            iframe.src = jasmine.getFixtures().fixturesPath + "/iframes-inc.html";
+            iframe.src = "iframes-inc.html";
             target.appendChild(iframe);
         </script>
     </div>

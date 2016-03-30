@@ -140,9 +140,6 @@
          * @return {string}
          */
         createRegExp(str) {
-            if(str === "") {
-                return str;
-            }
             str = this.escapeStr(str);
             if(Object.keys(this.opt.synonyms).length > 0) {
                 str = this.createSynonymsRegExp(str);
@@ -162,9 +159,6 @@
          * @return {string}
          */
         createSynonymsRegExp(str) {
-            if(str === "") {
-                return str;
-            }
             let syn = this.opt.synonyms;
             for(let index in syn) {
                 if(syn.hasOwnProperty(index)) {
@@ -185,9 +179,6 @@
          * @return {string}
          */
         createDiacriticsRegExp(str) {
-            if(str === "") {
-                return str;
-            }
             let charArr = str.split("");
             let handled = [];
             charArr.forEach(ch => {

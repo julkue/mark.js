@@ -15,11 +15,11 @@ describe("environment", function () {
 });
 
 describe("basic mark", function () {
-    var $ctx, eachCalled, completeCalled;
+    var $ctx, eachCalled, completeCalled, debugCalled;
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic.html");
 
-        eachCalled = 0, completeCalled = 0;
+        eachCalled = completeCalled = debugCalled = 0;
         $ctx = $(".basic");
         $ctx.mark("lorem ipsum", {
             "diacritics": false,
@@ -29,6 +29,15 @@ describe("basic mark", function () {
             "complete": function () {
                 completeCalled++;
                 done();
+            },
+            "debug": true,
+            "log": {
+                "debug": function () {
+                    debugCalled++;
+                },
+                "warn": function () {
+                    debugCalled++;
+                }
             }
         });
     });
@@ -47,6 +56,9 @@ describe("basic mark", function () {
             expect(completeCalled).toBe(1);
             done();
         }, 3000);
+    });
+    it("should call the log function if debug is enabled", function () {
+        expect(debugCalled).toBeGreaterThan(0);
     });
 });
 
@@ -233,6 +245,36 @@ describe("basic mark with custom element and class", function () {
 
     it("should wrap matches with specified element and class", function () {
         expect($ctx.find("i.custom")).toHaveLength(8);
+    });
+});
+
+describe("basic mark removal with custom element and class", function () {
+    var $ctx;
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("basic.html");
+
+        $ctx = $(".basic");
+        $ctx.mark(["lorem", "ipsum"], {
+            "diacritics": false,
+            "element": "i",
+            "className": "custom",
+            "complete": function () {
+                $ctx.removeMark({
+                    "element": "i",
+                    "className": "custom",
+                    "complete": function () {
+                        done();
+                    }
+                });
+            }
+        });
+    });
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should remove all marked elements", function () {
+        expect($ctx).not.toContainElement("span.mark");
     });
 });
 
@@ -577,7 +619,7 @@ describe("mark with iframes", function () {
         expect(errCall).toBe(0);
     });
     it("should wrap matches inside iframes recursively", function () {
-        expect($elements4).toHaveLength(8);
+        expect($elements4).toHaveLength(12);
         expect(errCall).toBe(0);
     });
 });
