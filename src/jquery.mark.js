@@ -228,12 +228,12 @@
             let stack = [];
             this.sv.forEach(kw => {
                 if(!this.opt.separateWordSearch) {
-                    if(kw !== "") {
+                    if(kw.trim() !== "") {
                         stack.push(kw);
                     }
                 } else {
                     kw.split(" ").forEach(kwSplitted => {
-                        if(kwSplitted !== "") {
+                        if(kwSplitted.trim() !== "") {
                             stack.push(kwSplitted);
                         }
                     });
