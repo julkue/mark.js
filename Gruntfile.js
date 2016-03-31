@@ -8,7 +8,7 @@ module.exports = function (grunt) {
     // load grunt tasks
     require("jit-grunt")(grunt, {
         usebanner: "grunt-banner"
-    })
+    });
 
     // read copyright header
     var fc = grunt.file.read("src/jquery.mark.js");
@@ -48,13 +48,13 @@ module.exports = function (grunt) {
             }
         },
         clean: {
-            build: ["build/"]
+            build: ["build/jquery.mark.js"]
         },
         jsdoc: {
             dist: {
                 src: ["src/jquery.mark.js", "README.md"],
                 options: {
-                    destination: "doc"
+                    destination: "build/doc"
                 }
             }
         },
@@ -63,13 +63,13 @@ module.exports = function (grunt) {
                 configFile: "karma.conf.js" // shared config
             },
             build: {},
+            buildsl: {
+                configFile: "karma.conf-ci.js"
+            },
             dev: {
                 singleRun: false,
                 autoWatch: true,
                 background: true
-            },
-            saucelabs: {
-                configFile: "karma.conf-ci.js"
             }
         },
         uglify: {
@@ -109,6 +109,10 @@ module.exports = function (grunt) {
     grunt.log.writeln(banner["yellow"]);
     grunt.registerTask("dev", ["karma:dev:start", "watch"]);
     grunt.registerTask("test", function () {
+        grunt.log.subhead(
+            "See the table below for test coverage or view " +
+            "'build/coverage/report-html/'"
+        );
         // local test against an uncompressed ES5 variant as ES6 is not
         // supported in PhantomJS and the normal ES5 variant is already
         // compressed (bad to determine coverage issues)
@@ -116,7 +120,7 @@ module.exports = function (grunt) {
         // continuous integration cross browser test
         if(process.env.CI) {
             if(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
-                grunt.task.run(["karma:saucelabs"]);
+                grunt.task.run(["karma:buildsl"]);
             } else {
                 grunt.log.warn(
                     "Make sure SAUCE_USERNAME and SAUCE_ACCESS_KEY " +
@@ -124,7 +128,6 @@ module.exports = function (grunt) {
                 );
             }
         }
-        // delete build folder
         grunt.task.run(["clean:build"]);
     });
     grunt.registerTask("minify", [

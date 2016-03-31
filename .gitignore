@@ -13,11 +13,5 @@ vendor/
 # Personal
 TODO
 
-# Build (in case of errors)
+# Build
 build/
-
-# JSDOC
-doc/
-
-# Coverage
-coverage/

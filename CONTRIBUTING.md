@@ -61,7 +61,7 @@ Set, Map, for...of loops etc..
 
 ### 2.4 Pull Requests
 
-Pull requests are very much appreciated!
+Pull requests are very much appreciated! :thumbsup:
 
 Please note the following things when doing a pull request:
 - Do not change any version
@@ -74,6 +74,7 @@ Please note the following things when doing a pull request:
 - When changing something inside `jquery.mark.js`, please
   run `$ grunt dist` at the end to generate a `.min.js`
 - Make sure that you format code to fit the [code style][code-style]
+- Pull requests will not be accepted if they worsen test coverage significantly
 
 
 __Thank you for contributing!__

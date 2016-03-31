@@ -157,8 +157,13 @@ module.exports = function (config) {
             "build/jquery.mark.js": ["coverage"]
         },
         coverageReporter: {
-            type: "html",
-            dir: "coverage/"
+            dir: "build/coverage/",
+            reporters: [{
+                type: 'html',
+                subdir: 'report-html'
+            }, {
+                type: 'text'
+            }, ]
         }
     });
 };
