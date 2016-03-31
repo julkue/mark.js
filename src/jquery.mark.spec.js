@@ -224,6 +224,35 @@ describe("basic mark with empty context", function () {
     });
 });
 
+describe("basic mark with HTML entities", function () {
+    var $ctx1, $ctx2;
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("basic-entities.html");
+
+        $ctx1 = $(".basic-entities > p:first-child");
+        $ctx2 = $(".basic-entities > p:last-child");
+        $ctx1.mark("Lorem © ipsum", {
+            "diacritics": false,
+            "complete": function () {
+                $ctx2.mark("justo √ duo", {
+                    "diacritics": false,
+                    "complete": function () {
+                        done();
+                    }
+                });
+            }
+        });
+    });
+    afterEach(function () {
+        $ctx1.add($ctx2).remove();
+    });
+
+    it("should wrap matches", function () {
+        expect($ctx1.find("span.mark")).toHaveLength(1);
+        expect($ctx2.find("span.mark")).toHaveLength(1);
+    });
+});
+
 describe("basic mark with custom element and class", function () {
     var $ctx;
     beforeEach(function (done) {
