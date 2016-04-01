@@ -95,6 +95,37 @@ describe("basic mark removal", function () {
     });
 });
 
+describe("basic mark removal with elements inside marked elements", function () {
+    var $ctx;
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("basic-manipulated-mark.html");
+
+        $ctx = $(".basic-manipulated-mark");
+        $ctx.mark("lorem ipsum", {
+            "diacritics": false,
+            "complete": function () {
+                $("<span />", {
+                    "html": "test",
+                    "id": "manipulatedMark"
+                }).appendTo($ctx.find("span.mark").first());
+                $ctx.removeMark({
+                    "complete": function () {
+                        done();
+                    }
+                });
+            }
+        });
+
+    });
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should not delete subsequently added elements", function () {
+        expect($ctx).toContainElement("#manipulatedMark");
+    });
+});
+
 describe("basic mark with array", function () {
     var $ctx;
     beforeEach(function (done) {
@@ -134,7 +165,7 @@ describe("basic mark with regex characters", function () {
         $ctx.remove();
     });
 
-    it("should wrap matches", function () {
+    it("should escape search terms and wrap matches", function () {
         expect($ctx.find("span.mark")).toHaveLength(4);
     });
     it("should not modify text node values", function () {

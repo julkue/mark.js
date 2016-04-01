@@ -1,5 +1,5 @@
 /*!***************************************************
- * jquery.mark v5.2.0
+ * jquery.mark v5.2.1
  * https://github.com/julmot/jquery.mark
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vaizN
@@ -523,7 +523,7 @@
         }
 
         /**
-         * Removes all marked elements inside the context with their text and
+         * Removes all marked elements inside the context with their HTML and
          * normalizes the parent at the end
          */
         remove() {
@@ -537,7 +537,7 @@
                 let $this = $(el);
                 if($this.is(sel)) {
                     let $parent = $this.parent();
-                    $this.replaceWith($this.text());
+                    $this.replaceWith($this.html());
                     // Normalize parent (merge splitted text nodes)
                     $parent[0].normalize();
                 }
