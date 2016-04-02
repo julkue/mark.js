@@ -159,11 +159,11 @@ Happy hacking!
 [bower-version]: https://github.com/julmot/jquery.mark
 [license]: https://raw.githubusercontent.com/julmot/jquery.mark/master/LICENSE
 
-[dependency-status-image]:https://img.shields.io/versioneye/d/javascript/julmot:jquery.mark.svg
-[build-status-image]: https://img.shields.io/travis/julmot/jquery.mark/master.svg
+[dependency-status-image]: https://img.shields.io/versioneye/d/javascript/julmot:jquery.mark.svg
+[build-status-image]: https://img.shields.io/travis/julmot/jquery.mark/master.svg?label=test
 [code-quality-image]:https://img.shields.io/codacy/27a3ed45370f41e89b02073b214c18a7.svg
-[bower-version-image]:https://img.shields.io/bower/v/jquery.mark.svg
-[license-image]:https://img.shields.io/badge/license-MIT-blue.svg
+[bower-version-image]: https://img.shields.io/bower/v/jquery.mark.svg
+[license-image]: https://img.shields.io/badge/license-MIT-blue.svg
 
 [nodejs]: https://nodejs.org/en/
 [bower]: http://bower.io/
