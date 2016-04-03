@@ -1,5 +1,5 @@
 /*!***************************************************
- * jquery.mark v5.2.1
+ * jquery.mark v5.2.2
  * https://github.com/julmot/jquery.mark
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vaizN
@@ -307,42 +307,47 @@
          * information how this function works
          */
         onIframeReady($i, successFn, errorFn) {
-            let bl = "about:blank",
-                compl = "complete";
             try {
-                let iCon = $i.first()[0].contentWindow;
-                if(iCon.document.readyState === compl) {
-                    if(iCon.location.href === bl && $i.attr("src") !== bl) {
-                        var call = 0,
-                            interval = setInterval(function () {
-                                try {
-                                    if((++call) > 400) { // 60sec
-                                        throw new Error("iframe inaccessable");
-                                    }
-                                    if(iCon.location.href !== bl) {
-                                        if(iCon.document.readyState === compl) {
-                                            clearInterval(interval);
-                                            successFn($i.contents());
-                                        }
-                                    }
-                                } catch(e) {
-                                    clearInterval(interval);
-                                    errorFn();
-                                }
-                            }, 150);
-                    } else {
-                        successFn($i.contents());
+                const iCon = $i.first()[0].contentWindow,
+                    bl = "about:blank",
+                    compl = "complete";
+                const callCallback = () => {
+                    try {
+                        const $con = $i.contents();
+                        if($con.length === 0) { // https://git.io/vV8yU
+                            throw new Error("iframe inaccessible");
+                        }
+                        successFn($con);
+                    } catch(e) { // accessing contents failed
+                        errorFn();
                     }
-                } else {
-                    $i.one("load", function () {
+                };
+                const observeOnload = () => {
+                    $i.on("load.jqueryMark", () => {
                         try {
-                            successFn($i.contents());
+                            const src = $i.attr("src").trim(),
+                                href = iCon.location.href;
+                            if(href !== bl || (src !== bl && src !== "")) {
+                                $i.off("load.jqueryMark");
+                                callCallback();
+                            }
                         } catch(e) {
                             errorFn();
                         }
                     });
+                };
+                if(iCon.document.readyState === compl) {
+                    const src = $i.attr("src").trim(),
+                        href = iCon.location.href;
+                    if(href === bl && src !== bl && src !== "") {
+                        observeOnload();
+                    } else {
+                        callCallback();
+                    }
+                } else {
+                    observeOnload();
                 }
-            } catch(e) {
+            } catch(e) { // accessing contentWindow failed
                 errorFn();
             }
         }
@@ -373,6 +378,7 @@
             this.onIframeReady($i, $con => {
                 let $stack = $con.find("*");
                 open = $stack.length;
+                if(open === 0) checkEnd();
                 $stack.each((i, el) => {
                     let $el = $(el);
                     if($el.is("iframe")) {
@@ -468,9 +474,9 @@
          * @param {RegExp} regex - The regular expression to be searched for
          */
         wrapMatches(node, regex) {
-            let hEl = this.opt.element === "*" ? "span" : this.opt.element;
-            let hCl = this.opt.className === "*" ? "mark" : this.opt.className;
-            let match;
+            let hEl = this.opt.element === "*" ? "span" : this.opt.element,
+                hCl = this.opt.className === "*" ? "mark" : this.opt.className,
+                match;
             while((match = regex.exec(node.textContent)) !== null) {
                 // Split the text node and
                 // replace match with mark element
