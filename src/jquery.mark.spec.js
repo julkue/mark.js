@@ -819,7 +819,7 @@ describe("mark with iframes where onload was not fired yet", function () {
         $elements = $();
         $ctx = $(".iframes-onload");
         errCall = 0;
-        $ctx.mark("lorem", {
+        $ctx.mark("test", {
             "diacritics": false,
             "iframes": true,
             "each": function ($m) {
@@ -843,7 +843,7 @@ describe("mark with iframes where onload was not fired yet", function () {
             }
         });
         expect(unequal).toBe(true);
-        expect($elements).toHaveLength(8);
+        expect($elements).toHaveLength(2);
         expect(errCall).toBe(0);
     });
 });
