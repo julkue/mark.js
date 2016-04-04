@@ -8,11 +8,7 @@
 // set correct fixture path
 jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
-describe("environment", function () {
-    it("should contain jquery", function () {
-        expect(typeof $).toBe("function");
-    });
-});
+console.info("jQuery version " + $.fn.jquery);
 
 describe("basic mark", function () {
     var $ctx, eachCalled, completeCalled, debugCalled;
@@ -78,7 +74,6 @@ describe("basic mark removal", function () {
                 });
             }
         });
-
     });
     afterEach(function () {
         $ctx.remove();
@@ -115,7 +110,6 @@ describe("basic mark removal with elements inside marked elements", function () 
                 });
             }
         });
-
     });
     afterEach(function () {
         $ctx.remove();
@@ -129,9 +123,9 @@ describe("basic mark removal with elements inside marked elements", function () 
 describe("basic mark with array", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic.html");
+        jasmine.getFixtures().appendLoad("basic-array.html");
 
-        $ctx = $(".basic");
+        $ctx = $(".basic-array");
         $ctx.mark(["lorem", "ipsum"], {
             "diacritics": false,
             "complete": function () {
@@ -153,7 +147,7 @@ describe("basic mark with regex characters", function () {
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic-escape.html");
 
-        $ctx = $(".basic-escape > table");
+        $ctx = $(".basic-escape");
         $ctx.mark(["39,00 €", "0.009 €", "Unk?nown", "Some+>thing"], {
             "diacritics": false,
             "complete": function () {
@@ -196,12 +190,12 @@ describe("basic mark in a context with script-tags and style-tags", function () 
     it("should wrap matches", function () {
         expect($ctx.find("span.mark")).toHaveLength(4);
     });
-    it("should not wrap anything inside script-tags or style-tags", function () {
+    it("should not wrap anything inside these tags", function () {
         expect($ctx.find("style, script")).not.toContainElement("span.mark");
     });
 });
 
-describe("basic mark directly inside context", function () {
+describe("basic mark directly inside the context", function () {
     var $ctx;
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic-only-context.html");
@@ -223,7 +217,7 @@ describe("basic mark directly inside context", function () {
     });
 });
 
-describe("basic mark with empty context", function () {
+describe("basic mark in an empty context", function () {
     var $ctx1, $ctx2, complete1 = false,
         complete2 = false;
     beforeEach(function (done) {
@@ -287,9 +281,9 @@ describe("basic mark with HTML entities", function () {
 describe("basic mark with custom element and class", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic.html");
+        jasmine.getFixtures().appendLoad("basic-custom-element-class.html");
 
-        $ctx = $(".basic");
+        $ctx = $(".basic-custom-element-class");
         $ctx.mark(["lorem", "ipsum"], {
             "diacritics": false,
             "element": "i",
@@ -311,7 +305,7 @@ describe("basic mark with custom element and class", function () {
 describe("basic mark removal with custom element and class", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic.html");
+        jasmine.getFixtures().appendLoad("basic-custom-element-class.html");
 
         $ctx = $(".basic");
         $ctx.mark(["lorem", "ipsum"], {
@@ -571,7 +565,6 @@ describe("nested mark removal", function () {
                 });
             }
         });
-
     });
     afterEach(function () {
         $ctx.remove();
@@ -591,106 +584,56 @@ describe("nested mark removal", function () {
 });
 
 describe("mark with iframes", function () {
-    var $ctx1, $ctx2, $ctx3, $ctx4;
-    var $elements1, $elements2, $elements3, $elements4;
-    var errCall = 0;
+    var $ctx, $elements, errCall;
     window.onError = function () {
         errCall++;
     };
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("iframes.html");
 
-        $elements1 = $(), $elements2 = $(), $elements3 = $(), $elements4 = $();
+        $elements = $();
+        $ctx = $(".iframes");
         errCall = 0;
-        $ctx1 = $(".iframes > .context1");
-        $ctx2 = $(".iframes > .context2");
-        $ctx3 = $(".iframes > .context3");
-        $ctx4 = $(".iframes > .context4");
-        $ctx1.mark("lorem", {
+        $ctx.mark("lorem", {
             "diacritics": false,
-            "iframes": false,
-            "each": function ($el) {
-                $elements1 = $elements1.add($el);
+            "iframes": true,
+            "each": function ($m) {
+                $elements = $elements.add($m);
             },
             "complete": function () {
-                $ctx2.mark("lorem", {
-                    "diacritics": false,
-                    "iframes": true,
-                    "each": function ($el) {
-                        $elements2 = $elements2.add($el);
-                    },
-                    "complete": function () {
-                        $ctx3.mark("lorem", {
-                            "diacritics": false,
-                            "iframes": true,
-                            "each": function ($el) {
-                                $elements3 = $elements3.add($el);
-                            },
-                            "complete": function () {
-                                $ctx4.mark("lorem", {
-                                    "diacritics": false,
-                                    "iframes": true,
-                                    "each": function ($el) {
-                                        $elements4 =
-                                            $elements4.add(
-                                                $el);
-                                    },
-                                    "complete": function () {
-                                        done();
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+                done();
             }
         });
-    });
+    }, 30000); // 30 sec timeout
     afterEach(function () {
-        $ctx1.add($ctx2).add($ctx3).add($ctx4).remove();
+        $ctx.remove();
     });
 
-    it("should ignore matches inside iframes if specified", function () {
-        expect($elements1).toHaveLength(4);
+    it("should wrap matches inside iframes", function () {
         var unequal = false;
-        $elements1.each(function () {
-            if($(this).prop("ownerDocument") != $ctx1.prop("ownerDocument")) {
-                unequal = true;
-                return;
-            }
-        });
-        expect(unequal).toBe(false);
-        expect(errCall).toBe(0);
-    });
-    it("should wrap matches inside iframes if specified", function () {
-        expect($elements2).toHaveLength(8);
-        var unequal = false;
-        $elements2.each(function () {
-            if($(this).prop("ownerDocument") != $ctx2.prop("ownerDocument")) {
+        $elements.each(function () {
+            if($(this).prop("ownerDocument") != $ctx.prop("ownerDocument")) {
                 unequal = true;
                 return;
             }
         });
         expect(unequal).toBe(true);
-        expect(errCall).toBe(0);
-    });
-    it("should silently skip iframes which can not be accessed", function () {
-        expect($elements3).toHaveLength(4);
-        expect(errCall).toBe(0);
-    });
-    it("should wrap matches inside iframes recursively", function () {
-        expect($elements4).toHaveLength(12);
+        expect($elements).toHaveLength(8);
         expect(errCall).toBe(0);
     });
 });
 
 describe("mark removal with iframes", function () {
-    var $ctx, $elements;
+    var $ctx, $elements, errCall;
+    window.onError = function () {
+        errCall++;
+    };
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("iframes.html");
 
-        $ctx = $(".iframes > .context4");
+        $ctx = $(".iframes");
         $elements = $();
+        errCall = 0;
         $ctx.mark("lorem", {
             "diacritics": false,
             "iframes": true,
@@ -699,27 +642,258 @@ describe("mark removal with iframes", function () {
             },
             "complete": function () {
                 $ctx.removeMark({
+                    "iframes": true,
                     "complete": function () {
-                        $ctx.removeMark({
-                            "iframes": true,
-                            "complete": function () {
-                                done();
-                            }
-                        });
+                        done();
                     }
                 });
             }
         });
-
     });
     afterEach(function () {
         $ctx.remove();
     });
 
-    it("should remove all marked elements recursively", function () {
+    it("should remove all marked elements inside iframes", function () {
         $elements.each(function () {
             expect(this).not.toBeInDOM();
         });
+        expect(errCall).toBe(0);
+    });
+});
+
+describe("mark with disabled iframes", function () {
+    var $ctx, $elements, errCall;
+    window.onError = function () {
+        errCall++;
+    };
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("iframes-disabled.html");
+
+        $elements = $();
+        $ctx = $(".iframes-disabled");
+        errCall = 0;
+        $ctx.mark("lorem", {
+            "diacritics": false,
+            "iframes": false,
+            "each": function ($m) {
+                $elements = $elements.add($m);
+            },
+            "complete": function () {
+                done();
+            }
+        });
+    }, 30000); // 30 sec timeout
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should ignore matches inside iframes if specified", function () {
+        var unequal = false;
+        $elements.each(function () {
+            if($(this).prop("ownerDocument") != $ctx.prop("ownerDocument")) {
+                unequal = true;
+                return;
+            }
+        });
+        expect(unequal).toBe(false);
+        expect($elements).toHaveLength(4);
+        expect(errCall).toBe(0);
+    });
+});
+
+describe("mark in inaccessible iframes", function () {
+    var $ctx, $elements, errCall;
+    window.onError = function () {
+        errCall++;
+    };
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("iframes-inaccessible.html");
+
+        $elements = $();
+        $ctx = $(".iframes-inaccessible");
+        errCall = 0;
+        $ctx.mark("lorem", {
+            "diacritics": false,
+            "iframes": true,
+            "each": function ($m) {
+                $elements = $elements.add($m);
+            },
+            "complete": function () {
+                done();
+            }
+        });
+    }, 30000); // 30 sec timeout
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should silently skip iframes which can not be accessed", function () {
+        expect($elements).toHaveLength(4);
+        expect(errCall).toBe(0);
+    });
+});
+
+describe("mark in nested iframes", function () {
+    var $ctx, $elements, errCall;
+    window.onError = function () {
+        errCall++;
+    };
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("iframes-nested.html");
+
+        $elements = $();
+        $ctx = $(".iframes-nested");
+        errCall = 0;
+        $ctx.mark("lorem", {
+            "diacritics": false,
+            "iframes": true,
+            "each": function ($m) {
+                $elements = $elements.add($m);
+            },
+            "complete": function () {
+                done();
+            }
+        });
+    }, 30000); // 30 sec timeout
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should wrap matches inside iframes recursively", function () {
+        expect($elements).toHaveLength(12);
+        expect(errCall).toBe(0);
+    });
+});
+
+describe("mark removal with nested iframes", function () {
+    var $ctx, $elements, errCall;
+    window.onError = function () {
+        errCall++;
+    };
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("iframes-nested.html");
+
+        $ctx = $(".iframes-nested");
+        $elements = $();
+        errCall = 0;
+        $ctx.mark("lorem", {
+            "diacritics": false,
+            "iframes": true,
+            "each": function ($el) {
+                $elements = $elements.add($el);
+            },
+            "complete": function () {
+                $ctx.removeMark({
+                    "iframes": true,
+                    "complete": function () {
+                        done();
+                    }
+                });
+            }
+        });
+    });
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should remove all marked elements inside iframes recursively", function () {
+        $elements.each(function () {
+            expect(this).not.toBeInDOM();
+        });
+        expect(errCall).toBe(0);
+    });
+});
+
+describe("mark with iframes where onload was not fired yet", function () {
+    // Note that in Chrome the onload event will already be fired. Reason
+    // is that Chrome initializes every iframe with an empty page, which will
+    // fire the onload event too respectively set readyState complete
+    var $ctx, $elements, errCall;
+    window.onError = function () {
+        errCall++;
+    };
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("iframes-onload.html");
+
+        $elements = $();
+        $ctx = $(".iframes-onload");
+        errCall = 0;
+        $ctx.mark("test", {
+            "diacritics": false,
+            "iframes": true,
+            "each": function ($m) {
+                $elements = $elements.add($m);
+            },
+            "complete": function () {
+                done();
+            }
+        });
+    }, 30000); // 30 sec timeout
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should wrap matches inside iframes", function () {
+        var unequal = false;
+        $elements.each(function () {
+            if($(this).prop("ownerDocument") != $ctx.prop("ownerDocument")) {
+                unequal = true;
+                return;
+            }
+        });
+        expect(unequal).toBe(true);
+        expect($elements).toHaveLength(2);
+        expect(errCall).toBe(0);
+    });
+});
+
+describe("mark with iframes where onload was already fired", function () {
+    var $ctx, $elements, errCall;
+    window.onError = function () {
+        errCall++;
+    };
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("iframes-readystate.html");
+
+        $elements = $();
+        $ctx = $(".iframes-readystate");
+        errCall = 0;
+        var int = setInterval(function () {
+            var iCon = $ctx.find("iframe").first()[0].contentWindow;
+            var readyState = iCon.document.readyState;
+            var href = iCon.location.href;
+            // about:blank check is necessary for Chrome (see Mark~onIframeReady)
+            if(readyState === "complete" && href !== "about:blank") {
+                clearInterval(int);
+                $ctx.mark("lorem", {
+                    "diacritics": false,
+                    "iframes": true,
+                    "each": function ($m) {
+                        $elements = $elements.add($m);
+                    },
+                    "complete": function () {
+                        done();
+                    }
+                });
+            }
+        }, 100);
+    }, 30000); // 30 sec timeout
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should wrap matches inside iframes", function () {
+        var unequal = false;
+        $elements.each(function () {
+            if($(this).prop("ownerDocument") != $ctx.prop("ownerDocument")) {
+                unequal = true;
+                return;
+            }
+        });
+        expect(unequal).toBe(true);
+        expect($elements).toHaveLength(8);
+        expect(errCall).toBe(0);
     });
 });
 

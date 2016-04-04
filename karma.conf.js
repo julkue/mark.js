@@ -32,6 +32,7 @@ module.exports = function (config) {
         ],
         browsers: ["PhantomJS"],
         captureTimeout: 30000,
+        browserNoActivityTimeout: 60000, // 60 sec
         singleRun: true,
         preprocessors: {
             "build/jquery.mark.js": ["coverage"]
@@ -39,11 +40,10 @@ module.exports = function (config) {
         coverageReporter: {
             dir: "build/coverage/",
             reporters: [{
-                type: 'html',
-                subdir: 'report-html'
+                type: "html"
             }, {
-                type: 'text'
-            }, ]
+                type: "text"
+            }]
         }
     });
 };

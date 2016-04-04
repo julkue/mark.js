@@ -110,13 +110,12 @@ module.exports = function (grunt) {
     grunt.registerTask("dev", ["karma:dev:start", "watch"]);
     grunt.registerTask("test", function () {
         grunt.log.subhead(
-            "See the table below for test coverage or view " +
-            "'build/coverage/report-html/'"
+            "See the table below for test coverage or view 'build/coverage/'"
         );
         // local test against an uncompressed ES5 variant as ES6 is not
         // supported in PhantomJS and the normal ES5 variant is already
         // compressed (bad to determine coverage issues)
-        grunt.task.run(["babel:build", "karma:build"]);
+        grunt.task.run(["babel:build"]);
         // continuous integration cross browser test
         if(process.env.CI) {
             if(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
@@ -127,6 +126,8 @@ module.exports = function (grunt) {
                     "environment variables are set."
                 );
             }
+        } else {
+            grunt.task.run(["karma:build"]);
         }
         grunt.task.run(["clean:build"]);
     });
