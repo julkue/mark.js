@@ -303,8 +303,8 @@
          * @param  {Mark~onIframeReadySuccessCallback} successFn - Success
          * callback
          * @param {Mark~onIframeReadyErrorCallback} errorFn - Error callback
-         * @see {@link http://stackoverflow.com/a/36155560/3894981} for further
-         * information how this function works
+         * @see {@link http://stackoverflow.com/a/36155560/3894981} for
+         * background information
          */
         onIframeReady($i, successFn, errorFn) {
             try {
@@ -327,7 +327,7 @@
                         try {
                             const src = $i.attr("src").trim(),
                                 href = iCon.location.href;
-                            if(href !== bl || (src !== bl && src !== "")) {
+                            if(href !== bl || src === bl || src === "") {
                                 $i.off("load.jqueryMark");
                                 callCallback();
                             }
