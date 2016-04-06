@@ -268,16 +268,21 @@
         }
 
         /**
-         * Checks if an element matches any of the specified filters or script,
-         * style and title
+         * Checks if an element matches any of the specified filters. Also it
+         * checks for script, style, title and already marked elements
          * @param  {jquery} $el - The element to check
+         * @param {boolean} exclM - If already marked elements should be
+         * excluded
          * @return {boolean}
          */
-        matchesFilter($el) {
+        matchesFilter($el, exclM) {
             let remain = true;
             let fltr = this.opt.filter.concat(["script", "style", "title"]);
             if(!this.opt.iframes) {
                 fltr = fltr.concat(["iframe"]);
+            }
+            if(exclM) {
+                fltr = fltr.concat(["*[data-jquery-mark='true']"]);
             }
             fltr.every(filter => {
                 if($el.is(filter)) {
@@ -414,8 +419,10 @@
          * within the instance context (filtered)
          * @param  {Mark~forEachElementCallback} cb - The callback
          * @param {Mark~forEachElementEndCallback} [end] - End callback
+         * @param {boolean} [exclM=true] - If already marked elements should be
+         * excluded
          */
-        forEachElement(cb, end = function () {}) {
+        forEachElement(cb, end = function () {}, exclM = true) {
             let {
                 elements: $stack,
                 length: open
@@ -426,10 +433,10 @@
             if(open === 0) end(); // no context elements
             $stack.each((i, el) => {
                 let $el = $(el);
-                if(!this.matchesFilter($el)) {
+                if(!this.matchesFilter($el, exclM)) {
                     if($el.is("iframe")) {
                         this.forEachElementInIframe($el, ($iel) => {
-                            if(!this.matchesFilter($iel)) {
+                            if(!this.matchesFilter($iel, exclM)) {
                                 cb($iel);
                             }
                         }, checkEnd);
@@ -547,7 +554,7 @@
                     // Normalize parent (merge splitted text nodes)
                     $parent[0].normalize();
                 }
-            }, this.opt.complete);
+            }, this.opt.complete, false);
         }
     }
 

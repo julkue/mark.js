@@ -217,6 +217,28 @@ describe("basic mark directly inside the context", function () {
     });
 });
 
+describe("basic mark with multiple same keywords", function () {
+    var $ctx;
+    beforeEach(function (done) {
+        jasmine.getFixtures().appendLoad("basic-same-keywords.html");
+
+        $ctx = $(".basic-same-keywords");
+        $ctx.mark(["test", "test"], {
+            "diacritics": false,
+            "complete": function () {
+                done();
+            }
+        });
+    });
+    afterEach(function () {
+        $ctx.remove();
+    });
+
+    it("should wrap only the first occurrence", function () {
+        expect($ctx.find("span.mark")).toHaveLength(1);
+    });
+});
+
 describe("basic mark in an empty context", function () {
     var $ctx1, $ctx2, complete1 = false,
         complete2 = false;
