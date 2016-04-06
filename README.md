@@ -147,7 +147,9 @@ See [the contribution guidelines][contribution-guidelines].
 
 ## 6. Changelog
 
-Changes are documented in [release descriptions][releases].
+Changes are documented in [release descriptions][releases]. You want to be
+notified about new releases? Click the "Subscribe to releases" button on
+[libraries.io][librariesio-subscribe].
 
 ---
 
@@ -173,6 +175,7 @@ Happy hacking!
 [contribution-guidelines]: https://github.com/julmot/jquery.mark/blob/master/CONTRIBUTING.md
 [minified]: https://github.com/julmot/jquery.mark/blob/master/dist/jquery.mark.min.js
 [releases]: https://github.com/julmot/jquery.mark/releases
+[librariesio-subscribe]: https://libraries.io/bower/jquery.mark/
 
 [jsfiddle-default]: https://jsfiddle.net/julmot/vpav6tL1/ "Default mark example"
 [jsfiddle-regex]: https://jsfiddle.net/julmot/ova17daa/ "Mark example with regular expression"
