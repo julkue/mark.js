@@ -1,5 +1,5 @@
 /*!***************************************************
- * jquery.mark v5.2.2
+ * jquery.mark v5.2.3
  * https://github.com/julmot/jquery.mark
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vaizN
