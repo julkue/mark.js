@@ -2,46 +2,38 @@
 <html>
 <!--
 /*!***************************************************
- * jquery.mark
- * https://github.com/julmot/jquery.mark
+ * mark.js
+ * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
- * Released under the MIT license https://git.io/vaizN
+ * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 -->
 <head>
     <meta charset="utf-8">
-    <title>jquery.mark manual test (dev purposes)</title>
+    <title>mark.js manual test (dev purposes)</title>
     <style>
-        .mark {
+        span {
             background: yellow;
         }
     </style>
 </head>
 <body>
-    <div>
-        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
-        invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero
-        eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
-        no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor
-        sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt
-        ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et
-        accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea
-        takimata sanctus est Lorem ipsum dolor sit amet.
+    <div id="context">
+        <p>
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+            invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+            At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+            gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem
+            ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
+            tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+            At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+            gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </p>
     </div>
-    <script src="../vendor/jquery/dist/jquery.min.js"></script>
-    <script src="../src/jquery.mark.js"></script>
+    <script src="../dist/mark.js"></script>
     <script>
-        $(function() {
-            $("div").mark("lorem", {
-                "debug": true,
-                "each": function($element) {
-                    console.log($element, "each called");
-                },
-                "complete": function() {
-                    console.log("complete called");
-                }
-            });
-        });
+        var instance = new Mark(document.getElementById("context"));
+        instance.mark("lorem");
     </script>
 </body>
 </html>

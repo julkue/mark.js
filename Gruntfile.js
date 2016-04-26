@@ -1,58 +1,74 @@
 /*!***************************************************
- * jquery.mark
- * https://github.com/julmot/jquery.mark
+ * mark.js
+ * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
- * Released under the MIT license https://git.io/vaizN
+ * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
-module.exports = function (grunt) {
+"use strict";
+module.exports = grunt => {
+
     // load grunt tasks
     require("jit-grunt")(grunt, {
         usebanner: "grunt-banner"
     });
 
     // read copyright header
-    var fc = grunt.file.read("src/jquery.mark.js");
-    var regex = /\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//gmi;
-    var banner = fc.match(regex)[0];
+    let fc = grunt.file.read("src/mark.js");
+    let regex = /\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//gmi;
+    const banner = fc.match(regex)[0];
+    grunt.log.writeln(banner["yellow"]);
 
-    // configuration
+    // grunt configuration
     grunt.initConfig({
         babel: {
             options: {
-                presets: ["es2015"],
-                plugins: ["transform-object-assign"],
-                compact: true,
+                compact: false,
                 comments: false
             },
             es5: {
-                files: {
-                    "dist/jquery.mark.min.js": "src/jquery.mark.js"
-                }
+                options: {
+                    presets: ["es2015"],
+                    plugins: ["transform-object-assign"]
+                },
+                files: [{
+                    "expand": true,
+                    "cwd": "build/",
+                    "src": ["*.js"],
+                    "dest": "dist/"
+                }]
             },
             es6: {
-                options: {
-                    presets: [],
-                    plugins: []
-                },
-                files: {
-                    "dist/jquery.mark.es6.min.js": "src/jquery.mark.js"
-                }
+                files: [{
+                    "expand": true,
+                    "cwd": "build/",
+                    "src": ["*.js"],
+                    "dest": "dist/",
+                    "ext": ".es6.js",
+                    "extDot": "last"
+                }]
             },
-            build: {
+            // as uglify can not compress es6, use the babel workaround
+            es6min: {
                 options: {
-                    compact: false
+                    compact: true
                 },
-                files: {
-                    "build/jquery.mark.js": "src/jquery.mark.js"
-                }
+                files: [{
+                    "expand": true,
+                    "cwd": "dist/",
+                    "src": ["*.es6.js"],
+                    "dest": "dist/",
+                    "ext": ".min.js",
+                    "extDot": "last"
+                }]
             }
         },
         clean: {
-            build: ["build/jquery.mark.js"]
+            build: ["build/*.js"],
+            dist: ["dist/*.js"]
         },
         jsdoc: {
             dist: {
-                src: ["src/jquery.mark.js", "README.md"],
+                src: ["src/mark.js", "README.md"],
                 options: {
                     destination: "build/doc"
                 }
@@ -79,9 +95,14 @@ module.exports = function (grunt) {
                     compress: true,
                     reserveComments: false
                 },
-                files: {
-                    "dist/jquery.mark.min.js": "dist/jquery.mark.min.js"
-                }
+                files: [{
+                    "expand": true,
+                    "cwd": "dist/",
+                    "src": ["*.js", "!*.es6.js", "!*.es6.min.js"],
+                    "dest": "dist/",
+                    "ext": ".min.js",
+                    "extDot": "last"
+                }]
             }
         },
         usebanner: {
@@ -92,30 +113,54 @@ module.exports = function (grunt) {
                     linebreak: true
                 },
                 files: {
-                    // don"t include subfolders
-                    src: ["dist/*.js", "!dist/*/*.js"]
+                    src: ["dist/*.js"]
                 }
             }
         },
         watch: {
             dist: {
-                files: ["src/*", "test/*"],
-                tasks: ["babel:build", "karma:dev:run", "clean:build"]
+                files: ["src/**", "test/**", "build/templates/**"],
+                tasks: ["compile", "karma:dev:run"]
             }
         }
     });
 
-    // register tasks
-    grunt.log.writeln(banner["yellow"]);
+    /**
+     * Compile build templates and generate all of them in ES5, ES6, with
+     * minification and without into ./dist
+     */
+    grunt.registerTask("compile", () => {
+        grunt.template.addDelimiters("jsBuildDelimiters", "//<%", "%>");
+        grunt.file.expand("build/templates/*.js").forEach(file => {
+            const filename = file.replace(/^.*[\\\/]/, "");
+            const tpl = grunt.file.read(file);
+            const module = grunt.file.read("src/mark.js");
+            const compiled = grunt.template.process(tpl, {
+                "delimiters": "jsBuildDelimiters",
+                "data": {
+                    "module": module
+                }
+            });
+            grunt.file.write(`build/${filename}`, compiled);
+        });
+        grunt.task.run([
+            "clean:dist", "babel", "uglify", "usebanner", "clean:build"
+        ]);
+    });
+
+    /**
+     * Run tests on file changes
+     */
     grunt.registerTask("dev", ["karma:dev:start", "watch"]);
+
+    /**
+     * Run tests
+     */
     grunt.registerTask("test", function () {
         grunt.log.subhead(
             "See the table below for test coverage or view 'build/coverage/'"
         );
-        // local test against an uncompressed ES5 variant as ES6 is not
-        // supported in PhantomJS and the normal ES5 variant is already
-        // compressed (bad to determine coverage issues)
-        grunt.task.run(["babel:build"]);
+        grunt.task.run(["compile"]);
         // continuous integration cross browser test
         if(process.env.CI) {
             if(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
@@ -129,13 +174,10 @@ module.exports = function (grunt) {
         } else {
             grunt.task.run(["karma:build"]);
         }
-        grunt.task.run(["clean:build"]);
     });
-    grunt.registerTask("minify", [
-        "babel:es5",
-        "babel:es6",
-        "uglify",
-        "usebanner"
-    ]);
-    grunt.registerTask("dist", ["test", "minify", "jsdoc"]);
+
+    /**
+     * Run tests, generate dist files and JSDOC documentation
+     */
+    grunt.registerTask("dist", ["test", "jsdoc"]);
 };

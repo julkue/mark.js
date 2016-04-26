@@ -13,5 +13,7 @@ vendor/
 # Personal
 TODO
 
-# Build
-build/
+# Build (do not ignore templates)
+build/*.js
+build/doc/
+build/coverage/

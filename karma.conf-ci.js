@@ -1,10 +1,11 @@
 /*!***************************************************
- * jquery.mark
- * https://github.com/julmot/jquery.mark
+ * mark.js
+ * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
- * Released under the MIT license https://git.io/vaizN
+ * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
-module.exports = function (config) {
+"use strict";
+module.exports = config => {
     // Define Sauce Labs browsers
     var customLaunchers = {
         "SL_Win_Chrome_30": {
@@ -121,8 +122,18 @@ module.exports = function (config) {
         frameworks: ["jasmine-jquery", "jasmine"],
         files: [
             "vendor/jquery/dist/jquery.min.js",
-            "build/jquery.mark.js",
-            "src/*.spec.js", {
+            "dist/!(*.es6|*.min).js",
+            "test/specs/basic.js",
+            "test/specs/basic-unmark.js",
+            "test/specs/basic-array.js",
+            "test/specs/basic-nodelist.js",
+            "test/specs/basic-array-keyword.js",
+            "test/specs/basic-!(accuracy)*.js",
+            // depends on diacritics, separateWordSearch
+            "test/specs/basic-accuracy*.js",
+            "test/specs/iframes.js",
+            "test/specs/iframes-unmark.js",
+            "test/specs/*.js", {
                 pattern: "test/fixtures/*.html",
                 included: false,
                 served: true
@@ -133,6 +144,7 @@ module.exports = function (config) {
         colors: true,
         logLevel: config.LOG_INFO,
         autoWatch: false,
+        failOnEmptyTestSuite: false,
         plugins: [
             "karma-jasmine",
             "karma-jasmine-jquery",
@@ -142,7 +154,7 @@ module.exports = function (config) {
             "karma-coverage"
         ],
         sauceLabs: {
-            testName: "jquery.mark Unit Tests"
+            testName: "mark.js unit tests"
         },
         customLaunchers: customLaunchers,
         browsers: Object.keys(customLaunchers),
@@ -154,7 +166,7 @@ module.exports = function (config) {
         browserDisconnectTolerance: 15,
         singleRun: true,
         preprocessors: {
-            "build/jquery.mark.js": ["coverage"]
+            "dist/mark.js": ["coverage"]
         },
         coverageReporter: {
             dir: "build/coverage/",
