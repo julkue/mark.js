@@ -2,10 +2,10 @@ Describe your issue here.
 
 ### Steps to reproduce
 
-Describe how to reproduce the issue. Provide a [fiddle](https://jsfiddle.net) if possible. You can also fork an [existing fiddle](https://github.com/julmot/jquery.mark#4-usage-examples).
+Describe how to reproduce the issue. Provide a [fiddle](https://jsfiddle.net) if possible.  
 __Note: Please do not provide a full website as example!__
 
 ### Environment
 
 - Browser name and version
-- jquery.mark version
+- mark.js version

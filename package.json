@@ -1,9 +1,11 @@
 {
-  "name": "jquery.mark",
-  "version": "5.2.3",
+  "name": "mark.js",
+  "version": "6.0.0",
   "keywords": [
-    "jquery.mark",
+    "mark.js",
+    "markjs",
     "mark",
+    "jquery.mark",
     "jmHighlight",
     "highlight",
     "search",
@@ -13,16 +15,19 @@
     "keyword"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/julmot/jquery.mark",
+  "homepage": "https://markjs.io/",
   "author": {
     "name": "Julian Motz",
     "url": "https://github.com/julmot"
   },
-  "description": "jQuery keyword highlighting. Highlight text with JavaScript. Can e.g. be used to mark text in search results.",
-  "main": "dist/jquery.mark.min.js",
-  "repository": "julmot/jquery.mark",
+  "description": "Highlight keywords using JavaScript. Intended for every use case. Can e.g. be used to mark text in search results.",
+  "main": "dist/mark.min.js",
+  "repository": "julmot/mark.js",
   "bugs": {
-    "url": "https://github.com/julmot/jquery.mark/issues"
+    "url": "https://github.com/julmot/mark.js/issues"
+  },
+  "scripts": {
+    "test": "echo \"Error: Use Grunt tasks\" && exit 1"
   },
   "devDependencies": {
     "babel-plugin-transform-object-assign": "^6.5.0",
@@ -33,17 +38,17 @@
     "grunt-contrib-clean": "^1.0.0",
     "grunt-contrib-uglify": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
-    "grunt-jsdoc": "^1.1.0",
-    "grunt-karma": "^0.12.1",
+    "grunt-jsdoc": "^2.0.0",
+    "grunt-karma": "^1.0.0",
     "jasmine-core": "^2.4.1",
     "jit-grunt": "^0.10.0",
     "karma": "^0.13.22",
-    "karma-coverage": "^0.5.5",
-    "karma-jasmine": "^0.3.6",
+    "karma-coverage": "^1.0.0",
+    "karma-jasmine": "^1.0.2",
     "karma-jasmine-jquery": "^0.1.1",
     "karma-phantomjs-launcher": "^1.0.0",
-    "karma-sauce-launcher": "^0.3.0",
-    "karma-spec-reporter": "^0.0.25",
+    "karma-sauce-launcher": "^1.0.0",
+    "karma-spec-reporter": "^0.0.26",
     "phantomjs-prebuilt": "^2.1.5"
   },
   "private": true
