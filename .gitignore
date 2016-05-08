@@ -1,0 +1,10 @@
+vendor/
+dist/
+build/
+node_modules/
+.sass-cache/
+.work-files/
+TODO
+_sprites.scss
+sprites*.png
+*.html

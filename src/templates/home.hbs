@@ -1,0 +1,36 @@
+{{!--
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+--}}
+
+{{> header}}
+
+<div class="jumbotron">
+    <div class="container">
+        <h1>
+            <span class="logo-overlay"></span>
+            <span class="logo">{{{defaults.title}}}</span>
+            {{{defaults.slogan}}}
+        </h1>
+        <h2>{{{defaults.description}}}</h2>
+        <div class="github-buttons">
+            {{> gh-star}}
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <nav class="hidden-xs col-sm-4 col-md-3">
+            {{> navigation}}
+        </nav>
+        <main class="col-xs-12 col-sm-8 col-md-9">
+            {{> articles}}
+            {{{contents}}}
+        </main>
+    </div>
+</div>
+
+{{> footer}}

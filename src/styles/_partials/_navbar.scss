@@ -1,0 +1,96 @@
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+
+/**
+ * Navbar logo
+ */
+.navbar {
+    .navbar-collapse {
+        @media (min-width: #{$breakpointSM}) {
+            padding: 10px 0;
+        }
+    }
+    .navbar-header {
+        padding: 10px 0;
+
+        .navbar-brand {
+            height: #{$navbarHeight - 20};
+            /* 20px padding */
+            width: 200px;
+            padding: 0;
+            margin-left: 0;
+            @media (max-width: #{$breakpointSM - 1}) {
+                margin-left: 15px;
+            }
+
+            .logo {
+                height: 100%;
+                width: 100%;
+            }
+        }
+    }
+}
+/**
+ * Navbar fixed
+ */
+.navbar {
+    margin-bottom: 0;
+    background: $navbarBg;
+    border-bottom: 1px solid $navbarBorder;
+    height: $navbarHeight;
+
+    .container {
+        overflow: hidden;
+        /* fixes strange 1px transparent header line in Chrome */
+    }
+
+    .navbar-header {
+        .navbar-toggle {
+            background: $navbarToggleBg;
+            @include border-radius(0);
+
+            .icon-bar {
+                background: $navbarToggleIconBg;
+            }
+        }
+    }
+    @media (min-width: #{$breakpointSM}) {
+        .navbar-collapse {
+            ul.navbar-nav {
+                li a {
+                    &:active,
+                    .no-touch &:hover {
+                        background: $navbarCollapseItemBg;
+                        color: $navbarCollapseItemColor;
+                    }
+                }
+            }
+        }
+    }
+    @media (max-width: #{$breakpointSM - 1}) {
+        .navbar-collapse {
+            background: $navbarCollapseBg;
+            color: $navbarCollapseColor;
+
+            ul.navbar-nav {
+                background: $navbarCollapseBg;
+                color: $navbarCollapseColor;
+
+                li {
+                    a {
+                        background: $navbarCollapseItemBg;
+                        color: $navbarCollapseItemColor;
+                        &:active,
+                        .no-touch &:hover {
+                            background: $navbarCollapseItemActiveBg;
+                            color: $navbarCollapseItemActiveColor;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

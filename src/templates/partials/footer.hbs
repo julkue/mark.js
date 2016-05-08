@@ -1,0 +1,40 @@
+{{!--
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+--}}
+
+        <footer>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="col-inner">
+                            <p>
+                                &copy;
+                                <script>
+                                    var startYear = 2016;
+                                    var year = new Date().getFullYear();
+                                    document.write(year > startYear ? startYear + "–" + year: year);
+                                </script>,
+                                <a href="{{{pkg.contributors.0.url}}}" target="_blank">{{{pkg.contributors.0.name}}}</a>.
+                                All rights reserved. <br> The plugin {{{defaults.title}}} itself is licensed under
+                                <a href="{{{defaults.license}}}" target="_blank">the {{{defaults.licenseName}}}</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="col-inner">
+                            <div class="github-buttons">
+                                {{> gh-star}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+    <script src="vendor/requirejs/require.js" data-main="src/app/main" async></script>
+</body>
+</html>

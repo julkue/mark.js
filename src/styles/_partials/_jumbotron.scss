@@ -1,0 +1,47 @@
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+
+.jumbotron {
+    text-align: center;
+    margin-bottom: 0;
+
+    h1 {
+        position: relative;
+        margin-top: 0;
+
+        /**
+          * Jumbotron logo
+          */
+        .logo,
+        .logo-overlay {
+            width: 420px;
+            height: 148px;
+            max-width: 100%;
+            display: block;
+            margin: 0 auto 48px;
+            background-position: center center;
+            @include transition(.5s all ease-in-out);
+            @media (max-width: #{$breakpointSM}) {
+                /* jumbotron padding top */
+                margin-bottom: 30px;
+            }
+            @media (max-width: #{$breakpointXS - 1}) {
+                height: 100px;
+            }
+        }
+        .logo-overlay {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translateX(-50%);
+            background-size: 100% 100%;
+            background-image: url("data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==");
+        }
+    }
+    h2 {
+        margin-bottom: 20px;
+    }
+}

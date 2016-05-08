@@ -1,0 +1,22 @@
+{
+  "name": "mark.js-website",
+  "version": "1.0.0",
+  "description": "Website of mark.js",
+  "license": "LicenseRef-LICENSE",
+  "keywords": [
+    "mark.js",
+    "markjs"
+  ],
+  "authors": [
+    "Julian Motz"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "requirejs": "~2.1",
+    "jquery": ">1.10",
+    "bootswatch-dist": "united",
+    "highlightjs": "^9.2.0",
+    "mark.js": "latest",
+    "fastclick": "^1.0.6"
+  }
+}

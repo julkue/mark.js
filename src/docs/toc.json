@@ -1,0 +1,42 @@
+{
+    "introduction": {
+        "pattern": "introduction/*.md",
+        "refer": false,
+        "metadata": {
+            "name": "Getting to Know mark.js",
+            "noHeadings": true
+        }
+    },
+    "examples": {
+        "pattern": "examples/*.md",
+        "refer": false,
+        "metadata": {
+            "name": "Examples",
+            "noHeadings": true
+        }
+    },
+    "getting-started": {
+        "pattern": "getting-started/*.md",
+        "refer": false,
+        "sortBy": ["Download", "Integration"],
+        "metadata": {
+            "name": "Getting Started"
+        }
+    },
+    "api": {
+        "pattern": "api/*.md",
+        "refer": false,
+        "sortBy": ["mark()", "markRegExp()", "unmark()"],
+        "metadata": {
+            "name": "API"
+        }
+    },
+    "compatibility": {
+        "pattern": "compatibility/*.md",
+        "refer": false,
+        "metadata": {
+            "name": "Compatibility",
+            "noHeadings": true
+        }
+    }
+}

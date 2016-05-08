@@ -1,0 +1,23 @@
+{{!--
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+--}}
+
+{{#each collections}}
+    <section>
+        <a id="{{anchor metadata.name}}"></a>
+        <h2>{{inc @index}}. {{metadata.name}}</h2>
+        {{#each this}}
+            <article>
+                {{#unless ../metadata.noHeadings}}
+                    <a id="{{anchor title}}"></a>
+                    <h3>{{inc @../index}}.{{inc @index}} {{title}}</h3>
+                {{/unless}}
+                {{{contents}}}
+            </article>
+        {{/each}}
+    </section>
+{{/each}}

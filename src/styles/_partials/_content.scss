@@ -1,0 +1,30 @@
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+
+main {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: $contentFontSize;
+    line-height: $contentLineHeight;
+
+    pre {
+        padding: 0;
+        background: transparent;
+        @include border-radius(0);
+    }
+    &:not(.configurator) {
+        /* Anchor offset */
+        a[id]:not([href]) {
+            display: block;
+            position: relative;
+            top: -#{$navbarHeight + 10};
+            visibility: hidden;
+        }
+        section:not(:first-child) h2 {
+            margin-top: 30px;
+        }
+    }
+}

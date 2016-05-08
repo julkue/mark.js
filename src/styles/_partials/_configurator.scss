@@ -1,0 +1,67 @@
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+
+.configurator {
+    form {
+        .form-group {
+            margin-bottom: 5px;
+            &[data-type-constraint]:not([data-type-constraint="keyword"]) {
+                display: none;
+            }
+            /**
+             * Fix checkbox spacing as some checkboxes may be hidden and
+             * Boostrap's selector will not set the correct margin/padding for
+             * the first visible checkbox
+             */
+            &.checkbox-options {
+                padding-top: 10px;
+
+                .checkbox {
+                    margin-top: 0 !important;
+                    margin-bottom: 5px !important;
+                }
+            }
+
+            @media (max-width: #{$breakpointSM - 1}) {
+                .radio-inline {
+                    display: block;
+                    margin-left: 0;
+                }
+            }
+            label {
+                @include user-select(none);
+            }
+        }
+        .filters,
+        .synonyms {
+            margin: 0 0 5px;
+
+            *[class^="col"] {
+                padding: 0 5px 0 0;
+            }
+            *[data-action="remove"] {
+                display: none;
+            }
+        }
+        button#perform {
+            margin-top: 10px;
+        }
+    }
+    .context {
+        /**
+         * Instead of just setting an explicit element to look marked, the
+         * following will apply for all custom elements and class names
+         */
+        :not(p):not(.ignore) {
+            padding: 0;
+            color: $configuratorMarkColor;
+            background: $configuratorMarkBg;
+        }
+    }
+    pre {
+        margin-top: 5px;
+    }
+}

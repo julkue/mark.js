@@ -1,0 +1,61 @@
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: $footerHeight;
+    margin-top: 20px;
+    background: $footerBg;
+    color: $footerColor;
+    @media(max-width: #{$breakpointSM - 1}) {
+        height: $footerHeight * 2;
+    }
+
+    .container {
+        height: $footerHeight;
+    }
+    .row {
+        height: $footerHeight;
+
+        > [class^="col"] {
+            position: relative;
+            height: $footerHeight;
+            overflow: hidden;
+
+            .col-inner {
+                position: relative;
+                top: 50%;
+                @include transform(translateY(-50%));
+                padding: 15px;
+                overflow: hidden;
+                /* clear float */
+                @media (max-width: #{$breakpointSM - 1}) {
+                    text-align: center;
+                }
+
+                a {
+                    &,
+                    &:active,
+                    &:focus,
+                    &:hover,
+                    &:visited {
+                        color: $footerColor;
+                        text-decoration: underline;
+                    }
+                }
+                .github-buttons {
+                    float: right;
+                    @media (max-width: #{$breakpointSM - 1}) {
+                        float: none;
+                        margin: 0 auto;
+                    }
+                }
+            }
+        }
+    }
+}

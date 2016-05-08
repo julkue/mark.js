@@ -1,0 +1,67 @@
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+@import "base";
+
+* {
+    text-shadow: none;
+    -webkit-tap-highlight-color: transparent;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+body,
+html {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    /* fixed nav: */
+    padding-top: $navbarHeight;
+    @include transition(padding .5s ease-in-out);
+}
+a,
+button,
+input[type="radio"] {
+    outline: 0 !important;
+}
+.page-container {
+    min-height: 100%;
+    height: auto;
+    margin-bottom: $footerHeight;
+    overflow-x: hidden;
+    @media (max-width: #{$breakpointSM - 1}) {
+        margin-bottom: $footerHeight * 2;
+    }
+}
+.container {
+    @include transition(all .5s ease-in-out);
+}
+.logo {
+    display: block;
+    background-image: image-url("logo.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    text-indent: -9999999px;
+    max-width: 100%;
+}
+.github-buttons {
+    a,
+    iframe {
+        &:not(:first-child) {
+            margin-left: 4px;
+        }
+    }
+}
+@import "_partials/navbar";
+@import "_partials/sidebar";
+@import "_partials/jumbotron";
+@import "_partials/content";
+@import "_partials/configurator";
+@import "_partials/content";
+@import "_partials/footer";

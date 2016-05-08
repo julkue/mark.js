@@ -1,0 +1,13 @@
+{
+    "title": "mark.js",
+    "slogan": "JavaScript keyword highlighter",
+    "pagetitle": "mark.js – JavaScript keyword highlight",
+    "description": "Search term highlighting intended for every use case. Can be used with pure JavaScript or as jQuery plugin.",
+    "robots": "index, follow",
+    "repository": "https://github.com/julmot/mark.js/",
+    "repositoryUser": "julmot",
+    "repositoryName": "mark.js",
+    "download": "https://github.com/julmot/mark.js/archive/master.zip",
+    "license": "https://git.io/vwTVl",
+    "licenseName": "MIT license"
+}

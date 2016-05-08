@@ -1,0 +1,49 @@
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+
+nav {
+    margin-top: 20px;
+
+    > ul {
+        overflow: hidden;
+        /* fixes iOS scroll delay */
+        @include transform(translate3d(0, 0, 0));
+
+        &.affix {
+            top: #{$navbarHeight + 20};
+        }
+        &.affix-bottom {
+            position: absolute;
+        }
+        > li {
+            li {
+                padding-left: 20px;
+            }
+            a {
+                border-left: 1px solid transparent;
+                hyphens: auto;
+                @include border-radius(0 !important);
+                & {
+                    color: $navColor !important;
+                    background: $navBg !important;
+                }
+                .no-touch &:hover {
+                    color: $navHoverColor !important;
+                    background: $navHoverBg !important;
+                }
+                @media (max-width: #{$breakpointMD - 1}) {
+                    padding: 10px !important;
+                }
+            }
+            &.active {
+                 > a,
+                > ul > li.active > a {
+                    border-left: 1px solid $navActiveBorder;
+                }
+            }
+        }
+    }
+}

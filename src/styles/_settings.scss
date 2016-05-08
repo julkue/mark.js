@@ -1,0 +1,51 @@
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+
+/**
+ * Breakpoints
+ */
+$breakpointXS: 420px;
+$breakpointSM: 768px;
+$breakpointMD: 992px;
+$brekapointLG: 1200px;
+
+/**
+ * Color settings
+ */
+$navbarBg: #fff;
+$navbarBorder: #bdc3c7;
+$navbarToggleBg: #DD4814;
+$navbarToggleIconBg: #fff;
+$navbarCollapseBg: $navbarToggleBg;
+$navbarCollapseColor: $navbarToggleIconBg;
+$navbarCollapseItemBg: $navbarCollapseBg;
+$navbarCollapseItemColor: $navbarCollapseColor;
+$navbarCollapseItemActiveBg: #AE3910;
+$navbarCollapseItemActiveColor: #fff;
+
+$navColor: #dd4814;
+$navBg: transparent;
+$navHoverColor: $navColor;
+$navHoverBg: #eeeeee;
+$navActiveBorder: #e67e22;
+
+$configuratorMarkBg: #f1c40f;
+$configuratorMarkColor: #333333;
+
+$footerBg: #DD4814;
+$footerColor: #fff;
+
+/**
+ * Size settings
+ */
+$navbarHeight: 70px;
+$footerHeight: 100px;
+
+/**
+ * Typography settings
+ */
+$contentFontSize: 16px;
+$contentLineHeight: 130%;

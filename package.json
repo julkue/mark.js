@@ -1,0 +1,52 @@
+{
+  "name": "mark.js-website",
+  "version": "1.0.0",
+  "description": "Website of mark.js",
+  "main": "generate-html.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mark.js",
+    "markjs"
+  ],
+  "author": "Julian Motz",
+  "license": "LicenseRef-LICENSE",
+  "contributors": [
+    {
+      "name": "Julian Motz",
+      "url": "https://github.com/julmot"
+    }
+  ],
+  "devDependencies": {
+    "almond": "~0.3",
+    "connect-livereload": "^0.5",
+    "del": "^2.2.0",
+    "grunt": "^1.0.1",
+    "grunt-banner": "^0.6",
+    "grunt-concurrent": "^2.3.0",
+    "grunt-contrib-clean": "~1",
+    "grunt-contrib-compass": "~1",
+    "grunt-contrib-compress": "~1",
+    "grunt-contrib-connect": "~1",
+    "grunt-contrib-copy": "~1",
+    "grunt-contrib-htmlmin": "~1",
+    "grunt-contrib-rename": "0.0",
+    "grunt-contrib-requirejs": "~1",
+    "grunt-contrib-uglify": "~1",
+    "grunt-contrib-watch": "~1",
+    "grunt-ftp-deploy": "^0.1",
+    "grunt-spritesmith": "^6.3",
+    "grunt-string-replace": "^1.2",
+    "handlebars": "^4.0.5",
+    "matchdep": "^1.0",
+    "metalsmith": "^2.1.0",
+    "metalsmith-beautify": "^0.1.0",
+    "metalsmith-collections": "^0.7.0",
+    "metalsmith-in-place": "^1.4.4",
+    "metalsmith-layouts": "^1.6.5",
+    "metalsmith-markdown": "^0.2.1",
+    "ncp": "^2.0.0"
+  },
+  "private": true
+}

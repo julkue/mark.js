@@ -1,0 +1,24 @@
+/*!*****************************************************
+ * mark.js-website
+ * https://github.com/julmot/mark.js/tree/website
+ * Copyright (c) 2016, Julian Motz. All Rights Reserved.
+ *******************************************************/
+
+/**
+ * Import compass libraries,
+ * internal libs and settings
+ */
+@import "compass";
+@import "compass/css3/selection";
+@import "compass/utilities/sprites";
+@import "settings";
+@import "sprites";
+
+/**
+ * Import vendor libs
+ * (path starting from styles-folder)
+ * Load any dependency here, like Fontawesome, Bootstrap, etc.
+ * The paths will be automatically corrected in the production build.
+ */
+@import "../../vendor/bootswatch-dist/css/bootstrap.css";
+@import "../../vendor/highlightjs/styles/idea.css";
