@@ -21,7 +21,7 @@
     "url": "https://github.com/julmot"
   },
   "description": "Highlight keywords using JavaScript. Intended for every use case. Can e.g. be used to mark text in search results.",
-  "main": "dist/mark.min.js",
+  "main": "dist/mark.js",
   "repository": "julmot/mark.js",
   "bugs": {
     "url": "https://github.com/julmot/mark.js/issues"

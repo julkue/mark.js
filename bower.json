@@ -23,7 +23,7 @@
     }
   ],
   "description": "Highlight keywords using JavaScript. Intended for every use case. Can e.g. be used to mark text in search results.",
-  "main": "dist/mark.min.js",
+  "main": "dist/mark.js",
   "moduleType": [
     "global", "amd"
   ],
