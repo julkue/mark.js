@@ -1,5 +1,6 @@
 # mark.js
-## (formerly known as jquery.mark or jmHighlight)
+
+##### (formerly known as jquery.mark or jmHighlight)
 
 #### Highlight keywords using JavaScript. Intended for every use case. <br> Can e.g. be used to mark text in search results.
 
