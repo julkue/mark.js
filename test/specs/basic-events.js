@@ -8,11 +8,15 @@
 jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
 describe("unmark with click event", function () {
-    var $ctx, spyEvent;
+    var $ctx, spyEvent, eventCalled;
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic-events.html");
 
         $ctx = $(".basic-events");
+        eventCalled = 0;
+        $ctx.find(".event-target").on("click", function(){
+            ++eventCalled;
+        });
         spyEvent = spyOnEvent(".basic-events .event-target", "click");
         var instance = new Mark($ctx[0]);
         instance.mark("test", {
@@ -33,6 +37,7 @@ describe("unmark with click event", function () {
     });
 
     it("should not remove bound events", function () {
+        console.log("EVENT CALLED: " + eventCalled);
         expect(spyEvent).toHaveBeenTriggered();
     });
 
