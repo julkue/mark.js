@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.0.0
+ * mark.js v6.0.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -163,7 +163,10 @@ class Mark {
 
     /**
      * Creates a regular expression string to match the specified string with
-     * the defined accuracy
+     * the defined accuracy. As in the regular expression of "exactly" can be
+     * a blank at the beginning, all regular expressions will be created with
+     * two groups. The first group can be ignored (may contain the said blank),
+     * the second contains the actual match
      * @param  {string} str - The searm term to be used
      * @return {str}
      * @access protected
@@ -171,11 +174,11 @@ class Mark {
     createAccuracyRegExp(str) {
         switch(this.opt.accuracy) {
         case "partially":
-            return str;
+            return `()(${str})`;
         case "complementary":
-            return `\\S*${str}\\S*`;
+            return `()(\\S*${str}\\S*)`;
         case "exactly":
-            return `\\b${str}\\b`;
+            return `(^|\\s)(${str})(?=\\s|$)`;
         }
     }
 
@@ -493,26 +496,35 @@ class Mark {
      * DOM text node element
      * @param {object} node - The DOM text node
      * @param {RegExp} regex - The regular expression to be searched for
+     * @param {boolean} custom - If true, the function expects a regular
+     * expression that has at least two groups (like returned from
+     * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
+     * the second will be wrapped
      * @access protected
      */
-    wrapMatches(node, regex) {
-        const hEl = !this.opt.element ? "mark" : this.opt.element;
+    wrapMatches(node, regex, custom = false) {
+        const hEl = !this.opt.element ? "mark" : this.opt.element,
+            index = custom ? 0 : 2;
         let match;
         while((match = regex.exec(node.textContent)) !== null) {
-            // Split the text node and
-            // replace match with mark element
-            let startNode = node.splitText(match.index);
+            // Split the text node at the start and the end of the match and
+            // replace the new node with the specified element
+            let pos = match.index;
+            if(!custom) {
+                pos += match[index - 1].length;
+            }
+            let startNode = node.splitText(pos);
             // The DOM reference of node will get lost due to
             // splitText. Therefore it is necessary to save the new
             // created element in "node"
-            node = startNode.splitText(match[0].length);
+            node = startNode.splitText(match[index].length);
             if(startNode.parentNode !== null) {
                 let repl = document.createElement(hEl);
                 repl.setAttribute("data-markjs", "true");
                 if(this.opt.className) {
                     repl.setAttribute("class", this.opt.className);
                 }
-                repl.textContent = match[0];
+                repl.textContent = match[index];
                 startNode.parentNode.replaceChild(repl, startNode);
                 this.opt.each(repl);
             }
@@ -555,7 +567,7 @@ class Mark {
         this.opt = opt;
         this.log(`Searching with expression "${regexp}"`);
         this.forEachNode(node => {
-            this.wrapMatches(node, regexp);
+            this.wrapMatches(node, regexp, true);
         }, this.opt.complete);
     }
 

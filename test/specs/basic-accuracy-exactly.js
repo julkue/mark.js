@@ -8,40 +8,56 @@
 jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
 describe("basic mark with exactly accuracy", function () {
-    var $ctx1, $ctx2;
+    var $ctx1, $ctx2, $ctx3;
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic-accuracy-exactly.html");
 
-        $ctx1 = $(".basic-accuracy-exactly > p:first-child");
-        $ctx2 = $(".basic-accuracy-exactly > p:last-child");
-        new Mark($ctx1[0]).mark("dolo", {
+        $ctx1 = $(".basic-accuracy-exactly > div:nth-child(1)");
+        $ctx2 = $(".basic-accuracy-exactly > div:nth-child(2)");
+        $ctx3 = $(".basic-accuracy-exactly > div:nth-child(3)");
+        new Mark($ctx1[0]).mark("ipsu", {
             "accuracy": "exactly",
             "separateWordSearch": false,
             "complete": function () {
-                new Mark($ctx2[0]).mark("ipsum dolo", {
+                new Mark($ctx2[0]).mark("ipsu dolo", {
                     "accuracy": "exactly",
                     "separateWordSearch": true,
                     "complete": function () {
-                        done();
+                        new Mark($ctx3[0]).mark("ipsu", {
+                            "accuracy": "exactly",
+                            "separateWordSearch": false,
+                            "complete": function () {
+                                done();
+                            }
+                        });
                     }
                 });
             }
         });
     });
     afterEach(function () {
-        $ctx1.add($ctx2).remove();
+        $ctx1.add($ctx2).add($ctx3).remove();
     });
 
     it("should wrap the right matches", function () {
         expect($ctx1.find("mark")).toHaveLength(1);
-        expect($ctx1.find("mark").text()).toBe("dolo");
+        expect($ctx1.find("mark").text()).toBe("ipsu");
+        expect($ctx1.find(".not mark")).toHaveLength(0);
     });
     it("should work with separateWordSearch", function () {
-        expect($ctx2.find("mark")).toHaveLength(5);
+        expect($ctx2.find("mark")).toHaveLength(2);
+        var textOpts = ["ipsu", "dolo"];
         $ctx2.find("mark").each(function () {
-            var text = $(this).text();
-            var containsText = text === "ipsum" || text === "dolo";
-            expect(containsText).toBe(true);
+            expect($.inArray($(this).text(), textOpts)).toBeGreaterThan(-1);
         });
+        expect($ctx2.find(".not mark")).toHaveLength(0);
+    });
+    it("should work with diacritics", function () {
+        expect($ctx3.find("mark")).toHaveLength(4);
+        var textOpts = ["ipsu", "ipsü", "īpsu", "īpsü"];
+        $ctx3.find("mark").each(function () {
+            expect($.inArray($(this).text(), textOpts)).toBeGreaterThan(-1);
+        });
+        expect($ctx3.find(".not mark")).toHaveLength(0);
     });
 });

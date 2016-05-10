@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.0.0
+ * mark.js v6.0.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -103,11 +103,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function createAccuracyRegExp(str) {
                 switch (this.opt.accuracy) {
                     case "partially":
-                        return str;
+                        return "()(" + str + ")";
                     case "complementary":
-                        return "\\S*" + str + "\\S*";
+                        return "()(\\S*" + str + "\\S*)";
                     case "exactly":
-                        return "\\b" + str + "\\b";
+                        return "(^|\\s)(" + str + ")(?=\\s|$)";
                 }
             }
         }, {
@@ -331,19 +331,26 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "wrapMatches",
             value: function wrapMatches(node, regex) {
-                var hEl = !this.opt.element ? "mark" : this.opt.element;
+                var custom = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+                var hEl = !this.opt.element ? "mark" : this.opt.element,
+                    index = custom ? 0 : 2;
                 var match = void 0;
                 while ((match = regex.exec(node.textContent)) !== null) {
-                    var startNode = node.splitText(match.index);
+                    var pos = match.index;
+                    if (!custom) {
+                        pos += match[index - 1].length;
+                    }
+                    var startNode = node.splitText(pos);
 
-                    node = startNode.splitText(match[0].length);
+                    node = startNode.splitText(match[index].length);
                     if (startNode.parentNode !== null) {
                         var repl = document.createElement(hEl);
                         repl.setAttribute("data-markjs", "true");
                         if (this.opt.className) {
                             repl.setAttribute("class", this.opt.className);
                         }
-                        repl.textContent = match[0];
+                        repl.textContent = match[index];
                         startNode.parentNode.replaceChild(repl, startNode);
                         this.opt.each(repl);
                     }
@@ -358,7 +365,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.opt = opt;
                 this.log("Searching with expression \"" + regexp + "\"");
                 this.forEachNode(function (node) {
-                    _this5.wrapMatches(node, regexp);
+                    _this5.wrapMatches(node, regexp, true);
                 }, this.opt.complete);
             }
         }, {
