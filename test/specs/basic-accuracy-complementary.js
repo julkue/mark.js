@@ -37,10 +37,9 @@ describe("basic mark with complementary accuracy", function () {
         expect($ctx1.find("mark").text()).toBe("testLoremtest");
     });
     it("should work with separateWordSearch", function () {
+        var textOpts = ["testLorem", "ipsumtest"];
         $ctx2.find("mark").each(function () {
-            var text = $(this).text();
-            var containsText = text === "testLorem" || text === "ipsumtest";
-            expect(containsText).toBe(true);
+            expect($.inArray($(this).text(), textOpts)).toBeGreaterThan(-1);
         });
     });
 });

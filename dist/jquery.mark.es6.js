@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.0.0
+ * mark.js v6.0.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -105,11 +105,11 @@
         createAccuracyRegExp(str) {
             switch (this.opt.accuracy) {
                 case "partially":
-                    return str;
+                    return `()(${ str })`;
                 case "complementary":
-                    return `\\S*${ str }\\S*`;
+                    return `()(\\S*${ str }\\S*)`;
                 case "exactly":
-                    return `\\b${ str }\\b`;
+                    return `(^|\\s)(${ str })(?=\\s|$)`;
             }
         }
 
@@ -303,20 +303,25 @@
             }, end);
         }
 
-        wrapMatches(node, regex) {
-            const hEl = !this.opt.element ? "mark" : this.opt.element;
+        wrapMatches(node, regex, custom = false) {
+            const hEl = !this.opt.element ? "mark" : this.opt.element,
+                  index = custom ? 0 : 2;
             let match;
             while ((match = regex.exec(node.textContent)) !== null) {
-                let startNode = node.splitText(match.index);
+                let pos = match.index;
+                if (!custom) {
+                    pos += match[index - 1].length;
+                }
+                let startNode = node.splitText(pos);
 
-                node = startNode.splitText(match[0].length);
+                node = startNode.splitText(match[index].length);
                 if (startNode.parentNode !== null) {
                     let repl = document.createElement(hEl);
                     repl.setAttribute("data-markjs", "true");
                     if (this.opt.className) {
                         repl.setAttribute("class", this.opt.className);
                     }
-                    repl.textContent = match[0];
+                    repl.textContent = match[index];
                     startNode.parentNode.replaceChild(repl, startNode);
                     this.opt.each(repl);
                 }
@@ -328,7 +333,7 @@
             this.opt = opt;
             this.log(`Searching with expression "${ regexp }"`);
             this.forEachNode(node => {
-                this.wrapMatches(node, regexp);
+                this.wrapMatches(node, regexp, true);
             }, this.opt.complete);
         }
 

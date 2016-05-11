@@ -8,25 +8,41 @@
 jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
 describe("mark with regular expression", function () {
-    var $ctx, ret;
+    var $ctx1, $ctx2, errorThrown, ret;
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("regexp.html");
 
-        $ctx = $(".regexp");
-        ret = new Mark($ctx[0]).markRegExp(/Lor[^]?m/gmi, {
+        $ctx1 = $(".regexp > p:first-child");
+        $ctx2 = $(".regexp > p:last-child");
+        errorThrown = false;
+        ret = new Mark($ctx1[0]).markRegExp(/Lor[^]?m/gmi, {
             "complete": function () {
-                setTimeout(function () { // otherwise "ret =" will not be executed
+                try{
+                    new Mark($ctx2[0]).markRegExp(/(Lor)([^]?m)/gmi, {
+                        "complete": function(){
+                            // timeout, otherwise "ret =" will not be executed
+                            setTimeout(function () {
+                                done();
+                            }, 50);
+                        }
+                    });
+                } catch(e){
+                    errorThrown = true;
                     done();
-                }, 50);
+                }
             }
         });
     });
     afterEach(function () {
-        $ctx.remove();
+        $ctx1.add($ctx2).remove();
     });
 
     it("should wrap matches", function () {
-        expect($ctx.find("mark")).toHaveLength(4);
+        expect($ctx1.find("mark")).toHaveLength(4);
+    });
+    it("should silently ignore groups in regular expression", function(){
+        expect($ctx2.find("mark")).toHaveLength(4);
+        expect(errorThrown).toBe(false);
     });
     it("should return an object with further methods", function () {
         expect(ret instanceof Mark).toBe(true);
