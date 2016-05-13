@@ -354,6 +354,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             }
         }, {
+            key: "unwrapMatches",
+            value: function unwrapMatches(node) {
+                var parent = node.parentNode;
+                var docFrag = document.createDocumentFragment();
+                while (node.firstChild) {
+                    docFrag.appendChild(node.removeChild(node.firstChild));
+                }
+                parent.replaceChild(docFrag, node);
+                parent.normalize();
+            }
+        }, {
             key: "markRegExp",
             value: function markRegExp(regexp, opt) {
                 var _this5 = this;
@@ -427,14 +438,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.log("Removal selector \"" + sel + "\"");
                 this.forEachElement(function (el) {
                     if (_this7.matches(el, sel)) {
-                        var parent = el.parentNode;
-                        var docFrag = document.createDocumentFragment();
-                        while (el.firstChild) {
-                            docFrag.appendChild(el.removeChild(el.firstChild));
-                        }
-                        parent.replaceChild(docFrag, el);
-
-                        parent.normalize();
+                        _this7.unwrapMatches(el);
                     }
                 }, function () {
                     _this7.opt.complete();

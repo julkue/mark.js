@@ -331,6 +331,16 @@
             }
         }
 
+        unwrapMatches(node) {
+            const parent = node.parentNode;
+            let docFrag = document.createDocumentFragment();
+            while (node.firstChild) {
+                docFrag.appendChild(node.removeChild(node.firstChild));
+            }
+            parent.replaceChild(docFrag, node);
+            parent.normalize();
+        }
+
         markRegExp(regexp, opt) {
             this.opt = opt;
             this.log(`Searching with expression "${ regexp }"`);
@@ -393,14 +403,7 @@
             this.log(`Removal selector "${ sel }"`);
             this.forEachElement(el => {
                 if (this.matches(el, sel)) {
-                    const parent = el.parentNode;
-                    let docFrag = document.createDocumentFragment();
-                    while (el.firstChild) {
-                        docFrag.appendChild(el.removeChild(el.firstChild));
-                    }
-                    parent.replaceChild(docFrag, el);
-
-                    parent.normalize();
+                    this.unwrapMatches(el);
                 }
             }, () => {
                 this.opt.complete();

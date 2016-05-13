@@ -541,6 +541,23 @@ class Mark {
     }
 
     /**
+     * Unwraps the specified DOM node with its content (text nodes or HTML)
+     * without destroying possibly present events (using innerHTML) and
+     * normalizes the parent at the end (merge splitted text nodes)
+     * @param  {HTMLElement} node - The DOM node to unwrap
+     * @access protected
+     */
+    unwrapMatches(node){
+        const parent = node.parentNode;
+        let docFrag = document.createDocumentFragment();
+        while(node.firstChild) {
+            docFrag.appendChild(node.removeChild(node.firstChild));
+        }
+        parent.replaceChild(docFrag, node);
+        parent.normalize();
+    }
+
+    /**
      * Callback when finished
      * @callback Mark~commonDoneCallback
      */
@@ -691,14 +708,7 @@ class Mark {
         this.log(`Removal selector "${sel}"`);
         this.forEachElement(el => {
             if(this.matches(el, sel)) {
-                const parent = el.parentNode;
-                let docFrag = document.createDocumentFragment();
-                while(el.firstChild) {
-                    docFrag.appendChild(el.removeChild(el.firstChild));
-                }
-                parent.replaceChild(docFrag, el);
-                // Normalize parent (merge splitted text nodes)
-                parent.normalize();
+                this.unwrapMatches(el);
             }
         }, () => {
             this.opt.complete(); // deprecated, use "done" instead
