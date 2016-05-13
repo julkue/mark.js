@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark called with a context array", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-array.html");
+        loadFixtures("basic-array.html");
 
         $ctx = $(".basic-array");
         new Mark($ctx.get()).mark("lorem", {
@@ -20,9 +18,6 @@ describe("basic mark called with a context array", function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should wrap matches", function () {

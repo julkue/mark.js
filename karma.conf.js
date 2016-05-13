@@ -12,6 +12,7 @@ module.exports = config => {
         files: [
             "vendor/jquery/dist/jquery.min.js",
             "dist/!(*.es6|*.min).js",
+            "test/specs/configuration.js",
             "test/specs/basic.js",
             "test/specs/basic-unmark.js",
             "test/specs/basic-array.js",

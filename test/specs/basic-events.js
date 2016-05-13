@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("unmark with click event", function () {
     var $ctx, eventCalled;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-events.html");
+        loadFixtures("basic-events.html");
 
         $ctx = $(".basic-events");
         eventCalled = 0;
@@ -30,9 +28,6 @@ describe("unmark with click event", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should not remove bound events", function () {

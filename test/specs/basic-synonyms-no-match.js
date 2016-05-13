@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with synonyms and 'noMatch'", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-synonyms-no-match.html");
+        loadFixtures("basic-synonyms-no-match.html");
 
         $ctx = $(".basic-synonyms-no-match > p");
         notFound = [];
@@ -27,9 +25,6 @@ describe("basic mark with synonyms and 'noMatch'", function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should not call 'noMatch' if there are synonym matches", function () {

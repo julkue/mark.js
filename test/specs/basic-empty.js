@@ -5,13 +5,11 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark in an empty context", function () {
     var $ctx1, $ctx2, done1 = false,
         done2 = false;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-empty.html");
+        loadFixtures("basic-empty.html");
 
         $ctx1 = $(".notExistingSelector");
         $ctx2 = $(".basic-empty");
@@ -30,9 +28,6 @@ describe("basic mark in an empty context", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx1.add($ctx2).remove();
     });
 
     it("should call the 'done' function", function () {

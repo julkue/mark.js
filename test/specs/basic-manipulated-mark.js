@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("unmark with elements inside marked elements", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-manipulated-mark.html");
+        loadFixtures("basic-manipulated-mark.html");
 
         $ctx = $(".basic-manipulated-mark");
         var instance = new Mark($ctx[0]);
@@ -29,9 +27,6 @@ describe("unmark with elements inside marked elements", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should not delete subsequently added elements", function () {

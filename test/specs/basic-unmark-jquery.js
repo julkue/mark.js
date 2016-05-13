@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic unmark with jquery", function () {
     var $ctx, ret;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic.html");
+        loadFixtures("basic.html");
 
         $ctx = $(".basic > div:first-child");
         $ctx.mark("lorem ipsum", {
@@ -27,9 +25,6 @@ describe("basic unmark with jquery", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should remove all marked elements", function () {

@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with synonyms", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-synonyms.html");
+        loadFixtures("basic-synonyms.html");
 
         $ctx1 = $(".basic-synonyms > div:nth-child(1)");
         $ctx2 = $(".basic-synonyms > div:nth-child(2)");
@@ -35,9 +33,6 @@ describe("basic mark with synonyms", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx1.add($ctx2).remove();
     });
 
     it("should wrap synonyms as well as keywords", function () {

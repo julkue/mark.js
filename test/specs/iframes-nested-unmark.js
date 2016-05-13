@@ -5,15 +5,13 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("unmark with nested iframes", function () {
     var $ctx, $elements, errCall;
     window.onError = function () {
         errCall++;
     };
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("iframes-nested.html");
+        loadFixtures("iframes-nested.html");
 
         $ctx = $(".iframes-nested");
         $elements = $();
@@ -35,9 +33,6 @@ describe("unmark with nested iframes", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should remove all marked elements inside iframes recursively", function () {

@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark called with jquery", function () {
     var $ctx, ret;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic.html");
+        loadFixtures("basic.html");
 
         $ctx = $(".basic > div:first-child");
         ret = $ctx.mark("lorem ipsum", {
@@ -23,9 +21,6 @@ describe("basic mark called with jquery", function () {
                 }, 50);
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should wrap matches", function () {

@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with custom element and class", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-custom-element-class.html");
+        loadFixtures("basic-custom-element-class.html");
 
         $ctx1 = $(".basic-custom-element-class > p:first-child");
         $ctx2 = $(".basic-custom-element-class > p:last-child");
@@ -30,9 +28,6 @@ describe("basic mark with custom element and class", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx1.add($ctx2).remove();
     });
 
     it("should not add a class to matched elements if specified", function () {

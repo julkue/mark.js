@@ -5,15 +5,13 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("mark in nested iframes", function () {
     var $ctx, $elements, errCall;
     window.onError = function () {
         errCall++;
     };
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("iframes-nested.html");
+        loadFixtures("iframes-nested.html");
 
         $elements = $();
         $ctx = $(".iframes-nested");
@@ -30,9 +28,6 @@ describe("mark in nested iframes", function () {
             }
         });
     }, 30000); // 30 sec timeout
-    afterEach(function () {
-        $ctx.remove();
-    });
 
     it("should wrap matches inside iframes recursively", function () {
         expect($elements).toHaveLength(12);

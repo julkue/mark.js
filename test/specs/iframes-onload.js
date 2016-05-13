@@ -5,8 +5,6 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("mark with iframes where onload was not fired yet", function () {
     // Note that in Chrome the onload event will already be fired. Reason
     // is that Chrome initializes every iframe with an empty page, which will
@@ -16,7 +14,7 @@ describe("mark with iframes where onload was not fired yet", function () {
         errCall++;
     };
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("iframes-onload.html");
+        loadFixtures("iframes-onload.html");
 
         $elements = $();
         $ctx = $(".iframes-onload");
@@ -33,9 +31,6 @@ describe("mark with iframes where onload was not fired yet", function () {
             }
         });
     }, 30000); // 30 sec timeout
-    afterEach(function () {
-        $ctx.remove();
-    });
 
     it("should wrap matches inside iframes", function () {
         var unequal = false;

@@ -5,15 +5,13 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("mark in inaccessible iframes", function () {
     var $ctx, $elements, errCall;
     window.onError = function () {
         errCall++;
     };
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("iframes-inaccessible.html");
+        loadFixtures("iframes-inaccessible.html");
 
         $elements = $();
         $ctx = $(".iframes-inaccessible");
@@ -30,9 +28,6 @@ describe("mark in inaccessible iframes", function () {
             }
         });
     }, 30000); // 30 sec timeout
-    afterEach(function () {
-        $ctx.remove();
-    });
 
     it("should silently skip iframes which can not be accessed", function () {
         expect($elements).toHaveLength(4);

@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with exactly accuracy", function () {
     var $ctx1, $ctx2, $ctx3;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-accuracy-exactly.html");
+        loadFixtures("basic-accuracy-exactly.html");
 
         $ctx1 = $(".basic-accuracy-exactly > div:nth-child(1)");
         $ctx2 = $(".basic-accuracy-exactly > div:nth-child(2)");
@@ -34,9 +32,6 @@ describe("basic mark with exactly accuracy", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx1.add($ctx2).add($ctx3).remove();
     });
 
     it("should wrap the right matches", function () {

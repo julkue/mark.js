@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark", function () {
     var $ctx1, $ctx2, ret, eachCalled, doneCalled, debugCalled, notFound;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic.html");
+        loadFixtures("basic.html");
 
         eachCalled = doneCalled = debugCalled = 0;
         notFound = [];
@@ -46,9 +44,6 @@ describe("basic mark", function () {
                 }
             }
         });
-    });
-    afterEach(function () {
-        $ctx1.add($ctx2).remove();
     });
 
     it("should wrap matches", function () {

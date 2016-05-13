@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("mark with regular expression", function () {
     var $ctx1, $ctx2, errorThrown, ret;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("regexp.html");
+        loadFixtures("regexp.html");
 
         $ctx1 = $(".regexp > p:first-child");
         $ctx2 = $(".regexp > p:last-child");
@@ -32,9 +30,6 @@ describe("mark with regular expression", function () {
                 }
             }
         });
-    });
-    afterEach(function () {
-        $ctx1.add($ctx2).remove();
     });
 
     it("should wrap matches", function () {

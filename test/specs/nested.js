@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("nested mark", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("nested.html");
+        loadFixtures("nested.html");
 
         $ctx = $(".nested");
         new Mark($ctx[0]).mark("lorem", {
@@ -21,9 +19,6 @@ describe("nested mark", function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should wrap matches", function () {

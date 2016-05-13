@@ -5,15 +5,13 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("mark with disabled iframes", function () {
     var $ctx, $elements, errCall;
     window.onError = function () {
         errCall++;
     };
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("iframes-disabled.html");
+        loadFixtures("iframes-disabled.html");
 
         $elements = $();
         $ctx = $(".iframes-disabled");
@@ -30,9 +28,6 @@ describe("mark with disabled iframes", function () {
             }
         });
     }, 30000); // 30 sec timeout
-    afterEach(function () {
-        $ctx.remove();
-    });
 
     it("should ignore matches inside iframes if specified", function () {
         var unequal = false;

@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with array", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-array-keyword.html");
+        loadFixtures("basic-array-keyword.html");
 
         $ctx = $(".basic-array-keyword");
         notFound = [];
@@ -24,9 +22,6 @@ describe("basic mark with array", function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should wrap all matching keywords from the array", function () {

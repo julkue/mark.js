@@ -5,15 +5,13 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("mark with iframes where onload was already fired", function () {
     var $ctx, $elements, errCall;
     window.onError = function () {
         errCall++;
     };
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("iframes-readystate.html");
+        loadFixtures("iframes-readystate.html");
 
         $elements = $();
         $ctx = $(".iframes-readystate");
@@ -39,9 +37,6 @@ describe("mark with iframes where onload was already fired", function () {
             }
         }, 100);
     }, 30000); // 30 sec timeout
-    afterEach(function () {
-        $ctx.remove();
-    });
 
     it("should wrap matches inside iframes", function () {
         var unequal = false;

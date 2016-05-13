@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark directly inside the context", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-only-context.html");
+        loadFixtures("basic-only-context.html");
 
         $ctx = $(".basic-only-context");
         new Mark($ctx[0]).mark("lorem ipsum", {
@@ -20,9 +18,6 @@ describe("basic mark directly inside the context", function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should wrap matches", function () {

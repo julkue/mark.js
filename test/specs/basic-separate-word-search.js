@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with separate word search", function () {
     var $ctx1, $ctx2, notFound;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-separate-word-search.html");
+        loadFixtures("basic-separate-word-search.html");
 
         $ctx1 = $(".basic-separate > p:first-child");
         $ctx2 = $(".basic-separate > p:last-child");
@@ -31,9 +29,6 @@ describe("basic mark with separate word search", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx1.add($ctx2).remove();
     });
 
     it("should wrap separated words", function () {

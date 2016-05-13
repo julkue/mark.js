@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with regex characters", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-escape.html");
+        loadFixtures("basic-escape.html");
 
         $ctx = $(".basic-escape");
         new Mark($ctx[0]).mark(["39,00 €", "0.009 €", "Unk?nown", "Some+>thing"], {
@@ -20,9 +18,6 @@ describe("basic mark with regex characters", function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should escape search terms and wrap matches", function () {

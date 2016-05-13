@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("mark with regular expression and 'noMatch'", function () {
     var $ctx, notFound, notFoundCalled;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("regexp.html");
+        loadFixtures("regexp.html");
 
         $ctx = $(".regexp > p:first-child");
         notFound = null;
@@ -24,9 +22,6 @@ describe("mark with regular expression and 'noMatch'", function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should call 'notFound' with the regular expression", function () {
