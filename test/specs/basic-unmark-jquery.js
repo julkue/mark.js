@@ -16,9 +16,9 @@ describe("basic unmark with jquery", function () {
         $ctx.mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 ret = $ctx.unmark({
-                    "complete": function () {
+                    "done": function () {
                         // otherwise "ret =" will not be executed
                         setTimeout(function () {
                             done();

@@ -20,7 +20,7 @@ describe("basic mark with filter", function () {
                 "*[data-ignore]",
                 ".ignore"
             ],
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });

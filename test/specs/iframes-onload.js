@@ -28,7 +28,7 @@ describe("mark with iframes where onload was not fired yet", function () {
             "each": function ($m) {
                 $elements = $elements.add($($m));
             },
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });

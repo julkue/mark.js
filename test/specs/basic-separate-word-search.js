@@ -17,11 +17,11 @@ describe("basic mark with separate word search", function () {
         new Mark($ctx1[0]).mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": true,
-            "complete": function () {
+            "done": function () {
                 new Mark($ctx2[0]).mark(["lorem ipsum"], {
                     "diacritics": false,
                     "separateWordSearch": true,
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });

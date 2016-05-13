@@ -17,11 +17,11 @@ describe("basic mark with complementary accuracy", function () {
         new Mark($ctx1[0]).mark("lorem", {
             "accuracy": "complementary",
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 new Mark($ctx2[0]).mark("lorem", {
                     "accuracy": "complementary",
                     "separateWordSearch": true,
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });

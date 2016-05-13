@@ -18,15 +18,15 @@ describe("basic mark with exactly accuracy", function () {
         new Mark($ctx1[0]).mark("ipsu", {
             "accuracy": "exactly",
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 new Mark($ctx2[0]).mark("ipsu dolo", {
                     "accuracy": "exactly",
                     "separateWordSearch": true,
-                    "complete": function () {
+                    "done": function () {
                         new Mark($ctx3[0]).mark("ipsu", {
                             "accuracy": "exactly",
                             "separateWordSearch": false,
-                            "complete": function () {
+                            "done": function () {
                                 done();
                             }
                         });

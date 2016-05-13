@@ -17,13 +17,13 @@ describe("unmark with elements inside marked elements", function () {
         instance.mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 $("<span />", {
                     "html": "test",
                     "id": "manipulatedMark"
                 }).appendTo($ctx.find("mark").first());
                 instance.unmark({
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });

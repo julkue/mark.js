@@ -16,7 +16,7 @@ describe("basic mark with array", function () {
         new Mark($ctx[0]).mark(["lorem", "ipsum"], {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });

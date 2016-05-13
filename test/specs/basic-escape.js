@@ -16,7 +16,7 @@ describe("basic mark with regex characters", function () {
         new Mark($ctx[0]).mark(["39,00 €", "0.009 €", "Unk?nown", "Some+>thing"], {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });

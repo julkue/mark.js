@@ -20,7 +20,7 @@ describe("basic mark with synonyms", function () {
             },
             "separateWordSearch": false,
             "diacritics": false,
-            "complete": function () {
+            "done": function () {
                 new Mark($ctx2.get()).mark(["one", "2", "lüfte"], {
                     "separateWordSearch": false,
                     "diacritics": false,
@@ -29,7 +29,7 @@ describe("basic mark with synonyms", function () {
                         "one": "1",
                         "two": "2"
                     },
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });

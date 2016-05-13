@@ -19,11 +19,11 @@ describe("basic unmark with custom element and class", function () {
             "separateWordSearch": false,
             "element": "i",
             "className": "custom",
-            "complete": function () {
+            "done": function () {
                 instance.unmark({
                     "element": "i",
                     "className": "custom",
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });

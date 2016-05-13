@@ -18,15 +18,15 @@ describe("basic mark with separateWordSearch and blanks", function () {
         new Mark($ctx1[0]).mark("lorem ", {
             "diacritics": false,
             "separateWordSearch": true,
-            "complete": function () {
+            "done": function () {
                 new Mark($ctx2[0]).mark(" lorem ", {
                     "diacritics": false,
                     "separateWordSearch": true,
-                    "complete": function () {
+                    "done": function () {
                         new Mark($ctx3[0]).mark([""], {
                             "diacritics": false,
                             "separateWordSearch": true,
-                            "complete": function () {
+                            "done": function () {
                                 done();
                             }
                         });
@@ -39,7 +39,7 @@ describe("basic mark with separateWordSearch and blanks", function () {
         $ctx1.add($ctx2).add($ctx3).remove();
     });
 
-    it("should wrap matches, ignore blanks and call complete", function () {
+    it("should wrap matches, ignore blanks and call done", function () {
         expect($ctx1.find("mark")).toHaveLength(4);
         expect($ctx2.find("mark")).toHaveLength(4);
         expect($ctx3.find("mark")).toHaveLength(0);

@@ -8,8 +8,8 @@
 jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
 describe("basic mark in an empty context", function () {
-    var $ctx1, $ctx2, complete1 = false,
-        complete2 = false;
+    var $ctx1, $ctx2, done1 = false,
+        done2 = false;
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic-empty.html");
 
@@ -18,13 +18,13 @@ describe("basic mark in an empty context", function () {
         new Mark($ctx1[0]).mark("lorem", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
-                complete1 = true;
+            "done": function () {
+                done1 = true;
                 new Mark($ctx2[0]).mark("lorem", {
                     "diacritics": false,
                     "separateWordSearch": false,
-                    "complete": function () {
-                        complete2 = true;
+                    "done": function () {
+                        done2 = true;
                         done();
                     }
                 });
@@ -35,8 +35,8 @@ describe("basic mark in an empty context", function () {
         $ctx1.add($ctx2).remove();
     });
 
-    it("should call the complete function", function () {
-        expect(complete1).toBe(true);
-        expect(complete2).toBe(true);
+    it("should call the 'done' function", function () {
+        expect(done1).toBe(true);
+        expect(done2).toBe(true);
     });
 });

@@ -366,7 +366,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.log("Searching with expression \"" + regexp + "\"");
                 this.forEachNode(function (node) {
                     _this5.wrapMatches(node, regexp, true);
-                }, this.opt.complete);
+                }, function () {
+                    _this5.opt.complete();
+                    _this5.opt.done();
+                });
             }
         }, {
             key: "mark",
@@ -383,6 +386,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 if (kwArrLen === 0) {
                     this.opt.complete();
+                    this.opt.done();
                 }
                 kwArr.forEach(function (kw) {
                     var regex = new RegExp(_this6.createRegExp(kw), "gmi");
@@ -392,6 +396,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }, function () {
                         if (kwArr[kwArrLen - 1] === kw) {
                             _this6.opt.complete();
+                            _this6.opt.done();
                         }
                     });
                 });
@@ -419,7 +424,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                         parent.normalize();
                     }
-                }, this.opt.complete, false);
+                }, function () {
+                    _this7.opt.complete();
+                    _this7.opt.done();
+                }, false);
             }
         }, {
             key: "opt",
@@ -434,6 +442,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "synonyms": {},
                     "accuracy": "partially",
                     "each": function each() {},
+                    "done": function done() {},
                     "complete": function complete() {},
                     "debug": false,
                     "log": window.console

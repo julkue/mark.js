@@ -18,13 +18,13 @@ describe("basic mark with custom element and class", function () {
             "diacritics": false,
             "separateWordSearch": false,
             "element": "i",
-            "complete": function () {
+            "done": function () {
                 new Mark($ctx2[0]).mark("lorem ipsum", {
                     "diacritics": false,
                     "separateWordSearch": false,
                     "element": "i",
                     "className": "custom",
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });

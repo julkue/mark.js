@@ -16,10 +16,10 @@ describe("mark with regular expression called with jquery", function () {
         $ctx2 = $(".regexp > p:last-child");
         errorThrown = false;
         ret = $ctx1.markRegExp(/Lor[^]?m/gmi, {
-            "complete": function () {
+            "done": function () {
                 try{
                     $ctx2.markRegExp(/(Lor)([^]?m)/gmi, {
-                        "complete": function(){
+                        "done": function(){
                             // timeout, otherwise "ret =" will not be executed
                             setTimeout(function () {
                                 done();

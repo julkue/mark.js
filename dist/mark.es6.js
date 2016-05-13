@@ -32,6 +32,7 @@
                 "synonyms": {},
                 "accuracy": "partially",
                 "each": () => {},
+                "done": () => {},
                 "complete": () => {},
                 "debug": false,
                 "log": window.console
@@ -332,7 +333,10 @@
             this.log(`Searching with expression "${ regexp }"`);
             this.forEachNode(node => {
                 this.wrapMatches(node, regexp, true);
-            }, this.opt.complete);
+            }, () => {
+                this.opt.complete();
+                this.opt.done();
+            });
         }
 
         mark(sv, opt) {
@@ -344,6 +348,7 @@
             } = this.getSeparatedKeywords(sv);
             if (kwArrLen === 0) {
                 this.opt.complete();
+                this.opt.done();
             }
             kwArr.forEach(kw => {
                 let regex = new RegExp(this.createRegExp(kw), "gmi");
@@ -353,6 +358,7 @@
                 }, () => {
                     if (kwArr[kwArrLen - 1] === kw) {
                         this.opt.complete();
+                        this.opt.done();
                     }
                 });
             });
@@ -377,7 +383,10 @@
 
                     parent.normalize();
                 }
-            }, this.opt.complete, false);
+            }, () => {
+                this.opt.complete();
+                this.opt.done();
+            }, false);
         }
 
     }

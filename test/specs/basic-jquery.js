@@ -16,7 +16,7 @@ describe("basic mark called with jquery", function () {
         ret = $ctx.mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 setTimeout(function(){ // otherwise "ret =" will not be executed
                     done();
                 }, 50);

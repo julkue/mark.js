@@ -32,7 +32,7 @@ describe("mark with iframes where onload was already fired", function () {
                     "each": function ($m) {
                         $elements = $elements.add($($m));
                     },
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });

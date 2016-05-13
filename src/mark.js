@@ -38,7 +38,8 @@ class Mark {
             "synonyms": {},
             "accuracy": "partially",
             "each": () => {},
-            "complete": () => {},
+            "done": () => {},
+            "complete": () => {}, // deprecated, use "done" instead
             "debug": false,
             "log": window.console
         }, val);
@@ -77,7 +78,7 @@ class Mark {
 
     /**
      * Creates a regular expression string to match the specified search
-     * term including synonyms, diacritics and wordBoundary if defined
+     * term including synonyms, diacritics and accuracy if defined
      * @param  {string} str - The search term to be used
      * @return {string}
      * @access protected
@@ -95,7 +96,7 @@ class Mark {
     }
 
     /**
-     * Creates a regular expression string to match the instance synonyms
+     * Creates a regular expression string to match the defined synonyms
      * @param  {string} str - The search term to be used
      * @return {string}
      * @access protected
@@ -164,9 +165,9 @@ class Mark {
     /**
      * Creates a regular expression string to match the specified string with
      * the defined accuracy. As in the regular expression of "exactly" can be
-     * a blank at the beginning, all regular expressions will be created with
-     * two groups. The first group can be ignored (may contain the said blank),
-     * the second contains the actual match
+     * a group containing a blank at the beginning, all regular expressions will
+     * be created with two groups. The first group can be ignored (may contain
+     * the said blank), the second contains the actual match
      * @param  {string} str - The searm term to be used
      * @return {str}
      * @access protected
@@ -532,35 +533,39 @@ class Mark {
         }
     }
 
-
     /**
-     * Callback on completed
-     * @callback Mark~completeCallback
+     * Callback when finished
+     * @callback Mark~commonDoneCallback
      */
     /**
-     * Callback for each marked element
-     * @callback Mark~eachCallback
-     * @param {HTMLElement} element - The marked DOM element
-     */
-    /**
-     * @typedef Mark~options
+     * @typedef Mark~commonOptions
      * @type {object.<string>}
      * @property {string} [element="mark"] - HTML element tag name
-     * @property {string} [className] - An optional class name that will be
-     * appended to <code>element</code>
+     * @property {string} [className] - An optional class name
      * @property {string[]} [filter - An array with exclusion selectors.
      * Elements matching those selectors will be ignored
      * @property {boolean} [iframes=false] - Whether to search inside iframes
-     * @property {Mark~completeCallback} [complete]
-     * @property {Mark~eachCallback} [each]
+     * @property {Mark~commonDoneCallback} [done]
      * @property {boolean} [debug=false] - Wheter to log messages
      * @property {object} [log=window.console] - Where to log messages (only if
      * debug is true)
      */
     /**
+     * Callback for each marked element
+     * @callback Mark~markRegExpEachCallback
+     * @param {HTMLElement} element - The marked DOM element
+     */
+    /**
+    * These options also include the common options from
+    * {@link Mark~commonOptions}
+     * @typedef Mark~markRegExpOptions
+     * @type {object.<string>}
+     * @property {Mark~markRegExpEachCallback} [each]
+     */
+    /**
      * Marks a custom regular expression
      * @param  {RegExp} regexp - The regular expression
-     * @param  {Mark~options} [opt] - Optional option object
+     * @param  {Mark~markRegExpOptions} [opt] - Optional options object
      * @access public
      */
     markRegExp(regexp, opt) {
@@ -568,13 +573,21 @@ class Mark {
         this.log(`Searching with expression "${regexp}"`);
         this.forEachNode(node => {
             this.wrapMatches(node, regexp, true);
-        }, this.opt.complete);
+        }, () => {
+            this.opt.complete(); // deprecated, use "done" instead
+            this.opt.done();
+        });
     }
 
     /**
-     * These options also include the standard
-     * options from {@link Mark~options}
-     * @typedef Mark~advancedOptions
+     * Callback for each marked element
+     * @callback Mark~markEachCallback
+     * @param {HTMLElement} element - The marked DOM element
+     */
+    /**
+    * These options also include the common options from
+    * {@link Mark~commonOptions}
+     * @typedef Mark~markOptions
      * @type {object.<string>}
      * @property {boolean} [separateWordSearch=true] - Whether to search for
      * each word separated by a blank instead of the complete term
@@ -593,13 +606,13 @@ class Mark {
      *   will be marked. In this example nothing inside "lorem". This value
      *   is equivalent to the previous option <i>wordBoundary</i></li>
      * </ul>
-     * @extends Mark~options
+     * @property {Mark~markEachCallback} [each]
      */
     /**
-     * Marks the defined search terms
+     * Marks the specified search terms
      * @param {string|string[]} [sv] - Search value, either a search string or
      * an array containing multiple search strings
-     * @param  {Mark~advancedOptions} [opt] - Optional option object
+     * @param  {Mark~markOptions} [opt] - Optional options object
      * @access public
      */
     mark(sv, opt) {
@@ -610,7 +623,8 @@ class Mark {
             length: kwArrLen
         } = this.getSeparatedKeywords(sv);
         if(kwArrLen === 0) {
-            this.opt.complete();
+            this.opt.complete(); // deprecated, use "done" instead
+            this.opt.done();
         }
         kwArr.forEach(kw => {
             let regex = new RegExp(this.createRegExp(kw), "gmi");
@@ -619,7 +633,8 @@ class Mark {
                 this.wrapMatches(node, regex);
             }, () => {
                 if(kwArr[kwArrLen - 1] === kw) {
-                    this.opt.complete();
+                    this.opt.complete(); // deprecated, use "done" instead
+                    this.opt.done();
                 }
             });
         });
@@ -628,7 +643,7 @@ class Mark {
     /**
      * Removes all marked elements inside the context with their HTML and
      * normalizes the parent at the end
-     * @param  {Mark~options} [opt] - Optional option object
+     * @param  {Mark~commonOptions} [opt] - Optional options object
      * @access public
      */
     unmark(opt) {
@@ -650,7 +665,10 @@ class Mark {
                 // Normalize parent (merge splitted text nodes)
                 parent.normalize();
             }
-        }, this.opt.complete, false);
+        }, () => {
+            this.opt.complete(); // deprecated, use "done" instead
+            this.opt.done();
+        }, false);
     }
 
 }

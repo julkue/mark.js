@@ -15,7 +15,7 @@ describe("basic mark with diacritics", function () {
         $ctx = $(".basic-diacritics");
         new Mark($ctx[0]).mark(["dolor", "amet", "justo"], {
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });

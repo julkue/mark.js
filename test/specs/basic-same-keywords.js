@@ -16,7 +16,7 @@ describe("basic mark with multiple same keywords", function () {
         new Mark($ctx[0]).mark(["test", "test"], {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });

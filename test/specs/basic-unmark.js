@@ -17,9 +17,9 @@ describe("basic unmark", function () {
         instance.mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 ret = instance.unmark({
-                    "complete": function () {
+                    "done": function () {
                         // otherwise "ret =" will not be executed
                         setTimeout(function () {
                             done();

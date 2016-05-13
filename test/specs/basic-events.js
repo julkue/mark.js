@@ -21,9 +21,9 @@ describe("unmark with click event", function () {
         instance.mark("test", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 instance.unmark({
-                    "complete": function(){
+                    "done": function(){
                         $ctx.find(".event-target").click();
                         done();
                     }

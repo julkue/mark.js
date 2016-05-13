@@ -26,10 +26,10 @@ describe("unmark with nested iframes", function () {
             "each": function ($el) {
                 $elements = $elements.add($($el));
             },
-            "complete": function () {
+            "done": function () {
                 instance.unmark({
                     "iframes": true,
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });

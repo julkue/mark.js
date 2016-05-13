@@ -8,11 +8,11 @@
 jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
 describe("basic mark", function () {
-    var $ctx, ret, eachCalled, completeCalled, debugCalled;
+    var $ctx, ret, eachCalled, doneCalled, debugCalled;
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic.html");
 
-        eachCalled = completeCalled = debugCalled = 0;
+        eachCalled = doneCalled = debugCalled = 0;
         $ctx = $(".basic");
         ret = new Mark($ctx[0]).mark("lorem ipsum", {
             "diacritics": false,
@@ -20,8 +20,8 @@ describe("basic mark", function () {
             "each": function () {
                 eachCalled++;
             },
-            "complete": function () {
-                completeCalled++;
+            "done": function () {
+                doneCalled++;
                 setTimeout(function () { // otherwise "ret =" will not be executed
                     done();
                 }, 50);
@@ -47,9 +47,9 @@ describe("basic mark", function () {
     it("should call the 'each' callback for each marked element", function () {
         expect(eachCalled).toBe(4);
     });
-    it("should call the 'complete' callback once only", function (done) {
+    it("should call the 'done' callback once only", function (done) {
         setTimeout(function () {
-            expect(completeCalled).toBe(1);
+            expect(doneCalled).toBe(1);
             done();
         }, 3000);
     });

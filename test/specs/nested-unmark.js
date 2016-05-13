@@ -18,9 +18,9 @@ describe("nested unmark", function () {
             "diacritics": false,
             "separateWordSearch": false,
             "className": "mark",
-            "complete": function () {
+            "done": function () {
                 instance.unmark({
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });

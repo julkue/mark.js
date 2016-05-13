@@ -25,7 +25,7 @@ describe("mark with disabled iframes", function () {
             "each": function ($m) {
                 $elements = $elements.add($($m));
             },
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });

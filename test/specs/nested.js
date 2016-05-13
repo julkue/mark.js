@@ -17,7 +17,7 @@ describe("nested mark", function () {
             "diacritics": false,
             "separateWordSearch": false,
             "className": "mark",
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });

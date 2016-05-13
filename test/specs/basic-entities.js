@@ -17,11 +17,11 @@ describe("basic mark with HTML entities", function () {
         new Mark($ctx1[0]).mark("Lorem © ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 new Mark($ctx2[0]).mark("justo √ duo", {
                     "diacritics": false,
                     "separateWordSearch": false,
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });
