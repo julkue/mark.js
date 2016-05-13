@@ -25,7 +25,7 @@ describe("basic mark with multiple same keywords", function () {
         $ctx.remove();
     });
 
-    it("should wrap only the first occurrence", function () {
+    it("matches should be wrapped only once", function () {
         expect($ctx.find("mark")).toHaveLength(1);
     });
 });

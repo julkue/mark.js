@@ -8,13 +8,15 @@
 jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
 describe("basic mark", function () {
-    var $ctx, ret, eachCalled, doneCalled, debugCalled;
+    var $ctx1, $ctx2, ret, eachCalled, doneCalled, debugCalled, notFound;
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic.html");
 
         eachCalled = doneCalled = debugCalled = 0;
-        $ctx = $(".basic");
-        ret = new Mark($ctx[0]).mark("lorem ipsum", {
+        notFound = [];
+        $ctx1 = $(".basic > div:first-child");
+        $ctx2 = $(".basic > div:last-child");
+        ret = new Mark($ctx1[0]).mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
             "each": function () {
@@ -22,9 +24,17 @@ describe("basic mark", function () {
             },
             "done": function () {
                 doneCalled++;
-                setTimeout(function () { // otherwise "ret =" will not be executed
-                    done();
-                }, 50);
+                new Mark($ctx2[0]).mark("test", {
+                    "noMatch": function (term) {
+                        notFound.push(term);
+                    },
+                    "done": function () {
+                        // otherwise "ret =" will not be executed
+                        setTimeout(function () {
+                            done();
+                        }, 50);
+                    }
+                });
             },
             "debug": true,
             "log": {
@@ -38,14 +48,17 @@ describe("basic mark", function () {
         });
     });
     afterEach(function () {
-        $ctx.remove();
+        $ctx1.add($ctx2).remove();
     });
 
     it("should wrap matches", function () {
-        expect($ctx.find("mark")).toHaveLength(4);
+        expect($ctx1.find("mark")).toHaveLength(4);
     });
     it("should call the 'each' callback for each marked element", function () {
         expect(eachCalled).toBe(4);
+    });
+    it("should call the 'noMatch' callback for not found terms", function () {
+        expect(notFound).toEqual(["test"]);
     });
     it("should call the 'done' callback once only", function (done) {
         setTimeout(function () {

@@ -12,7 +12,7 @@ describe("basic unmark", function () {
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic.html");
 
-        $ctx = $(".basic");
+        $ctx = $(".basic > div:first-child");
         var instance = new Mark($ctx[0]);
         instance.mark("lorem ipsum", {
             "diacritics": false,

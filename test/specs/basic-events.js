@@ -14,7 +14,7 @@ describe("unmark with click event", function () {
 
         $ctx = $(".basic-events");
         eventCalled = 0;
-        $ctx.find(".event-target").on("click", function(){
+        $ctx.find(".event-target").on("click", function () {
             ++eventCalled;
         });
         var instance = new Mark($ctx[0]);
@@ -23,7 +23,7 @@ describe("unmark with click event", function () {
             "separateWordSearch": false,
             "done": function () {
                 instance.unmark({
-                    "done": function(){
+                    "done": function () {
                         $ctx.find(".event-target").click();
                         done();
                     }

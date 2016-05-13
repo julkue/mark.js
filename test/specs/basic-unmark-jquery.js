@@ -12,7 +12,7 @@ describe("basic unmark with jquery", function () {
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic.html");
 
-        $ctx = $(".basic");
+        $ctx = $(".basic > div:first-child");
         $ctx.mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
@@ -35,8 +35,8 @@ describe("basic unmark with jquery", function () {
     it("should remove all marked elements", function () {
         expect($ctx).not.toContainElement("mark");
     });
-    it("should return the provided context jquery element", function(){
+    it("should return the provided context jquery element", function () {
         expect(ret instanceof $).toBe(true);
-        expect(ret).toBeMatchedBy(".basic");
+        expect(ret).toBeMatchedBy(".basic > div:first-child");
     });
 });

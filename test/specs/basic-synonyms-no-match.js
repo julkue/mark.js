@@ -7,16 +7,19 @@
 "use strict";
 jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
-describe("basic mark with array", function () {
+describe("basic mark with synonyms and 'noMatch'", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-array-keyword.html");
+        jasmine.getFixtures().appendLoad("basic-synonyms-no-match.html");
 
-        $ctx = $(".basic-array-keyword");
+        $ctx = $(".basic-synonyms-no-match > p");
         notFound = [];
-        new Mark($ctx[0]).mark(["lorem", "ipsum", "test", "hey"], {
-            "diacritics": false,
+        new Mark($ctx[0]).mark("test", {
+            "synonyms": {
+                "test": "ipsum"
+            },
             "separateWordSearch": false,
+            "diacritics": false,
             "noMatch": function (term) {
                 notFound.push(term);
             },
@@ -29,10 +32,7 @@ describe("basic mark with array", function () {
         $ctx.remove();
     });
 
-    it("should wrap all matching keywords from the array", function () {
-        expect($ctx.find("mark")).toHaveLength(8);
-    });
-    it("should call 'noMatch' for not found array items", function () {
-        expect(notFound).toEqual(["test", "hey"]);
+    it("should not call 'noMatch' if there are synonym matches", function () {
+        expect(notFound).toEqual([]);
     });
 });

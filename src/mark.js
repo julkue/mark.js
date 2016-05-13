@@ -38,6 +38,7 @@ class Mark {
             "synonyms": {},
             "accuracy": "partially",
             "each": () => {},
+            "noMatch": () => {},
             "done": () => {},
             "complete": () => {}, // deprecated, use "done" instead
             "debug": false,
@@ -493,6 +494,11 @@ class Mark {
     }
 
     /**
+     * Callback for each wrapped element
+     * @callback Mark~wrapMatchesEachCallback
+     * @param {HTMLElement} element - The marked DOM element
+     */
+    /**
      * Wraps the specified element and class around matches in the defined
      * DOM text node element
      * @param {object} node - The DOM text node
@@ -501,9 +507,10 @@ class Mark {
      * expression that has at least two groups (like returned from
      * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
      * the second will be wrapped
+     * @param {Mark~wrapMatchesEachCallback} cb
      * @access protected
      */
-    wrapMatches(node, regex, custom = false) {
+    wrapMatches(node, regex, custom, cb) {
         const hEl = !this.opt.element ? "mark" : this.opt.element,
             index = custom ? 0 : 2;
         let match;
@@ -527,7 +534,7 @@ class Mark {
                 }
                 repl.textContent = match[index];
                 startNode.parentNode.replaceChild(repl, startNode);
-                this.opt.each(repl);
+                cb(repl);
             }
             regex.lastIndex = 0; // http://tinyurl.com/htsudjd
         }
@@ -556,11 +563,17 @@ class Mark {
      * @param {HTMLElement} element - The marked DOM element
      */
     /**
-    * These options also include the common options from
-    * {@link Mark~commonOptions}
+     * Callback if there were no matches
+     * @callback Mark~markRegExpNoMatchCallback
+     * @param {RegExp} regexp - The regular expression
+     */
+    /**
+     * These options also include the common options from
+     * {@link Mark~commonOptions}
      * @typedef Mark~markRegExpOptions
      * @type {object.<string>}
      * @property {Mark~markRegExpEachCallback} [each]
+     * @property {Mark~markRegExpNoMatchCallback} [noMatch]
      */
     /**
      * Marks a custom regular expression
@@ -571,9 +584,17 @@ class Mark {
     markRegExp(regexp, opt) {
         this.opt = opt;
         this.log(`Searching with expression "${regexp}"`);
+        let found = false;
+        const eachCb = element => {
+            found = true;
+            this.opt.each(element);
+        };
         this.forEachNode(node => {
-            this.wrapMatches(node, regexp, true);
+            this.wrapMatches(node, regexp, true, eachCb);
         }, () => {
+            if(!found) {
+                this.opt.noMatch(regexp);
+            }
             this.opt.complete(); // deprecated, use "done" instead
             this.opt.done();
         });
@@ -585,8 +606,13 @@ class Mark {
      * @param {HTMLElement} element - The marked DOM element
      */
     /**
-    * These options also include the common options from
-    * {@link Mark~commonOptions}
+     * Callback if there were no matches
+     * @callback Mark~markNoMatchCallback
+     * @param {RegExp} term - The search term that was not found
+     */
+    /**
+     * These options also include the common options from
+     * {@link Mark~commonOptions}
      * @typedef Mark~markOptions
      * @type {object.<string>}
      * @property {boolean} [separateWordSearch=true] - Whether to search for
@@ -607,6 +633,7 @@ class Mark {
      *   is equivalent to the previous option <i>wordBoundary</i></li>
      * </ul>
      * @property {Mark~markEachCallback} [each]
+     * @property {Mark~markNoMatchCallback} [noMatch]
      */
     /**
      * Marks the specified search terms
@@ -627,11 +654,19 @@ class Mark {
             this.opt.done();
         }
         kwArr.forEach(kw => {
-            let regex = new RegExp(this.createRegExp(kw), "gmi");
+            let regex = new RegExp(this.createRegExp(kw), "gmi"),
+                found = false;
+            const eachCb = element => {
+                found = true;
+                this.opt.each(element);
+            };
             this.log(`Searching with expression "${regex}"`);
             this.forEachNode(node => {
-                this.wrapMatches(node, regex);
+                this.wrapMatches(node, regex, false, eachCb);
             }, () => {
+                if(!found) {
+                    this.opt.noMatch(kw);
+                }
                 if(kwArr[kwArrLen - 1] === kw) {
                     this.opt.complete(); // deprecated, use "done" instead
                     this.opt.done();

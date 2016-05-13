@@ -8,15 +8,19 @@
 jasmine.getFixtures().fixturesPath = "base/test/fixtures";
 
 describe("basic mark with separate word search", function () {
-    var $ctx1, $ctx2;
+    var $ctx1, $ctx2, notFound;
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic-separate-word-search.html");
 
         $ctx1 = $(".basic-separate > p:first-child");
         $ctx2 = $(".basic-separate > p:last-child");
-        new Mark($ctx1[0]).mark("lorem ipsum", {
+        notFound = [];
+        new Mark($ctx1[0]).mark("lorem ipsum test", {
             "diacritics": false,
             "separateWordSearch": true,
+            "noMatch": function (term) {
+                notFound.push(term);
+            },
             "done": function () {
                 new Mark($ctx2[0]).mark(["lorem ipsum"], {
                     "diacritics": false,
@@ -35,5 +39,8 @@ describe("basic mark with separate word search", function () {
     it("should wrap separated words", function () {
         expect($ctx1.find("mark")).toHaveLength(8);
         expect($ctx2.find("mark")).toHaveLength(8);
+    });
+    it("should work with 'noMatch'", function () {
+        expect(notFound).toEqual(["test"]);
     });
 });

@@ -12,12 +12,13 @@ describe("basic mark called with jquery", function () {
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic.html");
 
-        $ctx = $(".basic");
+        $ctx = $(".basic > div:first-child");
         ret = $ctx.mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
             "done": function () {
-                setTimeout(function(){ // otherwise "ret =" will not be executed
+                // otherwise "ret =" will not be executed
+                setTimeout(function () {
                     done();
                 }, 50);
             }
@@ -30,8 +31,8 @@ describe("basic mark called with jquery", function () {
     it("should wrap matches", function () {
         expect($ctx.find("mark")).toHaveLength(4);
     });
-    it("should return the provided context jquery element", function(){
+    it("should return the provided context jquery element", function () {
         expect(ret instanceof $).toBe(true);
-        expect(ret).toBeMatchedBy(".basic");
+        expect(ret).toBeMatchedBy(".basic > div:first-child");
     });
 });

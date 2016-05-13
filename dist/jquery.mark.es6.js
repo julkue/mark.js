@@ -34,6 +34,7 @@
                 "synonyms": {},
                 "accuracy": "partially",
                 "each": () => {},
+                "noMatch": () => {},
                 "done": () => {},
                 "complete": () => {},
                 "debug": false,
@@ -304,7 +305,7 @@
             }, end);
         }
 
-        wrapMatches(node, regex, custom = false) {
+        wrapMatches(node, regex, custom, cb) {
             const hEl = !this.opt.element ? "mark" : this.opt.element,
                   index = custom ? 0 : 2;
             let match;
@@ -324,7 +325,7 @@
                     }
                     repl.textContent = match[index];
                     startNode.parentNode.replaceChild(repl, startNode);
-                    this.opt.each(repl);
+                    cb(repl);
                 }
                 regex.lastIndex = 0;
             }
@@ -333,9 +334,17 @@
         markRegExp(regexp, opt) {
             this.opt = opt;
             this.log(`Searching with expression "${ regexp }"`);
+            let found = false;
+            const eachCb = element => {
+                found = true;
+                this.opt.each(element);
+            };
             this.forEachNode(node => {
-                this.wrapMatches(node, regexp, true);
+                this.wrapMatches(node, regexp, true, eachCb);
             }, () => {
+                if (!found) {
+                    this.opt.noMatch(regexp);
+                }
                 this.opt.complete();
                 this.opt.done();
             });
@@ -353,11 +362,19 @@
                 this.opt.done();
             }
             kwArr.forEach(kw => {
-                let regex = new RegExp(this.createRegExp(kw), "gmi");
+                let regex = new RegExp(this.createRegExp(kw), "gmi"),
+                    found = false;
+                const eachCb = element => {
+                    found = true;
+                    this.opt.each(element);
+                };
                 this.log(`Searching with expression "${ regex }"`);
                 this.forEachNode(node => {
-                    this.wrapMatches(node, regex);
+                    this.wrapMatches(node, regex, false, eachCb);
                 }, () => {
+                    if (!found) {
+                        this.opt.noMatch(kw);
+                    }
                     if (kwArr[kwArrLen - 1] === kw) {
                         this.opt.complete();
                         this.opt.done();

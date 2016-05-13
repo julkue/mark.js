@@ -12,8 +12,8 @@ describe("basic mark with synonyms", function () {
     beforeEach(function (done) {
         jasmine.getFixtures().appendLoad("basic-synonyms.html");
 
-        $ctx1 = $(".basic-synonyms > p:first-child");
-        $ctx2 = $(".basic-synonyms > p:not(:first-child)");
+        $ctx1 = $(".basic-synonyms > div:nth-child(1)");
+        $ctx2 = $(".basic-synonyms > div:nth-child(2)");
         new Mark($ctx1[0]).mark("lorem", {
             "synonyms": {
                 "lorem": "ipsum"
@@ -21,7 +21,7 @@ describe("basic mark with synonyms", function () {
             "separateWordSearch": false,
             "diacritics": false,
             "done": function () {
-                new Mark($ctx2.get()).mark(["one", "2", "lüfte"], {
+                new Mark($ctx2[0]).mark(["one", "2", "lüfte"], {
                     "separateWordSearch": false,
                     "diacritics": false,
                     "synonyms": {
