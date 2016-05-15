@@ -1,13 +1,15 @@
 language: node_js
 node_js:
   - "stable"
-before_script:
+install:
   - npm install grunt-cli -g
   - npm install bower -g
+  - npm install
   - bower install
   - gem update --system
   - gem install compass
-script:
+before_script:
   - node generate-html.js
   - grunt prod --absolutePaths=true
-  - grunt deploy-ftp --dest="httpdocs/"
+script:
+  - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && grunt deploy-ftp --dest="httpdocs/" || false'
