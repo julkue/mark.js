@@ -10,21 +10,21 @@ describe("mark with regular expression", function () {
     beforeEach(function (done) {
         loadFixtures("regexp.html");
 
-        $ctx1 = $(".regexp > p:first-child");
-        $ctx2 = $(".regexp > p:last-child");
+        $ctx1 = $(".regexp > div:first-child");
+        $ctx2 = $(".regexp > div:last-child");
         errorThrown = false;
         ret = new Mark($ctx1[0]).markRegExp(/Lor[^]?m/gmi, {
             "done": function () {
-                try{
+                try {
                     new Mark($ctx2[0]).markRegExp(/(Lor)([^]?m)/gmi, {
-                        "done": function(){
+                        "done": function () {
                             // timeout, otherwise "ret =" will not be executed
                             setTimeout(function () {
                                 done();
                             }, 50);
                         }
                     });
-                } catch(e){
+                } catch(e) {
                     errorThrown = true;
                     done();
                 }
@@ -35,7 +35,7 @@ describe("mark with regular expression", function () {
     it("should wrap matches", function () {
         expect($ctx1.find("mark")).toHaveLength(4);
     });
-    it("should silently ignore groups in regular expression", function(){
+    it("should silently ignore groups in regular expression", function () {
         expect($ctx2.find("mark")).toHaveLength(4);
         expect(errorThrown).toBe(false);
     });

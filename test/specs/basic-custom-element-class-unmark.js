@@ -10,7 +10,7 @@ describe("basic unmark with custom element and class", function () {
     beforeEach(function (done) {
         loadFixtures("basic-custom-element-class.html");
 
-        $ctx = $(".basic-custom-element-class > p:first-child");
+        $ctx = $(".basic-custom-element-class > div:first-child");
         var instance = new Mark($ctx[0]);
         instance.mark("lorem ipsum", {
             "diacritics": false,

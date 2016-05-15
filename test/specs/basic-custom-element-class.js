@@ -10,8 +10,8 @@ describe("basic mark with custom element and class", function () {
     beforeEach(function (done) {
         loadFixtures("basic-custom-element-class.html");
 
-        $ctx1 = $(".basic-custom-element-class > p:first-child");
-        $ctx2 = $(".basic-custom-element-class > p:last-child");
+        $ctx1 = $(".basic-custom-element-class > div:first-child");
+        $ctx2 = $(".basic-custom-element-class > div:last-child");
         new Mark($ctx1[0]).mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,

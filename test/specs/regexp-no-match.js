@@ -10,11 +10,11 @@ describe("mark with regular expression and 'noMatch'", function () {
     beforeEach(function (done) {
         loadFixtures("regexp.html");
 
-        $ctx = $(".regexp > p:first-child");
+        $ctx = $(".regexp > div:first-child");
         notFound = null;
         notFoundCalled = 0;
         new Mark($ctx[0]).markRegExp(/test/gmi, {
-            "noMatch": function(regexp){
+            "noMatch": function (regexp) {
                 notFoundCalled++;
                 notFound = regexp;
             },

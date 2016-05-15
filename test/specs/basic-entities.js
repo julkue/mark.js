@@ -10,8 +10,8 @@ describe("basic mark with HTML entities", function () {
     beforeEach(function (done) {
         loadFixtures("basic-entities.html");
 
-        $ctx1 = $(".basic-entities > p:first-child");
-        $ctx2 = $(".basic-entities > p:last-child");
+        $ctx1 = $(".basic-entities > div:first-child");
+        $ctx2 = $(".basic-entities > div:last-child");
         new Mark($ctx1[0]).mark("Lorem © ipsum", {
             "diacritics": false,
             "separateWordSearch": false,

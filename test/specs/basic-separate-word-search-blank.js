@@ -10,9 +10,9 @@ describe("basic mark with separateWordSearch and blanks", function () {
     beforeEach(function (done) {
         loadFixtures("basic-separate-word-search-blank.html");
 
-        $ctx1 = $(".basic-separate-blank > p:nth-child(1)");
-        $ctx2 = $(".basic-separate-blank > p:nth-child(2)");
-        $ctx3 = $(".basic-separate-blank > p:nth-child(3)");
+        $ctx1 = $(".basic-separate-blank > div:nth-child(1)");
+        $ctx2 = $(".basic-separate-blank > div:nth-child(2)");
+        $ctx3 = $(".basic-separate-blank > div:nth-child(3)");
         new Mark($ctx1[0]).mark("lorem ", {
             "diacritics": false,
             "separateWordSearch": true,

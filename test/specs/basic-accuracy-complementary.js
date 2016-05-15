@@ -10,8 +10,8 @@ describe("basic mark with complementary accuracy", function () {
     beforeEach(function (done) {
         loadFixtures("basic-accuracy-complementary.html");
 
-        $ctx1 = $(".basic-accuracy-complementary > p:first-child");
-        $ctx2 = $(".basic-accuracy-complementary > p:last-child");
+        $ctx1 = $(".basic-accuracy-complementary > div:first-child");
+        $ctx2 = $(".basic-accuracy-complementary > div:last-child");
         new Mark($ctx1[0]).mark("lorem", {
             "accuracy": "complementary",
             "separateWordSearch": false,

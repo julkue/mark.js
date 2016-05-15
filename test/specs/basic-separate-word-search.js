@@ -10,8 +10,8 @@ describe("basic mark with separate word search", function () {
     beforeEach(function (done) {
         loadFixtures("basic-separate-word-search.html");
 
-        $ctx1 = $(".basic-separate > p:first-child");
-        $ctx2 = $(".basic-separate > p:last-child");
+        $ctx1 = $(".basic-separate > div:first-child");
+        $ctx2 = $(".basic-separate > div:last-child");
         notFound = [];
         new Mark($ctx1[0]).mark("lorem ipsum test", {
             "diacritics": false,
