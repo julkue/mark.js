@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.0.1
+ * mark.js v6.1.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -330,9 +330,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: "wrapMatches",
-            value: function wrapMatches(node, regex) {
-                var custom = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
-
+            value: function wrapMatches(node, regex, custom, cb) {
                 var hEl = !this.opt.element ? "mark" : this.opt.element,
                     index = custom ? 0 : 2;
                 var match = void 0;
@@ -352,10 +350,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         }
                         repl.textContent = match[index];
                         startNode.parentNode.replaceChild(repl, startNode);
-                        this.opt.each(repl);
+                        cb(repl);
                     }
                     regex.lastIndex = 0;
                 }
+            }
+        }, {
+            key: "unwrapMatches",
+            value: function unwrapMatches(node) {
+                var parent = node.parentNode;
+                var docFrag = document.createDocumentFragment();
+                while (node.firstChild) {
+                    docFrag.appendChild(node.removeChild(node.firstChild));
+                }
+                parent.replaceChild(docFrag, node);
+                parent.normalize();
             }
         }, {
             key: "markRegExp",
@@ -364,9 +373,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 this.opt = opt;
                 this.log("Searching with expression \"" + regexp + "\"");
+                var found = false;
+                var eachCb = function eachCb(element) {
+                    found = true;
+                    _this5.opt.each(element);
+                };
                 this.forEachNode(function (node) {
-                    _this5.wrapMatches(node, regexp, true);
-                }, this.opt.complete);
+                    _this5.wrapMatches(node, regexp, true, eachCb);
+                }, function () {
+                    if (!found) {
+                        _this5.opt.noMatch(regexp);
+                    }
+                    _this5.opt.complete();
+                    _this5.opt.done();
+                });
             }
         }, {
             key: "mark",
@@ -383,15 +403,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 if (kwArrLen === 0) {
                     this.opt.complete();
+                    this.opt.done();
                 }
                 kwArr.forEach(function (kw) {
-                    var regex = new RegExp(_this6.createRegExp(kw), "gmi");
+                    var regex = new RegExp(_this6.createRegExp(kw), "gmi"),
+                        found = false;
+                    var eachCb = function eachCb(element) {
+                        found = true;
+                        _this6.opt.each(element);
+                    };
                     _this6.log("Searching with expression \"" + regex + "\"");
                     _this6.forEachNode(function (node) {
-                        _this6.wrapMatches(node, regex);
+                        _this6.wrapMatches(node, regex, false, eachCb);
                     }, function () {
+                        if (!found) {
+                            _this6.opt.noMatch(kw);
+                        }
                         if (kwArr[kwArrLen - 1] === kw) {
                             _this6.opt.complete();
+                            _this6.opt.done();
                         }
                     });
                 });
@@ -410,16 +440,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.log("Removal selector \"" + sel + "\"");
                 this.forEachElement(function (el) {
                     if (_this7.matches(el, sel)) {
-                        var parent = el.parentNode;
-                        var docFrag = document.createDocumentFragment();
-                        while (el.firstChild) {
-                            docFrag.appendChild(el.removeChild(el.firstChild));
-                        }
-                        parent.replaceChild(docFrag, el);
-
-                        parent.normalize();
+                        _this7.unwrapMatches(el);
                     }
-                }, this.opt.complete, false);
+                }, function () {
+                    _this7.opt.complete();
+                    _this7.opt.done();
+                }, false);
             }
         }, {
             key: "opt",
@@ -434,6 +460,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "synonyms": {},
                     "accuracy": "partially",
                     "each": function each() {},
+                    "noMatch": function noMatch() {},
+                    "done": function done() {},
                     "complete": function complete() {},
                     "debug": false,
                     "log": window.console

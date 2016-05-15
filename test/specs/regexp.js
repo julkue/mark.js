@@ -5,42 +5,37 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("mark with regular expression", function () {
     var $ctx1, $ctx2, errorThrown, ret;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("regexp.html");
+        loadFixtures("regexp.html");
 
-        $ctx1 = $(".regexp > p:first-child");
-        $ctx2 = $(".regexp > p:last-child");
+        $ctx1 = $(".regexp > div:first-child");
+        $ctx2 = $(".regexp > div:last-child");
         errorThrown = false;
         ret = new Mark($ctx1[0]).markRegExp(/Lor[^]?m/gmi, {
-            "complete": function () {
-                try{
+            "done": function () {
+                try {
                     new Mark($ctx2[0]).markRegExp(/(Lor)([^]?m)/gmi, {
-                        "complete": function(){
+                        "done": function () {
                             // timeout, otherwise "ret =" will not be executed
                             setTimeout(function () {
                                 done();
                             }, 50);
                         }
                     });
-                } catch(e){
+                } catch(e) {
                     errorThrown = true;
                     done();
                 }
             }
         });
     });
-    afterEach(function () {
-        $ctx1.add($ctx2).remove();
-    });
 
     it("should wrap matches", function () {
         expect($ctx1.find("mark")).toHaveLength(4);
     });
-    it("should silently ignore groups in regular expression", function(){
+    it("should silently ignore groups in regular expression", function () {
         expect($ctx2.find("mark")).toHaveLength(4);
         expect(errorThrown).toBe(false);
     });

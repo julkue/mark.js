@@ -5,20 +5,18 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic unmark with jquery", function () {
     var $ctx, ret;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic.html");
+        loadFixtures("basic.html");
 
-        $ctx = $(".basic");
+        $ctx = $(".basic > div:first-child");
         $ctx.mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 ret = $ctx.unmark({
-                    "complete": function () {
+                    "done": function () {
                         // otherwise "ret =" will not be executed
                         setTimeout(function () {
                             done();
@@ -28,15 +26,12 @@ describe("basic unmark with jquery", function () {
             }
         });
     });
-    afterEach(function () {
-        $ctx.remove();
-    });
 
     it("should remove all marked elements", function () {
         expect($ctx).not.toContainElement("mark");
     });
-    it("should return the provided context jquery element", function(){
+    it("should return the provided context jquery element", function () {
         expect(ret instanceof $).toBe(true);
-        expect(ret).toBeMatchedBy(".basic");
+        expect(ret).toBeMatchedBy(".basic > div:first-child");
     });
 });

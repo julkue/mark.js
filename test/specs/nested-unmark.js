@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("nested unmark", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("nested.html");
+        loadFixtures("nested.html");
 
         $ctx = $(".nested");
         var instance = new Mark($ctx[0]);
@@ -18,17 +16,14 @@ describe("nested unmark", function () {
             "diacritics": false,
             "separateWordSearch": false,
             "className": "mark",
-            "complete": function () {
+            "done": function () {
                 instance.unmark({
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should remove all marked elements", function () {

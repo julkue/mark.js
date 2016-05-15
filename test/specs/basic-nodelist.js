@@ -5,24 +5,19 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark called with a context NodeList", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-nodelist.html");
+        loadFixtures("basic-nodelist.html");
 
         $ctx = $(".basic-nodelist");
         new Mark(document.querySelectorAll(".basic-nodelist")).mark("lorem", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should wrap matches", function () {

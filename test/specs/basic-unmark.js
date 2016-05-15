@@ -5,21 +5,19 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic unmark", function () {
     var $ctx, ret;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic.html");
+        loadFixtures("basic.html");
 
-        $ctx = $(".basic");
+        $ctx = $(".basic > div:first-child");
         var instance = new Mark($ctx[0]);
         instance.mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 ret = instance.unmark({
-                    "complete": function () {
+                    "done": function () {
                         // otherwise "ret =" will not be executed
                         setTimeout(function () {
                             done();
@@ -28,9 +26,6 @@ describe("basic unmark", function () {
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should remove all marked elements", function () {

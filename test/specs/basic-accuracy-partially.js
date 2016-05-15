@@ -5,24 +5,19 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with partially accuracy", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-accuracy-partially.html");
+        loadFixtures("basic-accuracy-partially.html");
 
         $ctx = $(".basic-accuracy-partially");
         new Mark($ctx[0]).mark("lorem", {
             "accuracy": "partially",
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should wrap the right matches", function () {

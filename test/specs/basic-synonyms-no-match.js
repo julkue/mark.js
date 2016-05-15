@@ -5,16 +5,19 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with array", function () {
+describe("basic mark with synonyms and 'noMatch'", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
-        loadFixtures("basic-array-keyword.html");
+        loadFixtures("basic-synonyms-no-match.html");
 
-        $ctx = $(".basic-array-keyword");
+        $ctx = $(".basic-synonyms-no-match > p");
         notFound = [];
-        new Mark($ctx[0]).mark(["lorem", "ipsum", "test", "hey"], {
-            "diacritics": false,
+        new Mark($ctx[0]).mark("test", {
+            "synonyms": {
+                "test": "ipsum"
+            },
             "separateWordSearch": false,
+            "diacritics": false,
             "noMatch": function (term) {
                 notFound.push(term);
             },
@@ -24,10 +27,7 @@ describe("basic mark with array", function () {
         });
     });
 
-    it("should wrap all matching keywords from the array", function () {
-        expect($ctx.find("mark")).toHaveLength(8);
-    });
-    it("should call 'noMatch' for not found array items", function () {
-        expect(notFound).toEqual(["test", "hey"]);
+    it("should not call 'noMatch' if there are synonym matches", function () {
+        expect(notFound).toEqual([]);
     });
 });

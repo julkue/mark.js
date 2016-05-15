@@ -5,12 +5,10 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with filter", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-filter.html");
+        loadFixtures("basic-filter.html");
 
         $ctx = $(".basic-filter");
         new Mark($ctx[0]).mark("lorem ipsum", {
@@ -20,13 +18,10 @@ describe("basic mark with filter", function () {
                 "*[data-ignore]",
                 ".ignore"
             ],
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should exclude matches that are inside a filter selector", function () {

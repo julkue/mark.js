@@ -5,23 +5,18 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with diacritics", function () {
     var $ctx;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-diacritics.html");
+        loadFixtures("basic-diacritics.html");
 
         $ctx = $(".basic-diacritics");
         new Mark($ctx[0]).mark(["dolor", "amet", "justo"], {
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 done();
             }
         });
-    });
-    afterEach(function () {
-        $ctx.remove();
     });
 
     it("should treat normal and diacritic characters equally", function () {

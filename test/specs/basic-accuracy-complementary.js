@@ -5,31 +5,26 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
-
 describe("basic mark with complementary accuracy", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
-        jasmine.getFixtures().appendLoad("basic-accuracy-complementary.html");
+        loadFixtures("basic-accuracy-complementary.html");
 
-        $ctx1 = $(".basic-accuracy-complementary > p:first-child");
-        $ctx2 = $(".basic-accuracy-complementary > p:last-child");
+        $ctx1 = $(".basic-accuracy-complementary > div:first-child");
+        $ctx2 = $(".basic-accuracy-complementary > div:last-child");
         new Mark($ctx1[0]).mark("lorem", {
             "accuracy": "complementary",
             "separateWordSearch": false,
-            "complete": function () {
+            "done": function () {
                 new Mark($ctx2[0]).mark("lorem", {
                     "accuracy": "complementary",
                     "separateWordSearch": true,
-                    "complete": function () {
+                    "done": function () {
                         done();
                     }
                 });
             }
         });
-    });
-    afterEach(function () {
-        $ctx1.add($ctx2).remove();
     });
 
     it("should wrap the right matches", function () {

@@ -5,26 +5,24 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("nested mark", function () {
+describe("basic mark with synonyms and diacritics", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("nested.html");
+        loadFixtures("basic-synonyms-diacritics.html");
 
-        $ctx = $(".nested");
-        new Mark($ctx[0]).mark("lorem", {
-            "diacritics": false,
+        $ctx = $(".basic-synonyms-diacritics");
+        new Mark($ctx[0]).mark(["dolor", "amet"], {
             "separateWordSearch": false,
-            "className": "mark",
+            "synonyms": {
+                "dolor": "justo"
+            },
             "done": function () {
                 done();
             }
         });
     });
 
-    it("should wrap matches", function () {
-        expect($ctx.find("mark.mark")).toHaveLength(7);
-    });
-    it("should also wrap matches in nested mark elements", function () {
-        expect($ctx.find(".nested-mark > mark.mark")).toHaveLength(1);
+    it("should find synonyms with diacritics", function () {
+        expect($ctx.find("mark")).toHaveLength(13);
     });
 });
