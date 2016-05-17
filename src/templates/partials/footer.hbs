@@ -35,6 +35,30 @@
             </div>
         </footer>
     </div>
+    <div id="downloadModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Download {{defaults.title}}</h4>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="lead">If {{defaults.title}} made you happy then give a thanks with a star.<p>
+                    {{> gh-star}}
+                </div>
+                <div class="modal-footer">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-primary pull-left" data-action="download">Download</button>
+                        </div>
+                        <div class="col-xs-6">
+                            <button type="button" class="btn btn-default pull-right" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="vendor/requirejs/require.js" data-main="src/app/main" async></script>
 </body>
 </html>

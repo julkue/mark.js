@@ -58,6 +58,10 @@ input[type="radio"] {
         }
     }
 }
+.modal-open {
+    overflow: auto;
+    padding-right: 0 !important;
+}
 @import "_partials/navbar";
 @import "_partials/sidebar";
 @import "_partials/jumbotron";

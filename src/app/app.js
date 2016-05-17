@@ -20,12 +20,17 @@
                 $body = $("body"),
 
                 $content = $("main"),
-                $anchorLinks = $body.find("a[href*='#']:not([href='#'])"),
+                $links = $body.find("a"),
+                $anchorLinks = $links.filter("a[href*='#']:not([href='#'])"),
+                $downloadLinks = $links.filter("a[href$='.zip']"),
                 $tables = $content.find("table"),
                 $nav = $("nav"),
                 $navList = $nav.find("> ul"),
                 $navbar = $(".navbar"),
                 $jumbotron = $(".jumbotron"),
+
+                $downloadModal = $("#downloadModal"),
+                $downloadModalBtn = $downloadModal.find("button[data-action='download']"),
 
                 $footer = $("footer");
 
@@ -87,6 +92,25 @@
             }
 
             /**
+             * Initializes a modal that will appear in front of the download
+             * button
+             */
+            function initDownloadModal(){
+                $downloadLinks.on("click", function(e){
+                    e.preventDefault();
+                    var $link = $(this);
+                    $downloadModal.modal({
+                        "show": true,
+                        "backdrop": true
+                    });
+                    $downloadModalBtn.on("click", function(e){
+                        e.preventDefault();
+                        window.location.href = $link.attr("href");
+                    });
+                });
+            }
+
+            /**
              * Sets a class "no-touch" on the body if the current device is not
              * a touch device. This can help to set specific styles (e.g.
              * :hover) only on particular devices.
@@ -102,6 +126,7 @@
             initSyntaxHighlighting();
             initAffixNav();
             initScrollTo();
+            initDownloadModal();
             setNoTouchClass();
 
         });
