@@ -38,5 +38,13 @@
             "name": "Compatibility",
             "noHeadings": true
         }
+    },
+    "contribute": {
+        "pattern": "contribute/*.md",
+        "refer": false,
+        "metadata": {
+            "name": "Contribute",
+            "noHeadings": true
+        }
     }
 }
