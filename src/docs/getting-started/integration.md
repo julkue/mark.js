@@ -16,8 +16,8 @@ mark.js ships with a few files that can be found under `./dist/`:
   - `jquery.mark.es6.min.js` - Compressed ES6
 
 If you don't know what ES5 or ES6 ([ECMAScript][ecmascript]) is, then simply go
-ahead with a ES5 file as it might be in the JavaScript syntax you are familiar
-with.
+ahead with a ES5 file as it might be in the JavaScript syntax you are using in
+your project.
 
 After you have downloaded mark.js and chosen the appropriate file, you need to
 embed the file, e.g. as follows:
