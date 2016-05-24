@@ -9,7 +9,7 @@ contributing to the website of mark.js, please head over to the
 If you have a question, problem, feature request or found a bug please open an
 [issue][issue].
 
-### 1.1 Questions, problems and bugs
+### 1.1 Questions, Problems and Bugs 
 
 For each issue please provide:
 - What kind of browser and version you are using
@@ -18,7 +18,7 @@ For each issue please provide:
 - The exact steps to reproduce (bugs and problems)
 - A [fiddle][jsfiddle] that demonstrates your issue (if possible)
 
-### 1.2 Feature requests
+### 1.2 Feature Requests
 
 Please provide the following information:
 - Your use case, why your enhancement is necessary
@@ -33,13 +33,25 @@ _Requirements: [NodeJS][nodejs] (including npm) and [Bower][bower] installed._
 Before you start developing, you should clone or download this repository and run:
 
 ```bash
-bower install
-npm install
+$ bower install
+$ npm install
 ```
 
 Now you are ready to develop.
 
-### 2.2 ES6 (ES2015) information
+### 2.2 Source Code Documentation
+
+[JSDOC][jsdoc] is being used as an API documentation generator. If you want to extend
+mark.js it might be helpful for you to view the documentation first, to learn
+more about the internal structure. Simply run:
+
+```bash
+$ grunt dist
+```
+
+and open the file `./build/doc/index.html`.
+
+### 2.3 ES6 (ES2015) Information
 
 mark.js was developed in ECMAScript 6. But as most browsers don't fully support
 ES6 yet, it has only those features implemented that can be converted "locally"
@@ -47,7 +59,7 @@ to ES5 using [Babel][babel] without making a [polyfill][babel-polyfill]
 necessary. This means to forgo using generators, Set, Map, for...of loops etc..  
 
 
-### 2.3 Grunt tasks
+### 2.4 Grunt Tasks
 
 The project is using [Grunt][grunt] as a base, [Karma][karma] as a task runner
 and [Jasmine][jasmine] (with [jasmine-jquery][jasmine-jquery]) as a testing
@@ -62,7 +74,7 @@ framework.
 
 _Note: Run tasks with `$ grunt [task]` (Replace "[task]" with the actual task name)._
 
-### 2.4 Pull Requests
+### 2.5 Pull Requests
 
 Pull requests are very much appreciated! :thumbsup:
 
@@ -79,7 +91,7 @@ Please note the following things when doing a pull request:
 - Make sure that you format code to fit the [code style][code-style]
 - Pull requests will not be accepted if they worsen test coverage significantly
 
-### 2.5 Contribution and License Agreement
+### 2.6 Contribution and License Agreement
 
 If you contribute to this project, you are implicitly allowing your code to be
 distributed under [this license][license]. You are also implicitly verifying
@@ -96,6 +108,7 @@ __Thank you for contributing!__
 [karma]: http://karma-runner.github.io/latest/index.html
 [jasmine]: http://jasmine.github.io/
 [jasmine-jquery]: https://github.com/velesin/jasmine-jquery
+[jsdoc]: http://usejsdoc.org/about-getting-started.html
 [babel-polyfill]: https://babeljs.io/docs/usage/polyfill/
 [babel]: https://babeljs.io/
 [code-style]: https://github.com/julmot/mark.js/blob/master/.jsbeautifyrc
