@@ -38,10 +38,18 @@ nav {
                     padding: 10px !important;
                 }
             }
+            /* hide nested submenus until active */
+            .nav {
+                display: none;
+            }
             &.active {
-                 > a,
-                > ul > li.active > a {
+                > ul > li.active > a,
+                > a {
                     border-left: 1px solid $navActiveBorder;
+                }
+                /* show nested submenus */
+                > ul{
+                    display: block;
                 }
             }
         }
