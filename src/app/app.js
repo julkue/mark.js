@@ -38,14 +38,14 @@
              * Smooth scroll to anchors on the same page
              */
             function initScrollTo() {
-                var scrollTo = function (anchor) {
-                    $html.add($body).animate({
-                        "scrollTop": $(anchor).offset().top
-                    }, "fast");
-                }
                 $anchorLinks.on("click", function (event) {
                     event.preventDefault();
-                    scrollTo($(this).attr("href"));
+                    var offset = $($(this).attr("href")).offset().top;
+                    $html.add($body).animate({
+                        "scrollTop": offset
+                    }, {
+                        "duration": 0
+                    });
                 });
             }
 
@@ -95,15 +95,15 @@
              * Initializes a modal that will appear in front of the download
              * button
              */
-            function initDownloadModal(){
-                $downloadLinks.on("click", function(e){
+            function initDownloadModal() {
+                $downloadLinks.on("click", function (e) {
                     e.preventDefault();
                     var $link = $(this);
                     $downloadModal.modal({
                         "show": true,
                         "backdrop": true
                     });
-                    $downloadModalBtn.on("click", function(e){
+                    $downloadModalBtn.on("click", function (e) {
                         e.preventDefault();
                         window.location.href = $link.attr("href");
                     });

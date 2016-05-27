@@ -38,20 +38,23 @@ nav {
                     padding: 10px !important;
                 }
             }
-            /* hide nested submenus until active */
-            .nav {
-                display: none;
-            }
             &.active {
-                > ul > li.active > a,
+                 > ul > li.active > a,
                 > a {
                     border-left: 1px solid $navActiveBorder;
                 }
-                /* show nested submenus */
-                > ul{
-                    display: block;
-                }
             }
+        }
+    }
+}
+nav {
+    /* show nested submenus only when active */
+    > ul {
+        .nav {
+            display: none;
+        }
+        li.active .nav{
+            display: block;
         }
     }
 }
