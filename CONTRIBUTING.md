@@ -31,19 +31,26 @@ _Requirements: [node.js][node-js] (including npm), [Bower][bower] and
 Before you start developing, you should clone or download this repository and
 run:
 
+```bash
+$ bower install
+$ npm install
 ```
-bower install
-npm install
+
+The build to generate HTML files from the docs (written in Markdown) can be
+started using:
+
+```bash
+$ node generate-html.js
 ```
 
 To compile, compress and optimize the website, [wabp][wabp] is used as a
-boilerplate. Please see the grunt tasks and project structure there.  
-Additionally a build to generate HTML files from the docs (written in Markdown)
-was implemented. This build can be started using:
+boilerplate. For development you can use:
 
+```bash
+$ grunt dev
 ```
-node generate-html.js
-```
+
+Please see the grunt tasks and project structure [there][wabp].
 
 Docs are located in `./src/docs/`, handlebars templates in `./src/templates/`.
 
