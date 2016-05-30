@@ -45,6 +45,20 @@ handlebars.registerHelper("inc", function (value) {
 handlebars.registerHelper("randomStr", function (value) {
     return Math.random().toString(36).substring(7);
 });
+handlebars.registerHelper("ifNotFalse", function (value, options) {
+    if(value !== false) {
+        return options.fn(this);
+    }
+    return options.inverse(this);
+});
+handlebars.registerHelper("ifArticlesWithHeading", function (stack, options) {
+    for(var i = 0, len = stack.length; i < len; i++){
+        if(stack[i]["heading"] !== false){
+            return options.fn(this);
+        }
+    }
+    return options.inverse(this);
+});
 handlebars.registerHelper("anchor", function (str) {
     return str.replace(/[^\w\s]/gi, "").replace(/[\s]/gi, "-").toLowerCase();
 });

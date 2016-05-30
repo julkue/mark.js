@@ -10,13 +10,15 @@
     {{#each collections}}
         <li>
             <a href="#{{anchor metadata.name}}">{{inc @index}}. {{metadata.name}}</a>
-            {{#unless metadata.noHeadings}}
+            {{#ifArticlesWithHeading this}}
                 <ul class="nav">
-                    {{#each this}}
+                {{#each this}}
+                    {{#ifNotFalse heading}}
                         <li><a href="#{{anchor title}}">{{inc @../index}}.{{inc @index}} {{{title}}}</a></li>
-                    {{/each}}
+                    {{/ifNotFalse}}
+                {{/each}}
                 </ul>
-            {{/unless}}
+            {{/ifArticlesWithHeading}}
         </li>
     {{/each}}
 </ul>

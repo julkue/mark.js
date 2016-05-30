@@ -1,5 +1,5 @@
 ---
-title: Examples
+heading: false
 ---
 
 Have a look at the [Configurator][configurator] to see mark.js in action.

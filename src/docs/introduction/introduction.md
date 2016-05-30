@@ -1,5 +1,5 @@
 ---
-title: Introduction
+heading: false
 ---
 
 {{defaults.title}} is a text highlighter written in JavaScript. It can be

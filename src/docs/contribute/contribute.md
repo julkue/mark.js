@@ -1,5 +1,5 @@
 ---
-title: Contribute
+heading: false
 ---
 
 If you are having any questions, would like to submit a feature request or

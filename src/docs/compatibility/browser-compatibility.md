@@ -1,5 +1,5 @@
 ---
-title: Browser compatibility
+heading: false
 ---
 
 {{defaults.title}} works in all modern browsers.  

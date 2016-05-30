@@ -12,10 +12,10 @@
         <h2>{{inc @index}}. {{metadata.name}}</h2>
         {{#each this}}
             <article>
-                {{#unless ../metadata.noHeadings}}
+                {{#ifNotFalse heading}}
                     <a id="{{anchor title}}"></a>
                     <h3>{{inc @../index}}.{{inc @index}} {{title}}</h3>
-                {{/unless}}
+                {{/ifNotFalse}}
                 {{{contents}}}
             </article>
         {{/each}}

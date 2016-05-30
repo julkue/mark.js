@@ -3,16 +3,14 @@
         "pattern": "introduction/*.md",
         "refer": false,
         "metadata": {
-            "name": "Getting to Know mark.js",
-            "noHeadings": true
+            "name": "Getting to Know mark.js"
         }
     },
     "examples": {
         "pattern": "examples/*.md",
         "refer": false,
         "metadata": {
-            "name": "Examples",
-            "noHeadings": true
+            "name": "Examples"
         }
     },
     "getting-started": {
@@ -35,16 +33,14 @@
         "pattern": "compatibility/*.md",
         "refer": false,
         "metadata": {
-            "name": "Compatibility",
-            "noHeadings": true
+            "name": "Compatibility"
         }
     },
     "contribute": {
         "pattern": "contribute/*.md",
         "refer": false,
         "metadata": {
-            "name": "Contribute",
-            "noHeadings": true
+            "name": "Contribute"
         }
     }
 }
