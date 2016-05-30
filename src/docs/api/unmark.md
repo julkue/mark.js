@@ -2,6 +2,8 @@
 title: unmark()
 ---
 
+A method to remove highlights created by {{defaults.title}}.
+
 **JavaScript Syntax**:
 
 ```javascript

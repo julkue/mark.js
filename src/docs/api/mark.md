@@ -2,6 +2,8 @@
 title: mark()
 ---
 
+A method to highlight custom search terms.
+
 **JavaScript Syntax**:
 
 ```javascript

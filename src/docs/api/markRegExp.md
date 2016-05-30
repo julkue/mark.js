@@ -2,6 +2,8 @@
 title: markRegExp()
 ---
 
+A method to highlight custom [regular expressions][regexp].
+
 **JavaScript Syntax**:
 
 ```javascript
@@ -45,3 +47,4 @@ Optional options:
 | log       | object   | console | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                   |
 
 [SOP]: https://en.wikipedia.org/wiki/Same-origin_policy
+[regexp]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
