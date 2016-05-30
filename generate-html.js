@@ -16,7 +16,9 @@ const handlebars = require("handlebars"),
     fs = require("fs"),
     ncp = require("ncp").ncp;
 
-// location settings
+/**
+ * Location settings
+ */
 const targetDir = "./",
     buildDir = "build/tmp/",
     docsDir = "src/docs/",
@@ -27,30 +29,39 @@ const targetDir = "./",
     collectionsConfig = "src/docs/toc.json",
     beautifyConfig = ".jsbeautifyrc";
 
-// general utilities
+/**
+ * Common utilities
+ */
 const readJSON = file => {
     return JSON.parse(fs.readFileSync(file, "utf8"));
 };
 
-// handlebars helpers
+/**
+ * Handlebars helpers
+ */
+// Checks if a string contains a substring
 handlebars.registerHelper("contains", function (str, patt, opt) {
     if(str.toString().indexOf(patt.toString()) !== -1) {
         return opt.fn(this);
     }
     return opt.inverse(this);
 });
+// Increments a given counter (e.g. @index)
 handlebars.registerHelper("inc", function (value) {
     return parseInt(value) + 1;
 });
+// Returns a random string
 handlebars.registerHelper("randomStr", function (value) {
     return Math.random().toString(36).substring(7);
 });
+// Checks if the specified value is not false
 handlebars.registerHelper("ifNotFalse", function (value, options) {
     if(value !== false) {
         return options.fn(this);
     }
     return options.inverse(this);
 });
+// Checks if the stack of articles contains articles with a heading
 handlebars.registerHelper("ifArticlesWithHeading", function (stack, options) {
     for(var i = 0, len = stack.length; i < len; i++){
         if(stack[i]["heading"] !== false){
@@ -59,11 +70,25 @@ handlebars.registerHelper("ifArticlesWithHeading", function (stack, options) {
     }
     return options.inverse(this);
 });
+// Converts a string for usage as anchor
 handlebars.registerHelper("anchor", function (str) {
     return str.replace(/[^\w\s]/gi, "").replace(/[\s]/gi, "-").toLowerCase();
 });
+// A custom counter that can be used as an alternative to @index
+let counter = 0;
+handlebars.registerHelper("resetCounter", function () {
+    counter = 0;
+});
+handlebars.registerHelper("incrementCounter", function () {
+    return ++counter;
+});
+handlebars.registerHelper("getCounter", function () {
+    return counter;
+});
 
-// generate website using Metalsmith
+/**
+ * Documentation generation using Metalsmith
+ */
 metalsmith(__dirname)
     .source(docsDir)
     .destination(buildDir)

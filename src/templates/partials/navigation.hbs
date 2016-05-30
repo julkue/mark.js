@@ -12,11 +12,12 @@
             <a href="#{{anchor metadata.name}}">{{inc @index}}. {{metadata.name}}</a>
             {{#ifArticlesWithHeading this}}
                 <ul class="nav">
-                {{#each this}}
-                    {{#ifNotFalse heading}}
-                        <li><a href="#{{anchor title}}">{{inc @../index}}.{{inc @index}} {{{title}}}</a></li>
-                    {{/ifNotFalse}}
-                {{/each}}
+                    {{resetCounter}}
+                    {{#each this}}
+                        {{#ifNotFalse heading}}
+                            <li><a href="#{{anchor title}}">{{inc @../index}}.{{incrementCounter}} {{{title}}}</a></li>
+                        {{/ifNotFalse}}
+                    {{/each}}
                 </ul>
             {{/ifArticlesWithHeading}}
         </li>

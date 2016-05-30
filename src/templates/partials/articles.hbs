@@ -10,11 +10,12 @@
     <section>
         <a id="{{anchor metadata.name}}"></a>
         <h2>{{inc @index}}. {{metadata.name}}</h2>
+        {{resetCounter}}
         {{#each this}}
             <article>
                 {{#ifNotFalse heading}}
                     <a id="{{anchor title}}"></a>
-                    <h3>{{inc @../index}}.{{inc @index}} {{title}}</h3>
+                    <h3>{{inc @../index}}.{{incrementCounter}} {{title}}</h3>
                 {{/ifNotFalse}}
                 {{{contents}}}
             </article>
