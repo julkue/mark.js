@@ -14,7 +14,7 @@
   "devDependencies": {
     "requirejs": "~2.1",
     "jquery": ">1.10",
-    "bootswatch-dist": "united",
+    "bootswatch-dist": "3.3.6-united",
     "highlightjs": "^9.2.0",
     "mark.js": "latest",
     "fastclick": "^1.0.6"
