@@ -23,7 +23,7 @@ After you have downloaded mark.js and chosen the appropriate file, you need to
 embed the file, e.g. as follows:
 
 ```html
-<script src="mark.min.js"></script>
+<script src="vendor/mark.js/dist/mark.min.js"></script>
 ```
 
 Alternatively you can load it with AMD ([RequireJS][requirejs]) or CommonJS.

@@ -3,7 +3,7 @@ heading: false
 ---
 
 {{defaults.title}} works in all modern browsers.  
-It has been tested in:
+It is intensively tested in:
 
 - Firefox (30+)
 - Chrome (30+)

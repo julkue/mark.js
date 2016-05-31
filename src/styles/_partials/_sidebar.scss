@@ -20,7 +20,7 @@ nav {
         }
         > li {
             li {
-                padding-left: 20px;
+                padding-left: 15px;
             }
             a {
                 border-left: 1px solid transparent;
@@ -37,10 +37,13 @@ nav {
                 @media (max-width: #{$breakpointMD - 1}) {
                     padding: 10px !important;
                 }
+                @media (max-height: 600px) {
+                    padding: 8px !important;
+                }
             }
             &.active {
-                 > ul > li.active > a,
-                > a {
+                > a,
+                > ul > li.active > a {
                     border-left: 1px solid $navActiveBorder;
                 }
             }
@@ -53,7 +56,7 @@ nav {
         .nav {
             display: none;
         }
-        li.active .nav{
+        li.active .nav {
             display: block;
         }
     }

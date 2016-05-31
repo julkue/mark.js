@@ -36,6 +36,16 @@
             "name": "Compatibility"
         }
     },
+    "tutorials": {
+        "pattern": "tutorials/*.md",
+        "refer": false,
+        "sortBy": ["Introduction", "Element and Class Name", "Filter",
+                    "Separate Word Search", "Accuracy", "Diacritics",
+                    "Synonyms"],
+        "metadata": {
+            "name": "Tutorials"
+        }
+    },
     "contribute": {
         "pattern": "contribute/*.md",
         "refer": false,
