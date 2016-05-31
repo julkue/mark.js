@@ -19,7 +19,7 @@
 See the [contribution guidelines][contributing].
 
 ## Changelog
-Changes are documented in release descriptions.  
+Changes are documented in [release][releases] descriptions.  
 You want to be notified about new releases? Click the "Subscribe to releases"
 button on [libraries.io][libraries].
 
