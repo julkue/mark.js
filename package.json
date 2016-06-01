@@ -39,7 +39,7 @@
     "grunt-contrib-uglify": "^1.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-jsdoc": "^2.0.0",
-    "grunt-karma": "^1.0.0",
+    "grunt-karma": "^2.0.0",
     "jasmine-core": "^2.4.1",
     "jit-grunt": "^0.10.0",
     "karma": "^0.13.22",
