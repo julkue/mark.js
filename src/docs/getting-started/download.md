@@ -9,7 +9,9 @@ You can either download the package using Bower (assuming you have pre-installed
 $ bower install mark.js --save-dev
 ```
 
-Or download the package [manually]({{{defaults.download}}}).
+Or download the package [manually]({{{defaults.download}}}). Alternatively you
+can embed {{defaults.title}} using [cdnjs][cdnjs].
 
 [nodejs]: https://nodejs.org/en/
 [bower]: http://bower.io/
+[cdnjs]: https://cdnjs.com/libraries/mark.js/
