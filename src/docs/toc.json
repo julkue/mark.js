@@ -16,7 +16,7 @@
     "getting-started": {
         "pattern": "getting-started/*.md",
         "refer": false,
-        "sortBy": ["Download", "Integration"],
+        "sortBy": ["Download", "CDN", "Integration"],
         "metadata": {
             "name": "Getting Started"
         }

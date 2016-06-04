@@ -2,7 +2,8 @@
 title: Integration
 ---
 
-mark.js ships with a few files that can be found under `./dist/`:
+{{defaults.title}} ships with a few files that – when not using a CDN – can be
+found under `./dist/`:
 
 - Files for usage with pure JavaScript:
   - `mark.js` - Uncompressed ES5
@@ -19,8 +20,8 @@ If you don't know what ES5 or ES6 ([ECMAScript][ecmascript]) is, then simply go
 ahead with a ES5 file as it might be in the JavaScript syntax you are using in
 your project.
 
-After you have downloaded mark.js and chosen the appropriate file, you need to
-embed the file, e.g. as follows:
+After you have chosen the appropriate file, you need to embed it, e.g. as
+follows:
 
 ```html
 <script src="vendor/mark.js/dist/mark.min.js"></script>
