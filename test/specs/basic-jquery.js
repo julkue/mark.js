@@ -10,7 +10,7 @@ describe("basic mark called with jquery", function () {
     beforeEach(function (done) {
         loadFixtures("basic.html");
 
-        $ctx = $(".basic > div:first-child");
+        $ctx = $(".basic");
         ret = $ctx.mark("lorem ipsum", {
             "diacritics": false,
             "separateWordSearch": false,
@@ -28,6 +28,6 @@ describe("basic mark called with jquery", function () {
     });
     it("should return the provided context jquery element", function () {
         expect(ret instanceof $).toBe(true);
-        expect(ret).toBeMatchedBy(".basic > div:first-child");
+        expect(ret).toBeMatchedBy(".basic");
     });
 });

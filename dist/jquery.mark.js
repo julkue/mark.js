@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.1.0
+ * mark.js v6.2.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -373,19 +373,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 this.opt = opt;
                 this.log("Searching with expression \"" + regexp + "\"");
-                var found = false;
+                var totalMatches = 0;
                 var eachCb = function eachCb(element) {
-                    found = true;
+                    totalMatches++;
                     _this5.opt.each(element);
                 };
                 this.forEachNode(function (node) {
                     _this5.wrapMatches(node, regexp, true, eachCb);
                 }, function () {
-                    if (!found) {
+                    if (totalMatches === 0) {
                         _this5.opt.noMatch(regexp);
                     }
-                    _this5.opt.complete();
-                    _this5.opt.done();
+                    _this5.opt.complete(totalMatches);
+                    _this5.opt.done(totalMatches);
                 });
             }
         }, {
@@ -400,28 +400,29 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 var kwArr = _getSeparatedKeywords.keywords;
                 var kwArrLen = _getSeparatedKeywords.length;
-
+                var totalMatches = 0;
                 if (kwArrLen === 0) {
-                    this.opt.complete();
-                    this.opt.done();
+                    this.opt.complete(totalMatches);
+                    this.opt.done(totalMatches);
                 }
                 kwArr.forEach(function (kw) {
                     var regex = new RegExp(_this6.createRegExp(kw), "gmi"),
-                        found = false;
+                        matches = 0;
                     var eachCb = function eachCb(element) {
-                        found = true;
+                        matches++;
+                        totalMatches++;
                         _this6.opt.each(element);
                     };
                     _this6.log("Searching with expression \"" + regex + "\"");
                     _this6.forEachNode(function (node) {
                         _this6.wrapMatches(node, regex, false, eachCb);
                     }, function () {
-                        if (!found) {
+                        if (matches === 0) {
                             _this6.opt.noMatch(kw);
                         }
                         if (kwArr[kwArrLen - 1] === kw) {
-                            _this6.opt.complete();
-                            _this6.opt.done();
+                            _this6.opt.complete(totalMatches);
+                            _this6.opt.done(totalMatches);
                         }
                     });
                 });

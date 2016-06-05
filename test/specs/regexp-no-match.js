@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("mark with regular expression and 'noMatch'", function () {
+describe("mark with regular expression and 'noMatch' callback", function () {
     var $ctx, notFound, notFoundCalled;
     beforeEach(function (done) {
         loadFixtures("regexp.html");
