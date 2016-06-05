@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.1.0
+ * mark.js v6.2.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -547,7 +547,7 @@ class Mark {
      * @param  {HTMLElement} node - The DOM node to unwrap
      * @access protected
      */
-    unwrapMatches(node){
+    unwrapMatches(node) {
         const parent = node.parentNode;
         let docFrag = document.createDocumentFragment();
         while(node.firstChild) {
@@ -560,6 +560,7 @@ class Mark {
     /**
      * Callback when finished
      * @callback Mark~commonDoneCallback
+     * @param {number} totalMatches - The number of marked elements
      */
     /**
      * @typedef Mark~commonOptions
@@ -601,19 +602,19 @@ class Mark {
     markRegExp(regexp, opt) {
         this.opt = opt;
         this.log(`Searching with expression "${regexp}"`);
-        let found = false;
+        let totalMatches = 0;
         const eachCb = element => {
-            found = true;
+            totalMatches++;
             this.opt.each(element);
         };
         this.forEachNode(node => {
             this.wrapMatches(node, regexp, true, eachCb);
         }, () => {
-            if(!found) {
+            if(totalMatches === 0) {
                 this.opt.noMatch(regexp);
             }
-            this.opt.complete(); // deprecated, use "done" instead
-            this.opt.done();
+            this.opt.complete(totalMatches); // deprecated
+            this.opt.done(totalMatches);
         });
     }
 
@@ -665,28 +666,30 @@ class Mark {
         let {
             keywords: kwArr,
             length: kwArrLen
-        } = this.getSeparatedKeywords(sv);
+        } = this.getSeparatedKeywords(sv),
+            totalMatches = 0;
         if(kwArrLen === 0) {
-            this.opt.complete(); // deprecated, use "done" instead
-            this.opt.done();
+            this.opt.complete(totalMatches); // deprecated
+            this.opt.done(totalMatches);
         }
         kwArr.forEach(kw => {
             let regex = new RegExp(this.createRegExp(kw), "gmi"),
-                found = false;
+                matches = 0;
             const eachCb = element => {
-                found = true;
+                matches++;
+                totalMatches++;
                 this.opt.each(element);
             };
             this.log(`Searching with expression "${regex}"`);
             this.forEachNode(node => {
                 this.wrapMatches(node, regex, false, eachCb);
             }, () => {
-                if(!found) {
+                if(matches === 0) {
                     this.opt.noMatch(kw);
                 }
                 if(kwArr[kwArrLen - 1] === kw) {
-                    this.opt.complete(); // deprecated, use "done" instead
-                    this.opt.done();
+                    this.opt.complete(totalMatches); // deprecated
+                    this.opt.done(totalMatches);
                 }
             });
         });

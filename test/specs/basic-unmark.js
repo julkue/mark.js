@@ -10,7 +10,7 @@ describe("basic unmark", function () {
     beforeEach(function (done) {
         loadFixtures("basic.html");
 
-        $ctx = $(".basic > div:first-child");
+        $ctx = $(".basic");
         var instance = new Mark($ctx[0]);
         instance.mark("lorem ipsum", {
             "diacritics": false,
