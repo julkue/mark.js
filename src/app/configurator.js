@@ -17,20 +17,9 @@
              */
             var $body = $("body"),
                 $configurator = $(".configurator"),
-
-                $form = $configurator.find("form"),
-                $checkboxes = $form.find("input[type='checkbox']"),
-                $radioButtons = $form.find("input[type='radio']"),
-                $selects = $form.find("select"),
-                $typeRadioButtons = $radioButtons.filter("[name='type']"),
-                $textInputs = $form.find("input[type='text']"),
-                $performButton = $form.find("button#perform"),
-                $synonyms = $form.find(".synonyms"),
-                $filters = $form.find(".filters"),
-                $types = $form.find("[data-type-constraint]"),
-
-                $context = $configurator.find(".context"),
-
+                $typeToggles = $configurator.find("input[name='type']"),
+                $forms = $configurator.find("form"),
+                $markContext = $configurator.find(".context"),
                 $codeExample = $configurator.find(".code-example"),
                 $codeExampleMethod = $codeExample.find(".method"),
                 $codeExampleValue = $codeExample.find(".value"),
@@ -38,11 +27,28 @@
                 $codeExampleDelimiter = $codeExample.find(".delimiter");
 
             /**
+             * Selectors
+             */
+            var synonymsSel = ".configurator .synonyms";
+            var synonymsBtnSel = synonymsSel + " button";
+            var filtersSel = ".configurator .filters";
+            var filtersBtnSel = filtersSel + " button";
+
+            /**
              * Returns the current type, "keyword", "array" or "regexp"
              * @return {string}
              */
             function getCurrentType() {
-                return $typeRadioButtons.filter(":checked").val();
+                return $typeToggles.filter(":checked").val();
+            }
+
+            /**
+             * Returns the current form based on the current type
+             * @return {jQuery}
+             */
+            function getCurrentForm() {
+                var type = getCurrentType();
+                return $forms.filter("[name='form-" + type + "']");
             }
 
             /**
@@ -51,8 +57,8 @@
              * @return {string}
              */
             function getSearchValue() {
-                var val = getCurrentType();
-                return $textInputs.filter("[name='" + val + "']").val().trim();
+                var sel = "input[name='" + getCurrentType() + "']";
+                return getCurrentForm().find(sel).val().trim();
             }
 
             /**
@@ -61,24 +67,14 @@
              * @return {array}
              */
             function getSerializedForm() {
-                var type = getCurrentType(),
-                    notChk = function () {
-                        var attr = "data-type-constraint";
-                        var $p = $(this).parents("[" + attr + "]");
-                        if($p.length && $p.attr(attr).indexOf(type) === -1) {
-                            return true;
-                        }
-                        return false;
-                    };
+                var $form = getCurrentForm();
                 return $form
                     .find("input, select")
                     .not("[name='keyword'], [name='array'], [name='regexp']")
                     .not("[name='type'], [name='filter[]']")
-                    .not(notChk)
                     .serializeArray()
                     .concat(
-                        $checkboxes
-                        .not(notChk)
+                        $form.find("input[type='checkbox']")
                         .filter(":not(:checked)")
                         .map(
                             function () {
@@ -130,7 +126,7 @@
                     delete options["synonyms"];
                 }
                 // Map correct filter values
-                $form.find("[name='filter[]']").each(function () {
+                getCurrentForm().find("[name='filter[]']").each(function () {
                     var val = $(this).val().trim();
                     if(val) {
                         options["filter"].push(val);
@@ -205,14 +201,7 @@
                 default:
                     return val;
                 case "array":
-                    if(val.charAt(0) === "[") {
-                        val = val.substr(1);
-                    }
-                    if(val.slice(-1) === "]") {
-                        val = val.substring(0, val.length - 1);
-                    }
-                    val = val.replace(/[\s]*\"/g, "").replace(/\"/g, "");
-                    return val.split(",");
+                    return eval(val);
                 case "regexp":
                     var match = val.match(new RegExp("^/(.*?)/([gimy]*)$"));
                     return new RegExp(match[1], match[2]);
@@ -233,9 +222,9 @@
                 } catch(e) {
                     return;
                 }
-                $context.unmark();
+                $markContext.unmark();
                 try {
-                    $context[method](serialize, options);
+                    $markContext[method](serialize, options);
                 } catch(e) {
                     // this can be thrown when e.g. the filter selector is "."
                     console.debug(e);
@@ -251,16 +240,42 @@
             }
 
             /**
-             * Initializes dynamic synonym addition/deletion
-             * @param  {function} onDelete Callback if a synonym was deleted
+             * Toggles forms based on checked/unchecked type toggles
              */
-            function initDynamicSynonyms(onDelete) {
+            function initFormToggle() {
+                // it is necessary to trigger the action on init as the
+                // checkboxes may persist checked after page load
+                $typeToggles.on("change.typeToggle", function () {
+                    $forms.hide();
+                    getCurrentForm().show();
+                }).trigger("change.typeToggle");
+            }
+
+            /**
+             * Makes sure that elements will be validated
+             */
+            function initFormValidation() {
+                // Since the form will be validated by the browser using the
+                // pattern attribute, it is only necessary to stop the redirect
+                // action when the form is valid
+                $forms.on("submit", function (event) {
+                    if(this.checkValidity()) {
+                        event.preventDefault();
+                    }
+                });
+            }
+
+            /**
+             * Initializes dynamic synonym addition/deletion
+             */
+            function initDynamicSynonyms() {
                 var counter = 1;
-                $body.on("click", $synonyms.selector + " button", function () {
+                $body.on("click", synonymsBtnSel, function () {
                     var $this = $(this);
+                    var $closest = $this.closest(synonymsSel);
                     if($this.find("[data-action='add']").is(":visible")) {
                         ++counter;
-                        var $clone = $synonyms.clone();
+                        var $clone = $closest.clone();
                         var $inputs = $clone.find("input[name^='synonym']");
                         $inputs.each(function () {
                             var $this = $(this);
@@ -272,45 +287,27 @@
                         });
                         $clone.find("[data-action='add']").hide();
                         $clone.find("[data-action='remove']").show();
-                        $clone.insertAfter($synonyms);
+                        $clone.insertAfter($closest);
                     } else {
-                        $this.closest($synonyms.selector).remove();
-                        onDelete();
+                        $closest.remove();
                     }
                 });
             }
 
             /**
              * Initializes dynamic filter addition/deletion
-             * @param  {function} onDelete Callback if a filter was deleted
              */
-            function initDynamicFilters(onDelete) {
-                $body.on("click", $filters.selector + " button", function () {
+            function initDynamicFilters() {
+                $body.on("click", filtersBtnSel, function () {
                     var $this = $(this);
+                    var $closest = $this.closest(filtersSel);
                     if($this.find("[data-action='add']").is(":visible")) {
-                        var $clone = $filters.clone();
+                        var $clone = $closest.clone();
                         $clone.find("[data-action='add']").hide();
                         $clone.find("[data-action='remove']").show();
-                        $clone.insertAfter($filters);
+                        $clone.insertAfter($closest);
                     } else {
-                        $this.closest($filters.selector).remove();
-                        onDelete();
-                    }
-                });
-            }
-
-            /**
-             * Toggles input fields with type constraints related to the chosen
-             * radio button
-             */
-            function toggleTypes() {
-                var val = getCurrentType();
-                $types.each(function () {
-                    var $this = $(this);
-                    if($this.attr("data-type-constraint").indexOf(val) > -1) {
-                        $this.show();
-                    } else {
-                        $this.hide();
+                        $closest.remove();
                     }
                 });
             }
@@ -318,51 +315,28 @@
             /**
              * Initializes configurator events
              */
+            function initConfigurator() {
+                $forms.on("submit", function () {
+                    runConfigurator();
+                });
+                // make sure e.g. the could example is set on initialization
+                runConfigurator();
+            }
+
+            /**
+             * Initializes configurator events
+             */
             function initEvents() {
                 if($configurator.length) {
-
-                    // Init live example and code.
-                    // Do not run the configurator when changing the search
-                    // value when the type is "array" or "regexp" as this could
-                    // crash the browser due to syntax errors. In this case only
-                    // run the configurator on manual button clicks.
-                    var tmp = ":not([name='array']):not([name='regexp'])";
-                    $body.on(
-                        "input",
-                        $textInputs.selector + tmp,
-                        runConfigurator
-                    );
-                    $body.on(
-                        "change",
-                        $checkboxes.selector + "," + $selects.selector,
-                        runConfigurator
-                    );
-                    runConfigurator();
-
-                    // Init dynamic synonyms
-                    initDynamicSynonyms(runConfigurator);
-
-                    // Init dynamic filters
-                    initDynamicFilters(runConfigurator);
-
-                    // Init type radio buttons toggle
-                    $body.on(
-                        "change",
-                        $typeRadioButtons.selector,
-                        function () {
-                            toggleTypes();
-                            runConfigurator();
-                        }
-                    );
-                    $body.on("click", $performButton.selector, function (event) {
-                        event.preventDefault();
-                        runConfigurator();
-                    });
-                    toggleTypes();
+                    initFormToggle();
+                    initDynamicSynonyms();
+                    initDynamicFilters();
+                    initFormValidation();
+                    initConfigurator();
                 }
             }
 
-            initEvents();
+            return initEvents();
 
         });
     });

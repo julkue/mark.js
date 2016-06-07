@@ -6,11 +6,12 @@
 
 .configurator {
     form {
+        &:not([name="form-keyword"]){
+            display: none;
+        }
         .form-group {
             margin-bottom: 5px;
-            &[data-type-constraint]:not([data-type-constraint="keyword"]) {
-                display: none;
-            }
+
             /**
              * Fix checkbox spacing as some checkboxes may be hidden and
              * Boostrap's selector will not set the correct margin/padding for
@@ -34,6 +35,9 @@
             label {
                 @include user-select(none);
             }
+            input:invalid{
+                border: 1px solid $configuratorInvalidBorder;
+            }
         }
         .filters,
         .synonyms {
@@ -46,7 +50,7 @@
                 display: none;
             }
         }
-        button#perform {
+        button[type="submit"] {
             margin-top: 10px;
         }
     }

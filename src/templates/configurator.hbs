@@ -7,148 +7,235 @@
 --}}
 {{> header}}
 
-{{#* inline "form"}}
-    <form>
-        <div class="form-group">
-            <label class="radio-inline">
-                <input name="type" value="keyword" type="radio" checked>Keyword
-            </label>
-            <label class="radio-inline">
-                <input name="type" value="array" type="radio">Array of Keywords
-            </label>
-            <label class="radio-inline">
-                <input name="type" value="regexp" type="radio">Custom RegExp
-            </label>
+{{#* inline "form-type-toggle"}}
+    <div class="form-group">
+        <label class="radio-inline">
+            <input name="type" value="keyword" type="radio" checked>Keyword
+        </label>
+        <label class="radio-inline">
+            <input name="type" value="array" type="radio">Array of Keywords
+        </label>
+        <label class="radio-inline">
+            <input name="type" value="regexp" type="radio">Custom RegExp
+        </label>
+    </div>
+{{/inline}}
+{{#* inline "keyword-form-group"}}
+    <div class="form-group">
+        <label for="keyword">Keyword:</label>
+        <input class="form-control input-sm" id="keyword" name="keyword" type="text" value="Lorem ipsum" placeholder="(empty)">
+    </div>
+{{/inline}}
+{{#* inline "array-form-group"}}
+    <div class="form-group">
+        <label for="keyword">Array of keywords:</label>
+        <input class="form-control input-sm" id="array" name="array" type="text" value="[&quot;Lorem&quot;, &quot;ipsum&quot;]" placeholder="(empty)" pattern="\[[\s]*[&apos;|&quot;][^]*[&apos;|&quot;][\s]*\]" title="A valid array string with brackets">
+    </div>
+{{/inline}}
+{{#* inline "regexp-form-group"}}
+    <div class="form-group">
+        <label for="regexp">Custom RegExp:</label>
+        <input class="form-control input-sm" id="regexp" name="regexp" type="text" value="/Lorem ipsum/gmi" placeholder="(empty)" pattern="\/[^]+\/[a-z]*" title="A valid RegExp, e.g. /test/gmi">
+    </div>
+{{/inline}}
+{{#* inline "element-form-group"}}
+    <div class="form-group">
+        <label for="{{prefix}}element">Element:</label>
+        <input class="form-control input-sm" id="{{prefix}}element" name="element" type="text" value="mark" placeholder="(default)" pattern="[A-Za-z]+" title="A valid HTML element name, e.g. span">
+    </div>
+{{/inline}}
+{{#* inline "synonyms-form-group"}}
+    <div class="form-group">
+        <label>Synonyms</label>
+        <div class="row synonyms">
+            <div class="col-xs-4">
+                <input class="form-control input-sm" name="synonym_1_key" type="text" placeholder="(Term 1)" />
+            </div>
+            <div class="col-xs-4">
+                <input class="form-control input-sm" name="synonym_1_value" type="text" placeholder="(Term 2)" />
+            </div>
+            <div class="col-xs-4">
+                <button type="button" class="btn btn-info btn-sm">
+                    <i class="glyphicon glyphicon-plus" data-action="add"></i>
+                    <i class="glyphicon glyphicon-minus" data-action="remove"></i>
+                </button>
+            </div>
         </div>
+    </div>
+{{/inline}}
+{{#* inline "filter-form-group"}}
+    <div class="form-group">
+        <label>Filter</label>
+        <div class="row filters">
+            <div class="col-xs-8">
+                <input class="form-control input-sm" name="filter[]" type="text" placeholder="(e.g. .ignore)" pattern="([\.|#][A-Za-z0-9-_\.]+)|([A-Za-z\*\.-_]*\[[^]+\])|(^(?![\.]|[#])[A-Za-z]+)" title="A valid selector, e.g. #data-test" />
+            </div>
+            <div class="col-xs-4">
+                <button type="button" class="btn btn-info btn-sm">
+                    <i class="glyphicon glyphicon-plus" data-action="add"></i>
+                    <i class="glyphicon glyphicon-minus" data-action="remove"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+{{/inline}}
+{{#* inline "accuracy-form-group"}}
+    <div class="form-group">
+        <label for="{{prefix}}accuracy">Accuracy:</label>
+        <select class="form-control input-sm" id="{{prefix}}accuracy" name="accuracy">
+            <option value="exactly">exactly</option>
+            <option value="partially" selected>partially</option>
+            <option value="complementary">complementary</option>
+        </select>
+    </div>
+{{/inline}}
+{{#* inline "class-name-form-group"}}
+    <div class="form-group">
+        <label for="{{prefix}}className">Class name:</label>
+        <input class="form-control input-sm" id="{{prefix}}element" name="className" type="text" placeholder="(e.g. highlight)" pattern="-?[_a-zA-Z]+[_a-zA-Z0-9-]*" title="A valid class name not starting with a dot">
+    </div>
+{{/inline}}
+{{#* inline "separate-word-search-checkbox"}}
+    <div class="checkbox">
+        <label><input id="{{prefix}}separateWordSearch" name="separateWordSearch" type="checkbox" checked> Separate word search</label>
+    </div>
+{{/inline}}
+{{#* inline "diacritics-checkbox"}}
+    <div class="checkbox" data-type-constraint="keyword,array">
+        <label><input id="{{prefix}}diacritics" name="diacritics" type="checkbox" checked> Diacritics</label>
+    </div>
+{{/inline}}
+{{#* inline "iframes-checkbox"}}
+    <div class="checkbox">
+        <label><input id="{{prefix}}iframes" name="iframes" type="checkbox"> Iframes (is not demonstrated)</label>
+    </div>
+{{/inline}}
+{{#* inline "debug-checkbox"}}
+    <div class="checkbox">
+        <label><input id="{{prefix}}debug" name="debug" type="checkbox"> Debug</label>
+    </div>
+{{/inline}}
+{{#* inline "form-submit-button"}}
+    <button class="btn btn-primary btn-md" type="submit">Mark</button>
+{{/inline}}
+
+{{#* inline "form-keyword"}}
+    <form name="form-keyword">
         <div class="row">
             <div class="col-sm-6">
-                <div class="form-group" data-type-constraint="keyword">
-                    <label for="keyword">Keyword:</label>
-                    <input class="form-control input-sm" id="keyword" name="keyword" type="text" value="Lorem ipsum" placeholder="(empty)">
-                </div>
-                <div class="form-group" data-type-constraint="array">
-                    <label for="keyword">Array of keywords:</label>
-                    <input class="form-control input-sm" id="array" name="array" type="text" value="[&quot;Lorem&quot;, &quot;ipsum&quot;]" placeholder="(empty)">
-                </div>
-                <div class="form-group" data-type-constraint="regexp">
-                    <label for="regexp">Custom RegExp:</label>
-                    <input class="form-control input-sm" id="regexp" name="regexp" type="text" value="/Lorem ipsum/gmi" placeholder="(empty)">
-                </div>
-                <div class="form-group">
-                    <label for="element">Element:</label>
-                    <input class="form-control input-sm" id="element" name="element" type="text" value="mark" placeholder="(default)">
-                </div>
-                <div class="form-group" data-type-constraint="keyword,array">
-                    <label>Synonyms</label>
-                    <div class="row synonyms">
-                        <div class="col-xs-4">
-                            <input class="form-control input-sm" name="synonym_1_key" type="text" placeholder="(Term 1)" />
-                        </div>
-                        <div class="col-xs-4">
-                            <input class="form-control input-sm" name="synonym_1_value" type="text" placeholder="(Term 2)" />
-                        </div>
-                        <div class="col-xs-4">
-                            <button type="button" class="btn btn-info btn-sm">
-                                <i class="glyphicon glyphicon-plus" data-action="add"></i>
-                                <i class="glyphicon glyphicon-minus" data-action="remove"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Filter</label>
-                    <div class="row filters">
-                        <div class="col-xs-8">
-                            <input class="form-control input-sm" name="filter[]" type="text" placeholder="(e.g. .ignore)" />
-                        </div>
-                        <div class="col-xs-4">
-                            <button type="button" class="btn btn-info btn-sm">
-                                <i class="glyphicon glyphicon-plus" data-action="add"></i>
-                                <i class="glyphicon glyphicon-minus" data-action="remove"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                {{> keyword-form-group prefix="form-keyword-"}}
+                {{> element-form-group prefix="form-keyword-"}}
+                {{> synonyms-form-group prefix="form-keyword-"}}
+                {{> filter-form-group prefix="form-keyword-"}}
             </div>
             <div class="col-sm-6">
-                <div class="form-group" data-type-constraint="keyword,array">
-                    <label for="accuracy">Accuracy:</label>
-                    <select class="form-control input-sm" id="accuracy" name="accuracy">
-                        <option value="exactly">exactly</option>
-                        <option value="partially" selected>partially</option>
-                        <option value="complementary">complementary</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="className">Class name:</label>
-                    <input class="form-control input-sm" id="element" name="className" type="text" placeholder="(e.g. highlight)">
-                </div>
+                {{> accuracy-form-group prefix="form-keyword-"}}
+                {{> class-name-form-group prefix="form-keyword-"}}
                 <div class="form-group checkbox-options">
-                    <div class="checkbox" data-type-constraint="keyword,array">
-                        <label><input id="separateWordSearch" name="separateWordSearch" type="checkbox" checked> Separate word search</label>
-                    </div>
-                    <div class="checkbox" data-type-constraint="keyword,array">
-                        <label><input id="diacritics" name="diacritics" type="checkbox" checked> Diacritics</label>
-                    </div>
-                    <div class="checkbox">
-                        <label><input id="iframes" name="iframes" type="checkbox"> Iframes (is not demonstrated)</label>
-                    </div>
-                    <div class="checkbox">
-                        <label><input id="debug" name="debug" type="checkbox"> Debug</label>
-                    </div>
+                    {{> separate-word-search-checkbox prefix="form-keyword-"}}
+                    {{> diacritics-checkbox prefix="form-keyword-"}}
+                    {{> iframes-checkbox prefix="form-keyword-"}}
+                    {{> debug-checkbox prefix="form-keyword-"}}
                 </div>
             </div>
         </div>
-        <button id="perform" class="btn btn-primary btn-md" type="submit" data-type-constraint="array,regexp">Mark</button>
+        {{> form-submit-button prefix="form-keyword-"}}
     </form>
-    {{/inline}}
+{{/inline}}
 
-        <main class="container configurator">
-            {{> back-to-home}}
-            <h1>Configurator</h1>
-            <h3>
-                The configurator should help you understand {{defaults.title}}
-                and its API. Just define your custom options and see what will
-                be marked in real time. On top you can see the generated code
-                for your application.
-            </h3>
+{{#* inline "form-array"}}
+    <form name="form-array">
+        <div class="row">
+            <div class="col-sm-6">
+                {{> array-form-group prefix="form-array-"}}
+                {{> element-form-group prefix="form-array-"}}
+                {{> synonyms-form-group prefix="form-array-"}}
+                {{> filter-form-group prefix="form-array-"}}
+            </div>
+            <div class="col-sm-6">
+                {{> accuracy-form-group prefix="form-array-"}}
+                {{> class-name-form-group prefix="form-array-"}}
+                <div class="form-group checkbox-options">
+                    {{> separate-word-search-checkbox prefix="form-array-"}}
+                    {{> diacritics-checkbox prefix="form-array-"}}
+                    {{> iframes-checkbox prefix="form-array-"}}
+                    {{> debug-checkbox prefix="form-array-"}}
+                </div>
+            </div>
+        </div>
+        {{> form-submit-button prefix="form-array-"}}
+    </form>
+{{/inline}}
+
+{{#* inline "form-regexp"}}
+    <form name="form-regexp">
+        <div class="row">
+            <div class="col-sm-6">
+                {{> regexp-form-group prefix="form-regexp-"}}
+                {{> element-form-group prefix="form-regexp-"}}
+                {{> filter-form-group prefix="form-regexp-"}}
+            </div>
+            <div class="col-sm-6">
+                {{> class-name-form-group prefix="form-regexp-"}}
+                <div class="form-group checkbox-options">
+                    {{> iframes-checkbox prefix="form-regexp-"}}
+                    {{> debug-checkbox prefix="form-regexp-"}}
+                </div>
+            </div>
+        </div>
+        {{> form-submit-button prefix="form-regexp-"}}
+    </form>
+{{/inline}}
+
+<main class="container configurator">
+    {{> back-to-home}}
+    <h1>Configurator</h1>
+    <h3>
+        The configurator should help you understand {{defaults.title}}
+        and its API. Just define your custom options to see what will
+        be marked and view the generated code for your application.
+    </h3>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="panel panel-primary">
+                <div class="panel-heading">Options</div>
+                <div class="panel-body">
+                    {{> form-type-toggle}}
+                    {{> form-keyword}}
+                    {{> form-array}}
+                    {{> form-regexp}}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    Example
+                </div>
+                <div class="panel-body context">
+                    <p>
+                        Lorem ipsum dolor sit āmet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, one, nò sea takimata 1 sanctus est <span class="ignore">Lorem</span> ipsum dolor sit amet. Lörem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-success">
+        <div class="panel-heading">Your code</div>
+        <div class="panel-body code-example">
             <div class="row">
                 <div class="col-md-6">
-                    <div class="panel panel-primary">
-                        <div class="panel-heading">Options</div>
-                        <div class="panel-body">
-                            {{> form}}
-                        </div>
-                    </div>
+                    jQuery:
+<pre><code class="javascript">$(".context").<span class="method"></span>(<span class="value"></span><span class="delimiter">, </span><span class="options"></span>);</code></pre>
                 </div>
                 <div class="col-md-6">
-                    <div class="panel panel-info">
-                        <div class="panel-heading">
-                            Example
-                        </div>
-                        <div class="panel-body context">
-                            <p>
-                                Lorem ipsum dolor sit āmet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, one, nò sea takimata 1 sanctus est <span class="ignore">Lorem</span> ipsum dolor sit amet. Lörem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="panel panel-success">
-                <div class="panel-heading">Your code</div>
-                <div class="panel-body code-example">
-                    <div class="row">
-                        <div class="col-md-6">
-                            jQuery:
-<pre><code class="javascript">$(".context").<span class="method"></span>(<span class="value"></span><span class="delimiter">, </span><span class="options"></span>);</code></pre>
-                        </div>
-                        <div class="col-md-6">
-                            JavaScript:
+                    JavaScript:
 <pre><code class="javascript">var instance = new Mark(document.querySelector(".context"));
 instance.<span class="method"></span>(<span class="value"></span><span class="delimiter">, </span><span class="options"></span>);</code></pre>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </main>
-        {{> footer}}
+        </div>
+    </div>
+</main>
+
+{{> footer}}
