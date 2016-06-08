@@ -5,54 +5,52 @@
  *******************************************************/
 
 .configurator {
-    form {
-        &:not([name="form-keyword"]){
+    form:not([name="form-keyword"]){
+        display: none;
+    }
+    .form-group {
+        margin-bottom: 5px;
+
+        /**
+         * Fix checkbox spacing as some checkboxes may be hidden and
+         * Boostrap's selector will not set the correct margin/padding for
+         * the first visible checkbox
+         */
+        &.checkbox-options {
+            padding-top: 10px;
+
+            .checkbox {
+                margin-top: 0 !important;
+                margin-bottom: 5px !important;
+            }
+        }
+
+        @media (max-width: #{$breakpointSM - 1}) {
+            .radio-inline {
+                display: block;
+                margin-left: 0;
+            }
+        }
+        label {
+            @include user-select(none);
+        }
+        input:invalid{
+            border: 1px solid $configuratorInvalidBorder;
+        }
+    }
+    .filters,
+    .synonyms {
+        margin: 0 0 5px;
+
+        *[class^="col"] {
+            padding: 0 5px 0 0;
+        }
+        *[data-action="remove"] {
             display: none;
         }
-        .form-group {
-            margin-bottom: 5px;
-
-            /**
-             * Fix checkbox spacing as some checkboxes may be hidden and
-             * Boostrap's selector will not set the correct margin/padding for
-             * the first visible checkbox
-             */
-            &.checkbox-options {
-                padding-top: 10px;
-
-                .checkbox {
-                    margin-top: 0 !important;
-                    margin-bottom: 5px !important;
-                }
-            }
-
-            @media (max-width: #{$breakpointSM - 1}) {
-                .radio-inline {
-                    display: block;
-                    margin-left: 0;
-                }
-            }
-            label {
-                @include user-select(none);
-            }
-            input:invalid{
-                border: 1px solid $configuratorInvalidBorder;
-            }
-        }
-        .filters,
-        .synonyms {
-            margin: 0 0 5px;
-
-            *[class^="col"] {
-                padding: 0 5px 0 0;
-            }
-            *[data-action="remove"] {
-                display: none;
-            }
-        }
-        button[type="submit"] {
-            margin-top: 10px;
-        }
+    }
+    button[type="submit"] {
+        margin-top: 10px;
     }
     .context {
         /**
