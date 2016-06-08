@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.2.0
+ * mark.js v6.3.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -61,8 +61,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (this.opt.diacritics) {
                     str = this.createDiacriticsRegExp(str);
                 }
+                str = this.createMergedBlanksRegExp(str);
                 str = this.createAccuracyRegExp(str);
                 return str;
+            }
+        }, {
+            key: "createMergedBlanksRegExp",
+            value: function createMergedBlanksRegExp(str) {
+                return str.replace(/[\s]+/gmi, "[\\s]*");
             }
         }, {
             key: "createSynonymsRegExp",

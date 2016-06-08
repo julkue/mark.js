@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.2.0
+ * mark.js v6.3.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -92,8 +92,20 @@ class Mark {
         if(this.opt.diacritics) {
             str = this.createDiacriticsRegExp(str);
         }
+        str = this.createMergedBlanksRegExp(str);
         str = this.createAccuracyRegExp(str);
         return str;
+    }
+
+    /**
+     * Creates a regular expression string that merges whitespace characters
+     * including subsequent ones into a single pattern
+     * @param  {string} str - The search term to be used
+     * @return {string}
+     * @access protected
+     */
+    createMergedBlanksRegExp(str){
+        return str.replace(/[\s]+/gmi, "[\\s]*");
     }
 
     /**
