@@ -190,7 +190,7 @@ class Mark {
             val = typeof acc === "string" ? acc : acc.value,
             ls = typeof acc === "string" ? [] : acc.limiters,
             lsJoin = "";
-        ls.forEach((limiter, idx) => {
+        ls.forEach(limiter => {
             lsJoin += `|${this.escapeStr(limiter)}`;
         });
         switch(val) {

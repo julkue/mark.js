@@ -111,7 +111,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     val = typeof acc === "string" ? acc : acc.value,
                     ls = typeof acc === "string" ? [] : acc.limiters,
                     lsJoin = "";
-                ls.forEach(function (limiter, idx) {
+                ls.forEach(function (limiter) {
                     lsJoin += "|" + _this.escapeStr(limiter);
                 });
                 switch (val) {
