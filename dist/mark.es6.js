@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.3.0
+ * mark.js v6.4.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -71,10 +71,6 @@
             return str;
         }
 
-        createMergedBlanksRegExp(str) {
-            return str.replace(/[\s]+/gmi, "[\\s]*");
-        }
-
         createSynonymsRegExp(str) {
             const syn = this.opt.synonyms;
             for (let index in syn) {
@@ -107,14 +103,25 @@
             return str;
         }
 
+        createMergedBlanksRegExp(str) {
+            return str.replace(/[\s]+/gmi, "[\\s]*");
+        }
+
         createAccuracyRegExp(str) {
-            switch (this.opt.accuracy) {
+            let acc = this.opt.accuracy,
+                val = typeof acc === "string" ? acc : acc.value,
+                ls = typeof acc === "string" ? [] : acc.limiters,
+                lsJoin = "";
+            ls.forEach((limiter, idx) => {
+                lsJoin += `|${ this.escapeStr(limiter) }`;
+            });
+            switch (val) {
                 case "partially":
                     return `()(${ str })`;
                 case "complementary":
-                    return `()(\\S*${ str }\\S*)`;
+                    return `()([^\\s${ lsJoin }]*${ str }[^\\s${ lsJoin }]*)`;
                 case "exactly":
-                    return `(^|\\s)(${ str })(?=\\s|$)`;
+                    return `(^|\\s${ lsJoin })(${ str })(?=$|\\s${ lsJoin })`;
             }
         }
 

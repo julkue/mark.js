@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.3.0
+ * mark.js v6.4.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -98,17 +98,6 @@ class Mark {
     }
 
     /**
-     * Creates a regular expression string that merges whitespace characters
-     * including subsequent ones into a single pattern
-     * @param  {string} str - The search term to be used
-     * @return {string}
-     * @access protected
-     */
-    createMergedBlanksRegExp(str){
-        return str.replace(/[\s]+/gmi, "[\\s]*");
-    }
-
-    /**
      * Creates a regular expression string to match the defined synonyms
      * @param  {string} str - The search term to be used
      * @return {string}
@@ -176,6 +165,17 @@ class Mark {
     }
 
     /**
+     * Creates a regular expression string that merges whitespace characters
+     * including subsequent ones into a single pattern
+     * @param  {string} str - The search term to be used
+     * @return {string}
+     * @access protected
+     */
+    createMergedBlanksRegExp(str) {
+        return str.replace(/[\s]+/gmi, "[\\s]*");
+    }
+
+    /**
      * Creates a regular expression string to match the specified string with
      * the defined accuracy. As in the regular expression of "exactly" can be
      * a group containing a blank at the beginning, all regular expressions will
@@ -186,13 +186,20 @@ class Mark {
      * @access protected
      */
     createAccuracyRegExp(str) {
-        switch(this.opt.accuracy) {
+        let acc = this.opt.accuracy,
+            val = typeof acc === "string" ? acc : acc.value,
+            ls = typeof acc === "string" ? [] : acc.limiters,
+            lsJoin = "";
+        ls.forEach((limiter, idx) => {
+            lsJoin += `|${this.escapeStr(limiter)}`;
+        });
+        switch(val) {
         case "partially":
             return `()(${str})`;
         case "complementary":
-            return `()(\\S*${str}\\S*)`;
+            return `()([^\\s${lsJoin}]*${str}[^\\s${lsJoin}]*)`;
         case "exactly":
-            return `(^|\\s)(${str})(?=\\s|$)`;
+            return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
         }
     }
 
@@ -640,6 +647,13 @@ class Mark {
      * @callback Mark~markNoMatchCallback
      * @param {RegExp} term - The search term that was not found
      */
+     /**
+      * @typedef Mark~markAccuracyObject
+      * @type {object.<string>}
+      * @property {string} value - A accuracy string value
+      * @property {string[]} limiters - A custom array of limiters. For example
+      * <code>["-", ","]</code>
+      */
     /**
      * These options also include the common options from
      * {@link Mark~commonOptions}
@@ -651,8 +665,8 @@ class Mark {
      * matched. ({@link https://en.wikipedia.org/wiki/Diacritic Diacritics})
      * @property {object} [synonyms] - An object with synonyms. The key will be
      * a synonym for the value and the value for the key
-     * @property {("partially"|"complementary"|"exactly")}
-     * [accuracy="partially"] - Either one of the following values:
+     * @property {"partially"|"complementary"|"exactly"|Mark~markAccuracyObject}
+     * [accuracy="partially"] - Either one of the following string values:
      * <ul>
      *   <li><i>partially</i>: When searching for "lor" only "lor" inside
      *   "lorem" will be marked</li>
@@ -661,6 +675,12 @@ class Mark {
      *   <li><i>exactly</i>: When searching for "lor" only those exact words
      *   will be marked. In this example nothing inside "lorem". This value
      *   is equivalent to the previous option <i>wordBoundary</i></li>
+     * </ul>
+     * Or an object containing two properties:
+     * <ul>
+     *   <li><i>value</i>: One of the above named string values</li>
+     *   <li><i>limiters</i>: A custom array of string limiters for accuracy
+     *   "exactly" or "complementary"</li>
      * </ul>
      * @property {Mark~markEachCallback} [each]
      * @property {Mark~markNoMatchCallback} [noMatch]

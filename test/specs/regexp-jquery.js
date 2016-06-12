@@ -41,6 +41,6 @@ describe("mark with regular expression called with jquery", function () {
     });
     it("should return the provided context jquery element", function () {
         expect(ret instanceof $).toBe(true);
-        expect(ret).toBeMatchedBy($ctx1.selector);
+        expect(ret).toBeMatchedBy(".regexp > div:first-child");
     });
 });

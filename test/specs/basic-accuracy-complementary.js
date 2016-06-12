@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with complementary accuracy", function () {
+describe("basic mark with accuracy complementary", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
         loadFixtures("basic-accuracy-complementary.html");
