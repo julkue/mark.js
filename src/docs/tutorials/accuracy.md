@@ -49,4 +49,28 @@ be generated:
 </div>
 ```
 
+
+The option value `complementary` highlights the search term and all surrounding
+characters until a blank or the start/end of the search context occurs. The
+option value `exactly` highlights only whole words that match the specified
+search term separated by a blank or the start/end of the search context.
+
+But there might be cases where you might want to use accuracy `exactly`, but
+highlight also words that are followed by punctuation marks e.g. a `,` or a `.`.
+Or when using accuracy `complementary` you might not want to highlight a `,` or
+a `.` following a word. In these cases you can pass an array of custom limiters,
+e.g. as follows:
+
+```javascript
+var options = {
+    "accuracy": {
+        "value": "exactly",
+        "limiters": [",", "."]
+    }
+};
+```
+
+This will highlight words that are preceded and followed by a blank, the
+end/start of the search context (default), `.` or `,` (custom).
+
 [word-boundary]: http://grammar.about.com/od/tz/g/Word-Boundary.htm
