@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with partially accuracy", function () {
+describe("basic mark with accuracy partially", function () {
     var $ctx;
     beforeEach(function (done) {
         loadFixtures("basic-accuracy-partially.html");

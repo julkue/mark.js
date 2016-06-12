@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with exactly accuracy", function () {
+describe("basic mark with accuracy exactly", function () {
     var $ctx1, $ctx2, $ctx3;
     beforeEach(function (done) {
         loadFixtures("basic-accuracy-exactly.html");
