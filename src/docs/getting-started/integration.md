@@ -29,5 +29,5 @@ follows:
 
 Alternatively you can load it with AMD ([RequireJS][requirejs]) or CommonJS.
 
-[ecmascript]: https://en.wikipedia.org/wiki/ECMAScript/
+[ecmascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Introduction
 [requirejs]: http://requirejs.org/
