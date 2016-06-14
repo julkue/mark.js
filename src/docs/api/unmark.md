@@ -18,6 +18,9 @@ instance.unmark(options);
 $(".context").unmark(options);
 ```
 
+Note that this is a chaining method, thus allows you to call further methods on
+the returning object.
+
 **Parameters**:
 
 _options_

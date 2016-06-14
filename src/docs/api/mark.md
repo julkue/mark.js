@@ -18,6 +18,9 @@ instance.mark(keyword [, options]);
 $(".context").mark(keyword [, options]);
 ```
 
+Note that this is a chaining method, thus allows you to call further methods on
+the returning object.
+
 **Parameters**:
 
 _keyword_

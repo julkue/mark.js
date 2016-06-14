@@ -18,6 +18,9 @@ instance.markRegExp(regexp [, options]);
 $(".context").markRegExp(regexp [, options]);
 ```
 
+Note that this is a chaining method, thus allows you to call further methods on
+the returning object.
+
 **Parameters**:
 
 _regexp_
