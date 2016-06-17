@@ -31,7 +31,7 @@ class Mark {
         this._opt = Object.assign({}, {
             "element": "",
             "className": "",
-            "filter": [],
+            "exclude": [],
             "iframes": false,
             "separateWordSearch": true,
             "diacritics": true,
@@ -296,25 +296,25 @@ class Mark {
     }
 
     /**
-     * Checks if an element matches any of the specified filters. Also it checks
-     * for script, style, title and already marked elements
+     * Checks if an element matches any of the specified exclude selectors. Also
+     * it checks for script, style, title and optionally already marked elements
      * @param  {HTMLElement} el - The element to check
      * @param {boolean} exclM - If already marked elements should be excluded
      * too
      * @return {boolean}
      * @access protected
      */
-    matchesFilter(el, exclM) {
+    matchesExclude(el, exclM) {
         let remain = true;
-        let fltr = this.opt.filter.concat(["script", "style", "title"]);
+        let excl = this.opt.exclude.concat(["script", "style", "title"]);
         if(!this.opt.iframes) {
-            fltr = fltr.concat(["iframe"]);
+            excl = excl.concat(["iframe"]);
         }
         if(exclM) {
-            fltr = fltr.concat(["*[data-markjs='true']"]);
+            excl = excl.concat(["*[data-markjs='true']"]);
         }
-        fltr.every(filter => {
-            if(this.matches(el, filter)) {
+        excl.every(sel => {
+            if(this.matches(el, sel)) {
                 return remain = false;
             }
             return true;
@@ -451,7 +451,7 @@ class Mark {
      */
     /**
      * Calls the callback for each element including those inside an iframe
-     * within the instance context (filtered)
+     * within the instance context (filtered by exclude selectors)
      * @param  {Mark~forEachElementCallback} cb - The callback
      * @param {Mark~forEachElementEndCallback} [end] - End callback
      * @param {boolean} [exclM=true] - If already marked elements should be
@@ -470,10 +470,10 @@ class Mark {
         };
         checkEnd(++open); // no context elements
         stack.forEach(el => {
-            if(!this.matchesFilter(el, exclM)) {
+            if(!this.matchesExclude(el, exclM)) {
                 if(el.tagName.toLowerCase() === "iframe") {
                     this.forEachElementInIframe(el, (iel) => {
-                        if(!this.matchesFilter(iel, exclM)) {
+                        if(!this.matchesExclude(iel, exclM)) {
                             cb(iel);
                         }
                     }, checkEnd);
@@ -586,7 +586,7 @@ class Mark {
      * @type {object.<string>}
      * @property {string} [element="mark"] - HTML element tag name
      * @property {string} [className] - An optional class name
-     * @property {string[]} [filter - An array with exclusion selectors.
+     * @property {string[]} [exclude - An array with exclusion selectors.
      * Elements matching those selectors will be ignored
      * @property {boolean} [iframes=false] - Whether to search inside iframes
      * @property {Mark~commonDoneCallback} [done]

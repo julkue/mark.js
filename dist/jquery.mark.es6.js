@@ -27,7 +27,7 @@
             this._opt = Object.assign({}, {
                 "element": "",
                 "className": "",
-                "filter": [],
+                "exclude": [],
                 "iframes": false,
                 "separateWordSearch": true,
                 "diacritics": true,
@@ -180,17 +180,17 @@
             return (el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector).call(el, selector);
         }
 
-        matchesFilter(el, exclM) {
+        matchesExclude(el, exclM) {
             let remain = true;
-            let fltr = this.opt.filter.concat(["script", "style", "title"]);
+            let excl = this.opt.exclude.concat(["script", "style", "title"]);
             if (!this.opt.iframes) {
-                fltr = fltr.concat(["iframe"]);
+                excl = excl.concat(["iframe"]);
             }
             if (exclM) {
-                fltr = fltr.concat(["*[data-markjs='true']"]);
+                excl = excl.concat(["*[data-markjs='true']"]);
             }
-            fltr.every(filter => {
-                if (this.matches(el, filter)) {
+            excl.every(sel => {
+                if (this.matches(el, sel)) {
                     return remain = false;
                 }
                 return true;
@@ -291,10 +291,10 @@
             };
             checkEnd(++open);
             stack.forEach(el => {
-                if (!this.matchesFilter(el, exclM)) {
+                if (!this.matchesExclude(el, exclM)) {
                     if (el.tagName.toLowerCase() === "iframe") {
                         this.forEachElementInIframe(el, iel => {
-                            if (!this.matchesFilter(iel, exclM)) {
+                            if (!this.matchesExclude(iel, exclM)) {
                                 cb(iel);
                             }
                         }, checkEnd);
