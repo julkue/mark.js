@@ -12,8 +12,11 @@ module.exports = grunt => {
         usebanner: "grunt-banner"
     });
 
+    // settings
+    const mainFile = "mark.js";
+
     // read copyright header
-    let fc = grunt.file.read("src/mark.js");
+    let fc = grunt.file.read(`src/${mainFile}`);
     let regex = /\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\//gmi;
     const banner = fc.match(regex)[0];
     grunt.log.writeln(banner["yellow"]);
@@ -68,7 +71,7 @@ module.exports = grunt => {
         },
         jsdoc: {
             dist: {
-                src: ["src/mark.js", "README.md"],
+                src: [`src/${mainFile}`, "README.md"],
                 options: {
                     destination: "build/doc"
                 }
@@ -134,7 +137,7 @@ module.exports = grunt => {
         grunt.file.expand("build/templates/*.js").forEach(file => {
             const filename = file.replace(/^.*[\\\/]/, "");
             const tpl = grunt.file.read(file);
-            const module = grunt.file.read("src/mark.js");
+            const module = grunt.file.read(`src/${mainFile}`);
             const compiled = grunt.template.process(tpl, {
                 "delimiters": "jsBuildDelimiters",
                 "data": {
