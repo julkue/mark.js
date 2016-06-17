@@ -62,6 +62,20 @@ input[type="radio"] {
     overflow: auto;
     padding-right: 0 !important;
 }
+.noscript {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: auto;
+    /*navbar z-index + 1*/
+    z-index: 1031;
+    padding: 10px;
+    font-size: $noscriptFontSize;
+    line-height: $noscriptLineHeight;
+    text-align: center;
+    background: $noscriptBg;
+    color: $noscriptColor;
+}
 @import "_partials/navbar";
 @import "_partials/sidebar";
 @import "_partials/jumbotron";
