@@ -3,8 +3,8 @@ title: Diacritics
 ---
 
 The option `diacritics` will map normal and [diacritic characters][diacritics].
-Assuming you would like to highlight "piekny" or "piękny" in the following DOM
-fragment:
+Assuming you would like to highlight either "piekny" or "piękny" in the
+following DOM fragment:
 
 ```html
 <div class="context">
