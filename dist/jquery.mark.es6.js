@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.4.0
+ * mark.js v7.0.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -35,8 +35,8 @@
                 "accuracy": "partially",
                 "each": () => {},
                 "noMatch": () => {},
+                "filter": () => true,
                 "done": () => {},
-                "complete": () => {},
                 "debug": false,
                 "log": window.console
             }, val);
@@ -317,11 +317,15 @@
             }, end);
         }
 
-        wrapMatches(node, regex, custom, cb) {
+        wrapMatches(node, regex, custom, filterCb, eachCb) {
             const hEl = !this.opt.element ? "mark" : this.opt.element,
                   index = custom ? 0 : 2;
             let match;
             while ((match = regex.exec(node.textContent)) !== null) {
+                if (!filterCb(match[index])) {
+                    continue;
+                }
+
                 let pos = match.index;
                 if (!custom) {
                     pos += match[index - 1].length;
@@ -337,7 +341,7 @@
                     }
                     repl.textContent = match[index];
                     startNode.parentNode.replaceChild(repl, startNode);
-                    cb(repl);
+                    eachCb(repl);
                 }
                 regex.lastIndex = 0;
             }
@@ -362,26 +366,25 @@
                 this.opt.each(element);
             };
             this.forEachNode(node => {
-                this.wrapMatches(node, regexp, true, eachCb);
+                this.wrapMatches(node, regexp, true, match => {
+                    return this.opt.filter(node, match, totalMatches);
+                }, eachCb);
             }, () => {
                 if (totalMatches === 0) {
                     this.opt.noMatch(regexp);
                 }
-                this.opt.complete(totalMatches);
                 this.opt.done(totalMatches);
             });
         }
 
         mark(sv, opt) {
             this.opt = opt;
-            sv = typeof sv === "string" ? [sv] : sv;
-            let {
+            const {
                 keywords: kwArr,
                 length: kwArrLen
-            } = this.getSeparatedKeywords(sv),
-                totalMatches = 0;
+            } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
+            let totalMatches = 0;
             if (kwArrLen === 0) {
-                this.opt.complete(totalMatches);
                 this.opt.done(totalMatches);
             }
             kwArr.forEach(kw => {
@@ -394,13 +397,14 @@
                 };
                 this.log(`Searching with expression "${ regex }"`);
                 this.forEachNode(node => {
-                    this.wrapMatches(node, regex, false, eachCb);
+                    this.wrapMatches(node, regex, false, () => {
+                        return this.opt.filter(node, kw, matches, totalMatches);
+                    }, eachCb);
                 }, () => {
                     if (matches === 0) {
                         this.opt.noMatch(kw);
                     }
                     if (kwArr[kwArrLen - 1] === kw) {
-                        this.opt.complete(totalMatches);
                         this.opt.done(totalMatches);
                     }
                 });
@@ -420,7 +424,6 @@
                     this.unwrapMatches(el);
                 }
             }, () => {
-                this.opt.complete();
                 this.opt.done();
             }, false);
         }

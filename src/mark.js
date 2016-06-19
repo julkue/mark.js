@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.4.0
+ * mark.js v7.0.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -39,8 +39,8 @@ class Mark {
             "accuracy": "partially",
             "each": () => {},
             "noMatch": () => {},
+            "filter": () => true,
             "done": () => {},
-            "complete": () => {}, // deprecated, use "done" instead
             "debug": false,
             "log": window.console
         }, val);
@@ -513,6 +513,11 @@ class Mark {
     }
 
     /**
+     * Filter callback before each wrapping
+     * @callback Mark~wrapMatchesFilterCallback#
+     * @param {string} match - The matching string
+     */
+    /**
      * Callback for each wrapped element
      * @callback Mark~wrapMatchesEachCallback
      * @param {HTMLElement} element - The marked DOM element
@@ -526,14 +531,18 @@ class Mark {
      * expression that has at least two groups (like returned from
      * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
      * the second will be wrapped
-     * @param {Mark~wrapMatchesEachCallback} cb
+     * @param {Mark~wrapMatchesEachCallback} eachCb
+     * @param {Mark~wrapMatchesFilterCallback} filterCb
      * @access protected
      */
-    wrapMatches(node, regex, custom, cb) {
+    wrapMatches(node, regex, custom, filterCb, eachCb) {
         const hEl = !this.opt.element ? "mark" : this.opt.element,
             index = custom ? 0 : 2;
         let match;
         while((match = regex.exec(node.textContent)) !== null) {
+            if(!filterCb(match[index])) {
+                continue;
+            }
             // Split the text node at the start and the end of the match and
             // replace the new node with the specified element
             let pos = match.index;
@@ -553,7 +562,7 @@ class Mark {
                 }
                 repl.textContent = match[index];
                 startNode.parentNode.replaceChild(repl, startNode);
-                cb(repl);
+                eachCb(repl);
             }
             regex.lastIndex = 0; // http://tinyurl.com/htsudjd
         }
@@ -604,6 +613,13 @@ class Mark {
      * @callback Mark~markRegExpNoMatchCallback
      * @param {RegExp} regexp - The regular expression
      */
+     /**
+      * Callback to filter matches
+      * @callback Mark~markRegExpFilterCallback
+      * @param {HTMLElement} textNode - The text node which includes the match
+      * @param {string} match - The matching string for the RegExp
+      * @param {number} counter - A counter indicating the number of all marks
+      */
     /**
      * These options also include the common options from
      * {@link Mark~commonOptions}
@@ -611,6 +627,7 @@ class Mark {
      * @type {object.<string>}
      * @property {Mark~markRegExpEachCallback} [each]
      * @property {Mark~markRegExpNoMatchCallback} [noMatch]
+     * @property {Mark~markRegExpFilterCallback} [filter]
      */
     /**
      * Marks a custom regular expression
@@ -627,12 +644,13 @@ class Mark {
             this.opt.each(element);
         };
         this.forEachNode(node => {
-            this.wrapMatches(node, regexp, true, eachCb);
+            this.wrapMatches(node, regexp, true, match => {
+                return this.opt.filter(node, match, totalMatches);
+            }, eachCb);
         }, () => {
             if(totalMatches === 0) {
                 this.opt.noMatch(regexp);
             }
-            this.opt.complete(totalMatches); // deprecated
             this.opt.done(totalMatches);
         });
     }
@@ -648,12 +666,22 @@ class Mark {
      * @param {RegExp} term - The search term that was not found
      */
      /**
-      * @typedef Mark~markAccuracyObject
-      * @type {object.<string>}
-      * @property {string} value - A accuracy string value
-      * @property {string[]} limiters - A custom array of limiters. For example
-      * <code>["-", ","]</code>
+      * Callback to filter matches
+      * @callback Mark~markFilterCallback
+      * @param {HTMLElement} textNode - The text node which includes the match
+      * @param {string} match - The matching term
+      * @param {number} termCounter - A counter indicating the number of marks
+      * for the specific match
+      * @param {number} totalCounter - A counter indicating the number of all
+      * marks
       */
+    /**
+     * @typedef Mark~markAccuracyObject
+     * @type {object.<string>}
+     * @property {string} value - A accuracy string value
+     * @property {string[]} limiters - A custom array of limiters. For example
+     * <code>["-", ","]</code>
+     */
     /**
      * These options also include the common options from
      * {@link Mark~commonOptions}
@@ -684,6 +712,7 @@ class Mark {
      * </ul>
      * @property {Mark~markEachCallback} [each]
      * @property {Mark~markNoMatchCallback} [noMatch]
+     * @property {Mark~markFilterCallback} [filter]
      */
     /**
      * Marks the specified search terms
@@ -694,14 +723,12 @@ class Mark {
      */
     mark(sv, opt) {
         this.opt = opt;
-        sv = typeof sv === "string" ? [sv] : sv;
-        let {
+        const {
             keywords: kwArr,
             length: kwArrLen
-        } = this.getSeparatedKeywords(sv),
-            totalMatches = 0;
+        } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
+        let totalMatches = 0;
         if(kwArrLen === 0) {
-            this.opt.complete(totalMatches); // deprecated
             this.opt.done(totalMatches);
         }
         kwArr.forEach(kw => {
@@ -714,13 +741,14 @@ class Mark {
             };
             this.log(`Searching with expression "${regex}"`);
             this.forEachNode(node => {
-                this.wrapMatches(node, regex, false, eachCb);
+                this.wrapMatches(node, regex, false, () => {
+                    return this.opt.filter(node, kw, matches, totalMatches);
+                }, eachCb);
             }, () => {
                 if(matches === 0) {
                     this.opt.noMatch(kw);
                 }
                 if(kwArr[kwArrLen - 1] === kw) {
-                    this.opt.complete(totalMatches); // deprecated
                     this.opt.done(totalMatches);
                 }
             });
@@ -746,7 +774,6 @@ class Mark {
                 this.unwrapMatches(el);
             }
         }, () => {
-            this.opt.complete(); // deprecated, use "done" instead
             this.opt.done();
         }, false);
     }
