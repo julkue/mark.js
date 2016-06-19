@@ -39,9 +39,9 @@
     "tutorials": {
         "pattern": "tutorials/*.md",
         "refer": false,
-        "sortBy": ["Introduction", "Element and Class Name", "Filter",
+        "sortBy": ["Introduction", "Element and Class Name", "Exclude",
                     "Separate Word Search", "Accuracy", "Diacritics",
-                    "Synonyms"],
+                    "Synonyms", "Filter"],
         "metadata": {
             "name": "Tutorials"
         }

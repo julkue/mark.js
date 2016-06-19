@@ -11,13 +11,12 @@ The following example will add the synonym "1" for "one", "2" for "two" and vice
 versa:
 
 ```javascript
-var instance = new Mark(document.querySelector("div.context"));
-instance.mark("text", {
+var options = {
     "synonyms": {
         "one": "1",
         "two": "2"
     }
-});
+};
 ```
 
 [umlauts]: https://en.wikipedia.org/wiki/Germanic_umlaut
