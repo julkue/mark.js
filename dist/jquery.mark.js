@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v6.4.0
+ * mark.js v7.0.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -184,20 +184,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return (el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector).call(el, selector);
             }
         }, {
-            key: "matchesFilter",
-            value: function matchesFilter(el, exclM) {
+            key: "matchesExclude",
+            value: function matchesExclude(el, exclM) {
                 var _this3 = this;
 
                 var remain = true;
-                var fltr = this.opt.filter.concat(["script", "style", "title"]);
+                var excl = this.opt.exclude.concat(["script", "style", "title"]);
                 if (!this.opt.iframes) {
-                    fltr = fltr.concat(["iframe"]);
+                    excl = excl.concat(["iframe"]);
                 }
                 if (exclM) {
-                    fltr = fltr.concat(["*[data-markjs='true']"]);
+                    excl = excl.concat(["*[data-markjs='true']"]);
                 }
-                fltr.every(function (filter) {
-                    if (_this3.matches(el, filter)) {
+                excl.every(function (sel) {
+                    if (_this3.matches(el, sel)) {
                         return remain = false;
                     }
                     return true;
@@ -315,10 +315,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 };
                 checkEnd(++open);
                 stack.forEach(function (el) {
-                    if (!_this5.matchesFilter(el, exclM)) {
+                    if (!_this5.matchesExclude(el, exclM)) {
                         if (el.tagName.toLowerCase() === "iframe") {
                             _this5.forEachElementInIframe(el, function (iel) {
-                                if (!_this5.matchesFilter(iel, exclM)) {
+                                if (!_this5.matchesExclude(iel, exclM)) {
                                     cb(iel);
                                 }
                             }, checkEnd);
@@ -345,11 +345,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: "wrapMatches",
-            value: function wrapMatches(node, regex, custom, cb) {
+            value: function wrapMatches(node, regex, custom, filterCb, eachCb) {
                 var hEl = !this.opt.element ? "mark" : this.opt.element,
                     index = custom ? 0 : 2;
                 var match = void 0;
                 while ((match = regex.exec(node.textContent)) !== null) {
+                    if (!filterCb(match[index])) {
+                        continue;
+                    }
+
                     var pos = match.index;
                     if (!custom) {
                         pos += match[index - 1].length;
@@ -365,7 +369,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         }
                         repl.textContent = match[index];
                         startNode.parentNode.replaceChild(repl, startNode);
-                        cb(repl);
+                        eachCb(repl);
                     }
                     regex.lastIndex = 0;
                 }
@@ -394,12 +398,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     _this6.opt.each(element);
                 };
                 this.forEachNode(function (node) {
-                    _this6.wrapMatches(node, regexp, true, eachCb);
+                    _this6.wrapMatches(node, regexp, true, function (match) {
+                        return _this6.opt.filter(node, match, totalMatches);
+                    }, eachCb);
                 }, function () {
                     if (totalMatches === 0) {
                         _this6.opt.noMatch(regexp);
                     }
-                    _this6.opt.complete(totalMatches);
                     _this6.opt.done(totalMatches);
                 });
             }
@@ -409,15 +414,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this7 = this;
 
                 this.opt = opt;
-                sv = typeof sv === "string" ? [sv] : sv;
 
-                var _getSeparatedKeywords = this.getSeparatedKeywords(sv);
+                var _getSeparatedKeywords = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
 
                 var kwArr = _getSeparatedKeywords.keywords;
                 var kwArrLen = _getSeparatedKeywords.length;
+
                 var totalMatches = 0;
                 if (kwArrLen === 0) {
-                    this.opt.complete(totalMatches);
                     this.opt.done(totalMatches);
                 }
                 kwArr.forEach(function (kw) {
@@ -430,13 +434,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     };
                     _this7.log("Searching with expression \"" + regex + "\"");
                     _this7.forEachNode(function (node) {
-                        _this7.wrapMatches(node, regex, false, eachCb);
+                        _this7.wrapMatches(node, regex, false, function () {
+                            return _this7.opt.filter(node, kw, matches, totalMatches);
+                        }, eachCb);
                     }, function () {
                         if (matches === 0) {
                             _this7.opt.noMatch(kw);
                         }
                         if (kwArr[kwArrLen - 1] === kw) {
-                            _this7.opt.complete(totalMatches);
                             _this7.opt.done(totalMatches);
                         }
                     });
@@ -459,7 +464,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         _this8.unwrapMatches(el);
                     }
                 }, function () {
-                    _this8.opt.complete();
                     _this8.opt.done();
                 }, false);
             }
@@ -469,7 +473,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this._opt = _extends({}, {
                     "element": "",
                     "className": "",
-                    "filter": [],
+                    "exclude": [],
                     "iframes": false,
                     "separateWordSearch": true,
                     "diacritics": true,
@@ -477,8 +481,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "accuracy": "partially",
                     "each": function each() {},
                     "noMatch": function noMatch() {},
+                    "filter": function filter() {
+                        return true;
+                    },
                     "done": function done() {},
-                    "complete": function complete() {},
                     "debug": false,
                     "log": window.console
                 }, val);
