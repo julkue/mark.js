@@ -42,7 +42,7 @@ var instance = new Mark(document.querySelector("div.context"));
 instance.mark("text", {
     "exclude": [
         "h1",
-        ".byline"
+        ".byline *"
     ]
 });
 ```
@@ -53,7 +53,7 @@ With jQuery:
 $("div.context").mark("text", {
     "exclude": [
         "h1",
-        ".byline"
+        ".byline *"
     ]
 });
 ```
