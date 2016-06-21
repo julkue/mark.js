@@ -14,11 +14,17 @@ module.exports = config => {
             platform: "Windows 10",
             version: "30"
         },
-        "SL_Win_Chrome_48": {
+        "SL_Win_Chrome_40": {
             base: "SauceLabs",
             browserName: "chrome",
             platform: "Windows 10",
-            version: "48"
+            version: "40"
+        },
+        "SL_Win_Chrome_50": {
+            base: "SauceLabs",
+            browserName: "chrome",
+            platform: "Windows 10",
+            version: "50"
         },
         "SL_Win_Chrome_Latest": {
             base: "SauceLabs",
@@ -32,11 +38,11 @@ module.exports = config => {
             platform: "Windows 10",
             version: "30"
         },
-        "SL_Win_Firefox_44": {
+        "SL_Win_Firefox_40": {
             base: "SauceLabs",
             browserName: "firefox",
             platform: "Windows 10",
-            version: "44"
+            version: "40"
         },
         "SL_Win_Firefox_Latest": {
             base: "SauceLabs",
