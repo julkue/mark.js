@@ -8,7 +8,9 @@
 [![Code quality][code-quality-image]][code-quality]
 [![Bower Version][bower-version-image]][bower-version]
 [![License][license-image]][license]  
-[![Browser Test Status][sauce-image]][sauce]
+<a href="https://saucelabs.com/u/markjs">
+  <img src="https://saucelabs.com/browser-matrix/markjs.svg" alt="Sauce Test Status" width="600" />
+</a>
 
 ## Documentation and further information
 
@@ -31,13 +33,11 @@ Happy hacking!
 [code-quality]: https://www.codacy.com/app/julmot/mark.js
 [bower-version]: https://github.com/julmot/mark.js
 [license]: https://raw.githubusercontent.com/julmot/mark.js/master/LICENSE
-[sauce]: https://saucelabs.com/u/markjs
 
 [build-status-image]: https://img.shields.io/travis/julmot/mark.js/master.svg?label=test
 [code-quality-image]:https://img.shields.io/codacy/27a3ed45370f41e89b02073b214c18a7.svg
 [bower-version-image]: https://img.shields.io/bower/v/mark.js.svg
 [license-image]: https://img.shields.io/badge/license-MIT-blue.svg
-[sauce-image]: https://saucelabs.com/browser-matrix/markjs.svg
 
 [website]: https://markjs.io/
 [contributing]: https://github.com/julmot/mark.js/blob/master/CONTRIBUTING.md
