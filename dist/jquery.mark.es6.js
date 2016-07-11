@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v7.0.0
+ * mark.js v7.0.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -161,10 +161,12 @@
                 ctx = Array.prototype.slice.call(this.ctx);
             }
             ctx.forEach(ctx => {
-                stack.push(ctx);
-                const childs = ctx.querySelectorAll("*");
-                if (childs.length) {
-                    stack = stack.concat(Array.prototype.slice.call(childs));
+                if (stack.indexOf(ctx) === -1) {
+                    stack.push(ctx);
+                    const childs = ctx.querySelectorAll("*");
+                    if (childs.length) {
+                        stack = stack.concat(Array.prototype.slice.call(childs));
+                    }
                 }
             });
             if (!ctx.length) {
