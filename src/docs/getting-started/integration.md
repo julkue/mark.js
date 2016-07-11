@@ -2,8 +2,8 @@
 title: Integration
 ---
 
-{{defaults.title}} ships with a few files that – when not using a CDN – can be
-found under `./dist/`:
+{{defaults.title}} ships with a few files – when using Bower they're located in
+`./dist/`:
 
 - Files for usage with pure JavaScript:
   - `mark.js` - Uncompressed ES5
