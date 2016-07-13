@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v7.0.1
+ * mark.js v7.0.2
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -12,6 +12,8 @@
         define([], () => {
             return factory(window, document);
         });
+    } else if (typeof module === "object" && module.exports) {
+        module.exports = factory(window, document);
     } else {
         factory(window, document);
     }

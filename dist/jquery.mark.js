@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v7.0.1
+ * mark.js v7.0.2
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -20,8 +20,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         define(["jquery"], function (jQuery) {
             return factory(window, document, jQuery);
         });
-    } else if ((typeof exports === "undefined" ? "undefined" : _typeof(exports)) === "object") {
-        factory(window, document, require("jquery"));
+    } else if ((typeof module === "undefined" ? "undefined" : _typeof(module)) === "object" && module.exports) {
+        module.exports = factory(window, document, require("jquery"));
     } else {
         factory(window, document, jQuery);
     }
@@ -511,4 +511,5 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         new Mark(this).unmark(opt);
         return this;
     };
+    return $;
 }, window, document);
