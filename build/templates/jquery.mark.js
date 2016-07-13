@@ -10,8 +10,8 @@
         define(["jquery"], jQuery => {
             return factory(window, document, jQuery);
         });
-    } else if(typeof exports === "object") {
-        factory(window, document, require("jquery"));
+    } else if(typeof module === "object" && module.exports) {
+        module.exports = factory(window, document, require("jquery"));
     } else {
         factory(window, document, jQuery);
     }
@@ -29,4 +29,5 @@
         new Mark(this).unmark(opt);
         return this;
     };
+    return $;
 }, window, document);

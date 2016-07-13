@@ -10,6 +10,8 @@
         define([], () => {
             return factory(window, document);
         });
+    } else if(typeof module === "object" && module.exports) {
+        module.exports = factory(window, document);
     } else {
         factory(window, document);
     }

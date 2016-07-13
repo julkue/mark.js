@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v7.0.1
+ * mark.js v7.0.2
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -12,8 +12,8 @@
         define(["jquery"], jQuery => {
             return factory(window, document, jQuery);
         });
-    } else if (typeof exports === "object") {
-        factory(window, document, require("jquery"));
+    } else if (typeof module === "object" && module.exports) {
+        module.exports = factory(window, document, require("jquery"));
     } else {
         factory(window, document, jQuery);
     }
@@ -444,4 +444,5 @@
         new Mark(this).unmark(opt);
         return this;
     };
+    return $;
 }, window, document);
