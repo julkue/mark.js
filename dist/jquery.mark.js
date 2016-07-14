@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v7.0.2
+ * mark.js v8.0.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -150,10 +150,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 };
             }
         }, {
-            key: "getElements",
-            value: function getElements() {
-                var ctx = void 0,
-                    stack = [];
+            key: "getContexts",
+            value: function getContexts() {
+                var ctx = void 0;
                 if (typeof this.ctx === "undefined") {
                     ctx = [];
                 } else if (this.ctx instanceof HTMLElement) {
@@ -163,22 +162,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 } else {
                     ctx = Array.prototype.slice.call(this.ctx);
                 }
-                ctx.forEach(function (ctx) {
-                    if (stack.indexOf(ctx) === -1) {
-                        stack.push(ctx);
-                        var childs = ctx.querySelectorAll("*");
-                        if (childs.length) {
-                            stack = stack.concat(Array.prototype.slice.call(childs));
-                        }
-                    }
-                });
                 if (!ctx.length) {
                     this.log("Empty context", "warn");
                 }
-                return {
-                    "elements": stack,
-                    "length": stack.length
-                };
+                return ctx;
             }
         }, {
             key: "matches",
@@ -192,9 +179,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 var remain = true;
                 var excl = this.opt.exclude.concat(["script", "style", "title"]);
-                if (!this.opt.iframes) {
-                    excl = excl.concat(["iframe"]);
-                }
                 if (exclM) {
                     excl = excl.concat(["*[data-markjs='true']"]);
                 }
@@ -257,91 +241,79 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             }
         }, {
-            key: "forEachElementInIframe",
-            value: function forEachElementInIframe(ifr, cb) {
+            key: "forEachIframe",
+            value: function forEachIframe(ctx, cb, end) {
                 var _this4 = this;
 
-                var end = arguments.length <= 2 || arguments[2] === undefined ? function () {} : arguments[2];
+                var ifr = ctx.querySelectorAll("iframe");
+                ifr = Array.prototype.slice.call(ifr);
+                if (ifr.length) {
+                    ifr.forEach(function (ifr) {
+                        _this4.onIframeReady(ifr, function (con) {
+                            var html = con.querySelector("html");
+                            _this4.forEachIframe(html, cb, function () {
+                                cb(html);
+                                end();
+                            });
+                        }, function () {
+                            var src = ifr.getAttribute("src");
+                            _this4.log("iframe \"" + src + "\" could not be accessed", "warn");
+                            end();
+                        });
+                    });
+                } else {
+                    end();
+                }
+            }
+        }, {
+            key: "forEachContext",
+            value: function forEachContext(cb, end) {
+                var _this5 = this;
 
-                var open = 0;
-                var checkEnd = function checkEnd() {
+                var ctx = this.getContexts(),
+                    callCallbacks = function callCallbacks(el) {
+                    cb(el);
                     if (--open < 1) {
                         end();
                     }
                 };
-                this.onIframeReady(ifr, function (con) {
-                    var stack = Array.prototype.slice.call(con.querySelectorAll("*"));
-                    if ((open = stack.length) === 0) {
-                        checkEnd();
+                var open = ctx.length;
+                if (open < 1) {
+                    end();
+                }
+                ctx.forEach(function (el) {
+                    if (_this5.opt.iframes) {
+                        _this5.forEachIframe(el, cb, function () {
+                            callCallbacks(el);
+                        });
+                    } else {
+                        callCallbacks(el);
                     }
-                    stack.forEach(function (el) {
-                        if (el.tagName.toLowerCase() === "iframe") {
-                            (function () {
-                                var j = 0;
-                                _this4.forEachElementInIframe(el, function (iel, len) {
-                                    cb(iel, len);
-                                    if (len - 1 === j) {
-                                        checkEnd();
-                                    }
-                                    j++;
-                                }, checkEnd);
-                            })();
-                        } else {
-                            cb(el, stack.length);
-                            checkEnd();
-                        }
-                    });
-                }, function () {
-                    var src = ifr.getAttribute("src");
-                    _this4.log("iframe '" + src + "' could not be accessed", "warn");
-                    checkEnd();
                 });
             }
         }, {
-            key: "forEachElement",
-            value: function forEachElement(cb) {
-                var _this5 = this;
+            key: "forEachTextNode",
+            value: function forEachTextNode(cb, end) {
+                var _this6 = this;
 
-                var end = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
-                var exclM = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
-
-                var _getElements = this.getElements();
-
-                var stack = _getElements.elements;
-                var open = _getElements.length;
-
-                var checkEnd = function checkEnd() {
-                    if (--open === 0) {
-                        end();
+                var handled = [];
+                this.forEachContext(function (ctx) {
+                    var isDescendant = handled.filter(function (handledCtx) {
+                        return handledCtx.contains(ctx);
+                    }).length > 0;
+                    if (handled.indexOf(ctx) > -1 || isDescendant) {
+                        return;
                     }
-                };
-                checkEnd(++open);
-                stack.forEach(function (el) {
-                    if (!_this5.matchesExclude(el, exclM)) {
-                        if (el.tagName.toLowerCase() === "iframe") {
-                            _this5.forEachElementInIframe(el, function (iel) {
-                                if (!_this5.matchesExclude(iel, exclM)) {
-                                    cb(iel);
-                                }
-                            }, checkEnd);
-                            return;
-                        } else {
-                                cb(el);
-                            }
-                    }
-                    checkEnd();
-                });
-            }
-        }, {
-            key: "forEachNode",
-            value: function forEachNode(cb) {
-                var end = arguments.length <= 1 || arguments[1] === undefined ? function () {} : arguments[1];
-
-                this.forEachElement(function (n) {
-                    for (n = n.firstChild; n; n = n.nextSibling) {
-                        if (n.nodeType === 3 && n.textContent.trim()) {
-                            cb(n);
+                    handled.push(ctx);
+                    var itr = document.createNodeIterator(ctx, NodeFilter.SHOW_TEXT, function (node) {
+                        if (!_this6.matchesExclude(node.parentNode, true)) {
+                            return NodeFilter.FILTER_ACCEPT;
                         }
+                        return NodeFilter.FILTER_REJECT;
+                    }, false);
+                    var node = void 0;
+                    while (node = itr.nextNode()) {
+                        cb(node);
                     }
                 }, end);
             }
@@ -390,30 +362,30 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "markRegExp",
             value: function markRegExp(regexp, opt) {
-                var _this6 = this;
+                var _this7 = this;
 
                 this.opt = opt;
                 this.log("Searching with expression \"" + regexp + "\"");
                 var totalMatches = 0;
                 var eachCb = function eachCb(element) {
                     totalMatches++;
-                    _this6.opt.each(element);
+                    _this7.opt.each(element);
                 };
-                this.forEachNode(function (node) {
-                    _this6.wrapMatches(node, regexp, true, function (match) {
-                        return _this6.opt.filter(node, match, totalMatches);
+                this.forEachTextNode(function (node) {
+                    _this7.wrapMatches(node, regexp, true, function (match) {
+                        return _this7.opt.filter(node, match, totalMatches);
                     }, eachCb);
                 }, function () {
                     if (totalMatches === 0) {
-                        _this6.opt.noMatch(regexp);
+                        _this7.opt.noMatch(regexp);
                     }
-                    _this6.opt.done(totalMatches);
+                    _this7.opt.done(totalMatches);
                 });
             }
         }, {
             key: "mark",
             value: function mark(sv, opt) {
-                var _this7 = this;
+                var _this8 = this;
 
                 this.opt = opt;
 
@@ -427,24 +399,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     this.opt.done(totalMatches);
                 }
                 kwArr.forEach(function (kw) {
-                    var regex = new RegExp(_this7.createRegExp(kw), "gmi"),
+                    var regex = new RegExp(_this8.createRegExp(kw), "gmi"),
                         matches = 0;
                     var eachCb = function eachCb(element) {
                         matches++;
                         totalMatches++;
-                        _this7.opt.each(element);
+                        _this8.opt.each(element);
                     };
-                    _this7.log("Searching with expression \"" + regex + "\"");
-                    _this7.forEachNode(function (node) {
-                        _this7.wrapMatches(node, regex, false, function () {
-                            return _this7.opt.filter(node, kw, matches, totalMatches);
+                    _this8.log("Searching with expression \"" + regex + "\"");
+                    _this8.forEachTextNode(function (node) {
+                        _this8.wrapMatches(node, regex, false, function () {
+                            return _this8.opt.filter(node, kw, matches, totalMatches);
                         }, eachCb);
                     }, function () {
                         if (matches === 0) {
-                            _this7.opt.noMatch(kw);
+                            _this8.opt.noMatch(kw);
                         }
                         if (kwArr[kwArrLen - 1] === kw) {
-                            _this7.opt.done(totalMatches);
+                            _this8.opt.done(totalMatches);
                         }
                     });
                 });
@@ -452,7 +424,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "unmark",
             value: function unmark(opt) {
-                var _this8 = this;
+                var _this9 = this;
 
                 this.opt = opt;
                 var sel = this.opt.element ? this.opt.element : "*";
@@ -461,13 +433,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     sel += "." + this.opt.className;
                 }
                 this.log("Removal selector \"" + sel + "\"");
-                this.forEachElement(function (el) {
-                    if (_this8.matches(el, sel)) {
-                        _this8.unwrapMatches(el);
-                    }
-                }, function () {
-                    _this8.opt.done();
-                }, false);
+                this.forEachContext(function (ctx) {
+                    var matches = ctx.querySelectorAll(sel);
+                    Array.prototype.slice.call(matches).forEach(function (el) {
+                        if (!_this9.matchesExclude(el, false)) {
+                            _this9.unwrapMatches(el);
+                        }
+                    });
+                }, this.opt.done);
             }
         }, {
             key: "opt",

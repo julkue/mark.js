@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v7.0.2
+ * mark.js v8.0.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -148,9 +148,8 @@
             };
         }
 
-        getElements() {
-            let ctx,
-                stack = [];
+        getContexts() {
+            let ctx;
             if (typeof this.ctx === "undefined") {
                 ctx = [];
             } else if (this.ctx instanceof HTMLElement) {
@@ -160,22 +159,10 @@
             } else {
                 ctx = Array.prototype.slice.call(this.ctx);
             }
-            ctx.forEach(ctx => {
-                if (stack.indexOf(ctx) === -1) {
-                    stack.push(ctx);
-                    const childs = ctx.querySelectorAll("*");
-                    if (childs.length) {
-                        stack = stack.concat(Array.prototype.slice.call(childs));
-                    }
-                }
-            });
             if (!ctx.length) {
                 this.log("Empty context", "warn");
             }
-            return {
-                "elements": stack,
-                "length": stack.length
-            };
+            return ctx;
         }
 
         matches(el, selector) {
@@ -185,9 +172,6 @@
         matchesExclude(el, exclM) {
             let remain = true;
             let excl = this.opt.exclude.concat(["script", "style", "title"]);
-            if (!this.opt.iframes) {
-                excl = excl.concat(["iframe"]);
-            }
             if (exclM) {
                 excl = excl.concat(["*[data-markjs='true']"]);
             }
@@ -247,74 +231,70 @@
             }
         }
 
-        forEachElementInIframe(ifr, cb, end = function () {}) {
-            let open = 0;
-            const checkEnd = () => {
+        forEachIframe(ctx, cb, end) {
+            let ifr = ctx.querySelectorAll("iframe");
+            ifr = Array.prototype.slice.call(ifr);
+            if (ifr.length) {
+                ifr.forEach(ifr => {
+                    this.onIframeReady(ifr, con => {
+                        const html = con.querySelector("html");
+                        this.forEachIframe(html, cb, () => {
+                            cb(html);
+                            end();
+                        });
+                    }, () => {
+                        const src = ifr.getAttribute("src");
+                        this.log(`iframe "${ src }" could not be accessed`, "warn");
+                        end();
+                    });
+                });
+            } else {
+                end();
+            }
+        }
+
+        forEachContext(cb, end) {
+            const ctx = this.getContexts(),
+                  callCallbacks = el => {
+                cb(el);
                 if (--open < 1) {
                     end();
                 }
             };
-            this.onIframeReady(ifr, con => {
-                const stack = Array.prototype.slice.call(con.querySelectorAll("*"));
-                if ((open = stack.length) === 0) {
-                    checkEnd();
+            let open = ctx.length;
+            if (open < 1) {
+                end();
+            }
+            ctx.forEach(el => {
+                if (this.opt.iframes) {
+                    this.forEachIframe(el, cb, () => {
+                        callCallbacks(el);
+                    });
+                } else {
+                    callCallbacks(el);
                 }
-                stack.forEach(el => {
-                    if (el.tagName.toLowerCase() === "iframe") {
-                        let j = 0;
-                        this.forEachElementInIframe(el, (iel, len) => {
-                            cb(iel, len);
-                            if (len - 1 === j) {
-                                checkEnd();
-                            }
-                            j++;
-                        }, checkEnd);
-                    } else {
-                        cb(el, stack.length);
-                        checkEnd();
-                    }
-                });
-            }, () => {
-                let src = ifr.getAttribute("src");
-                this.log(`iframe '${ src }' could not be accessed`, "warn");
-                checkEnd();
             });
         }
 
-        forEachElement(cb, end = function () {}, exclM = true) {
-            let {
-                elements: stack,
-                length: open
-            } = this.getElements();
-            const checkEnd = () => {
-                if (--open === 0) {
-                    end();
+        forEachTextNode(cb, end) {
+            let handled = [];
+            this.forEachContext(ctx => {
+                const isDescendant = handled.filter(handledCtx => {
+                    return handledCtx.contains(ctx);
+                }).length > 0;
+                if (handled.indexOf(ctx) > -1 || isDescendant) {
+                    return;
                 }
-            };
-            checkEnd(++open);
-            stack.forEach(el => {
-                if (!this.matchesExclude(el, exclM)) {
-                    if (el.tagName.toLowerCase() === "iframe") {
-                        this.forEachElementInIframe(el, iel => {
-                            if (!this.matchesExclude(iel, exclM)) {
-                                cb(iel);
-                            }
-                        }, checkEnd);
-                        return;
-                    } else {
-                            cb(el);
-                        }
-                }
-                checkEnd();
-            });
-        }
-
-        forEachNode(cb, end = function () {}) {
-            this.forEachElement(n => {
-                for (n = n.firstChild; n; n = n.nextSibling) {
-                    if (n.nodeType === 3 && n.textContent.trim()) {
-                        cb(n);
+                handled.push(ctx);
+                const itr = document.createNodeIterator(ctx, NodeFilter.SHOW_TEXT, node => {
+                    if (!this.matchesExclude(node.parentNode, true)) {
+                        return NodeFilter.FILTER_ACCEPT;
                     }
+                    return NodeFilter.FILTER_REJECT;
+                }, false);
+                let node;
+                while (node = itr.nextNode()) {
+                    cb(node);
                 }
             }, end);
         }
@@ -367,7 +347,7 @@
                 totalMatches++;
                 this.opt.each(element);
             };
-            this.forEachNode(node => {
+            this.forEachTextNode(node => {
                 this.wrapMatches(node, regexp, true, match => {
                     return this.opt.filter(node, match, totalMatches);
                 }, eachCb);
@@ -398,7 +378,7 @@
                     this.opt.each(element);
                 };
                 this.log(`Searching with expression "${ regex }"`);
-                this.forEachNode(node => {
+                this.forEachTextNode(node => {
                     this.wrapMatches(node, regex, false, () => {
                         return this.opt.filter(node, kw, matches, totalMatches);
                     }, eachCb);
@@ -421,13 +401,14 @@
                 sel += `.${ this.opt.className }`;
             }
             this.log(`Removal selector "${ sel }"`);
-            this.forEachElement(el => {
-                if (this.matches(el, sel)) {
-                    this.unwrapMatches(el);
-                }
-            }, () => {
-                this.opt.done();
-            }, false);
+            this.forEachContext(ctx => {
+                const matches = ctx.querySelectorAll(sel);
+                Array.prototype.slice.call(matches).forEach(el => {
+                    if (!this.matchesExclude(el, false)) {
+                        this.unwrapMatches(el);
+                    }
+                });
+            }, this.opt.done);
         }
 
     }

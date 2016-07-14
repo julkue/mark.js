@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v7.0.2
+ * mark.js v8.0.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -238,20 +238,12 @@ class Mark {
     }
 
     /**
-     * @typedef Mark~elements
-     * @type {object.<string>}
-     * @property {array} elements - An array containing the instance DOM
-     * elements
-     * @property {number} length - The array length
-     */
-    /**
-     * Returns the context and all children elements
-     * @return {Mark~elements}
+     * Returns all contexts
+     * @return [HTMLElement[]] - An array containing DOM contexts
      * @access protected
      */
-    getElements() {
-        let ctx,
-            stack = [];
+    getContexts() {
+        let ctx;
         if(typeof this.ctx === "undefined") {
             ctx = [];
         } else if(this.ctx instanceof HTMLElement) {
@@ -261,22 +253,10 @@ class Mark {
         } else { // NodeList
             ctx = Array.prototype.slice.call(this.ctx);
         }
-        ctx.forEach(ctx => {
-            if(stack.indexOf(ctx) === -1){
-                stack.push(ctx);
-                const childs = ctx.querySelectorAll("*");
-                if(childs.length) {
-                    stack = stack.concat(Array.prototype.slice.call(childs));
-                }
-            }
-        });
         if(!ctx.length) {
             this.log("Empty context", "warn");
         }
-        return {
-            "elements": stack,
-            "length": stack.length
-        };
+        return ctx;
     }
 
     /**
@@ -309,9 +289,6 @@ class Mark {
     matchesExclude(el, exclM) {
         let remain = true;
         let excl = this.opt.exclude.concat(["script", "style", "title"]);
-        if(!this.opt.iframes) {
-            excl = excl.concat(["iframe"]);
-        }
         if(exclM) {
             excl = excl.concat(["*[data-markjs='true']"]);
         }
@@ -390,126 +367,121 @@ class Mark {
     }
 
     /**
-     * Callback for each element inside the specified iframe
-     * @callback Mark~forEachElementInIframeCallback
-     * @param {HTMLElement} element - The DOM element
-     * @param {integer} length - The length of all elements. Note that this does
-     * not include elements <i>inside</i> an iframe. An iframe itself will be
-     * counted as one element
+     * Callback for each iframe content
+     * @callback Mark~forEachIframeCallback
+     * @param {HTMLElement} html - The html element of the iframe
      */
+     /**
+      * Callback if all iframes were handled inside the context
+      * @callback Mark~forEachIframeEndCallback
+      */
     /**
-     * Callback if ended
-     * @callback Mark~forEachElementInIframeEndCallback
+     * Iterates over all iframes (recursive) inside the specified context and
+     * calls the callback with its content
+     * @param  {HTMLElement} ctx - The DOM context
+     * @param  {Mark~forEachIframeCallback} cb - Each callback
+     * @param  {Mark~forEachIframeEndCallback} end - End callback
      */
-    /**
-     * Calls the callback for each element inside an iframe recursively
-     * @param  {HTMLElement} ifr - The iframe DOM element
-     * @param  {Mark~forEachElementInIframeCallback} cb - The callback
-     * @param {Mark~forEachElementInIframeEndCallback} [end] - End callback
-     * @access protected
-     */
-    forEachElementInIframe(ifr, cb, end = function () {}) {
-        let open = 0;
-        const checkEnd = () => {
-            if((--open) < 1) {
-                end();
-            }
-        };
-        this.onIframeReady(ifr, con => {
-            const stack = Array.prototype.slice.call(con.querySelectorAll("*"));
-            if((open = stack.length) === 0) {
-                checkEnd();
-            }
-            stack.forEach(el => {
-                if(el.tagName.toLowerCase() === "iframe") {
-                    let j = 0;
-                    this.forEachElementInIframe(el, (iel, len) => {
-                        cb(iel, len);
-                        if((len - 1) === j) {
-                            checkEnd();
-                        }
-                        j++;
-                    }, checkEnd);
-                } else {
-                    cb(el, stack.length);
-                    checkEnd();
-                }
+    forEachIframe(ctx, cb, end) {
+        let ifr = ctx.querySelectorAll("iframe");
+        ifr = Array.prototype.slice.call(ifr);
+        if(ifr.length) {
+            ifr.forEach(ifr => {
+                this.onIframeReady(ifr, con => {
+                    const html = con.querySelector("html");
+                    this.forEachIframe(html, cb, () => {
+                        cb(html);
+                        end();
+                    });
+                }, () => {
+                    const src = ifr.getAttribute("src");
+                    this.log(`iframe "${src}" could not be accessed`, "warn");
+                    end();
+                });
             });
-        }, () => {
-            let src = ifr.getAttribute("src");
-            this.log(`iframe '${src}' could not be accessed`, "warn");
-            checkEnd();
+        } else {
+            end();
+        }
+    }
+
+    /**
+     * Callback for each context
+     * @callback Mark~forEachContextCallback
+     * @param {HTMLElement} el - The DOM context
+     */
+    /**
+     * Callback if all contexts were handled
+     * @callback Mark~forEachContextEndCallback
+     */
+    /**
+     * Calls the callback for each context. If there are iframes and the iframes
+     * option is enabled, it will call the callback for each iframe too
+     * @param  {Mark~forEachContextCallback} cb - Each callback
+     * @param {Mark~forEachContextEndCallback} cb - End callback
+     */
+    forEachContext(cb, end) {
+        const ctx = this.getContexts(),
+            callCallbacks = el => {
+                cb(el);
+                if((--open) < 1) {
+                    end();
+                }
+            };
+        let open = ctx.length;
+        if(open < 1) {
+            end();
+        }
+        ctx.forEach(el => {
+            if(this.opt.iframes) {
+                this.forEachIframe(el, cb, () => {
+                    callCallbacks(el);
+                });
+            } else {
+                callCallbacks(el);
+            }
         });
     }
 
     /**
-     * Callback for each element
-     * @callback Mark~forEachElementCallback
-     * @param {HTMLElement} element - The DOM element
+     * Callback for each text node
+     * @callback Mark~forEachTextNodeCallback
+     * @param {HTMLElement} node - The DOM text node element
      */
     /**
      * Callback if ended
-     * @callback Mark~forEachElementEndCallback
+     * @callback Mark~forEachTextNodeEndCallback
      */
     /**
-     * Calls the callback for each element including those inside an iframe
-     * within the instance context (filtered by exclude selectors)
-     * @param  {Mark~forEachElementCallback} cb - The callback
-     * @param {Mark~forEachElementEndCallback} [end] - End callback
-     * @param {boolean} [exclM=true] - If already marked elements should be
-     * excluded
+     * Calls the callback function for each text node of instance contexts and
+     * iframes if the iframes option is enabled
+     * @param  {Mark~forEachTextNodeCallback} cb - The callback function
+     * @param {Mark~forEachTextNodeEndCallback} end - End callback
      * @access protected
      */
-    forEachElement(cb, end = function () {}, exclM = true) {
-        let {
-            elements: stack,
-            length: open
-        } = this.getElements();
-        const checkEnd = () => {
-            if((--open) === 0) {
-                end();
+    forEachTextNode(cb, end) {
+        let handled = [];
+        this.forEachContext(ctx => {
+            const isDescendant = handled.filter(handledCtx => {
+                return handledCtx.contains(ctx);
+            }).length > 0;
+            if(handled.indexOf(ctx) > -1 || isDescendant){
+                return;
             }
-        };
-        checkEnd(++open); // no context elements
-        stack.forEach(el => {
-            if(!this.matchesExclude(el, exclM)) {
-                if(el.tagName.toLowerCase() === "iframe") {
-                    this.forEachElementInIframe(el, (iel) => {
-                        if(!this.matchesExclude(iel, exclM)) {
-                            cb(iel);
-                        }
-                    }, checkEnd);
-                    return; // avoid further code execution
-                } else {
-                    cb(el);
-                }
-            }
-            checkEnd();
-        });
-    }
-
-    /**
-     * Callback for each node
-     * @callback Mark~forEachNodeCallback
-     * @param {object} node - The DOM text node element
-     */
-    /**
-     * Callback if ended
-     * @callback Mark~forEachNodeEndCallback
-     */
-    /**
-     * Calls the callback function for each text node of instance context
-     * elements
-     * @param  {Mark~forEachNodeCallback} cb - The callback function
-     * @param {Mark~forEachNodeEndCallback} [end] - End callback
-     * @access protected
-     */
-    forEachNode(cb, end = function () {}) {
-        this.forEachElement(n => {
-            for(n = n.firstChild; n; n = n.nextSibling) {
-                if(n.nodeType === 3 && n.textContent.trim()) {
-                    cb(n);
-                }
+            handled.push(ctx);
+            const itr = document.createNodeIterator(
+                ctx,
+                NodeFilter.SHOW_TEXT,
+                node => {
+                    if(!this.matchesExclude(node.parentNode, true)) {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                    return NodeFilter.FILTER_REJECT;
+                },
+                false
+            );
+            let node;
+            while(node = itr.nextNode()) {
+                cb(node);
             }
         }, end);
     }
@@ -615,13 +587,13 @@ class Mark {
      * @callback Mark~markRegExpNoMatchCallback
      * @param {RegExp} regexp - The regular expression
      */
-     /**
-      * Callback to filter matches
-      * @callback Mark~markRegExpFilterCallback
-      * @param {HTMLElement} textNode - The text node which includes the match
-      * @param {string} match - The matching string for the RegExp
-      * @param {number} counter - A counter indicating the number of all marks
-      */
+    /**
+     * Callback to filter matches
+     * @callback Mark~markRegExpFilterCallback
+     * @param {HTMLElement} textNode - The text node which includes the match
+     * @param {string} match - The matching string for the RegExp
+     * @param {number} counter - A counter indicating the number of all marks
+     */
     /**
      * These options also include the common options from
      * {@link Mark~commonOptions}
@@ -645,7 +617,7 @@ class Mark {
             totalMatches++;
             this.opt.each(element);
         };
-        this.forEachNode(node => {
+        this.forEachTextNode(node => {
             this.wrapMatches(node, regexp, true, match => {
                 return this.opt.filter(node, match, totalMatches);
             }, eachCb);
@@ -667,16 +639,16 @@ class Mark {
      * @callback Mark~markNoMatchCallback
      * @param {RegExp} term - The search term that was not found
      */
-     /**
-      * Callback to filter matches
-      * @callback Mark~markFilterCallback
-      * @param {HTMLElement} textNode - The text node which includes the match
-      * @param {string} match - The matching term
-      * @param {number} termCounter - A counter indicating the number of marks
-      * for the specific match
-      * @param {number} totalCounter - A counter indicating the number of all
-      * marks
-      */
+    /**
+     * Callback to filter matches
+     * @callback Mark~markFilterCallback
+     * @param {HTMLElement} textNode - The text node which includes the match
+     * @param {string} match - The matching term
+     * @param {number} termCounter - A counter indicating the number of marks
+     * for the specific match
+     * @param {number} totalCounter - A counter indicating the number of all
+     * marks
+     */
     /**
      * @typedef Mark~markAccuracyObject
      * @type {object.<string>}
@@ -742,7 +714,7 @@ class Mark {
                 this.opt.each(element);
             };
             this.log(`Searching with expression "${regex}"`);
-            this.forEachNode(node => {
+            this.forEachTextNode(node => {
                 this.wrapMatches(node, regex, false, () => {
                     return this.opt.filter(node, kw, matches, totalMatches);
                 }, eachCb);
@@ -771,13 +743,14 @@ class Mark {
             sel += `.${this.opt.className}`;
         }
         this.log(`Removal selector "${sel}"`);
-        this.forEachElement(el => {
-            if(this.matches(el, sel)) {
-                this.unwrapMatches(el);
-            }
-        }, () => {
-            this.opt.done();
-        }, false);
+        this.forEachContext(ctx => {
+            const matches = ctx.querySelectorAll(sel);
+            Array.prototype.slice.call(matches).forEach(el => {
+                if(!this.matchesExclude(el, false)) {
+                    this.unwrapMatches(el);
+                }
+            });
+        }, this.opt.done);
     }
 
 }
