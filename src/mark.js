@@ -37,10 +37,10 @@ class Mark {
             "diacritics": true,
             "synonyms": {},
             "accuracy": "partially",
-            "each": () => {},
-            "noMatch": () => {},
+            "each": () => ({}),
+            "noMatch": () => ({}),
             "filter": () => true,
-            "done": () => {},
+            "done": () => ({}),
             "debug": false,
             "log": window.console
         }, val);
