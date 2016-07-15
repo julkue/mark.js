@@ -168,15 +168,17 @@ module.exports = grunt => {
         if(process.env.CI) {
             if(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
                 grunt.task.run(["karma:buildsl"]);
+                return;
             } else {
-                grunt.log.warn(
-                    "Make sure SAUCE_USERNAME and SAUCE_ACCESS_KEY " +
-                    "environment variables are set."
-                );
+                if(process.env.TRAVIS_PULL_REQUEST !== "false"){
+                    grunt.log.warn(
+                        "Make sure SAUCE_USERNAME and SAUCE_ACCESS_KEY " +
+                        "environment variables are set."
+                    );
+                }
             }
-        } else {
-            grunt.task.run(["karma:build"]);
         }
+        grunt.task.run(["karma:build"]);
     });
 
     /**
