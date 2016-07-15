@@ -133,12 +133,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var stack = [];
                 sv.forEach(function (kw) {
                     if (!_this2.opt.separateWordSearch) {
-                        if (kw.trim()) {
+                        if (kw.trim() && stack.indexOf(kw) === -1) {
                             stack.push(kw);
                         }
                     } else {
                         kw.split(" ").forEach(function (kwSplitted) {
-                            if (kwSplitted.trim()) {
+                            if (kwSplitted.trim() && stack.indexOf(kwSplitted) === -1) {
                                 stack.push(kwSplitted);
                             }
                         });

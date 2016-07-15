@@ -131,12 +131,12 @@
             let stack = [];
             sv.forEach(kw => {
                 if (!this.opt.separateWordSearch) {
-                    if (kw.trim()) {
+                    if (kw.trim() && stack.indexOf(kw) === -1) {
                         stack.push(kw);
                     }
                 } else {
                     kw.split(" ").forEach(kwSplitted => {
-                        if (kwSplitted.trim()) {
+                        if (kwSplitted.trim() && stack.indexOf(kwSplitted) === -1) {
                             stack.push(kwSplitted);
                         }
                     });
