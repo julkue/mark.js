@@ -12,7 +12,11 @@ var instance = new Mark(context);
 ```
 
 The variable `context` defines where you want {{defaults.title}} to search for
-matches. If you'd like to highlight matches in a div with a class `test` then
+matches. You can pass a single element (e.g. the return value of
+`document.getElementById()` or `document.querySelector()`), an array containing
+multiple single elements, or a NodeList.
+
+If for example you'd like to highlight matches in a div with a class `test` then
 you'd have to use:
 
 ```javascript
