@@ -232,7 +232,9 @@ class Mark {
             }
         });
         return {
-            "keywords": stack,
+            "keywords": stack.sort((a, b) => {
+                return b.length - a.length;
+            }),
             "length": stack.length
         };
     }

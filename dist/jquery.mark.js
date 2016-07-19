@@ -145,7 +145,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }
                 });
                 return {
-                    "keywords": stack,
+                    "keywords": stack.sort(function (a, b) {
+                        return b.length - a.length;
+                    }),
                     "length": stack.length
                 };
             }
