@@ -8,7 +8,7 @@
 describe("basic mark with 'done' callback", function () {
     var $ctx, doneCalled, totalMatches;
     beforeEach(function (done) {
-        loadFixtures("basic.html");
+        loadFixtures("basic/main.html");
 
         totalMatches = doneCalled = 0;
         $ctx = $(".basic");

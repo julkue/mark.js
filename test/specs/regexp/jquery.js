@@ -8,7 +8,7 @@
 describe("mark with regular expression called with jquery", function () {
     var $ctx1, $ctx2, errorThrown, ret;
     beforeEach(function (done) {
-        loadFixtures("regexp.html");
+        loadFixtures("regexp/main.html");
 
         $ctx1 = $(".regexp > div:first-child");
         $ctx2 = $(".regexp > div:last-child");

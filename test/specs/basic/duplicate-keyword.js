@@ -8,7 +8,7 @@
 describe("basic mark with duplicated keywords", function () {
     var $ctx1, $ctx2, ctx1Called, ctx2Called;
     beforeEach(function (done) {
-        loadFixtures("basic-duplicate-keywords.html");
+        loadFixtures("basic/duplicate-keywords.html");
 
         $ctx1 = $(".basic-duplicate-keywords > div:first-child");
         $ctx2 = $(".basic-duplicate-keywords > div:last-child");

@@ -8,7 +8,7 @@
 describe("basic unmark with custom element and class", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-custom-element-class.html");
+        loadFixtures("basic/custom-element-class.html");
 
         $ctx = $(".basic-custom-element-class > div:first-child");
         var instance = new Mark($ctx[0]);

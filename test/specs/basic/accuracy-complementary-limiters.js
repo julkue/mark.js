@@ -8,7 +8,7 @@
 describe("basic mark with accuracy complementary and limiters", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-accuracy-complementary-limiters.html");
+        loadFixtures("basic/accuracy-complementary-limiters.html");
 
         $ctx = $(".basic-accuracy-complementary-limiters");
         new Mark($ctx[0]).mark("test", {

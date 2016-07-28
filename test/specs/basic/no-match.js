@@ -8,7 +8,7 @@
 describe("basic mark with 'noMatch' callback", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
-        loadFixtures("basic.html");
+        loadFixtures("basic/main.html");
 
         notFound = [];
         $ctx = $(".basic");

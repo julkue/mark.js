@@ -8,7 +8,7 @@
 describe("basic mark with regex characters", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-escape.html");
+        loadFixtures("basic/escape.html");
 
         $ctx = $(".basic-escape");
         new Mark($ctx[0]).mark(["39,00 €", "0.009 €", "Unk?nown", "Some+>thing"], {

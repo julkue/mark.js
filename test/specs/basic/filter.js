@@ -8,7 +8,7 @@
 describe("basic mark with 'filter' callback", function () {
     var $ctx;
     beforeEach(function () {
-        loadFixtures("basic-filter.html");
+        loadFixtures("basic/filter.html");
 
         $ctx = $(".basic-filter");
     });

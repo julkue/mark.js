@@ -8,7 +8,7 @@
 describe("mark with disabled iframes", function () {
     var $ctx, $elements, errCall;
     beforeEach(function (done) {
-        loadFixtures("iframes-disabled.html");
+        loadFixtures("iframes/disabled.html");
 
         $elements = $();
         $ctx = $(".iframes-disabled");

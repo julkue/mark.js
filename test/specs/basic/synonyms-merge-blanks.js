@@ -8,7 +8,7 @@
 describe("basic mark with synonyms and multiple blanks", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-synonyms-merge-blanks.html");
+        loadFixtures("basic/synonyms-merge-blanks.html");
 
         $ctx = $(".basic-synonyms-merge-blanks");
         new Mark($ctx[0]).mark(["dolor", "amet"], {

@@ -8,7 +8,7 @@
 describe("unmark with nested iframes", function () {
     var $ctx, $elements, errCall;
     beforeEach(function (done) {
-        loadFixtures("iframes-nested.html");
+        loadFixtures("iframes/nested.html");
 
         $ctx = $(".iframes-nested");
         $elements = $();

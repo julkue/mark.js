@@ -8,7 +8,7 @@
 describe("mark with regular expression and 'filter' callback", function () {
     var $ctx;
     beforeEach(function () {
-        loadFixtures("regexp-filter.html");
+        loadFixtures("regexp/filter.html");
 
         $ctx = $(".regexp-filter");
     });

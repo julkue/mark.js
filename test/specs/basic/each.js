@@ -8,7 +8,7 @@
 describe("basic mark with 'each' callback", function () {
     var $ctx, eachCalled;
     beforeEach(function (done) {
-        loadFixtures("basic.html");
+        loadFixtures("basic/main.html");
 
         eachCalled = 0;
         $ctx = $(".basic");

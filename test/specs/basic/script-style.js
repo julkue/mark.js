@@ -8,7 +8,7 @@
 describe("basic mark in a context with script-tags and style-tags", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-script-style.html");
+        loadFixtures("basic/script-style.html");
 
         $ctx = $(".basic-script-style");
         new Mark($ctx[0]).mark("lorem", {

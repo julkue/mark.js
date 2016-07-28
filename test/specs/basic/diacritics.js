@@ -8,7 +8,7 @@
 describe("basic mark with diacritics", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-diacritics.html");
+        loadFixtures("basic/diacritics.html");
 
         $ctx = $(".basic-diacritics");
         // including a term with a "s" and a whitespace to check "merge blanks"

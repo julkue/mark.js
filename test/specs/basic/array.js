@@ -8,7 +8,7 @@
 describe("basic mark called with a context array", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-array.html");
+        loadFixtures("basic/array.html");
 
         $ctx = $(".basic-array");
         new Mark($ctx.get()).mark("lorem", {

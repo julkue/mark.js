@@ -8,7 +8,7 @@
 describe("basic mark with accuracy exactly", function () {
     var $ctx1, $ctx2, $ctx3;
     beforeEach(function (done) {
-        loadFixtures("basic-accuracy-exactly.html");
+        loadFixtures("basic/accuracy-exactly.html");
 
         $ctx1 = $(".basic-accuracy-exactly > div:nth-child(1)");
         $ctx2 = $(".basic-accuracy-exactly > div:nth-child(2)");

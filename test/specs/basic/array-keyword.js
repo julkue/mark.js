@@ -8,7 +8,7 @@
 describe("basic mark with array", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
-        loadFixtures("basic-array-keyword.html");
+        loadFixtures("basic/array-keyword.html");
 
         $ctx = $(".basic-array-keyword");
         notFound = [];

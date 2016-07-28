@@ -8,7 +8,7 @@
 describe("mark in inaccessible iframes", function () {
     var $ctx, $elements, errCall;
     beforeEach(function (done) {
-        loadFixtures("iframes-inaccessible.html");
+        loadFixtures("iframes/inaccessible.html");
 
         $elements = $();
         $ctx = $(".iframes-inaccessible");

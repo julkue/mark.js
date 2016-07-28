@@ -8,7 +8,7 @@
 describe("basic mark with duplicated contexts", function () {
     var $ctx1, $ctx2, ctx1Called, ctx2Called;
     beforeEach(function (done) {
-        loadFixtures("basic-duplicate-context.html");
+        loadFixtures("basic/duplicate-context.html");
 
         $ctx1 = $(".basic-duplicate-context > div:first-child");
         $ctx2 = $(".basic-duplicate-context > div:last-child");

@@ -8,7 +8,7 @@
 describe("basic mark with separate word search", function () {
     var $ctx1, $ctx2, notFound;
     beforeEach(function (done) {
-        loadFixtures("basic-separate-word-search.html");
+        loadFixtures("basic/separate-word-search.html");
 
         $ctx1 = $(".basic-separate > div:first-child");
         $ctx2 = $(".basic-separate > div:last-child");

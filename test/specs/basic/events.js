@@ -8,7 +8,7 @@
 describe("unmark with click event", function () {
     var $ctx, eventCalled;
     beforeEach(function (done) {
-        loadFixtures("basic-events.html");
+        loadFixtures("basic/events.html");
 
         $ctx = $(".basic-events");
         eventCalled = 0;

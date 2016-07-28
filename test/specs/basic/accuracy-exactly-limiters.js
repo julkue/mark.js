@@ -8,7 +8,7 @@
 describe("basic mark with accuracy exactly and limiters", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-accuracy-exactly-limiters.html");
+        loadFixtures("basic/accuracy-exactly-limiters.html");
 
         $ctx = $(".basic-accuracy-exactly-limiters");
         new Mark($ctx[0]).mark("test", {

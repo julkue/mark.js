@@ -8,7 +8,7 @@
 describe("basic mark with synonyms", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
-        loadFixtures("basic-synonyms.html");
+        loadFixtures("basic/synonyms.html");
 
         $ctx1 = $(".basic-synonyms > div:nth-child(1)");
         $ctx2 = $(".basic-synonyms > div:nth-child(2)");

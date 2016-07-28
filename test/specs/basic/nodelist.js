@@ -8,7 +8,7 @@
 describe("basic mark called with a context NodeList", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-nodelist.html");
+        loadFixtures("basic/nodelist.html");
 
         $ctx = $(".basic-nodelist");
         new Mark(document.querySelectorAll(".basic-nodelist")).mark("lorem", {

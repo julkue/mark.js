@@ -8,7 +8,7 @@
 describe("basic mark with synonyms and 'noMatch'", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
-        loadFixtures("basic-synonyms-no-match.html");
+        loadFixtures("basic/synonyms-no-match.html");
 
         $ctx = $(".basic-synonyms-no-match > p");
         notFound = [];

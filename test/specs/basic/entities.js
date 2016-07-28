@@ -8,7 +8,7 @@
 describe("basic mark with HTML entities", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
-        loadFixtures("basic-entities.html");
+        loadFixtures("basic/entities.html");
 
         $ctx1 = $(".basic-entities > div:first-child");
         $ctx2 = $(".basic-entities > div:last-child");

@@ -8,7 +8,7 @@
 describe("basic mark with synonyms and diacritics", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-synonyms-diacritics.html");
+        loadFixtures("basic/synonyms-diacritics.html");
 
         $ctx = $(".basic-synonyms-diacritics");
         new Mark($ctx[0]).mark(["dolor", "amet"], {

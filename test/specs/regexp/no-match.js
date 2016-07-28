@@ -8,7 +8,7 @@
 describe("mark with regular expression and 'noMatch' callback", function () {
     var $ctx, notFound, notFoundCalled;
     beforeEach(function (done) {
-        loadFixtures("regexp.html");
+        loadFixtures("regexp/main.html");
 
         $ctx = $(".regexp > div:first-child");
         notFound = null;

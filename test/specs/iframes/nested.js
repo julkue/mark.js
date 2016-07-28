@@ -8,7 +8,7 @@
 describe("mark in nested iframes", function () {
     var $ctx, $elements, errCall;
     beforeEach(function (done) {
-        loadFixtures("iframes-nested.html");
+        loadFixtures("iframes/nested.html");
 
         $elements = $();
         $ctx = $(".iframes-nested");

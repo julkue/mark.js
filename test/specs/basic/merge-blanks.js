@@ -8,7 +8,7 @@
 describe("basic mark with multiple blanks", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
-        loadFixtures("basic-merge-blanks.html");
+        loadFixtures("basic/merge-blanks.html");
 
         $ctx1 = $(".basic-merge-blanks > div:nth-child(1)");
         $ctx2 = $(".basic-merge-blanks > div:nth-child(2)");

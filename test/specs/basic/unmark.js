@@ -8,7 +8,7 @@
 describe("basic unmark", function () {
     var $ctx, ret;
     beforeEach(function (done) {
-        loadFixtures("basic.html");
+        loadFixtures("basic/main.html");
 
         $ctx = $(".basic");
         var instance = new Mark($ctx[0]);

@@ -8,7 +8,7 @@
 describe("mark with iframes", function () {
     var $ctx, $elements, errCall;
     beforeEach(function (done) {
-        loadFixtures("iframes.html");
+        loadFixtures("iframes/main.html");
 
         $elements = $();
         $ctx = $(".iframes");

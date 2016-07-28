@@ -8,7 +8,7 @@
 describe("basic mark", function () {
     var $ctx, ret;
     beforeEach(function (done) {
-        loadFixtures("basic.html");
+        loadFixtures("basic/main.html");
 
         $ctx = $(".basic");
         ret = new Mark($ctx[0]).mark("lorem ipsum", {

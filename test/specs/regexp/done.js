@@ -8,7 +8,7 @@
 describe("mark with regular expression and 'done' callback", function () {
     var $ctx, doneCalled, totalMatches;
     beforeEach(function (done) {
-        loadFixtures("regexp.html");
+        loadFixtures("regexp/main.html");
 
         totalMatches = doneCalled = 0;
         $ctx = $(".regexp > div:first-child");

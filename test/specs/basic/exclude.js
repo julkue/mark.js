@@ -8,7 +8,7 @@
 describe("basic mark with exclude", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-exclude.html");
+        loadFixtures("basic/exclude.html");
 
         $ctx = $(".basic-exclude");
         new Mark($ctx[0]).mark("lorem ipsum", {

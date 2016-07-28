@@ -8,7 +8,7 @@
 describe("basic unmark with jquery", function () {
     var $ctx, ret;
     beforeEach(function (done) {
-        loadFixtures("basic.html");
+        loadFixtures("basic/main.html");
 
         $ctx = $(".basic");
         $ctx.mark("lorem ipsum", {

@@ -8,7 +8,7 @@
 describe("basic mark with accuracy complementary", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
-        loadFixtures("basic-accuracy-complementary.html");
+        loadFixtures("basic/accuracy-complementary.html");
 
         $ctx1 = $(".basic-accuracy-complementary > div:first-child");
         $ctx2 = $(".basic-accuracy-complementary > div:last-child");

@@ -10,7 +10,7 @@ describe(
     function () {
         var $ctx;
         beforeEach(function (done) {
-            loadFixtures("basic-partial-duplicate-words.html");
+            loadFixtures("basic/partial-duplicate-words.html");
 
             $ctx = $(".basic-partial-duplicate-words");
             new Mark($ctx[0]).mark(["test", "lorem test ipsum"], {

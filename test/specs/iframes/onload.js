@@ -11,7 +11,7 @@ describe("mark with iframes where onload was not fired yet", function () {
     // fire the onload event too respectively set readyState complete
     var $ctx, $elements, errCall;
     beforeEach(function (done) {
-        loadFixtures("iframes-onload.html");
+        loadFixtures("iframes/onload.html");
 
         $elements = $();
         $ctx = $(".iframes-onload");

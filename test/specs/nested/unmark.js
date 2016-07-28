@@ -8,7 +8,7 @@
 describe("nested unmark", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("nested.html");
+        loadFixtures("nested/main.html");
 
         $ctx = $(".nested");
         var instance = new Mark($ctx[0]);

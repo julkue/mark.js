@@ -8,7 +8,7 @@
 describe("mark with iframes where onload was already fired", function () {
     var $ctx, $elements, errCall;
     beforeEach(function (done) {
-        loadFixtures("iframes-readystate.html");
+        loadFixtures("iframes/readystate.html");
 
         $elements = $();
         $ctx = $(".iframes-readystate");

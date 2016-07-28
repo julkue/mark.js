@@ -8,7 +8,7 @@
 describe("unmark with elements inside marked elements", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic-manipulated-mark.html");
+        loadFixtures("basic/manipulated-mark.html");
 
         $ctx = $(".basic-manipulated-mark");
         var instance = new Mark($ctx[0]);

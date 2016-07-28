@@ -8,7 +8,7 @@
 describe("basic mark with 'debug' callback", function () {
     var $ctx, debugCalled;
     beforeEach(function (done) {
-        loadFixtures("basic.html");
+        loadFixtures("basic/main.html");
 
         debugCalled = 0;
         $ctx = $(".basic");

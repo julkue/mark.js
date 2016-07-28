@@ -8,7 +8,7 @@
 describe("basic mark with custom element and class", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
-        loadFixtures("basic-custom-element-class.html");
+        loadFixtures("basic/custom-element-class.html");
 
         $ctx1 = $(".basic-custom-element-class > div:first-child");
         $ctx2 = $(".basic-custom-element-class > div:last-child");
