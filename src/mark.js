@@ -37,6 +37,7 @@ class Mark {
             "diacritics": true,
             "synonyms": {},
             "accuracy": "partially",
+            "acrossElements": false,
             "each": () => {},
             "noMatch": () => {},
             "filter": () => true,
@@ -232,6 +233,7 @@ class Mark {
             }
         });
         return {
+            // sort because of https://git.io/v6USg
             "keywords": stack.sort((a, b) => {
                 return b.length - a.length;
             }),
@@ -259,6 +261,44 @@ class Mark {
             this.log("Empty context", "warn");
         }
         return ctx;
+    }
+
+    /**
+     * @typedef Mark~getTextNodesDict
+     * @type {object.<string>}
+     * @property {string} value - The composite value of all text nodes
+     * @property {object[]} nodes - An array of objects
+     * @property {number} nodes.start - The start position within the composite
+     * value
+     * @property {number} nodes.end - The end position within the composite
+     * value
+     * @property {HTMLElement} nodes.node - The DOM text node element
+     */
+    /**
+     * Callback
+     * @callback Mark~getTextNodesCallback
+     * @param {Mark~getTextNodesDict}
+     */
+    /**
+     * Calls the callback with an object containing all text nodes (including
+     * iframe text nodes) and the composite value of them (string)
+     * @param {Mark~getTextNodesCallback} cb - Callback
+     */
+    getTextNodes(cb) {
+        let val = "",
+            nodes = [];
+        this.forEachTextNode(node => {
+            nodes.push({
+                start: val.length,
+                end: (val += node.textContent).length,
+                node
+            });
+        }, () => {
+            cb({
+                value: val,
+                nodes: nodes
+            });
+        });
     }
 
     /**
@@ -325,35 +365,35 @@ class Mark {
         try {
             const ifrWin = ifr.contentWindow,
                 bl = "about:blank",
-                compl = "complete";
-            const callCallback = () => {
-                try {
-                    if(ifrWin.document === null) { // no permission
-                        throw new Error("iframe inaccessible");
-                    }
-                    successFn(ifrWin.document);
-                } catch(e) { // accessing contentDocument failed
-                    errorFn();
-                }
-            };
-            const isBlank = () => {
-                const src = ifr.getAttribute("src").trim(),
-                    href = ifrWin.location.href;
-                return href === bl && src !== bl && src;
-            };
-            const observeOnload = () => {
-                const listener = () => {
+                compl = "complete",
+                callCallback = () => {
                     try {
-                        if(!isBlank()) {
-                            ifr.removeEventListener("load", listener);
-                            callCallback();
+                        if(ifrWin.document === null) { // no permission
+                            throw new Error("iframe inaccessible");
                         }
-                    } catch(e) {
+                        successFn(ifrWin.document);
+                    } catch(e) { // accessing contentDocument failed
                         errorFn();
                     }
+                },
+                isBlank = () => {
+                    const src = ifr.getAttribute("src").trim(),
+                        href = ifrWin.location.href;
+                    return href === bl && src !== bl && src;
+                },
+                observeOnload = () => {
+                    const listener = () => {
+                        try {
+                            if(!isBlank()) {
+                                ifr.removeEventListener("load", listener);
+                                callCallback();
+                            }
+                        } catch(e) {
+                            errorFn();
+                        }
+                    };
+                    ifr.addEventListener("load", listener);
                 };
-                ifr.addEventListener("load", listener);
-            };
             if(ifrWin.document.readyState === compl) {
                 if(isBlank()) {
                     observeOnload();
@@ -373,10 +413,10 @@ class Mark {
      * @callback Mark~forEachIframeCallback
      * @param {HTMLElement} html - The html element of the iframe
      */
-     /**
-      * Callback if all iframes were handled inside the context
-      * @callback Mark~forEachIframeEndCallback
-      */
+    /**
+     * Callback if all iframes inside the context are handled
+     * @callback Mark~forEachIframeEndCallback
+     */
     /**
      * Iterates over all iframes (recursive) inside the specified context and
      * calls the callback with its content
@@ -425,7 +465,7 @@ class Mark {
         const ctx = this.getContexts(),
             callCallbacks = el => {
                 cb(el);
-                if((--open) < 1) {
+                if(--open < 1) {
                     end();
                 }
             };
@@ -463,10 +503,11 @@ class Mark {
     forEachTextNode(cb, end) {
         let handled = [];
         this.forEachContext(ctx => {
+            // filter duplicate text nodes
             const isDescendant = handled.filter(handledCtx => {
                 return handledCtx.contains(ctx);
             }).length > 0;
-            if(handled.indexOf(ctx) > -1 || isDescendant){
+            if(handled.indexOf(ctx) > -1 || isDescendant) {
                 return;
             }
             handled.push(ctx);
@@ -489,9 +530,105 @@ class Mark {
     }
 
     /**
+     * Wraps the specified element and class around matches that fit the start
+     * and end positions
+     * @param  {HTMLElement} node - The DOM text node
+     * @param  {number} start - The position where to start wrapping
+     * @param  {number} end - The position where to end wrapping
+     * @return {HTMLElement} Returns the splitted text node that will appear
+     * after the wrapped text node
+     */
+    wrapRangeInTextNode(node, start, end) {
+        const hEl = !this.opt.element ? "mark" : this.opt.element,
+            startNode = node.splitText(start),
+            ret = startNode.splitText(end - start);
+        let repl = document.createElement(hEl);
+        repl.setAttribute("data-markjs", "true");
+        if(this.opt.className) {
+            repl.setAttribute("class", this.opt.className);
+        }
+        repl.textContent = startNode.textContent;
+        startNode.parentNode.replaceChild(repl, startNode);
+        return ret;
+    }
+
+    /**
+     * @typedef Mark~wrapRangeInMappedTextNodeDict
+     * @type {object.<string>}
+     * @property {string} value - The composite value of all text nodes
+     * @property {object[]} nodes - An array of objects
+     * @property {number} nodes.start - The start position within the composite
+     * value
+     * @property {number} nodes.end - The end position within the composite
+     * value
+     * @property {HTMLElement} nodes.node - The DOM text node element
+     */
+    /**
+     * Each callback
+     * @callback Mark~wrapMatchesEachCallback
+     * @param {HTMLElement} node - The wrapped DOM element
+     * @param {number} lastIndex - The last matching position within the
+     * composite value of text nodes
+     */
+    /**
+     * Filter callback
+     * @callback Mark~wrapMatchesFilterCallback
+     * @param {HTMLElement} node - The matching text node DOM element
+     */
+    /**
+     * Will map matches determined by start end end positions with text nodes
+     * inside the dictionary of text nodes and wraps them using
+     * {@link Mark#wrapRangeInTextNode}.
+     * @param  {Mark~wrapRangeInMappedTextNodeDict} dict - The dictionary
+     * @param  {number} start - The start position of the match
+     * @param  {number} end - The end position of the match
+     * @param  {Mark~wrapMatchesFilterCallback} filterCb - Filter callback
+     * @param  {Mark~wrapMatchesEachCallback} eachCb - Each callback
+     */
+    wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
+        // iterate over all text nodes to find the one matching the positions
+        dict.nodes.every((n, i) => {
+            const sibl = dict.nodes[i + 1];
+            if(typeof sibl === "undefined" || sibl.start > start) {
+                // map range from dict.value to text node
+                const s = start - n.start,
+                    e = (end > n.end ? n.end : end) - n.start;
+                if(filterCb(n.node)) {
+                    dict.nodes[i].node = this.wrapRangeInTextNode(n.node, s, e);
+                    // recalculate positions to also find subsequent
+                    // matches in the same text node. Necessary as the
+                    // text node in dict now only contains the splitted
+                    // part
+                    const startStr = dict.value.substr(0, n.start),
+                        endStr = dict.value.substr(e + n.start);
+                    dict.value = startStr + endStr;
+                    dict.nodes.forEach((k, j) => {
+                        if(j >= i) {
+                            if(dict.nodes[j].start > 0 && j !== i) {
+                                dict.nodes[j].start -= e;
+                            }
+                            dict.nodes[j].end -= e;
+                        }
+                    });
+                    end -= e;
+                    eachCb(dict.nodes[i].node.previousSibling, n.start);
+                    if(end > n.end) {
+                        // set next start position for subsequent match
+                        start = n.end;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
+    }
+
+    /**
      * Filter callback before each wrapping
-     * @callback Mark~wrapMatchesFilterCallback#
+     * @callback Mark~wrapMatchesFilterCallback
      * @param {string} match - The matching string
+     * @param {HTMLElement} node - The text node where the match occurs
      */
     /**
      * Callback for each wrapped element
@@ -499,49 +636,97 @@ class Mark {
      * @param {HTMLElement} element - The marked DOM element
      */
     /**
-     * Wraps the specified element and class around matches in the defined
-     * DOM text node element
-     * @param {object} node - The DOM text node
+     * Callback on end
+     * @callback Mark~wrapMatchesEndCallback
+     */
+    /**
+     * Wraps the specified element and class around matches within single HTML
+     * elements in all contexts
      * @param {RegExp} regex - The regular expression to be searched for
-     * @param {boolean} custom - If true, the function expects a regular
+     * @param {boolean} custom - If false, the function expects a regular
      * expression that has at least two groups (like returned from
      * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
      * the second will be wrapped
      * @param {Mark~wrapMatchesEachCallback} eachCb
      * @param {Mark~wrapMatchesFilterCallback} filterCb
+     * @param {Mark~wrapMatchesEndCallback} endCb
      * @access protected
      */
-    wrapMatches(node, regex, custom, filterCb, eachCb) {
-        const hEl = !this.opt.element ? "mark" : this.opt.element,
-            index = custom ? 0 : 2;
-        let match;
-        while((match = regex.exec(node.textContent)) !== null) {
-            if(!filterCb(match[index])) {
-                continue;
-            }
-            // Split the text node at the start and the end of the match and
-            // replace the new node with the specified element
-            let pos = match.index;
-            if(!custom) {
-                pos += match[index - 1].length;
-            }
-            let startNode = node.splitText(pos);
-            // The DOM reference of node will get lost due to
-            // splitText. Therefore it is necessary to save the new
-            // created element in "node"
-            node = startNode.splitText(match[index].length);
-            if(startNode.parentNode !== null) {
-                let repl = document.createElement(hEl);
-                repl.setAttribute("data-markjs", "true");
-                if(this.opt.className) {
-                    repl.setAttribute("class", this.opt.className);
+    wrapMatches(regex, custom, filterCb, eachCb, endCb) {
+        const matchIdx = custom ? 0 : 2;
+        this.forEachTextNode(node => {
+            let match;
+            while((match = regex.exec(node.textContent)) !== null) {
+                if(!filterCb(match[matchIdx], node)) {
+                    continue;
                 }
-                repl.textContent = match[index];
-                startNode.parentNode.replaceChild(repl, startNode);
-                eachCb(repl);
+                let pos = match.index;
+                if(!custom) {
+                    pos += match[matchIdx - 1].length;
+                }
+                node = this.wrapRangeInTextNode(
+                    node,
+                    pos,
+                    pos + match[matchIdx].length
+                );
+                eachCb(node.previousSibling);
+                // reset index of last match as the node changed and the index
+                // isn't valid anymore http://tinyurl.com/htsudjd
+                regex.lastIndex = 0;
             }
-            regex.lastIndex = 0; // http://tinyurl.com/htsudjd
-        }
+        }, endCb);
+    }
+
+    /**
+     * Callback for each wrapped element
+     * @callback Mark~wrapMatchesAcrossElementsEachCallback
+     * @param {HTMLElement} element - The marked DOM element
+     */
+    /**
+     * Filter callback before each wrapping
+     * @callback Mark~wrapMatchesAcrossElementsFilterCallback
+     * @param {string} match - The matching string
+     * @param {HTMLElement} node - The text node where the match occurs
+     */
+    /**
+     * Callback on end
+     * @callback Mark~wrapMatchesAcrossElementsEndCallback
+     */
+    /**
+     * Wraps the specified element and class around matches across all HTML
+     * elements in all contexts
+     * @param {RegExp} regex - The regular expression to be searched for
+     * @param {boolean} custom - If false, the function expects a regular
+     * expression that has at least two groups (like returned from
+     * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
+     * the second will be wrapped
+     * @param {ark~wrapMatchesAcrossElementsEachCallback} eachCb
+     * @param {Mark~wrapMatchesAcrossElementsFilterCallback} filterCb
+     * @param {Mark~wrapMatchesAcrossElementsEndCallback} endCb
+     */
+    wrapMatchesAcrossElements(regex, custom, filterCb, eachCb, endCb) {
+        const matchIdx = custom ? 0 : 2;
+        this.getTextNodes(dict => {
+            let match;
+            while((match = regex.exec(dict.value)) !== null) {
+                // calculate range inside dict.value
+                let start = match.index,
+                    end = start + match[matchIdx].length;
+                if(!custom) {
+                    start += match[matchIdx - 1].length;
+                }
+                // note that dict will be updated automatically, as it'll change
+                // in the wrapping process, due to the fact that text
+                // nodes will be splitted
+                this.wrapRangeInMappedTextNode(dict, start, end, node => {
+                    return filterCb(match[matchIdx], node);
+                }, (node, lastIndex) => {
+                    regex.lastIndex = lastIndex;
+                    eachCb(node);
+                });
+            }
+            endCb();
+        });
     }
 
     /**
@@ -619,11 +804,9 @@ class Mark {
             totalMatches++;
             this.opt.each(element);
         };
-        this.forEachTextNode(node => {
-            this.wrapMatches(node, regexp, true, match => {
-                return this.opt.filter(node, match, totalMatches);
-            }, eachCb);
-        }, () => {
+        this.wrapMatches(regexp, true, (match, node) => {
+            return this.opt.filter(node, match, totalMatches);
+        }, eachCb, () => {
             if(totalMatches === 0) {
                 this.opt.noMatch(regexp);
             }
@@ -686,6 +869,9 @@ class Mark {
      *   <li><i>limiters</i>: A custom array of string limiters for accuracy
      *   "exactly" or "complementary"</li>
      * </ul>
+     * @property {boolean} [acrossElements=false] - Whether to find matches
+     * across HTML elements. By default, only matches within single HTML
+     * elements will be found
      * @property {Mark~markEachCallback} [each]
      * @property {Mark~markNoMatchCallback} [noMatch]
      * @property {Mark~markFilterCallback} [filter]
@@ -710,16 +896,17 @@ class Mark {
         kwArr.forEach(kw => {
             let regex = new RegExp(this.createRegExp(kw), "gmi"),
                 matches = 0;
-            const eachCb = element => {
+            this.log(`Searching with expression "${regex}"`);
+            let fn = "wrapMatches";
+            if(this.opt.acrossElements) {
+                fn = "wrapMatchesAcrossElements";
+            }
+            this[fn](regex, false, (term, node) => {
+                return this.opt.filter(node, kw, matches, totalMatches);
+            }, element => {
                 matches++;
                 totalMatches++;
                 this.opt.each(element);
-            };
-            this.log(`Searching with expression "${regex}"`);
-            this.forEachTextNode(node => {
-                this.wrapMatches(node, regex, false, () => {
-                    return this.opt.filter(node, kw, matches, totalMatches);
-                }, eachCb);
             }, () => {
                 if(matches === 0) {
                     this.opt.noMatch(kw);

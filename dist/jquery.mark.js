@@ -170,6 +170,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return ctx;
             }
         }, {
+            key: "getTextNodes",
+            value: function getTextNodes(cb) {
+                var val = "",
+                    nodes = [];
+                this.forEachTextNode(function (node) {
+                    nodes.push({
+                        start: val.length,
+                        end: (val += node.textContent).length,
+                        node: node
+                    });
+                }, function () {
+                    cb({
+                        value: val,
+                        nodes: nodes
+                    });
+                });
+            }
+        }, {
             key: "matches",
             value: function matches(el, selector) {
                 return (el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector).call(el, selector);
@@ -199,8 +217,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     (function () {
                         var ifrWin = ifr.contentWindow,
                             bl = "about:blank",
-                            compl = "complete";
-                        var callCallback = function callCallback() {
+                            compl = "complete",
+                            callCallback = function callCallback() {
                             try {
                                 if (ifrWin.document === null) {
                                     throw new Error("iframe inaccessible");
@@ -209,13 +227,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             } catch (e) {
                                 errorFn();
                             }
-                        };
-                        var isBlank = function isBlank() {
+                        },
+                            isBlank = function isBlank() {
                             var src = ifr.getAttribute("src").trim(),
                                 href = ifrWin.location.href;
                             return href === bl && src !== bl && src;
-                        };
-                        var observeOnload = function observeOnload() {
+                        },
+                            observeOnload = function observeOnload() {
                             var listener = function listener() {
                                 try {
                                     if (!isBlank()) {
@@ -320,35 +338,109 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }, end);
             }
         }, {
-            key: "wrapMatches",
-            value: function wrapMatches(node, regex, custom, filterCb, eachCb) {
+            key: "wrapRangeInTextNode",
+            value: function wrapRangeInTextNode(node, start, end) {
                 var hEl = !this.opt.element ? "mark" : this.opt.element,
-                    index = custom ? 0 : 2;
-                var match = void 0;
-                while ((match = regex.exec(node.textContent)) !== null) {
-                    if (!filterCb(match[index])) {
-                        continue;
-                    }
-
-                    var pos = match.index;
-                    if (!custom) {
-                        pos += match[index - 1].length;
-                    }
-                    var startNode = node.splitText(pos);
-
-                    node = startNode.splitText(match[index].length);
-                    if (startNode.parentNode !== null) {
-                        var repl = document.createElement(hEl);
-                        repl.setAttribute("data-markjs", "true");
-                        if (this.opt.className) {
-                            repl.setAttribute("class", this.opt.className);
-                        }
-                        repl.textContent = match[index];
-                        startNode.parentNode.replaceChild(repl, startNode);
-                        eachCb(repl);
-                    }
-                    regex.lastIndex = 0;
+                    startNode = node.splitText(start),
+                    ret = startNode.splitText(end - start);
+                var repl = document.createElement(hEl);
+                repl.setAttribute("data-markjs", "true");
+                if (this.opt.className) {
+                    repl.setAttribute("class", this.opt.className);
                 }
+                repl.textContent = startNode.textContent;
+                startNode.parentNode.replaceChild(repl, startNode);
+                return ret;
+            }
+        }, {
+            key: "wrapRangeInMappedTextNode",
+            value: function wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
+                var _this7 = this;
+
+                dict.nodes.every(function (n, i) {
+                    var sibl = dict.nodes[i + 1];
+                    if (typeof sibl === "undefined" || sibl.start > start) {
+                        var _ret2 = function () {
+                            var s = start - n.start,
+                                e = (end > n.end ? n.end : end) - n.start;
+                            if (filterCb(n.node)) {
+                                dict.nodes[i].node = _this7.wrapRangeInTextNode(n.node, s, e);
+
+                                var startStr = dict.value.substr(0, n.start),
+                                    endStr = dict.value.substr(e + n.start);
+                                dict.value = startStr + endStr;
+                                dict.nodes.forEach(function (k, j) {
+                                    if (j >= i) {
+                                        if (dict.nodes[j].start > 0 && j !== i) {
+                                            dict.nodes[j].start -= e;
+                                        }
+                                        dict.nodes[j].end -= e;
+                                    }
+                                });
+                                end -= e;
+                                eachCb(dict.nodes[i].node.previousSibling, n.start);
+                                if (end > n.end) {
+                                    start = n.end;
+                                } else {
+                                    return {
+                                        v: false
+                                    };
+                                }
+                            }
+                        }();
+
+                        if ((typeof _ret2 === "undefined" ? "undefined" : _typeof(_ret2)) === "object") return _ret2.v;
+                    }
+                    return true;
+                });
+            }
+        }, {
+            key: "wrapMatches",
+            value: function wrapMatches(regex, custom, filterCb, eachCb, endCb) {
+                var _this8 = this;
+
+                var matchIdx = custom ? 0 : 2;
+                this.forEachTextNode(function (node) {
+                    var match = void 0;
+                    while ((match = regex.exec(node.textContent)) !== null) {
+                        if (!filterCb(match[matchIdx], node)) {
+                            continue;
+                        }
+                        var pos = match.index;
+                        if (!custom) {
+                            pos += match[matchIdx - 1].length;
+                        }
+                        node = _this8.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
+                        eachCb(node.previousSibling);
+
+                        regex.lastIndex = 0;
+                    }
+                }, endCb);
+            }
+        }, {
+            key: "wrapMatchesAcrossElements",
+            value: function wrapMatchesAcrossElements(regex, custom, filterCb, eachCb, endCb) {
+                var _this9 = this;
+
+                var matchIdx = custom ? 0 : 2;
+                this.getTextNodes(function (dict) {
+                    var match = void 0;
+                    while ((match = regex.exec(dict.value)) !== null) {
+                        var start = match.index,
+                            end = start + match[matchIdx].length;
+                        if (!custom) {
+                            start += match[matchIdx - 1].length;
+                        }
+
+                        _this9.wrapRangeInMappedTextNode(dict, start, end, function (node) {
+                            return filterCb(match[matchIdx], node);
+                        }, function (node, lastIndex) {
+                            regex.lastIndex = lastIndex;
+                            eachCb(node);
+                        });
+                    }
+                    endCb();
+                });
             }
         }, {
             key: "unwrapMatches",
@@ -364,30 +456,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "markRegExp",
             value: function markRegExp(regexp, opt) {
-                var _this7 = this;
+                var _this10 = this;
 
                 this.opt = opt;
                 this.log("Searching with expression \"" + regexp + "\"");
                 var totalMatches = 0;
                 var eachCb = function eachCb(element) {
                     totalMatches++;
-                    _this7.opt.each(element);
+                    _this10.opt.each(element);
                 };
-                this.forEachTextNode(function (node) {
-                    _this7.wrapMatches(node, regexp, true, function (match) {
-                        return _this7.opt.filter(node, match, totalMatches);
-                    }, eachCb);
-                }, function () {
+                this.wrapMatches(regexp, true, function (match, node) {
+                    return _this10.opt.filter(node, match, totalMatches);
+                }, eachCb, function () {
                     if (totalMatches === 0) {
-                        _this7.opt.noMatch(regexp);
+                        _this10.opt.noMatch(regexp);
                     }
-                    _this7.opt.done(totalMatches);
+                    _this10.opt.done(totalMatches);
                 });
             }
         }, {
             key: "mark",
             value: function mark(sv, opt) {
-                var _this8 = this;
+                var _this11 = this;
 
                 this.opt = opt;
 
@@ -401,24 +491,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     this.opt.done(totalMatches);
                 }
                 kwArr.forEach(function (kw) {
-                    var regex = new RegExp(_this8.createRegExp(kw), "gmi"),
+                    var regex = new RegExp(_this11.createRegExp(kw), "gmi"),
                         matches = 0;
-                    var eachCb = function eachCb(element) {
+                    _this11.log("Searching with expression \"" + regex + "\"");
+                    var fn = "wrapMatches";
+                    if (_this11.opt.acrossElements) {
+                        fn = "wrapMatchesAcrossElements";
+                    }
+                    _this11[fn](regex, false, function (term, node) {
+                        return _this11.opt.filter(node, kw, matches, totalMatches);
+                    }, function (element) {
                         matches++;
                         totalMatches++;
-                        _this8.opt.each(element);
-                    };
-                    _this8.log("Searching with expression \"" + regex + "\"");
-                    _this8.forEachTextNode(function (node) {
-                        _this8.wrapMatches(node, regex, false, function () {
-                            return _this8.opt.filter(node, kw, matches, totalMatches);
-                        }, eachCb);
+                        _this11.opt.each(element);
                     }, function () {
                         if (matches === 0) {
-                            _this8.opt.noMatch(kw);
+                            _this11.opt.noMatch(kw);
                         }
                         if (kwArr[kwArrLen - 1] === kw) {
-                            _this8.opt.done(totalMatches);
+                            _this11.opt.done(totalMatches);
                         }
                     });
                 });
@@ -426,7 +517,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "unmark",
             value: function unmark(opt) {
-                var _this9 = this;
+                var _this12 = this;
 
                 this.opt = opt;
                 var sel = this.opt.element ? this.opt.element : "*";
@@ -438,8 +529,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.forEachContext(function (ctx) {
                     var matches = ctx.querySelectorAll(sel);
                     Array.prototype.slice.call(matches).forEach(function (el) {
-                        if (!_this9.matchesExclude(el, false)) {
-                            _this9.unwrapMatches(el);
+                        if (!_this12.matchesExclude(el, false)) {
+                            _this12.unwrapMatches(el);
                         }
                     });
                 }, this.opt.done);
@@ -456,6 +547,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "diacritics": true,
                     "synonyms": {},
                     "accuracy": "partially",
+                    "acrossElements": false,
                     "each": function each() {},
                     "noMatch": function noMatch() {},
                     "filter": function filter() {
