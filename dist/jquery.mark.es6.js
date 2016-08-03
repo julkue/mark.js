@@ -39,7 +39,8 @@
                 "filter": () => true,
                 "done": () => {},
                 "debug": false,
-                "log": window.console
+                "log": window.console,
+                "caseSensitive": false
             }, val);
         }
 
@@ -75,20 +76,22 @@
         }
 
         createSynonymsRegExp(str) {
-            const syn = this.opt.synonyms;
+            const syn = this.opt.synonyms,
+                  sens = this.opt.caseSensitive ? "" : "i";
             for (let index in syn) {
                 if (syn.hasOwnProperty(index)) {
                     const value = syn[index],
                           k1 = this.escapeStr(index),
                           k2 = this.escapeStr(value);
-                    str = str.replace(new RegExp(`(${ k1 }|${ k2 })`, "gmi"), `(${ k1 }|${ k2 })`);
+                    str = str.replace(new RegExp(`(${ k1 }|${ k2 })`, `gm${ sens }`), `(${ k1 }|${ k2 })`);
                 }
             }
             return str;
         }
 
         createDiacriticsRegExp(str) {
-            const dct = ["aÀÁÂÃÄÅàáâãäåĀāąĄ", "cÇçćĆčČ", "dđĐďĎ", "eÈÉÊËèéêëěĚĒēęĘ", "iÌÍÎÏìíîïĪī", "lłŁ", "nÑñňŇńŃ", "oÒÓÔÕÕÖØòóôõöøŌō", "rřŘ", "sŠšśŚ", "tťŤ", "uÙÚÛÜùúûüůŮŪū", "yŸÿýÝ", "zŽžżŻźŹ"];
+            const dct = ["aàáâãäåāą", "AÀÁÂÃÄÅĀĄ", "cçćč", "CÇĆČ", "dđď", "DĐĎ", "eèéêëěēę", "EÈÉÊËĚĒĘ", "iìíîïī", "IÌÍÎÏĪ", "lł", "LŁ", "nñňń", "NÑŇŃ", "oòóôõöøō", "OÒÓÔÕÖØŌ", "rř", "RŘ", "sšś", "SŠŚ", "tť", "TŤ", "uùúûüůū", "UÙÚÛÜŮŪ", "yÿý", "YŸÝ", "zžżź", "ZŽŻŹ"],
+                  sens = this.opt.caseSensitive ? "" : "i";
             let handled = [];
             str.split("").forEach(ch => {
                 dct.every(dct => {
@@ -97,7 +100,7 @@
                             return false;
                         }
 
-                        str = str.replace(new RegExp(`[${ dct }]`, "gmi"), `[${ dct }]`);
+                        str = str.replace(new RegExp(`[${ dct }]`, `gm${ sens }`), `[${ dct }]`);
                         handled.push(dct);
                     }
                     return true;
@@ -442,12 +445,13 @@
                 keywords: kwArr,
                 length: kwArrLen
             } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
+            const sens = opt.caseSensitive ? "" : "i";
             let totalMatches = 0;
             if (kwArrLen === 0) {
                 this.opt.done(totalMatches);
             }
             kwArr.forEach(kw => {
-                let regex = new RegExp(this.createRegExp(kw), "gmi"),
+                let regex = new RegExp(this.createRegExp(kw), `gm${ sens }`),
                     matches = 0;
                 this.log(`Searching with expression "${ regex }"`);
                 let fn = "wrapMatches";

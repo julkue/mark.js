@@ -68,13 +68,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "createSynonymsRegExp",
             value: function createSynonymsRegExp(str) {
-                var syn = this.opt.synonyms;
+                var syn = this.opt.synonyms,
+                    sens = this.opt.caseSensitive ? "" : "i";
                 for (var index in syn) {
                     if (syn.hasOwnProperty(index)) {
                         var value = syn[index],
                             k1 = this.escapeStr(index),
                             k2 = this.escapeStr(value);
-                        str = str.replace(new RegExp("(" + k1 + "|" + k2 + ")", "gmi"), "(" + k1 + "|" + k2 + ")");
+                        str = str.replace(new RegExp("(" + k1 + "|" + k2 + ")", "gm" + sens), "(" + k1 + "|" + k2 + ")");
                     }
                 }
                 return str;
@@ -82,7 +83,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "createDiacriticsRegExp",
             value: function createDiacriticsRegExp(str) {
-                var dct = ["aÀÁÂÃÄÅàáâãäåĀāąĄ", "cÇçćĆčČ", "dđĐďĎ", "eÈÉÊËèéêëěĚĒēęĘ", "iÌÍÎÏìíîïĪī", "lłŁ", "nÑñňŇńŃ", "oÒÓÔÕÕÖØòóôõöøŌō", "rřŘ", "sŠšśŚ", "tťŤ", "uÙÚÛÜùúûüůŮŪū", "yŸÿýÝ", "zŽžżŻźŹ"];
+                var dct = ["aàáâãäåāą", "AÀÁÂÃÄÅĀĄ", "cçćč", "CÇĆČ", "dđď", "DĐĎ", "eèéêëěēę", "EÈÉÊËĚĒĘ", "iìíîïī", "IÌÍÎÏĪ", "lł", "LŁ", "nñňń", "NÑŇŃ", "oòóôõöøō", "OÒÓÔÕÖØŌ", "rř", "RŘ", "sšś", "SŠŚ", "tť", "TŤ", "uùúûüůū", "UÙÚÛÜŮŪ", "yÿý", "YŸÝ", "zžżź", "ZŽŻŹ"],
+                    sens = this.opt.caseSensitive ? "" : "i";
                 var handled = [];
                 str.split("").forEach(function (ch) {
                     dct.every(function (dct) {
@@ -91,7 +93,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                                 return false;
                             }
 
-                            str = str.replace(new RegExp("[" + dct + "]", "gmi"), "[" + dct + "]");
+                            str = str.replace(new RegExp("[" + dct + "]", "gm" + sens), "[" + dct + "]");
                             handled.push(dct);
                         }
                         return true;
@@ -486,12 +488,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var kwArr = _getSeparatedKeywords.keywords;
                 var kwArrLen = _getSeparatedKeywords.length;
 
+                var sens = opt.caseSensitive ? "" : "i";
                 var totalMatches = 0;
                 if (kwArrLen === 0) {
                     this.opt.done(totalMatches);
                 }
                 kwArr.forEach(function (kw) {
-                    var regex = new RegExp(_this11.createRegExp(kw), "gmi"),
+                    var regex = new RegExp(_this11.createRegExp(kw), "gm" + sens),
                         matches = 0;
                     _this11.log("Searching with expression \"" + regex + "\"");
                     var fn = "wrapMatches";
@@ -555,7 +558,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     },
                     "done": function done() {},
                     "debug": false,
-                    "log": window.console
+                    "log": window.console,
+                    "caseSensitive": false
                 }, val);
             },
             get: function get() {
