@@ -152,40 +152,41 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 };
             }
         }, {
-            key: "getContexts",
-            value: function getContexts() {
-                var ctx = void 0;
-                if (typeof this.ctx === "undefined") {
-                    ctx = [];
-                } else if (this.ctx instanceof HTMLElement) {
-                    ctx = [this.ctx];
-                } else if (Array.isArray(this.ctx)) {
-                    ctx = this.ctx;
-                } else {
-                    ctx = Array.prototype.slice.call(this.ctx);
-                }
-                if (!ctx.length) {
-                    this.log("Empty context", "warn");
-                }
-                return ctx;
-            }
-        }, {
-            key: "matches",
-            value: function matches(el, selector) {
-                return (el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector).call(el, selector);
+            key: "getTextNodes",
+            value: function getTextNodes(cb) {
+                var _this3 = this;
+
+                var val = "",
+                    nodes = [];
+                this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
+                    nodes.push({
+                        start: val.length,
+                        end: (val += node.textContent).length,
+                        node: node
+                    });
+                }, function (node) {
+                    if (_this3.matchesExclude(node.parentNode, true)) {
+                        return NodeFilter.FILTER_REJECT;
+                    } else {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                }, function () {
+                    cb({
+                        value: val,
+                        nodes: nodes
+                    });
+                });
             }
         }, {
             key: "matchesExclude",
             value: function matchesExclude(el, exclM) {
-                var _this3 = this;
-
                 var remain = true;
-                var excl = this.opt.exclude.concat(["script", "style", "title"]);
+                var excl = this.opt.exclude.concat(["script", "style", "title", "head", "html"]);
                 if (exclM) {
                     excl = excl.concat(["*[data-markjs='true']"]);
                 }
                 excl.every(function (sel) {
-                    if (_this3.matches(el, sel)) {
+                    if (DOMIterator.matches(el, sel)) {
                         return remain = false;
                     }
                     return true;
@@ -193,162 +194,113 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return !remain;
             }
         }, {
-            key: "onIframeReady",
-            value: function onIframeReady(ifr, successFn, errorFn) {
-                try {
-                    (function () {
-                        var ifrWin = ifr.contentWindow,
-                            bl = "about:blank",
-                            compl = "complete";
-                        var callCallback = function callCallback() {
-                            try {
-                                if (ifrWin.document === null) {
-                                    throw new Error("iframe inaccessible");
-                                }
-                                successFn(ifrWin.document);
-                            } catch (e) {
-                                errorFn();
-                            }
-                        };
-                        var isBlank = function isBlank() {
-                            var src = ifr.getAttribute("src").trim(),
-                                href = ifrWin.location.href;
-                            return href === bl && src !== bl && src;
-                        };
-                        var observeOnload = function observeOnload() {
-                            var listener = function listener() {
-                                try {
-                                    if (!isBlank()) {
-                                        ifr.removeEventListener("load", listener);
-                                        callCallback();
-                                    }
-                                } catch (e) {
-                                    errorFn();
-                                }
-                            };
-                            ifr.addEventListener("load", listener);
-                        };
-                        if (ifrWin.document.readyState === compl) {
-                            if (isBlank()) {
-                                observeOnload();
-                            } else {
-                                callCallback();
-                            }
-                        } else {
-                            observeOnload();
-                        }
-                    })();
-                } catch (e) {
-                    errorFn();
+            key: "wrapRangeInTextNode",
+            value: function wrapRangeInTextNode(node, start, end) {
+                var hEl = !this.opt.element ? "mark" : this.opt.element,
+                    startNode = node.splitText(start),
+                    ret = startNode.splitText(end - start);
+                var repl = document.createElement(hEl);
+                repl.setAttribute("data-markjs", "true");
+                if (this.opt.className) {
+                    repl.setAttribute("class", this.opt.className);
                 }
+                repl.textContent = startNode.textContent;
+                startNode.parentNode.replaceChild(repl, startNode);
+                return ret;
             }
         }, {
-            key: "forEachIframe",
-            value: function forEachIframe(ctx, cb, end) {
+            key: "wrapRangeInMappedTextNode",
+            value: function wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
                 var _this4 = this;
 
-                var ifr = ctx.querySelectorAll("iframe");
-                ifr = Array.prototype.slice.call(ifr);
-                if (ifr.length) {
-                    ifr.forEach(function (ifr) {
-                        _this4.onIframeReady(ifr, function (con) {
-                            var html = con.querySelector("html");
-                            _this4.forEachIframe(html, cb, function () {
-                                cb(html);
-                                end();
-                            });
-                        }, function () {
-                            var src = ifr.getAttribute("src");
-                            _this4.log("iframe \"" + src + "\" could not be accessed", "warn");
-                            end();
-                        });
-                    });
-                } else {
-                    end();
-                }
-            }
-        }, {
-            key: "forEachContext",
-            value: function forEachContext(cb, end) {
-                var _this5 = this;
+                dict.nodes.every(function (n, i) {
+                    var sibl = dict.nodes[i + 1];
+                    if (typeof sibl === "undefined" || sibl.start > start) {
+                        var _ret = function () {
+                            var s = start - n.start,
+                                e = (end > n.end ? n.end : end) - n.start;
+                            if (filterCb(n.node)) {
+                                n.node = _this4.wrapRangeInTextNode(n.node, s, e);
 
-                var ctx = this.getContexts(),
-                    callCallbacks = function callCallbacks(el) {
-                    cb(el);
-                    if (--open < 1) {
-                        end();
+                                var startStr = dict.value.substr(0, n.start),
+                                    endStr = dict.value.substr(e + n.start);
+                                dict.value = startStr + endStr;
+                                dict.nodes.forEach(function (k, j) {
+                                    if (j >= i) {
+                                        if (dict.nodes[j].start > 0 && j !== i) {
+                                            dict.nodes[j].start -= e;
+                                        }
+                                        dict.nodes[j].end -= e;
+                                    }
+                                });
+                                end -= e;
+                                eachCb(n.node.previousSibling, n.start);
+                                if (end > n.end) {
+                                    start = n.end;
+                                } else {
+                                    return {
+                                        v: false
+                                    };
+                                }
+                            }
+                        }();
+
+                        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
                     }
-                };
-                var open = ctx.length;
-                if (open < 1) {
-                    end();
-                }
-                ctx.forEach(function (el) {
-                    if (_this5.opt.iframes) {
-                        _this5.forEachIframe(el, cb, function () {
-                            callCallbacks(el);
-                        });
-                    } else {
-                        callCallbacks(el);
-                    }
+                    return true;
                 });
             }
         }, {
-            key: "forEachTextNode",
-            value: function forEachTextNode(cb, end) {
-                var _this6 = this;
+            key: "wrapMatches",
+            value: function wrapMatches(regex, custom, filterCb, eachCb, endCb) {
+                var _this5 = this;
 
-                var handled = [];
-                this.forEachContext(function (ctx) {
-                    var isDescendant = handled.filter(function (handledCtx) {
-                        return handledCtx.contains(ctx);
-                    }).length > 0;
-                    if (handled.indexOf(ctx) > -1 || isDescendant) {
-                        return;
-                    }
-                    handled.push(ctx);
-                    var itr = document.createNodeIterator(ctx, NodeFilter.SHOW_TEXT, function (node) {
-                        if (!_this6.matchesExclude(node.parentNode, true)) {
-                            return NodeFilter.FILTER_ACCEPT;
+                var matchIdx = custom ? 0 : 2;
+                this.getTextNodes(function (dict) {
+                    dict.nodes.forEach(function (node) {
+                        node = node.node;
+                        var match = void 0;
+                        while ((match = regex.exec(node.textContent)) !== null) {
+                            if (!filterCb(match[matchIdx], node)) {
+                                continue;
+                            }
+                            var pos = match.index;
+                            if (!custom) {
+                                pos += match[matchIdx - 1].length;
+                            }
+                            node = _this5.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
+                            eachCb(node.previousSibling);
+
+                            regex.lastIndex = 0;
                         }
-                        return NodeFilter.FILTER_REJECT;
-                    }, false);
-                    var node = void 0;
-                    while (node = itr.nextNode()) {
-                        cb(node);
-                    }
-                }, end);
+                    });
+                    endCb();
+                });
             }
         }, {
-            key: "wrapMatches",
-            value: function wrapMatches(node, regex, custom, filterCb, eachCb) {
-                var hEl = !this.opt.element ? "mark" : this.opt.element,
-                    index = custom ? 0 : 2;
-                var match = void 0;
-                while ((match = regex.exec(node.textContent)) !== null) {
-                    if (!filterCb(match[index])) {
-                        continue;
-                    }
+            key: "wrapMatchesAcrossElements",
+            value: function wrapMatchesAcrossElements(regex, custom, filterCb, eachCb, endCb) {
+                var _this6 = this;
 
-                    var pos = match.index;
-                    if (!custom) {
-                        pos += match[index - 1].length;
-                    }
-                    var startNode = node.splitText(pos);
-
-                    node = startNode.splitText(match[index].length);
-                    if (startNode.parentNode !== null) {
-                        var repl = document.createElement(hEl);
-                        repl.setAttribute("data-markjs", "true");
-                        if (this.opt.className) {
-                            repl.setAttribute("class", this.opt.className);
+                var matchIdx = custom ? 0 : 2;
+                this.getTextNodes(function (dict) {
+                    var match = void 0;
+                    while ((match = regex.exec(dict.value)) !== null) {
+                        var start = match.index;
+                        if (!custom) {
+                            start += match[matchIdx - 1].length;
                         }
-                        repl.textContent = match[index];
-                        startNode.parentNode.replaceChild(repl, startNode);
-                        eachCb(repl);
+                        var end = start + match[matchIdx].length;
+
+                        _this6.wrapRangeInMappedTextNode(dict, start, end, function (node) {
+                            return filterCb(match[matchIdx], node);
+                        }, function (node, lastIndex) {
+                            regex.lastIndex = lastIndex;
+                            eachCb(node);
+                        });
                     }
-                    regex.lastIndex = 0;
-                }
+                    endCb();
+                });
             }
         }, {
             key: "unwrapMatches",
@@ -373,11 +325,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     totalMatches++;
                     _this7.opt.each(element);
                 };
-                this.forEachTextNode(function (node) {
-                    _this7.wrapMatches(node, regexp, true, function (match) {
-                        return _this7.opt.filter(node, match, totalMatches);
-                    }, eachCb);
-                }, function () {
+                var fn = "wrapMatches";
+                if (this.opt.acrossElements) {
+                    fn = "wrapMatchesAcrossElements";
+                }
+                this[fn](regexp, true, function (match, node) {
+                    return _this7.opt.filter(node, match, totalMatches);
+                }, eachCb, function () {
                     if (totalMatches === 0) {
                         _this7.opt.noMatch(regexp);
                     }
@@ -396,32 +350,37 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var kwArr = _getSeparatedKeywords.keywords;
                 var kwArrLen = _getSeparatedKeywords.length;
 
-                var totalMatches = 0;
+                var totalMatches = 0,
+                    fn = "wrapMatches";
+                if (this.opt.acrossElements) {
+                    fn = "wrapMatchesAcrossElements";
+                }
                 if (kwArrLen === 0) {
                     this.opt.done(totalMatches);
+                    return;
                 }
-                kwArr.forEach(function (kw) {
+                var handler = function handler(kw) {
                     var regex = new RegExp(_this8.createRegExp(kw), "gmi"),
                         matches = 0;
-                    var eachCb = function eachCb(element) {
+                    _this8.log("Searching with expression \"" + regex + "\"");
+                    _this8[fn](regex, false, function (term, node) {
+                        return _this8.opt.filter(node, kw, matches, totalMatches);
+                    }, function (element) {
                         matches++;
                         totalMatches++;
                         _this8.opt.each(element);
-                    };
-                    _this8.log("Searching with expression \"" + regex + "\"");
-                    _this8.forEachTextNode(function (node) {
-                        _this8.wrapMatches(node, regex, false, function () {
-                            return _this8.opt.filter(node, kw, matches, totalMatches);
-                        }, eachCb);
                     }, function () {
                         if (matches === 0) {
                             _this8.opt.noMatch(kw);
                         }
                         if (kwArr[kwArrLen - 1] === kw) {
                             _this8.opt.done(totalMatches);
+                        } else {
+                            handler(kwArr[kwArr.indexOf(kw) + 1]);
                         }
                     });
-                });
+                };
+                handler(kwArr[0]);
             }
         }, {
             key: "unmark",
@@ -435,13 +394,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     sel += "." + this.opt.className;
                 }
                 this.log("Removal selector \"" + sel + "\"");
-                this.forEachContext(function (ctx) {
-                    var matches = ctx.querySelectorAll(sel);
-                    Array.prototype.slice.call(matches).forEach(function (el) {
-                        if (!_this9.matchesExclude(el, false)) {
-                            _this9.unwrapMatches(el);
-                        }
-                    });
+                this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, function (node) {
+                    _this9.unwrapMatches(node);
+                }, function (node) {
+                    var matchesSel = DOMIterator.matches(node, sel),
+                        matchesExclude = _this9.matchesExclude(node, false);
+                    if (!matchesSel || matchesExclude) {
+                        return NodeFilter.FILTER_REJECT;
+                    } else {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
                 }, this.opt.done);
             }
         }, {
@@ -456,6 +418,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "diacritics": true,
                     "synonyms": {},
                     "accuracy": "partially",
+                    "acrossElements": false,
                     "each": function each() {},
                     "noMatch": function noMatch() {},
                     "filter": function filter() {
@@ -469,26 +432,291 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             get: function get() {
                 return this._opt;
             }
+        }, {
+            key: "iterator",
+            get: function get() {
+                if (!this._iterator) {
+                    this._iterator = new DOMIterator(this.ctx, this.opt.iframes);
+                }
+                return this._iterator;
+            }
         }]);
 
         return Mark;
     }();
 
+    var DOMIterator = function () {
+        function DOMIterator(ctx) {
+            var iframes = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+            _classCallCheck(this, DOMIterator);
+
+            this.ctx = ctx;
+
+            this.iframes = iframes;
+        }
+
+        _createClass(DOMIterator, [{
+            key: "getContexts",
+            value: function getContexts() {
+                var ctx = void 0;
+                if (typeof this.ctx === "undefined" || !this.ctx) {
+                    ctx = [];
+                } else if (NodeList.prototype.isPrototypeOf(this.ctx)) {
+                    ctx = Array.prototype.slice.call(this.ctx);
+                } else if (Array.isArray(this.ctx)) {
+                    ctx = this.ctx;
+                } else {
+                    ctx = [this.ctx];
+                }
+
+                var filteredCtx = [];
+                ctx.forEach(function (ctx) {
+                    var isDescendant = filteredCtx.filter(function (contexts) {
+                        return contexts.contains(ctx);
+                    }).length > 0;
+                    if (filteredCtx.indexOf(ctx) === -1 && !isDescendant) {
+                        filteredCtx.push(ctx);
+                    }
+                });
+                return filteredCtx;
+            }
+        }, {
+            key: "getIframeContents",
+            value: function getIframeContents(ifr, successFn) {
+                var errorFn = arguments.length <= 2 || arguments[2] === undefined ? function () {} : arguments[2];
+
+                var doc = void 0;
+                try {
+                    var ifrWin = ifr.contentWindow;
+                    doc = ifrWin.document;
+                    if (!ifrWin || !doc) {
+                        throw new Error("iframe inaccessible");
+                    }
+                } catch (e) {
+                    errorFn();
+                }
+                if (doc) {
+                    successFn(doc);
+                }
+            }
+        }, {
+            key: "onIframeReady",
+            value: function onIframeReady(ifr, successFn, errorFn) {
+                var _this10 = this;
+
+                try {
+                    (function () {
+                        var ifrWin = ifr.contentWindow,
+                            bl = "about:blank",
+                            compl = "complete",
+                            isBlank = function isBlank() {
+                            var src = ifr.getAttribute("src").trim(),
+                                href = ifrWin.location.href;
+                            return href === bl && src !== bl && src;
+                        },
+                            observeOnload = function observeOnload() {
+                            var listener = function listener() {
+                                try {
+                                    if (!isBlank()) {
+                                        ifr.removeEventListener("load", listener);
+                                        _this10.getIframeContents(ifr, successFn, errorFn);
+                                    }
+                                } catch (e) {
+                                    errorFn();
+                                }
+                            };
+                            ifr.addEventListener("load", listener);
+                        };
+                        if (ifrWin.document.readyState === compl) {
+                            if (isBlank()) {
+                                observeOnload();
+                            } else {
+                                _this10.getIframeContents(ifr, successFn, errorFn);
+                            }
+                        } else {
+                            observeOnload();
+                        }
+                    })();
+                } catch (e) {
+                    errorFn();
+                }
+            }
+        }, {
+            key: "forEachIframe",
+            value: function forEachIframe(ctx, filter, each, end) {
+                var _this11 = this;
+
+                var ifr = ctx.querySelectorAll("iframe"),
+                    open = ifr.length,
+                    handled = 0;
+                ifr = Array.prototype.slice.call(ifr);
+                var checkEnd = function checkEnd() {
+                    if (--open <= 0) {
+                        end(handled);
+                    }
+                };
+                if (!open) {
+                    checkEnd();
+                }
+                ifr.forEach(function (ifr) {
+                    _this11.onIframeReady(ifr, function (con) {
+                        if (filter(ifr)) {
+                            handled++;
+                            each(con);
+                        }
+                        checkEnd();
+                    }, checkEnd);
+                });
+            }
+        }, {
+            key: "createIterator",
+            value: function createIterator(ctx, whatToShow, filter) {
+                return document.createNodeIterator(ctx, whatToShow, filter, false);
+            }
+        }, {
+            key: "createInstanceOnIframe",
+            value: function createInstanceOnIframe(contents) {
+                contents = contents.querySelector("html");
+                return new DOMIterator(contents, this.iframes);
+            }
+        }, {
+            key: "compareNodeIframe",
+            value: function compareNodeIframe(node, prevNode, ifr) {
+                var compCurr = node.compareDocumentPosition(ifr),
+                    prev = Node.DOCUMENT_POSITION_PRECEDING;
+                if (compCurr & prev) {
+                    if (prevNode !== null) {
+                        var compPrev = prevNode.compareDocumentPosition(ifr),
+                            after = Node.DOCUMENT_POSITION_FOLLOWING;
+                        if (compPrev & after) {
+                            return true;
+                        }
+                    } else {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }, {
+            key: "getIteratorNode",
+            value: function getIteratorNode(itr) {
+                var prevNode = itr.previousNode();
+                var node = void 0;
+                if (prevNode === null) {
+                    node = itr.nextNode();
+                } else {
+                    node = itr.nextNode() && itr.nextNode();
+                }
+                return {
+                    prevNode: prevNode,
+                    node: node
+                };
+            }
+        }, {
+            key: "iterateThroughNodes",
+            value: function iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr) {
+                var _this12 = this;
+
+                var openIfr = arguments.length <= 6 || arguments[6] === undefined ? [] : arguments[6];
+
+                itr = !itr ? this.createIterator(ctx, whatToShow, fCb) : itr;
+
+                var _getIteratorNode = this.getIteratorNode(itr);
+
+                var prevNode = _getIteratorNode.prevNode;
+                var node = _getIteratorNode.node;
+                var done = function done() {
+                    if (node !== null) {
+                        eCb(node);
+                    }
+                    if (itr.nextNode()) {
+                        itr.previousNode();
+                        _this12.iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, openIfr);
+                    } else {
+                        if (!openIfr.length) {
+                            endCb();
+                        }
+                        openIfr.forEach(function (ifr) {
+                            _this12.getIframeContents(ifr, function (con) {
+                                _this12.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, endCb);
+                            });
+                        });
+                    }
+                };
+                if (!this.iframes) {
+                    done();
+                } else {
+                    this.forEachIframe(ctx, function (ifr) {
+                        if (!_this12.compareNodeIframe(node, prevNode, ifr)) {
+                            if (openIfr.indexOf(ifr) === -1) {
+                                openIfr.push(ifr);
+                            }
+                            return false;
+                        }
+                        if (openIfr.indexOf(ifr) > -1) {
+                            openIfr = openIfr.splice(openIfr.indexOf(ifr), 1);
+                        }
+                        return true;
+                    }, function (con) {
+                        _this12.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, done);
+                    }, function (handled) {
+                        if (handled === 0) {
+                            done();
+                        }
+                    });
+                }
+            }
+        }, {
+            key: "forEachNode",
+            value: function forEachNode(whatToShow, cb, filterCb) {
+                var _this13 = this;
+
+                var end = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
+
+                var contexts = this.getContexts();
+                var open = contexts.length;
+                if (!open) {
+                    end();
+                }
+                contexts.forEach(function (ctx) {
+                    _this13.iterateThroughNodes(whatToShow, ctx, cb, filterCb, function () {
+                        if (--open <= 0) {
+                            end();
+                        }
+                    });
+                });
+            }
+        }], [{
+            key: "matches",
+            value: function matches(el, selector) {
+                var fn = el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.oMatchesSelector || el.webkitMatchesSelector;
+                if (fn) {
+                    return fn.call(el, selector);
+                } else {
+                    return false;
+                }
+            }
+        }]);
+
+        return DOMIterator;
+    }();
+
     window.Mark = function (ctx) {
-        var _this10 = this;
+        var _this14 = this;
 
         var instance = new Mark(ctx);
         this.mark = function (sv, opt) {
             instance.mark(sv, opt);
-            return _this10;
+            return _this14;
         };
         this.markRegExp = function (sv, opt) {
             instance.markRegExp(sv, opt);
-            return _this10;
+            return _this14;
         };
         this.unmark = function (opt) {
             instance.unmark(opt);
-            return _this10;
+            return _this14;
         };
         return this;
     };

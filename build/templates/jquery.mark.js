@@ -18,15 +18,15 @@
 })((window, document, $) => {
     //<%= module %>
     $.fn.mark = function (sv, opt) {
-        new Mark(this).mark(sv, opt);
+        new Mark(this.get()).mark(sv, opt);
         return this;
     };
     $.fn.markRegExp = function (regexp, opt) {
-        new Mark(this).markRegExp(regexp, opt);
+        new Mark(this.get()).markRegExp(regexp, opt);
         return this;
     };
     $.fn.unmark = function (opt) {
-        new Mark(this).unmark(opt);
+        new Mark(this.get()).unmark(opt);
         return this;
     };
     return $;

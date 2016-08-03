@@ -6,6 +6,10 @@
  *****************************************************/
 /**
  * Marks search terms in DOM elements
+ * @example
+ * new Mark(document.querySelector(".context")).mark("lorem ipsum");
+ * @example
+ * new Mark(document.querySelector(".context")).markRegExp(/lorem/gmi);
  */
 class Mark {
 
@@ -37,6 +41,7 @@ class Mark {
             "diacritics": true,
             "synonyms": {},
             "accuracy": "partially",
+            "acrossElements": false,
             "each": () => {},
             "noMatch": () => {},
             "filter": () => true,
@@ -48,6 +53,17 @@ class Mark {
 
     get opt() {
         return this._opt;
+    }
+
+    /**
+     * An instance of DOMIterator
+     * @return {DOMIterator}
+     */
+    get iterator() {
+        if(!this._iterator) {
+            this._iterator = new DOMIterator(this.ctx, this.opt.iframes);
+        }
+        return this._iterator;
     }
 
     /**
@@ -232,6 +248,7 @@ class Mark {
             }
         });
         return {
+            // sort because of https://git.io/v6USg
             "keywords": stack.sort((a, b) => {
                 return b.length - a.length;
             }),
@@ -240,48 +257,54 @@ class Mark {
     }
 
     /**
-     * Returns all contexts
-     * @return [HTMLElement[]] - An array containing DOM contexts
-     * @access protected
+     * @typedef Mark~getTextNodesDict
+     * @type {object.<string>}
+     * @property {string} value - The composite value of all text nodes
+     * @property {object[]} nodes - An array of objects
+     * @property {number} nodes.start - The start position within the composite
+     * value
+     * @property {number} nodes.end - The end position within the composite
+     * value
+     * @property {HTMLElement} nodes.node - The DOM text node element
      */
-    getContexts() {
-        let ctx;
-        if(typeof this.ctx === "undefined") {
-            ctx = [];
-        } else if(this.ctx instanceof HTMLElement) {
-            ctx = [this.ctx];
-        } else if(Array.isArray(this.ctx)) {
-            ctx = this.ctx;
-        } else { // NodeList
-            ctx = Array.prototype.slice.call(this.ctx);
-        }
-        if(!ctx.length) {
-            this.log("Empty context", "warn");
-        }
-        return ctx;
-    }
-
     /**
-     * Checks if a DOM element matches a specified selector
-     * @param  {HTMLElement} el - The DOM element
-     * @param  {string} selector - The selector
-     * @return {boolean}
+     * Callback
+     * @callback Mark~getTextNodesCallback
+     * @param {Mark~getTextNodesDict}
+     */
+    /**
+     * Calls the callback with an object containing all text nodes (including
+     * iframe text nodes) and the composite value of them (string)
+     * @param {Mark~getTextNodesCallback} cb - Callback
      * @access protected
      */
-    matches(el, selector) {
-        return(
-            el.matches ||
-            el.matchesSelector ||
-            el.msMatchesSelector ||
-            el.mozMatchesSelector ||
-            el.webkitMatchesSelector ||
-            el.oMatchesSelector
-        ).call(el, selector);
+    getTextNodes(cb) {
+        let val = "",
+            nodes = [];
+        this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
+            nodes.push({
+                start: val.length,
+                end: (val += node.textContent).length,
+                node
+            });
+        }, node => {
+            if(this.matchesExclude(node.parentNode, true)) {
+                return NodeFilter.FILTER_REJECT;
+            } else {
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        }, () => {
+            cb({
+                value: val,
+                nodes: nodes
+            });
+        });
     }
 
     /**
      * Checks if an element matches any of the specified exclude selectors. Also
-     * it checks for script, style, title and optionally already marked elements
+     * it checks for elements in which no marks should be performed (e.g.
+     * script and style tags) and optionally already marked elements
      * @param  {HTMLElement} el - The element to check
      * @param {boolean} exclM - If already marked elements should be excluded
      * too
@@ -290,12 +313,15 @@ class Mark {
      */
     matchesExclude(el, exclM) {
         let remain = true;
-        let excl = this.opt.exclude.concat(["script", "style", "title"]);
+        let excl = this.opt.exclude.concat([
+            // ignores the elements itself, not their childrens (selector *)
+            "script", "style", "title", "head", "html"
+        ]);
         if(exclM) {
             excl = excl.concat(["*[data-markjs='true']"]);
         }
         excl.every(sel => {
-            if(this.matches(el, sel)) {
+            if(DOMIterator.matches(el, sel)) {
                 return remain = false;
             }
             return true;
@@ -304,194 +330,105 @@ class Mark {
     }
 
     /**
-     * Callback when the iframe is ready
-     * @callback Mark~onIframeReadySuccessCallback
-     * @param {HTMLElement} contents - The contentDocument of the iframe
-     */
-    /**
-     * Callback if iframe can not be accessed
-     * @callback Mark~onIframeReadyErrorCallback
-     */
-    /**
-     * Calls the callback if the specified iframe is ready for DOM access
-     * @param  {HTMLElement} ifr - The iframe DOM element
-     * @param  {Mark~onIframeReadySuccessCallback} successFn - Success callback
-     * @param {Mark~onIframeReadyErrorCallback} errorFn - Error callback
-     * @see {@link http://stackoverflow.com/a/36155560/3894981} for
-     * background information
+     * Wraps the specified element and class around matches that fit the start
+     * and end positions
+     * @param  {HTMLElement} node - The DOM text node
+     * @param  {number} start - The position where to start wrapping
+     * @param  {number} end - The position where to end wrapping
+     * @return {HTMLElement} Returns the splitted text node that will appear
+     * after the wrapped text node
      * @access protected
      */
-    onIframeReady(ifr, successFn, errorFn) {
-        try {
-            const ifrWin = ifr.contentWindow,
-                bl = "about:blank",
-                compl = "complete";
-            const callCallback = () => {
-                try {
-                    if(ifrWin.document === null) { // no permission
-                        throw new Error("iframe inaccessible");
-                    }
-                    successFn(ifrWin.document);
-                } catch(e) { // accessing contentDocument failed
-                    errorFn();
-                }
-            };
-            const isBlank = () => {
-                const src = ifr.getAttribute("src").trim(),
-                    href = ifrWin.location.href;
-                return href === bl && src !== bl && src;
-            };
-            const observeOnload = () => {
-                const listener = () => {
-                    try {
-                        if(!isBlank()) {
-                            ifr.removeEventListener("load", listener);
-                            callCallback();
+    wrapRangeInTextNode(node, start, end) {
+        const hEl = !this.opt.element ? "mark" : this.opt.element,
+            startNode = node.splitText(start),
+            ret = startNode.splitText(end - start);
+        let repl = document.createElement(hEl);
+        repl.setAttribute("data-markjs", "true");
+        if(this.opt.className) {
+            repl.setAttribute("class", this.opt.className);
+        }
+        repl.textContent = startNode.textContent;
+        startNode.parentNode.replaceChild(repl, startNode);
+        return ret;
+    }
+
+    /**
+     * @typedef Mark~wrapRangeInMappedTextNodeDict
+     * @type {object.<string>}
+     * @property {string} value - The composite value of all text nodes
+     * @property {object[]} nodes - An array of objects
+     * @property {number} nodes.start - The start position within the composite
+     * value
+     * @property {number} nodes.end - The end position within the composite
+     * value
+     * @property {HTMLElement} nodes.node - The DOM text node element
+     */
+    /**
+     * Each callback
+     * @callback Mark~wrapMatchesEachCallback
+     * @param {HTMLElement} node - The wrapped DOM element
+     * @param {number} lastIndex - The last matching position within the
+     * composite value of text nodes
+     */
+    /**
+     * Filter callback
+     * @callback Mark~wrapMatchesFilterCallback
+     * @param {HTMLElement} node - The matching text node DOM element
+     */
+    /**
+     * Will map matches determined by start end end positions with text nodes
+     * inside the dictionary of text nodes and wraps them using
+     * {@link Mark#wrapRangeInTextNode}.
+     * @param  {Mark~wrapRangeInMappedTextNodeDict} dict - The dictionary
+     * @param  {number} start - The start position of the match
+     * @param  {number} end - The end position of the match
+     * @param  {Mark~wrapMatchesFilterCallback} filterCb - Filter callback
+     * @param  {Mark~wrapMatchesEachCallback} eachCb - Each callback
+     * @access protected
+     */
+    wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
+        // iterate over all text nodes to find the one matching the positions
+        dict.nodes.every((n, i) => {
+            const sibl = dict.nodes[i + 1];
+            if(typeof sibl === "undefined" || sibl.start > start) {
+                // map range from dict.value to text node
+                const s = start - n.start,
+                    e = (end > n.end ? n.end : end) - n.start;
+                if(filterCb(n.node)) {
+                    n.node = this.wrapRangeInTextNode(n.node, s, e);
+                    // recalculate positions to also find subsequent matches in
+                    // the same text node. Necessary as the text node in dict
+                    // now only contains the splitted part after the wrapped one
+                    const startStr = dict.value.substr(0, n.start),
+                        endStr = dict.value.substr(e + n.start);
+                    dict.value = startStr + endStr;
+                    dict.nodes.forEach((k, j) => {
+                        if(j >= i) {
+                            if(dict.nodes[j].start > 0 && j !== i) {
+                                dict.nodes[j].start -= e;
+                            }
+                            dict.nodes[j].end -= e;
                         }
-                    } catch(e) {
-                        errorFn();
-                    }
-                };
-                ifr.addEventListener("load", listener);
-            };
-            if(ifrWin.document.readyState === compl) {
-                if(isBlank()) {
-                    observeOnload();
-                } else {
-                    callCallback();
-                }
-            } else {
-                observeOnload();
-            }
-        } catch(e) { // accessing contentDocument failed
-            errorFn();
-        }
-    }
-
-    /**
-     * Callback for each iframe content
-     * @callback Mark~forEachIframeCallback
-     * @param {HTMLElement} html - The html element of the iframe
-     */
-     /**
-      * Callback if all iframes were handled inside the context
-      * @callback Mark~forEachIframeEndCallback
-      */
-    /**
-     * Iterates over all iframes (recursive) inside the specified context and
-     * calls the callback with its content
-     * @param  {HTMLElement} ctx - The DOM context
-     * @param  {Mark~forEachIframeCallback} cb - Each callback
-     * @param  {Mark~forEachIframeEndCallback} end - End callback
-     */
-    forEachIframe(ctx, cb, end) {
-        let ifr = ctx.querySelectorAll("iframe");
-        ifr = Array.prototype.slice.call(ifr);
-        if(ifr.length) {
-            ifr.forEach(ifr => {
-                this.onIframeReady(ifr, con => {
-                    const html = con.querySelector("html");
-                    this.forEachIframe(html, cb, () => {
-                        cb(html);
-                        end();
                     });
-                }, () => {
-                    const src = ifr.getAttribute("src");
-                    this.log(`iframe "${src}" could not be accessed`, "warn");
-                    end();
-                });
-            });
-        } else {
-            end();
-        }
-    }
-
-    /**
-     * Callback for each context
-     * @callback Mark~forEachContextCallback
-     * @param {HTMLElement} el - The DOM context
-     */
-    /**
-     * Callback if all contexts were handled
-     * @callback Mark~forEachContextEndCallback
-     */
-    /**
-     * Calls the callback for each context. If there are iframes and the iframes
-     * option is enabled, it will call the callback for each iframe too
-     * @param  {Mark~forEachContextCallback} cb - Each callback
-     * @param {Mark~forEachContextEndCallback} cb - End callback
-     */
-    forEachContext(cb, end) {
-        const ctx = this.getContexts(),
-            callCallbacks = el => {
-                cb(el);
-                if((--open) < 1) {
-                    end();
+                    end -= e;
+                    eachCb(n.node.previousSibling, n.start);
+                    if(end > n.end) {
+                        start = n.end;
+                    } else {
+                        return false;
+                    }
                 }
-            };
-        let open = ctx.length;
-        if(open < 1) {
-            end();
-        }
-        ctx.forEach(el => {
-            if(this.opt.iframes) {
-                this.forEachIframe(el, cb, () => {
-                    callCallbacks(el);
-                });
-            } else {
-                callCallbacks(el);
             }
+            return true;
         });
     }
 
     /**
-     * Callback for each text node
-     * @callback Mark~forEachTextNodeCallback
-     * @param {HTMLElement} node - The DOM text node element
-     */
-    /**
-     * Callback if ended
-     * @callback Mark~forEachTextNodeEndCallback
-     */
-    /**
-     * Calls the callback function for each text node of instance contexts and
-     * iframes if the iframes option is enabled
-     * @param  {Mark~forEachTextNodeCallback} cb - The callback function
-     * @param {Mark~forEachTextNodeEndCallback} end - End callback
-     * @access protected
-     */
-    forEachTextNode(cb, end) {
-        let handled = [];
-        this.forEachContext(ctx => {
-            const isDescendant = handled.filter(handledCtx => {
-                return handledCtx.contains(ctx);
-            }).length > 0;
-            if(handled.indexOf(ctx) > -1 || isDescendant){
-                return;
-            }
-            handled.push(ctx);
-            const itr = document.createNodeIterator(
-                ctx,
-                NodeFilter.SHOW_TEXT,
-                node => {
-                    if(!this.matchesExclude(node.parentNode, true)) {
-                        return NodeFilter.FILTER_ACCEPT;
-                    }
-                    return NodeFilter.FILTER_REJECT;
-                },
-                false
-            );
-            let node;
-            while(node = itr.nextNode()) {
-                cb(node);
-            }
-        }, end);
-    }
-
-    /**
      * Filter callback before each wrapping
-     * @callback Mark~wrapMatchesFilterCallback#
+     * @callback Mark~wrapMatchesFilterCallback
      * @param {string} match - The matching string
+     * @param {HTMLElement} node - The text node where the match occurs
      */
     /**
      * Callback for each wrapped element
@@ -499,55 +436,108 @@ class Mark {
      * @param {HTMLElement} element - The marked DOM element
      */
     /**
-     * Wraps the specified element and class around matches in the defined
-     * DOM text node element
-     * @param {object} node - The DOM text node
+     * Callback on end
+     * @callback Mark~wrapMatchesEndCallback
+     */
+    /**
+     * Wraps the specified element and class around matches within single HTML
+     * elements in all contexts
      * @param {RegExp} regex - The regular expression to be searched for
-     * @param {boolean} custom - If true, the function expects a regular
+     * @param {boolean} custom - If false, the function expects a regular
      * expression that has at least two groups (like returned from
      * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
      * the second will be wrapped
      * @param {Mark~wrapMatchesEachCallback} eachCb
      * @param {Mark~wrapMatchesFilterCallback} filterCb
+     * @param {Mark~wrapMatchesEndCallback} endCb
      * @access protected
      */
-    wrapMatches(node, regex, custom, filterCb, eachCb) {
-        const hEl = !this.opt.element ? "mark" : this.opt.element,
-            index = custom ? 0 : 2;
-        let match;
-        while((match = regex.exec(node.textContent)) !== null) {
-            if(!filterCb(match[index])) {
-                continue;
-            }
-            // Split the text node at the start and the end of the match and
-            // replace the new node with the specified element
-            let pos = match.index;
-            if(!custom) {
-                pos += match[index - 1].length;
-            }
-            let startNode = node.splitText(pos);
-            // The DOM reference of node will get lost due to
-            // splitText. Therefore it is necessary to save the new
-            // created element in "node"
-            node = startNode.splitText(match[index].length);
-            if(startNode.parentNode !== null) {
-                let repl = document.createElement(hEl);
-                repl.setAttribute("data-markjs", "true");
-                if(this.opt.className) {
-                    repl.setAttribute("class", this.opt.className);
+    wrapMatches(regex, custom, filterCb, eachCb, endCb) {
+        const matchIdx = custom ? 0 : 2;
+        this.getTextNodes(dict => {
+            dict.nodes.forEach(node => {
+                node = node.node;
+                let match;
+                while((match = regex.exec(node.textContent)) !== null) {
+                    if(!filterCb(match[matchIdx], node)) {
+                        continue;
+                    }
+                    let pos = match.index;
+                    if(!custom) {
+                        pos += match[matchIdx - 1].length;
+                    }
+                    node = this.wrapRangeInTextNode(
+                        node,
+                        pos,
+                        pos + match[matchIdx].length
+                    );
+                    eachCb(node.previousSibling);
+                    // reset index of last match as the node changed and the
+                    // index isn't valid anymore http://tinyurl.com/htsudjd
+                    regex.lastIndex = 0;
                 }
-                repl.textContent = match[index];
-                startNode.parentNode.replaceChild(repl, startNode);
-                eachCb(repl);
+            });
+            endCb();
+        });
+    }
+
+    /**
+     * Callback for each wrapped element
+     * @callback Mark~wrapMatchesAcrossElementsEachCallback
+     * @param {HTMLElement} element - The marked DOM element
+     */
+    /**
+     * Filter callback before each wrapping
+     * @callback Mark~wrapMatchesAcrossElementsFilterCallback
+     * @param {string} match - The matching string
+     * @param {HTMLElement} node - The text node where the match occurs
+     */
+    /**
+     * Callback on end
+     * @callback Mark~wrapMatchesAcrossElementsEndCallback
+     */
+    /**
+     * Wraps the specified element and class around matches across all HTML
+     * elements in all contexts
+     * @param {RegExp} regex - The regular expression to be searched for
+     * @param {boolean} custom - If false, the function expects a regular
+     * expression that has at least two groups (like returned from
+     * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
+     * the second will be wrapped
+     * @param {Mark~wrapMatchesAcrossElementsEachCallback} eachCb
+     * @param {Mark~wrapMatchesAcrossElementsFilterCallback} filterCb
+     * @param {Mark~wrapMatchesAcrossElementsEndCallback} endCb
+     * @access protected
+     */
+    wrapMatchesAcrossElements(regex, custom, filterCb, eachCb, endCb) {
+        const matchIdx = custom ? 0 : 2;
+        this.getTextNodes(dict => {
+            let match;
+            while((match = regex.exec(dict.value)) !== null) {
+                // calculate range inside dict.value
+                let start = match.index;
+                if(!custom) {
+                    start += match[matchIdx - 1].length;
+                }
+                const end = start + match[matchIdx].length;
+                // note that dict will be updated automatically, as it'll change
+                // in the wrapping process, due to the fact that text
+                // nodes will be splitted
+                this.wrapRangeInMappedTextNode(dict, start, end, node => {
+                    return filterCb(match[matchIdx], node);
+                }, (node, lastIndex) => {
+                    regex.lastIndex = lastIndex;
+                    eachCb(node);
+                });
             }
-            regex.lastIndex = 0; // http://tinyurl.com/htsudjd
-        }
+            endCb();
+        });
     }
 
     /**
      * Unwraps the specified DOM node with its content (text nodes or HTML)
      * without destroying possibly present events (using innerHTML) and
-     * normalizes the parent at the end (merge splitted text nodes)
+     * normalizes the parent at the end (merges splitted text nodes)
      * @param  {HTMLElement} node - The DOM node to unwrap
      * @access protected
      */
@@ -619,11 +609,13 @@ class Mark {
             totalMatches++;
             this.opt.each(element);
         };
-        this.forEachTextNode(node => {
-            this.wrapMatches(node, regexp, true, match => {
-                return this.opt.filter(node, match, totalMatches);
-            }, eachCb);
-        }, () => {
+        let fn = "wrapMatches";
+        if(this.opt.acrossElements) {
+            fn = "wrapMatchesAcrossElements";
+        }
+        this[fn](regexp, true, (match, node) => {
+            return this.opt.filter(node, match, totalMatches);
+        }, eachCb, () => {
             if(totalMatches === 0) {
                 this.opt.noMatch(regexp);
             }
@@ -686,6 +678,9 @@ class Mark {
      *   <li><i>limiters</i>: A custom array of string limiters for accuracy
      *   "exactly" or "complementary"</li>
      * </ul>
+     * @property {boolean} [acrossElements=false] - Whether to find matches
+     * across HTML elements. By default, only matches within single HTML
+     * elements will be found
      * @property {Mark~markEachCallback} [each]
      * @property {Mark~markNoMatchCallback} [noMatch]
      * @property {Mark~markFilterCallback} [filter]
@@ -703,32 +698,37 @@ class Mark {
             keywords: kwArr,
             length: kwArrLen
         } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
-        let totalMatches = 0;
+        let totalMatches = 0,
+            fn = "wrapMatches";
+        if(this.opt.acrossElements) {
+            fn = "wrapMatchesAcrossElements";
+        }
         if(kwArrLen === 0) {
             this.opt.done(totalMatches);
+            return;
         }
-        kwArr.forEach(kw => {
+        const handler = kw => {
             let regex = new RegExp(this.createRegExp(kw), "gmi"),
                 matches = 0;
-            const eachCb = element => {
+            this.log(`Searching with expression "${regex}"`);
+            this[fn](regex, false, (term, node) => {
+                return this.opt.filter(node, kw, matches, totalMatches);
+            }, element => {
                 matches++;
                 totalMatches++;
                 this.opt.each(element);
-            };
-            this.log(`Searching with expression "${regex}"`);
-            this.forEachTextNode(node => {
-                this.wrapMatches(node, regex, false, () => {
-                    return this.opt.filter(node, kw, matches, totalMatches);
-                }, eachCb);
             }, () => {
                 if(matches === 0) {
                     this.opt.noMatch(kw);
                 }
                 if(kwArr[kwArrLen - 1] === kw) {
                     this.opt.done(totalMatches);
+                } else {
+                    handler(kwArr[kwArr.indexOf(kw) + 1]);
                 }
             });
-        });
+        };
+        handler(kwArr[0]);
     }
 
     /**
@@ -745,14 +745,435 @@ class Mark {
             sel += `.${this.opt.className}`;
         }
         this.log(`Removal selector "${sel}"`);
-        this.forEachContext(ctx => {
-            const matches = ctx.querySelectorAll(sel);
-            Array.prototype.slice.call(matches).forEach(el => {
-                if(!this.matchesExclude(el, false)) {
-                    this.unwrapMatches(el);
-                }
-            });
+        this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, node => {
+            this.unwrapMatches(node);
+        }, node => {
+            const matchesSel = DOMIterator.matches(node, sel),
+                matchesExclude = this.matchesExclude(node, false);
+            if(!matchesSel || matchesExclude) {
+                return NodeFilter.FILTER_REJECT;
+            } else {
+                return NodeFilter.FILTER_ACCEPT;
+            }
         }, this.opt.done);
     }
+}
 
+/**
+ * A NodeIterator with iframes support and a method to check if an element is
+ * matching a specified selector
+ * @example
+ * const iterator = new DOMIterator(
+ *     document.querySelector("#context"), true
+ * );
+ * iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
+ *     console.log(node);
+ * }, node => {
+ *     if(DOMIterator.matches(node.parentNode, ".ignore")){
+ *         return NodeFilter.FILTER_REJECT;
+ *     } else {
+ *         return NodeFilter.FILTER_ACCEPT;
+ *     }
+ * }, () => {
+ *     console.log("DONE");
+ * });
+ * @todo Outsource into separate repository and include it in the build
+ */
+class DOMIterator {
+
+    /**
+     * @param {HTMLElement|HTMLElement[]|NodeList} ctx - The context DOM
+     * element, an array of DOM elements or a NodeList
+     * @param {boolean} [iframes=true] - A boolean indicating if iframes should
+     * be handled
+     */
+    constructor(ctx, iframes = true) {
+        /**
+         * The context
+         * @type {HTMLElement|HTMLElement[]|NodeList}
+         */
+        this.ctx = ctx;
+        /**
+         * Boolean indicating if iframe support is enabled
+         * @type {boolean}
+         */
+        this.iframes = iframes;
+    }
+
+    /**
+     * Returns all contexts filtered by duplicates (even nested)
+     * @return [HTMLElement[]] - An array containing DOM contexts
+     * @access protected
+     */
+    getContexts() {
+        let ctx;
+        if(typeof this.ctx === "undefined" || !this.ctx) { // e.g. null
+            ctx = [];
+        } else if(NodeList.prototype.isPrototypeOf(this.ctx)) {
+            ctx = Array.prototype.slice.call(this.ctx);
+        } else if(Array.isArray(this.ctx)) {
+            ctx = this.ctx;
+        } else { // e.g. HTMLElement or element inside iframe
+            ctx = [this.ctx]
+        }
+        // filter duplicate text nodes
+        let filteredCtx = [];
+        ctx.forEach(ctx => {
+            const isDescendant = filteredCtx.filter(contexts => {
+                return contexts.contains(ctx);
+            }).length > 0;
+            if(filteredCtx.indexOf(ctx) === -1 && !isDescendant) {
+                filteredCtx.push(ctx);
+            }
+        });
+        return filteredCtx;
+    }
+
+    /**
+     * Checks if a DOM element matches a specified selector
+     * @param  {HTMLElement} el - The DOM element
+     * @param  {string} selector - The selector
+     * @return {boolean}
+     * @access public
+     */
+    static matches(el, selector) {
+        const fn = (
+            el.matches ||
+            el.matchesSelector ||
+            el.msMatchesSelector ||
+            el.mozMatchesSelector ||
+            el.oMatchesSelector ||
+            el.webkitMatchesSelector
+        );
+        if(fn) {
+            return fn.call(el, selector);
+        } else { // may occur e.g. when el is a textNode
+            return false;
+        }
+    }
+
+    /**
+     * @callback DOMIterator~getIframeContentsSuccessCallback
+     * @param {HTMLDocument} contents - The contentDocument of the iframe
+     */
+    /**
+     * Calls the success callback function with the iframe document. If it can't
+     * be accessed it calls the error callback function
+     * @param {DOMIterator~getIframeContentsSuccessCallback} successFn
+     * @param {function} [errorFn]
+     * @access protected
+     */
+    getIframeContents(ifr, successFn, errorFn = () => {}) {
+        let doc;
+        try {
+            const ifrWin = ifr.contentWindow;
+            doc = ifrWin.document;
+            if(!ifrWin || !doc) { // no permission = null. Undefined in Phantom
+                throw new Error("iframe inaccessible");
+            }
+        } catch(e) {
+            errorFn();
+        }
+        if(doc) {
+            successFn(doc);
+        }
+    }
+
+    /**
+     * Callback when the iframe is ready
+     * @callback DOMIterator~onIframeReadySuccessCallback
+     * @param {HTMLDocument} contents - The contentDocument of the iframe
+     */
+    /**
+     * Callback if iframe can not be accessed
+     * @callback DOMIterator~onIframeReadyErrorCallback
+     */
+    /**
+     * Calls the callback if the specified iframe is ready for DOM access
+     * @param  {HTMLElement} ifr - The iframe DOM element
+     * @param  {DOMIterator~onIframeReadySuccessCallback} successFn - Success callback
+     * @param {DOMIterator~onIframeReadyErrorCallback} errorFn - Error callback
+     * @see {@link http://stackoverflow.com/a/36155560/3894981} for
+     * background information
+     * @access protected
+     */
+    onIframeReady(ifr, successFn, errorFn) {
+        try {
+            const ifrWin = ifr.contentWindow,
+                bl = "about:blank",
+                compl = "complete",
+                isBlank = () => {
+                    const src = ifr.getAttribute("src").trim(),
+                        href = ifrWin.location.href;
+                    return href === bl && src !== bl && src;
+                },
+                observeOnload = () => {
+                    const listener = () => {
+                        try {
+                            if(!isBlank()) {
+                                ifr.removeEventListener("load", listener);
+                                this.getIframeContents(ifr, successFn, errorFn);
+                            }
+                        } catch(e) {
+                            errorFn();
+                        }
+                    };
+                    ifr.addEventListener("load", listener);
+                };
+            if(ifrWin.document.readyState === compl) {
+                if(isBlank()) {
+                    observeOnload();
+                } else {
+                    this.getIframeContents(ifr, successFn, errorFn);
+                }
+            } else {
+                observeOnload();
+            }
+        } catch(e) { // accessing contentDocument failed
+            errorFn();
+        }
+    }
+
+    /**
+     * Callback allowing to filter an iframe. Must return true when the element
+     * should remain, otherwise false
+     * @callback DOMIterator~forEachIframeFilterCallback
+     * @param {HTMLElement} iframe - The iframe DOM element
+     */
+    /**
+     * Callback for each iframe content
+     * @callback DOMIterator~forEachIframeEachCallback
+     * @param {HTMLElement} content - The iframe document
+     */
+    /**
+     * Callback if all iframes inside the context were handled
+     * @callback DOMIterator~forEachIframeEndCallback
+     * @param {number} handled - The number of handled iframes (those who
+     * wheren't filtered)
+     */
+    /**
+     * Iterates over all iframes inside the specified context and calls the
+     * callbacks when they are ready
+     * @param {HTMLElement} ctx - The context DOM element
+     * @param {DOMIterator~forEachIframeFilterCallback} filter - Filter callback
+     * @param {DOMIterator~forEachIframeEachCallback} each - Each callback
+     * @param {DOMIterator~forEachIframeEndCallback} end - End callback
+     * @access protected
+     */
+    forEachIframe(ctx, filter, each, end) {
+        let ifr = ctx.querySelectorAll("iframe"),
+            open = ifr.length,
+            handled = 0;
+        ifr = Array.prototype.slice.call(ifr);
+        const checkEnd = () => {
+            if(--open <= 0) {
+                end(handled);
+            }
+        };
+        if(!open) {
+            checkEnd();
+        }
+        ifr.forEach(ifr => {
+            this.onIframeReady(ifr, con => {
+                if(filter(ifr)) {
+                    handled++;
+                    each(con);
+                }
+                checkEnd();
+            }, checkEnd);
+        });
+    }
+
+    /**
+     * Creates a NodeIterator on the specified context
+     * @see {@link https://developer.mozilla.org/en/docs/Web/API/NodeIterator}
+     * @param {HTMLElement} ctx - The context DOM element
+     * @param {DOMIterator~whatToShow} whatToShow
+     * @param {DOMIterator~filterCb} filter
+     * @return {NodeIterator}
+     * @access protected
+     */
+    createIterator(ctx, whatToShow, filter) {
+        return document.createNodeIterator(ctx, whatToShow, filter, false);
+    }
+
+    /**
+     * Creates an instance of DOMIterator in an iframe
+     * @param {HTMLDocument} contents - Iframe document
+     * @return {DOMIterator}
+     */
+    createInstanceOnIframe(contents) {
+        contents = contents.querySelector("html");
+        return new DOMIterator(contents, this.iframes);
+    }
+
+    /**
+     * The function can be used to check if an iframe occurs between two nodes.
+     * Checks if an iframe occurs before the specified node and after the
+     * specified prevNode
+     * @param {HTMLElement} node - The node that should occur after the iframe
+     * @param {HTMLElement} prevNode - The node that should occur before the
+     * iframe
+     * @param {HTMLElement} iframe - The iframe to check against
+     * @return {boolean}
+     * @access protected
+     */
+    compareNodeIframe(node, prevNode, ifr) {
+        const compCurr = node.compareDocumentPosition(ifr),
+            prev = Node.DOCUMENT_POSITION_PRECEDING;
+        if(compCurr & prev) {
+            if(prevNode !== null) {
+                const compPrev = prevNode.compareDocumentPosition(ifr),
+                    after = Node.DOCUMENT_POSITION_FOLLOWING;
+                if(compPrev & after) {
+                    return true;
+                }
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @typedef {DOMIterator~getIteratorNodeReturn}
+     * @type {object.<string>}
+     * @property {HTMLElement} prevNode - The previous node or null if there is
+     * no
+     * @property {HTMLElement} node - The current node
+     */
+    /**
+     * Returns the previous and current node of the specified iterator
+     * @param {NodeIterator} - The iterator
+     * @return DOMIterator~getIteratorNodeReturn
+     */
+    getIteratorNode(itr) {
+        const prevNode = itr.previousNode();
+        let node;
+        if(prevNode === null) {
+            node = itr.nextNode();
+        } else {
+            node = itr.nextNode() && itr.nextNode();
+        }
+        return {
+            prevNode,
+            node
+        };
+    }
+
+    /**
+     * Iterates through all nodes in the specified context and handles iframe
+     * nodes at the correct position
+     * @param {DOMIterator~whatToShow} whatToShow
+     * @param {HTMLElement} ctx - The context
+     * @param  {DOMIterator~forEachNodeCallback} eCb - Each callback
+     * @param {DOMIterator~filterCb} fCb
+     * @param {DOMIterator~forEachNodeEndCallback} endCb - End callback
+     * @param {NodeIterator} itr - A NodeIterator that will be set for recursive
+     * calls
+     * @param {HTMLElement[]} openIfr - An array containing iframe elements that
+     * weren't handled yet (in recursive calls). If an iframe isn't located
+     * before all or between nodes this makes sure that they will be handled at
+     * the end
+     */
+    iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, openIfr = []) {
+        itr = !itr ? this.createIterator(ctx, whatToShow, fCb): itr;
+        const {
+            prevNode,
+            node
+        } = this.getIteratorNode(itr),
+            done = () => {
+                if(node !== null) { // In case all elements were filtered
+                    eCb(node);
+                }
+                if(itr.nextNode()) {
+                    itr.previousNode(); // reset iterator
+                    this.iterateThroughNodes(
+                        whatToShow, ctx, eCb, fCb, endCb, itr, openIfr
+                    );
+                } else {
+                    if(!openIfr.length) {
+                        endCb();
+                    }
+                    openIfr.forEach(ifr => {
+                        this.getIframeContents(ifr, con => {
+                            this.createInstanceOnIframe(con).forEachNode(
+                                whatToShow, eCb, fCb, endCb
+                            );
+                        });
+                    });
+                }
+            };
+        if(!this.iframes) {
+            done();
+        } else {
+            this.forEachIframe(ctx, ifr => {
+                if(!this.compareNodeIframe(node, prevNode, ifr)) {
+                    if(openIfr.indexOf(ifr) === -1) {
+                        openIfr.push(ifr);
+                    }
+                    return false;
+                }
+                if(openIfr.indexOf(ifr) > -1) {
+                    openIfr = openIfr.splice(openIfr.indexOf(ifr), 1);
+                }
+                return true;
+            }, con => {
+                this.createInstanceOnIframe(con).forEachNode(
+                    whatToShow, eCb, fCb, done
+                );
+            }, handled => {
+                if(handled === 0) {
+                    done();
+                }
+            });
+        }
+    }
+
+    /**
+     * Callback for each node
+     * @callback DOMIterator~forEachNodeCallback
+     * @param {HTMLElement} node - The DOM text node element
+     */
+    /**
+     * Callback if all contexts were handled
+     * @callback DOMIterator~forEachNodeEndCallback
+     */
+    /**
+     * Iterates over all contexts and initializes
+     * {@link DOMIterator#iterateThroughNodes iterateThroughNodes} on them
+     * @param {DOMIterator~whatToShow} whatToShow
+     * @param  {DOMIterator~forEachNodeCallback} cb - Each callback
+     * @param {DOMIterator~filterCb} filterCb
+     * @param {DOMIterator~forEachNodeEndCallback} end - End callback
+     * @access public
+     */
+    forEachNode(whatToShow, cb, filterCb, end = () => {}) {
+        const contexts = this.getContexts();
+        let open = contexts.length;
+        if(!open) {
+            end();
+        }
+        contexts.forEach(ctx => {
+            this.iterateThroughNodes(whatToShow, ctx, cb, filterCb, () => {
+                // call end only if all contexts were handled
+                if(--open <= 0) {
+                    end();
+                }
+            });
+        });
+    }
+
+    /**
+     * Callback to filter nodes. Can return e.g. NodeFilter.FILTER_ACCEPT or
+     * NodeFilter.FILTER_REJECT
+     * @see {@link http://tinyurl.com/zdczmm2}
+     * @callback DOMIterator~filterCb
+     * @param {HTMLElement} node - The node to filter
+     */
+    /**
+     * @typedef DOMIterator~whatToShow
+     * @see {@link http://tinyurl.com/zfqqkx2}
+     * @type {number}
+     */
 }

@@ -32,14 +32,15 @@ describe("mark with iframes", function () {
 
     it("should wrap matches inside iframes", function () {
         expect(errCall).toBe(0);
+        expect($elements).toHaveLength(8);
         var unequal = false;
         $elements.each(function () {
+            // make sure that some elements are inside an iframe
             if($(this).prop("ownerDocument") != $ctx.prop("ownerDocument")) {
                 unequal = true;
                 return;
             }
         });
         expect(unequal).toBe(true);
-        expect($elements).toHaveLength(8);
     });
 });
