@@ -96,7 +96,8 @@ module.exports = grunt => {
                 options: {
                     screwIE8: true,
                     compress: true,
-                    reserveComments: false
+                    reserveComments: false,
+                    ASCIIOnly: true
                 },
                 files: [{
                     "expand": true,
