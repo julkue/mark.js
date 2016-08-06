@@ -43,7 +43,8 @@ class Mark {
             "filter": () => true,
             "done": () => {},
             "debug": false,
-            "log": window.console
+            "log": window.console,
+            "caseSensitive": false
         }, val);
     }
 
@@ -105,14 +106,15 @@ class Mark {
      * @access protected
      */
     createSynonymsRegExp(str) {
-        const syn = this.opt.synonyms;
+        const syn = this.opt.synonyms,
+            sens = this.opt.caseSensitive ? "" : "i";
         for(let index in syn) {
             if(syn.hasOwnProperty(index)) {
                 const value = syn[index],
                     k1 = this.escapeStr(index),
                     k2 = this.escapeStr(value);
                 str = str.replace(
-                    new RegExp(`(${k1}|${k2})`, "gmi"), `(${k1}|${k2})`
+                    new RegExp(`(${k1}|${k2})`, `gm${sens}`), `(${k1}|${k2})`
                 );
             }
         }
@@ -127,21 +129,36 @@ class Mark {
      */
     createDiacriticsRegExp(str) {
         const dct = [
-            "aÀÁÂÃÄÅàáâãäåĀāąĄ",
-            "cÇçćĆčČ",
-            "dđĐďĎ",
-            "eÈÉÊËèéêëěĚĒēęĘ",
-            "iÌÍÎÏìíîïĪī",
-            "lłŁ",
-            "nÑñňŇńŃ",
-            "oÒÓÔÕÕÖØòóôõöøŌō",
-            "rřŘ",
-            "sŠšśŚ",
-            "tťŤ",
-            "uÙÚÛÜùúûüůŮŪū",
-            "yŸÿýÝ",
-            "zŽžżŻźŹ"
-        ];
+            "a\u00e0\u00e1\u00e2\u00e3\u00e4\u00e5\u0101\u0105",
+            "A\u00c0\u00c1\u00c2\u00c3\u00c4\u00c5\u0100\u0104",
+            "c\u00e7\u0107\u010d",
+            "C\u00c7\u0106\u010c",
+            "d\u0111\u010f",
+            "D\u0110\u010e",
+            "e\u00e8\u00e9\u00ea\u00eb\u011b\u0113\u0119",
+            "E\u00c8\u00c9\u00ca\u00cb\u011a\u0112\u0118",
+            "i\u00ec\u00ed\u00ee\u00ef\u012b",
+            "I\u00cc\u00cd\u00ce\u00cf\u012a",
+            "l\u0142",
+            "L\u0141",
+            "n\u00f1\u0148\u0144",
+            "N\u00d1\u0147\u0143",
+            "o\u00f2\u00f3\u00f4\u00f5\u00f6\u00f8\u014d",
+            "O\u00d2\u00d3\u00d4\u00d5\u00d6\u00d8\u014c",
+            "r\u0159",
+            "R\u0158",
+            "s\u0161\u015b",
+            "S\u0160\u015a",
+            "t\u0165",
+            "T\u0164",
+            "u\u00f9\u00fa\u00fb\u00fc\u016f\u016b",
+            "U\u00d9\u00da\u00db\u00dc\u016e\u016a",
+            "y\u00ff\u00fd",
+            "Y\u0178\u00dd",
+            "z\u017e\u017c\u017a",
+            "Z\u017d\u017b\u0179"
+        ],
+        sens = this.opt.caseSensitive ? "" : "i";
         let handled = [];
         str.split("").forEach(ch => {
             dct.every(dct => {
@@ -155,7 +172,7 @@ class Mark {
                     // Make sure that the character OR any other
                     // character in the diacritics list will be matched
                     str = str.replace(
-                        new RegExp(`[${dct}]`, "gmi"), `[${dct}]`
+                        new RegExp(`[${dct}]`, `gm${sens}`), `[${dct}]`
                     );
                     handled.push(dct);
                 }
@@ -889,12 +906,13 @@ class Mark {
             keywords: kwArr,
             length: kwArrLen
         } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
+        const sens = opt.caseSensitive ? "" : "i";
         let totalMatches = 0;
         if(kwArrLen === 0) {
             this.opt.done(totalMatches);
         }
         kwArr.forEach(kw => {
-            let regex = new RegExp(this.createRegExp(kw), "gmi"),
+            let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),
                 matches = 0;
             this.log(`Searching with expression "${regex}"`);
             let fn = "wrapMatches";
