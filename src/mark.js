@@ -143,20 +143,20 @@ class Mark {
         ];
         let handled = [];
         str.split("").forEach(ch => {
-            dct.every(dct => {
+            dct.every(d => {
                 // Check if the character is inside a diacritics list
-                if(dct.indexOf(ch) !== -1) {
+                if(d.indexOf(ch) !== -1) {
                     // Check if the related diacritics list was not
                     // handled yet
-                    if(handled.indexOf(dct) > -1) {
+                    if(handled.indexOf(d) > -1) {
                         return false;
                     }
                     // Make sure that the character OR any other
                     // character in the diacritics list will be matched
                     str = str.replace(
-                        new RegExp(`[${dct}]`, "gmi"), `[${dct}]`
+                        new RegExp(`[${d}]`, "gmi"), `[${d}]`
                     );
-                    handled.push(dct);
+                    handled.push(d);
                 }
                 return true;
             });
