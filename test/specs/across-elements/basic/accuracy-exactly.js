@@ -8,7 +8,7 @@
 describe("mark with acrossElements and accuracy exactly", function () {
     var $ctx1, $ctx2, $ctx3;
     beforeEach(function (done) {
-        loadFixtures("across-elements/accuracy-exactly.html");
+        loadFixtures("across-elements/basic/accuracy-exactly.html");
 
         $ctx1 = $(".across-elements-accuracy-exactly > div:nth-child(1)");
         $ctx2 = $(".across-elements-accuracy-exactly > div:nth-child(2)");

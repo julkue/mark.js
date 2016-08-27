@@ -8,7 +8,7 @@
 describe("mark with acrossElements and 'each' callback", function () {
     var $ctx, eachCalled;
     beforeEach(function (done) {
-        loadFixtures("across-elements/main.html");
+        loadFixtures("across-elements/basic/main.html");
 
         eachCalled = 0;
         $ctx = $(".across-elements");

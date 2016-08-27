@@ -8,7 +8,7 @@
 describe("mark with acrossElements and nested matches", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("across-elements/nested.html");
+        loadFixtures("across-elements/nested/main.html");
 
         $ctx = $(".across-elements-nested");
         new Mark($ctx[0]).mark("lorem ipsum", {

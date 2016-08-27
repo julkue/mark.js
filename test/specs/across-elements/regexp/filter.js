@@ -10,7 +10,7 @@ describe(
     function () {
         var $ctx;
         beforeEach(function () {
-            loadFixtures("across-elements/regexp-filter.html");
+            loadFixtures("across-elements/regexp/filter.html");
 
             $ctx = $(".across-elements-regexp-filter");
         });

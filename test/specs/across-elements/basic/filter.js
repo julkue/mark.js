@@ -8,7 +8,7 @@
 describe("mark with acrossElements and 'filter' callback", function () {
     var $ctx;
     beforeEach(function () {
-        loadFixtures("across-elements/filter.html");
+        loadFixtures("across-elements/basic/filter.html");
 
         $ctx = $(".across-elements-filter");
     });

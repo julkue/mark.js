@@ -539,7 +539,51 @@
             };
         }
 
-        iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, openIfr = []) {
+        checkIframeFilter(node, prevNode, currIfr, ifr) {
+            let key = false,
+                handled = false;
+            ifr.forEach((ifrDict, i) => {
+                if (ifrDict.val === currIfr) {
+                    key = i;
+                    handled = ifrDict.handled;
+                }
+            });
+            if (this.compareNodeIframe(node, prevNode, currIfr)) {
+                if (key === false && !handled) {
+                    ifr.push({
+                        val: currIfr,
+                        handled: true
+                    });
+                } else if (key !== false && !handled) {
+                    ifr[key].handled = true;
+                }
+                return true;
+            }
+            if (key === false) {
+                ifr.push({
+                    val: currIfr,
+                    handled: false
+                });
+            }
+            return false;
+        }
+
+        handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb) {
+            let endAlreadyCalled = false;
+            ifr.forEach(ifrDict => {
+                if (!ifrDict.handled) {
+                    endAlreadyCalled = true;
+                    this.getIframeContents(ifrDict.val, c => {
+                        this.createInstanceOnIframe(c).forEachNode(whatToShow, eCb, fCb, endCb);
+                    });
+                }
+            });
+            if (!endAlreadyCalled) {
+                endCb();
+            }
+        }
+
+        iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr = []) {
             itr = !itr ? this.createIterator(ctx, whatToShow, fCb) : itr;
             const {
                 prevNode,
@@ -551,32 +595,16 @@
                 }
                 if (itr.nextNode()) {
                     itr.previousNode();
-                    this.iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, openIfr);
+                    this.iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr);
                 } else {
-                    if (!openIfr.length) {
-                        endCb();
-                    }
-                    openIfr.forEach(ifr => {
-                        this.getIframeContents(ifr, con => {
-                            this.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, endCb);
-                        });
-                    });
+                    this.handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb);
                 }
             };
             if (!this.iframes) {
                 done();
             } else {
-                this.forEachIframe(ctx, ifr => {
-                    if (!this.compareNodeIframe(node, prevNode, ifr)) {
-                        if (openIfr.indexOf(ifr) === -1) {
-                            openIfr.push(ifr);
-                        }
-                        return false;
-                    }
-                    if (openIfr.indexOf(ifr) > -1) {
-                        openIfr = openIfr.splice(openIfr.indexOf(ifr), 1);
-                    }
-                    return true;
+                this.forEachIframe(ctx, currIfr => {
+                    return this.checkIframeFilter(node, prevNode, currIfr, ifr);
                 }, con => {
                     this.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, done);
                 }, handled => {

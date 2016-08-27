@@ -8,7 +8,7 @@
 describe("mark with acrossElements and 'done' callback", function () {
     var $ctx, doneCalled, totalMatches;
     beforeEach(function (done) {
-        loadFixtures("across-elements/main.html");
+        loadFixtures("across-elements/basic/main.html");
 
         totalMatches = doneCalled = 0;
         $ctx = $(".across-elements");

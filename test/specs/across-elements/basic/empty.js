@@ -5,23 +5,25 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("mark with acrossElements and multiple blanks", function () {
-    var $ctx1, $ctx2;
+describe("mark with acrossElements in an empty context", function () {
+    var $ctx1, $ctx2, done1 = false,
+        done2 = false;
     beforeEach(function (done) {
-        loadFixtures("across-elements/merge-blanks.html");
+        loadFixtures("across-elements/basic/empty.html");
 
-        $ctx1 = $(".across-elements-merge-blanks > div:nth-child(1)");
-        $ctx2 = $(".across-elements-merge-blanks > div:nth-child(2)");
-        new Mark($ctx1.get()).mark("lorem  ipsum", {
+        $ctx1 = $(".notExistingSelector");
+        $ctx2 = $(".across-elements-empty");
+        new Mark($ctx1[0]).mark("lorem", {
             "diacritics": false,
             "separateWordSearch": false,
             "acrossElements": true,
             "done": function () {
-                new Mark($ctx2.get()).mark("lorem ipsum", {
+                done1 = true;
+                new Mark($ctx2[0]).mark("lorem", {
                     "diacritics": false,
                     "separateWordSearch": false,
-                    "acrossElements": true,
                     "done": function () {
+                        done2 = true;
                         done();
                     }
                 });
@@ -29,8 +31,8 @@ describe("mark with acrossElements and multiple blanks", function () {
         });
     });
 
-    it("should wrap matches regardless of the number of blanks", function () {
-        expect($ctx1.find("mark")).toHaveLength(5);
-        expect($ctx2.find("mark")).toHaveLength(5);
+    it("should call the 'done' function", function () {
+        expect(done1).toBe(true);
+        expect(done2).toBe(true);
     });
 });

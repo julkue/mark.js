@@ -614,11 +614,59 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 };
             }
         }, {
-            key: "iterateThroughNodes",
-            value: function iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr) {
+            key: "checkIframeFilter",
+            value: function checkIframeFilter(node, prevNode, currIfr, ifr) {
+                var key = false,
+                    handled = false;
+                ifr.forEach(function (ifrDict, i) {
+                    if (ifrDict.val === currIfr) {
+                        key = i;
+                        handled = ifrDict.handled;
+                    }
+                });
+                if (this.compareNodeIframe(node, prevNode, currIfr)) {
+                    if (key === false && !handled) {
+                        ifr.push({
+                            val: currIfr,
+                            handled: true
+                        });
+                    } else if (key !== false && !handled) {
+                        ifr[key].handled = true;
+                    }
+                    return true;
+                }
+                if (key === false) {
+                    ifr.push({
+                        val: currIfr,
+                        handled: false
+                    });
+                }
+                return false;
+            }
+        }, {
+            key: "handleOpenIframes",
+            value: function handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb) {
                 var _this12 = this;
 
-                var openIfr = arguments.length <= 6 || arguments[6] === undefined ? [] : arguments[6];
+                var endAlreadyCalled = false;
+                ifr.forEach(function (ifrDict) {
+                    if (!ifrDict.handled) {
+                        endAlreadyCalled = true;
+                        _this12.getIframeContents(ifrDict.val, function (c) {
+                            _this12.createInstanceOnIframe(c).forEachNode(whatToShow, eCb, fCb, endCb);
+                        });
+                    }
+                });
+                if (!endAlreadyCalled) {
+                    endCb();
+                }
+            }
+        }, {
+            key: "iterateThroughNodes",
+            value: function iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr) {
+                var _this13 = this;
+
+                var ifr = arguments.length <= 6 || arguments[6] === undefined ? [] : arguments[6];
 
                 itr = !itr ? this.createIterator(ctx, whatToShow, fCb) : itr;
 
@@ -632,34 +680,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }
                     if (itr.nextNode()) {
                         itr.previousNode();
-                        _this12.iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, openIfr);
+                        _this13.iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr);
                     } else {
-                        if (!openIfr.length) {
-                            endCb();
-                        }
-                        openIfr.forEach(function (ifr) {
-                            _this12.getIframeContents(ifr, function (con) {
-                                _this12.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, endCb);
-                            });
-                        });
+                        _this13.handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb);
                     }
                 };
                 if (!this.iframes) {
                     done();
                 } else {
-                    this.forEachIframe(ctx, function (ifr) {
-                        if (!_this12.compareNodeIframe(node, prevNode, ifr)) {
-                            if (openIfr.indexOf(ifr) === -1) {
-                                openIfr.push(ifr);
-                            }
-                            return false;
-                        }
-                        if (openIfr.indexOf(ifr) > -1) {
-                            openIfr = openIfr.splice(openIfr.indexOf(ifr), 1);
-                        }
-                        return true;
+                    this.forEachIframe(ctx, function (currIfr) {
+                        return _this13.checkIframeFilter(node, prevNode, currIfr, ifr);
                     }, function (con) {
-                        _this12.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, done);
+                        _this13.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, done);
                     }, function (handled) {
                         if (handled === 0) {
                             done();
@@ -670,7 +702,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "forEachNode",
             value: function forEachNode(whatToShow, cb, filterCb) {
-                var _this13 = this;
+                var _this14 = this;
 
                 var end = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
 
@@ -680,7 +712,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     end();
                 }
                 contexts.forEach(function (ctx) {
-                    _this13.iterateThroughNodes(whatToShow, ctx, cb, filterCb, function () {
+                    _this14.iterateThroughNodes(whatToShow, ctx, cb, filterCb, function () {
                         if (--open <= 0) {
                             end();
                         }
@@ -703,20 +735,20 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     }();
 
     window.Mark = function (ctx) {
-        var _this14 = this;
+        var _this15 = this;
 
         var instance = new Mark(ctx);
         this.mark = function (sv, opt) {
             instance.mark(sv, opt);
-            return _this14;
+            return _this15;
         };
         this.markRegExp = function (sv, opt) {
             instance.markRegExp(sv, opt);
-            return _this14;
+            return _this15;
         };
         this.unmark = function (opt) {
             instance.unmark(opt);
-            return _this14;
+            return _this15;
         };
         return this;
     };

@@ -21,6 +21,7 @@ class Mark {
         /**
          * The context
          * @type {HTMLElement|HTMLElement[]|NodeList}
+         * @access protected
          */
         this.ctx = ctx;
     }
@@ -30,6 +31,7 @@ class Mark {
      * public methods. See {@link Mark#mark}, {@link Mark#markRegExp} and
      * {@link Mark#unmark} for option properties.
      * @type {object}
+     * @access protected
      */
     set opt(val) {
         this._opt = Object.assign({}, {
@@ -57,7 +59,8 @@ class Mark {
 
     /**
      * An instance of DOMIterator
-     * @return {DOMIterator}
+     * @type {DOMIterator}
+     * @access protected
      */
     get iterator() {
         if(!this._iterator) {
@@ -274,7 +277,8 @@ class Mark {
      */
     /**
      * Calls the callback with an object containing all text nodes (including
-     * iframe text nodes) and the composite value of them (string)
+     * iframe text nodes) with start and end positions and the composite value
+     * of them (string)
      * @param {Mark~getTextNodesCallback} cb - Callback
      * @access protected
      */
@@ -330,8 +334,8 @@ class Mark {
     }
 
     /**
-     * Wraps the specified element and class around matches that fit the start
-     * and end positions
+     * Wraps the instance element and class around matches that fit the start
+     * and end positions within the node
      * @param  {HTMLElement} node - The DOM text node
      * @param  {number} start - The position where to start wrapping
      * @param  {number} end - The position where to end wrapping
@@ -377,9 +381,9 @@ class Mark {
      * @param {HTMLElement} node - The matching text node DOM element
      */
     /**
-     * Will map matches determined by start end end positions with text nodes
-     * inside the dictionary of text nodes and wraps them using
-     * {@link Mark#wrapRangeInTextNode}.
+     * Determines matches by start and end positions using the text node
+     * dictionary even across text nodes and calls
+     * {@link Mark#wrapRangeInTextNode} to wrap them
      * @param  {Mark~wrapRangeInMappedTextNodeDict} dict - The dictionary
      * @param  {number} start - The start position of the match
      * @param  {number} end - The end position of the match
@@ -440,7 +444,7 @@ class Mark {
      * @callback Mark~wrapMatchesEndCallback
      */
     /**
-     * Wraps the specified element and class around matches within single HTML
+     * Wraps the instance element and class around matches within single HTML
      * elements in all contexts
      * @param {RegExp} regex - The regular expression to be searched for
      * @param {boolean} custom - If false, the function expects a regular
@@ -497,7 +501,7 @@ class Mark {
      * @callback Mark~wrapMatchesAcrossElementsEndCallback
      */
     /**
-     * Wraps the specified element and class around matches across all HTML
+     * Wraps the instance element and class around matches across all HTML
      * elements in all contexts
      * @param {RegExp} regex - The regular expression to be searched for
      * @param {boolean} custom - If false, the function expects a regular
@@ -537,7 +541,7 @@ class Mark {
     /**
      * Unwraps the specified DOM node with its content (text nodes or HTML)
      * without destroying possibly present events (using innerHTML) and
-     * normalizes the parent at the end (merges splitted text nodes)
+     * normalizes the parent at the end (merge splitted text nodes)
      * @param  {HTMLElement} node - The DOM node to unwrap
      * @access protected
      */
@@ -707,7 +711,7 @@ class Mark {
             this.opt.done(totalMatches);
             return;
         }
-        const handler = kw => {
+        const handler = kw => { // async function calls as iframes are async too
             let regex = new RegExp(this.createRegExp(kw), "gmi"),
                 matches = 0;
             this.log(`Searching with expression "${regex}"`);
@@ -791,11 +795,13 @@ class DOMIterator {
         /**
          * The context
          * @type {HTMLElement|HTMLElement[]|NodeList}
+         * @access protected
          */
         this.ctx = ctx;
         /**
          * Boolean indicating if iframe support is enabled
          * @type {boolean}
+         * @access protected
          */
         this.iframes = iframes;
     }
@@ -814,7 +820,7 @@ class DOMIterator {
         } else if(Array.isArray(this.ctx)) {
             ctx = this.ctx;
         } else { // e.g. HTMLElement or element inside iframe
-            ctx = [this.ctx]
+            ctx = [this.ctx];
         }
         // filter duplicate text nodes
         let filteredCtx = [];
@@ -830,7 +836,7 @@ class DOMIterator {
     }
 
     /**
-     * Checks if a DOM element matches a specified selector
+     * Checks if the specified DOM element matches the selector
      * @param  {HTMLElement} el - The DOM element
      * @param  {string} selector - The selector
      * @return {boolean}
@@ -885,7 +891,7 @@ class DOMIterator {
      * @param {HTMLDocument} contents - The contentDocument of the iframe
      */
     /**
-     * Callback if iframe can not be accessed
+     * Callback if the iframe can't be accessed
      * @callback DOMIterator~onIframeReadyErrorCallback
      */
     /**
@@ -953,7 +959,7 @@ class DOMIterator {
      */
     /**
      * Iterates over all iframes inside the specified context and calls the
-     * callbacks when they are ready
+     * callbacks when they're ready
      * @param {HTMLElement} ctx - The context DOM element
      * @param {DOMIterator~forEachIframeFilterCallback} filter - Filter callback
      * @param {DOMIterator~forEachIframeEachCallback} each - Each callback
@@ -1001,6 +1007,7 @@ class DOMIterator {
      * Creates an instance of DOMIterator in an iframe
      * @param {HTMLDocument} contents - Iframe document
      * @return {DOMIterator}
+     * @access protected
      */
     createInstanceOnIframe(contents) {
         contents = contents.querySelector("html");
@@ -1008,9 +1015,8 @@ class DOMIterator {
     }
 
     /**
-     * The function can be used to check if an iframe occurs between two nodes.
-     * Checks if an iframe occurs before the specified node and after the
-     * specified prevNode
+     * Checks if an iframe occurs between two nodes, more specifically if an
+     * iframe occurs before the specified node and after the specified prevNode
      * @param {HTMLElement} node - The node that should occur after the iframe
      * @param {HTMLElement} prevNode - The node that should occur before the
      * iframe
@@ -1046,6 +1052,7 @@ class DOMIterator {
      * Returns the previous and current node of the specified iterator
      * @param {NodeIterator} - The iterator
      * @return DOMIterator~getIteratorNodeReturn
+     * @access protected
      */
     getIteratorNode(itr) {
         const prevNode = itr.previousNode();
@@ -1062,6 +1069,88 @@ class DOMIterator {
     }
 
     /**
+     * Checks if an iframe wasn't handled already and if so, calls
+     * {@link DOMIterator#compareNodeIframe} to check if it should be handled.
+     * Information wheter an iframe was or wasn't handled is given within the
+     * <code>ifr</code> dictionary
+     * @param {HTMLElement} node - The node that should occur after the iframe
+     * @param {HTMLElement} prevNode - The node that should occur before the
+     * iframe
+     * @param {HTMLElement} currIFr - The iframe to check
+     * @param {DOMIterator~iterateThroughNodesIfr} - The iframe dictionary. Will
+     * be manipulated (by reference)
+     * @return {boolean} Returns true when it should be handled, otherwise false
+     * @access protected
+     */
+    checkIframeFilter(node, prevNode, currIfr, ifr) {
+        let key = false, // false === doesn't exist
+            handled = false;
+        ifr.forEach((ifrDict, i) => {
+            if(ifrDict.val === currIfr) {
+                key = i;
+                handled = ifrDict.handled;
+            }
+        });
+        if(this.compareNodeIframe(node, prevNode, currIfr)) {
+            if(key === false && !handled) {
+                ifr.push({
+                    val: currIfr,
+                    handled: true
+                });
+            } else if(key !== false && !handled) {
+                ifr[key].handled = true;
+            }
+            return true;
+        }
+        if(key === false) {
+            ifr.push({
+                val: currIfr,
+                handled: false
+            });
+        }
+        return false;
+    }
+
+    /**
+     * Creates an iterator on all open iframes in the specified array and calls
+     * the end callback when finished
+     * @param {DOMIterator~iterateThroughNodesIfr} ifr
+     * @param {DOMIterator~whatToShow} whatToShow
+     * @param  {DOMIterator~forEachNodeCallback} eCb - Each callback
+     * @param {DOMIterator~filterCb} fCb
+     * @param {DOMIterator~forEachNodeEndCallback} endCb - End callback
+     * @access protected
+     */
+    handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb) {
+        let endAlreadyCalled = false;
+        ifr.forEach(ifrDict => {
+            if(!ifrDict.handled) {
+                endAlreadyCalled = true;
+                this.getIframeContents(ifrDict.val, c => {
+                    this.createInstanceOnIframe(c).forEachNode(
+                        whatToShow, eCb, fCb, endCb
+                    );
+                });
+            }
+        });
+        if(!endAlreadyCalled) {
+            endCb();
+        }
+    }
+
+    /**
+     * An array containing objects. The object key "val" contains an iframe
+     * DOM element. The object key "handled" contains a boolean indicating if
+     * the iframe was handled already.
+     * It wouldn't be enough to save all open or all already handled iframes.
+     * The information of open iframes is necessary because they may occur after
+     * all other text nodes (and compareNodeIframe would never be true). The
+     * information of already handled iframes is necessary as otherwise they may
+     * be handled multiple times
+     * @typedef DOMIterator~iterateThroughNodesIfr
+     * @type {object[]}
+     */
+    /**
      * Iterates through all nodes in the specified context and handles iframe
      * nodes at the correct position
      * @param {DOMIterator~whatToShow} whatToShow
@@ -1069,15 +1158,14 @@ class DOMIterator {
      * @param  {DOMIterator~forEachNodeCallback} eCb - Each callback
      * @param {DOMIterator~filterCb} fCb
      * @param {DOMIterator~forEachNodeEndCallback} endCb - End callback
-     * @param {NodeIterator} itr - A NodeIterator that will be set for recursive
+     * @param {NodeIterator} itr - A NodeIterator that will be set in recursive
      * calls
-     * @param {HTMLElement[]} openIfr - An array containing iframe elements that
-     * weren't handled yet (in recursive calls). If an iframe isn't located
-     * before all or between nodes this makes sure that they will be handled at
-     * the end
+     * @param {DOMIterator~iterateThroughNodesIfr} ifr - An array of iframes
+     * that will be passed in recursive calls
+     * @access protected
      */
-    iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, openIfr = []) {
-        itr = !itr ? this.createIterator(ctx, whatToShow, fCb): itr;
+    iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr = []) {
+        itr = !itr ? this.createIterator(ctx, whatToShow, fCb) : itr;
         const {
             prevNode,
             node
@@ -1089,41 +1177,24 @@ class DOMIterator {
                 if(itr.nextNode()) {
                     itr.previousNode(); // reset iterator
                     this.iterateThroughNodes(
-                        whatToShow, ctx, eCb, fCb, endCb, itr, openIfr
+                        whatToShow, ctx, eCb, fCb, endCb, itr, ifr
                     );
                 } else {
-                    if(!openIfr.length) {
-                        endCb();
-                    }
-                    openIfr.forEach(ifr => {
-                        this.getIframeContents(ifr, con => {
-                            this.createInstanceOnIframe(con).forEachNode(
-                                whatToShow, eCb, fCb, endCb
-                            );
-                        });
-                    });
+                    this.handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb);
                 }
             };
         if(!this.iframes) {
             done();
         } else {
-            this.forEachIframe(ctx, ifr => {
-                if(!this.compareNodeIframe(node, prevNode, ifr)) {
-                    if(openIfr.indexOf(ifr) === -1) {
-                        openIfr.push(ifr);
-                    }
-                    return false;
-                }
-                if(openIfr.indexOf(ifr) > -1) {
-                    openIfr = openIfr.splice(openIfr.indexOf(ifr), 1);
-                }
-                return true;
+            this.forEachIframe(ctx, currIfr => {
+                // note that ifr will be manipulated within the following method
+                return this.checkIframeFilter(node, prevNode, currIfr, ifr);
             }, con => {
                 this.createInstanceOnIframe(con).forEachNode(
                     whatToShow, eCb, fCb, done
                 );
             }, handled => {
-                if(handled === 0) {
+                if(handled === 0) { // each callback wasn't called
                     done();
                 }
             });

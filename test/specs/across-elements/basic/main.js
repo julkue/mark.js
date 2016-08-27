@@ -5,13 +5,15 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("mark with acrossElements and regular expression", function () {
+describe("mark with acrossElements", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("across-elements/regexp.html");
+        loadFixtures("across-elements/basic/main.html");
 
-        $ctx = $(".across-elements-regexp");
-        new Mark($ctx[0]).markRegExp(/lorem[\s]+ipsum/gmi, {
+        $ctx = $(".across-elements");
+        new Mark($ctx[0]).mark("lorem ipsum", {
+            "diacritics": false,
+            "separateWordSearch": false,
             "acrossElements": true,
             "done": function () {
                 done();
