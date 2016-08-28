@@ -41,7 +41,7 @@
         "refer": false,
         "sortBy": ["Introduction", "Element and Class Name", "Exclude",
                     "Separate Word Search", "Accuracy", "Diacritics",
-                    "Synonyms", "Filter"],
+                    "Synonyms", "Filter", "Across Elements"],
         "metadata": {
             "name": "Tutorials"
         }

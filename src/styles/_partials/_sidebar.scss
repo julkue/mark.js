@@ -34,10 +34,10 @@ nav {
                     color: $navHoverColor !important;
                     background: $navHoverBg !important;
                 }
-                @media (max-width: #{$breakpointMD - 1}) {
+                @media (max-width: #{$breakpointLG - 1}) {
                     padding: 10px !important;
                 }
-                @media (max-height: 600px) {
+                @media (max-height: #{$breakpointMD - 1}) {
                     padding: 8px !important;
                 }
             }

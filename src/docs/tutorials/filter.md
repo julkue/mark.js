@@ -11,7 +11,7 @@ Here is an example to limit matches for a word "the" to a maximum of 10:
 
 ```javascript
 var options = {
-    "filter": function(node, term, counter, totalCounter){
+    "filter": function(node, term, totalCounter, counter){
         if(term === "the" && counter >= 10){
             return false;
         } else {
