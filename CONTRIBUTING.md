@@ -9,7 +9,7 @@ contributing to the website of mark.js, please head over to the
 If you have a question, problem, feature request or found a bug please open an
 [issue][issue].
 
-### 1.1 Questions, Problems and Bugs 
+### 1.1 Questions, Problems and Bugs
 
 For each issue please provide:
 - What kind of browser and version you are using
@@ -79,17 +79,22 @@ _Note: Run tasks with `$ grunt [task]` (Replace "[task]" with the actual task na
 Pull requests are very much appreciated! :thumbsup:
 
 Please note the following things when doing a pull request:
+- If your pull request is implementing a feature, please open a new issue first.
+  Therein we can discuss about it and determine if it brings a benefit
 - Do not change any version
-- Always include a test if possible
-  - Add a fixture (test/fixtures/)
-  - Add a test (test/specs/)
+- Always include a test if possible. Please avoid referencing existing test
+  files to keep flexibility
+  - Add a new fixture (test/fixtures/)
+  - Add a new spec (test/specs/)
 - Reference related issues in the pull request description
 - Describe your changes and why they are necessary
   (if not stated in referenced issues)
 - When changing something inside `mark.js`, please run `$ grunt dist` at the end
   to generate files in `dist/`
-- Make sure that you format code to fit the [code style][code-style]
-- Pull requests will not be accepted if they worsen test coverage significantly
+- Make sure that you format code to fit the [code style][code-style]. If
+  something isn't covered, please see existing code for orientation
+- Pull requests will not be accepted if they worsen test coverage significantly.
+  You can view test coverage in `./build/coverage/` after running `$ grunt test`.
 
 ### 2.6 Contribution and License Agreement
 

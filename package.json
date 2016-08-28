@@ -1,6 +1,6 @@
 {
   "name": "mark.js",
-  "version": "7.0.2",
+  "version": "8.0.0",
   "keywords": [
     "mark.js",
     "markjs",
@@ -36,7 +36,7 @@
     "grunt-babel": "^6.0.0",
     "grunt-banner": "^0.6.0",
     "grunt-contrib-clean": "^1.0.0",
-    "grunt-contrib-uglify": "^1.0.0",
+    "grunt-contrib-uglify": "^2.0.0",
     "grunt-contrib-watch": "^1.0.0",
     "grunt-jsdoc": "^2.0.0",
     "grunt-karma": "^2.0.0",

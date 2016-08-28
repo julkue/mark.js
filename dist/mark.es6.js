@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v7.0.2
+ * mark.js v8.0.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -33,6 +33,7 @@
                 "diacritics": true,
                 "synonyms": {},
                 "accuracy": "partially",
+                "acrossElements": false,
                 "each": () => {},
                 "noMatch": () => {},
                 "filter": () => true,
@@ -44,6 +45,13 @@
 
         get opt() {
             return this._opt;
+        }
+
+        get iterator() {
+            if (!this._iterator) {
+                this._iterator = new DOMIterator(this.ctx, this.opt.iframes);
+            }
+            return this._iterator;
         }
 
         log(msg, level = "debug") {
@@ -131,68 +139,56 @@
             let stack = [];
             sv.forEach(kw => {
                 if (!this.opt.separateWordSearch) {
-                    if (kw.trim()) {
+                    if (kw.trim() && stack.indexOf(kw) === -1) {
                         stack.push(kw);
                     }
                 } else {
                     kw.split(" ").forEach(kwSplitted => {
-                        if (kwSplitted.trim()) {
+                        if (kwSplitted.trim() && stack.indexOf(kwSplitted) === -1) {
                             stack.push(kwSplitted);
                         }
                     });
                 }
             });
             return {
-                "keywords": stack,
+                "keywords": stack.sort((a, b) => {
+                    return b.length - a.length;
+                }),
                 "length": stack.length
             };
         }
 
-        getElements() {
-            let ctx,
-                stack = [];
-            if (typeof this.ctx === "undefined") {
-                ctx = [];
-            } else if (this.ctx instanceof HTMLElement) {
-                ctx = [this.ctx];
-            } else if (Array.isArray(this.ctx)) {
-                ctx = this.ctx;
-            } else {
-                ctx = Array.prototype.slice.call(this.ctx);
-            }
-            ctx.forEach(ctx => {
-                if (stack.indexOf(ctx) === -1) {
-                    stack.push(ctx);
-                    const childs = ctx.querySelectorAll("*");
-                    if (childs.length) {
-                        stack = stack.concat(Array.prototype.slice.call(childs));
-                    }
+        getTextNodes(cb) {
+            let val = "",
+                nodes = [];
+            this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
+                nodes.push({
+                    start: val.length,
+                    end: (val += node.textContent).length,
+                    node
+                });
+            }, node => {
+                if (this.matchesExclude(node.parentNode, true)) {
+                    return NodeFilter.FILTER_REJECT;
+                } else {
+                    return NodeFilter.FILTER_ACCEPT;
                 }
+            }, () => {
+                cb({
+                    value: val,
+                    nodes: nodes
+                });
             });
-            if (!ctx.length) {
-                this.log("Empty context", "warn");
-            }
-            return {
-                "elements": stack,
-                "length": stack.length
-            };
-        }
-
-        matches(el, selector) {
-            return (el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.webkitMatchesSelector || el.oMatchesSelector).call(el, selector);
         }
 
         matchesExclude(el, exclM) {
             let remain = true;
-            let excl = this.opt.exclude.concat(["script", "style", "title"]);
-            if (!this.opt.iframes) {
-                excl = excl.concat(["iframe"]);
-            }
+            let excl = this.opt.exclude.concat(["script", "style", "title", "head", "html"]);
             if (exclM) {
                 excl = excl.concat(["*[data-markjs='true']"]);
             }
             excl.every(sel => {
-                if (this.matches(el, sel)) {
+                if (DOMIterator.matches(el, sel)) {
                     return remain = false;
                 }
                 return true;
@@ -200,153 +196,97 @@
             return !remain;
         }
 
-        onIframeReady(ifr, successFn, errorFn) {
-            try {
-                const ifrWin = ifr.contentWindow,
-                      bl = "about:blank",
-                      compl = "complete";
-                const callCallback = () => {
-                    try {
-                        if (ifrWin.document === null) {
-                            throw new Error("iframe inaccessible");
-                        }
-                        successFn(ifrWin.document);
-                    } catch (e) {
-                        errorFn();
-                    }
-                };
-                const isBlank = () => {
-                    const src = ifr.getAttribute("src").trim(),
-                          href = ifrWin.location.href;
-                    return href === bl && src !== bl && src;
-                };
-                const observeOnload = () => {
-                    const listener = () => {
-                        try {
-                            if (!isBlank()) {
-                                ifr.removeEventListener("load", listener);
-                                callCallback();
-                            }
-                        } catch (e) {
-                            errorFn();
-                        }
-                    };
-                    ifr.addEventListener("load", listener);
-                };
-                if (ifrWin.document.readyState === compl) {
-                    if (isBlank()) {
-                        observeOnload();
-                    } else {
-                        callCallback();
-                    }
-                } else {
-                    observeOnload();
-                }
-            } catch (e) {
-                errorFn();
+        wrapRangeInTextNode(node, start, end) {
+            const hEl = !this.opt.element ? "mark" : this.opt.element,
+                  startNode = node.splitText(start),
+                  ret = startNode.splitText(end - start);
+            let repl = document.createElement(hEl);
+            repl.setAttribute("data-markjs", "true");
+            if (this.opt.className) {
+                repl.setAttribute("class", this.opt.className);
             }
+            repl.textContent = startNode.textContent;
+            startNode.parentNode.replaceChild(repl, startNode);
+            return ret;
         }
 
-        forEachElementInIframe(ifr, cb, end = function () {}) {
-            let open = 0;
-            const checkEnd = () => {
-                if (--open < 1) {
-                    end();
-                }
-            };
-            this.onIframeReady(ifr, con => {
-                const stack = Array.prototype.slice.call(con.querySelectorAll("*"));
-                if ((open = stack.length) === 0) {
-                    checkEnd();
-                }
-                stack.forEach(el => {
-                    if (el.tagName.toLowerCase() === "iframe") {
-                        let j = 0;
-                        this.forEachElementInIframe(el, (iel, len) => {
-                            cb(iel, len);
-                            if (len - 1 === j) {
-                                checkEnd();
+        wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
+            dict.nodes.every((n, i) => {
+                const sibl = dict.nodes[i + 1];
+                if (typeof sibl === "undefined" || sibl.start > start) {
+                    const s = start - n.start,
+                          e = (end > n.end ? n.end : end) - n.start;
+                    if (filterCb(n.node)) {
+                        n.node = this.wrapRangeInTextNode(n.node, s, e);
+
+                        const startStr = dict.value.substr(0, n.start),
+                              endStr = dict.value.substr(e + n.start);
+                        dict.value = startStr + endStr;
+                        dict.nodes.forEach((k, j) => {
+                            if (j >= i) {
+                                if (dict.nodes[j].start > 0 && j !== i) {
+                                    dict.nodes[j].start -= e;
+                                }
+                                dict.nodes[j].end -= e;
                             }
-                            j++;
-                        }, checkEnd);
-                    } else {
-                        cb(el, stack.length);
-                        checkEnd();
+                        });
+                        end -= e;
+                        eachCb(n.node.previousSibling, n.start);
+                        if (end > n.end) {
+                            start = n.end;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            });
+        }
+
+        wrapMatches(regex, custom, filterCb, eachCb, endCb) {
+            const matchIdx = custom ? 0 : 2;
+            this.getTextNodes(dict => {
+                dict.nodes.forEach(node => {
+                    node = node.node;
+                    let match;
+                    while ((match = regex.exec(node.textContent)) !== null) {
+                        if (!filterCb(match[matchIdx], node)) {
+                            continue;
+                        }
+                        let pos = match.index;
+                        if (!custom) {
+                            pos += match[matchIdx - 1].length;
+                        }
+                        node = this.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
+                        eachCb(node.previousSibling);
+
+                        regex.lastIndex = 0;
                     }
                 });
-            }, () => {
-                let src = ifr.getAttribute("src");
-                this.log(`iframe '${ src }' could not be accessed`, "warn");
-                checkEnd();
+                endCb();
             });
         }
 
-        forEachElement(cb, end = function () {}, exclM = true) {
-            let {
-                elements: stack,
-                length: open
-            } = this.getElements();
-            const checkEnd = () => {
-                if (--open === 0) {
-                    end();
+        wrapMatchesAcrossElements(regex, custom, filterCb, eachCb, endCb) {
+            const matchIdx = custom ? 0 : 2;
+            this.getTextNodes(dict => {
+                let match;
+                while ((match = regex.exec(dict.value)) !== null) {
+                    let start = match.index;
+                    if (!custom) {
+                        start += match[matchIdx - 1].length;
+                    }
+                    const end = start + match[matchIdx].length;
+
+                    this.wrapRangeInMappedTextNode(dict, start, end, node => {
+                        return filterCb(match[matchIdx], node);
+                    }, (node, lastIndex) => {
+                        regex.lastIndex = lastIndex;
+                        eachCb(node);
+                    });
                 }
-            };
-            checkEnd(++open);
-            stack.forEach(el => {
-                if (!this.matchesExclude(el, exclM)) {
-                    if (el.tagName.toLowerCase() === "iframe") {
-                        this.forEachElementInIframe(el, iel => {
-                            if (!this.matchesExclude(iel, exclM)) {
-                                cb(iel);
-                            }
-                        }, checkEnd);
-                        return;
-                    } else {
-                            cb(el);
-                        }
-                }
-                checkEnd();
+                endCb();
             });
-        }
-
-        forEachNode(cb, end = function () {}) {
-            this.forEachElement(n => {
-                for (n = n.firstChild; n; n = n.nextSibling) {
-                    if (n.nodeType === 3 && n.textContent.trim()) {
-                        cb(n);
-                    }
-                }
-            }, end);
-        }
-
-        wrapMatches(node, regex, custom, filterCb, eachCb) {
-            const hEl = !this.opt.element ? "mark" : this.opt.element,
-                  index = custom ? 0 : 2;
-            let match;
-            while ((match = regex.exec(node.textContent)) !== null) {
-                if (!filterCb(match[index])) {
-                    continue;
-                }
-
-                let pos = match.index;
-                if (!custom) {
-                    pos += match[index - 1].length;
-                }
-                let startNode = node.splitText(pos);
-
-                node = startNode.splitText(match[index].length);
-                if (startNode.parentNode !== null) {
-                    let repl = document.createElement(hEl);
-                    repl.setAttribute("data-markjs", "true");
-                    if (this.opt.className) {
-                        repl.setAttribute("class", this.opt.className);
-                    }
-                    repl.textContent = match[index];
-                    startNode.parentNode.replaceChild(repl, startNode);
-                    eachCb(repl);
-                }
-                regex.lastIndex = 0;
-            }
         }
 
         unwrapMatches(node) {
@@ -367,11 +307,13 @@
                 totalMatches++;
                 this.opt.each(element);
             };
-            this.forEachNode(node => {
-                this.wrapMatches(node, regexp, true, match => {
-                    return this.opt.filter(node, match, totalMatches);
-                }, eachCb);
-            }, () => {
+            let fn = "wrapMatches";
+            if (this.opt.acrossElements) {
+                fn = "wrapMatchesAcrossElements";
+            }
+            this[fn](regexp, true, (match, node) => {
+                return this.opt.filter(node, match, totalMatches);
+            }, eachCb, () => {
                 if (totalMatches === 0) {
                     this.opt.noMatch(regexp);
                 }
@@ -385,32 +327,37 @@
                 keywords: kwArr,
                 length: kwArrLen
             } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
-            let totalMatches = 0;
+            let totalMatches = 0,
+                fn = "wrapMatches";
+            if (this.opt.acrossElements) {
+                fn = "wrapMatchesAcrossElements";
+            }
             if (kwArrLen === 0) {
                 this.opt.done(totalMatches);
+                return;
             }
-            kwArr.forEach(kw => {
+            const handler = kw => {
                 let regex = new RegExp(this.createRegExp(kw), "gmi"),
                     matches = 0;
-                const eachCb = element => {
+                this.log(`Searching with expression "${ regex }"`);
+                this[fn](regex, false, (term, node) => {
+                    return this.opt.filter(node, kw, totalMatches, matches);
+                }, element => {
                     matches++;
                     totalMatches++;
                     this.opt.each(element);
-                };
-                this.log(`Searching with expression "${ regex }"`);
-                this.forEachNode(node => {
-                    this.wrapMatches(node, regex, false, () => {
-                        return this.opt.filter(node, kw, matches, totalMatches);
-                    }, eachCb);
                 }, () => {
                     if (matches === 0) {
                         this.opt.noMatch(kw);
                     }
                     if (kwArr[kwArrLen - 1] === kw) {
                         this.opt.done(totalMatches);
+                    } else {
+                        handler(kwArr[kwArr.indexOf(kw) + 1]);
                     }
                 });
-            });
+            };
+            handler(kwArr[0]);
         }
 
         unmark(opt) {
@@ -421,13 +368,266 @@
                 sel += `.${ this.opt.className }`;
             }
             this.log(`Removal selector "${ sel }"`);
-            this.forEachElement(el => {
-                if (this.matches(el, sel)) {
-                    this.unwrapMatches(el);
+            this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, node => {
+                this.unwrapMatches(node);
+            }, node => {
+                const matchesSel = DOMIterator.matches(node, sel),
+                      matchesExclude = this.matchesExclude(node, false);
+                if (!matchesSel || matchesExclude) {
+                    return NodeFilter.FILTER_REJECT;
+                } else {
+                    return NodeFilter.FILTER_ACCEPT;
                 }
-            }, () => {
-                this.opt.done();
-            }, false);
+            }, this.opt.done);
+        }
+    }
+
+    class DOMIterator {
+        constructor(ctx, iframes = true) {
+            this.ctx = ctx;
+
+            this.iframes = iframes;
+        }
+
+        getContexts() {
+            let ctx;
+            if (typeof this.ctx === "undefined" || !this.ctx) {
+                ctx = [];
+            } else if (NodeList.prototype.isPrototypeOf(this.ctx)) {
+                ctx = Array.prototype.slice.call(this.ctx);
+            } else if (Array.isArray(this.ctx)) {
+                ctx = this.ctx;
+            } else {
+                ctx = [this.ctx];
+            }
+
+            let filteredCtx = [];
+            ctx.forEach(ctx => {
+                const isDescendant = filteredCtx.filter(contexts => {
+                    return contexts.contains(ctx);
+                }).length > 0;
+                if (filteredCtx.indexOf(ctx) === -1 && !isDescendant) {
+                    filteredCtx.push(ctx);
+                }
+            });
+            return filteredCtx;
+        }
+
+        static matches(el, selector) {
+            const fn = el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.oMatchesSelector || el.webkitMatchesSelector;
+            if (fn) {
+                return fn.call(el, selector);
+            } else {
+                return false;
+            }
+        }
+
+        getIframeContents(ifr, successFn, errorFn = () => {}) {
+            let doc;
+            try {
+                const ifrWin = ifr.contentWindow;
+                doc = ifrWin.document;
+                if (!ifrWin || !doc) {
+                    throw new Error("iframe inaccessible");
+                }
+            } catch (e) {
+                errorFn();
+            }
+            if (doc) {
+                successFn(doc);
+            }
+        }
+
+        onIframeReady(ifr, successFn, errorFn) {
+            try {
+                const ifrWin = ifr.contentWindow,
+                      bl = "about:blank",
+                      compl = "complete",
+                      isBlank = () => {
+                    const src = ifr.getAttribute("src").trim(),
+                          href = ifrWin.location.href;
+                    return href === bl && src !== bl && src;
+                },
+                      observeOnload = () => {
+                    const listener = () => {
+                        try {
+                            if (!isBlank()) {
+                                ifr.removeEventListener("load", listener);
+                                this.getIframeContents(ifr, successFn, errorFn);
+                            }
+                        } catch (e) {
+                            errorFn();
+                        }
+                    };
+                    ifr.addEventListener("load", listener);
+                };
+                if (ifrWin.document.readyState === compl) {
+                    if (isBlank()) {
+                        observeOnload();
+                    } else {
+                        this.getIframeContents(ifr, successFn, errorFn);
+                    }
+                } else {
+                    observeOnload();
+                }
+            } catch (e) {
+                errorFn();
+            }
+        }
+
+        forEachIframe(ctx, filter, each, end) {
+            let ifr = ctx.querySelectorAll("iframe"),
+                open = ifr.length,
+                handled = 0;
+            ifr = Array.prototype.slice.call(ifr);
+            const checkEnd = () => {
+                if (--open <= 0) {
+                    end(handled);
+                }
+            };
+            if (!open) {
+                checkEnd();
+            }
+            ifr.forEach(ifr => {
+                this.onIframeReady(ifr, con => {
+                    if (filter(ifr)) {
+                        handled++;
+                        each(con);
+                    }
+                    checkEnd();
+                }, checkEnd);
+            });
+        }
+
+        createIterator(ctx, whatToShow, filter) {
+            return document.createNodeIterator(ctx, whatToShow, filter, false);
+        }
+
+        createInstanceOnIframe(contents) {
+            contents = contents.querySelector("html");
+            return new DOMIterator(contents, this.iframes);
+        }
+
+        compareNodeIframe(node, prevNode, ifr) {
+            const compCurr = node.compareDocumentPosition(ifr),
+                  prev = Node.DOCUMENT_POSITION_PRECEDING;
+            if (compCurr & prev) {
+                if (prevNode !== null) {
+                    const compPrev = prevNode.compareDocumentPosition(ifr),
+                          after = Node.DOCUMENT_POSITION_FOLLOWING;
+                    if (compPrev & after) {
+                        return true;
+                    }
+                } else {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        getIteratorNode(itr) {
+            const prevNode = itr.previousNode();
+            let node;
+            if (prevNode === null) {
+                node = itr.nextNode();
+            } else {
+                node = itr.nextNode() && itr.nextNode();
+            }
+            return {
+                prevNode,
+                node
+            };
+        }
+
+        checkIframeFilter(node, prevNode, currIfr, ifr) {
+            let key = false,
+                handled = false;
+            ifr.forEach((ifrDict, i) => {
+                if (ifrDict.val === currIfr) {
+                    key = i;
+                    handled = ifrDict.handled;
+                }
+            });
+            if (this.compareNodeIframe(node, prevNode, currIfr)) {
+                if (key === false && !handled) {
+                    ifr.push({
+                        val: currIfr,
+                        handled: true
+                    });
+                } else if (key !== false && !handled) {
+                    ifr[key].handled = true;
+                }
+                return true;
+            }
+            if (key === false) {
+                ifr.push({
+                    val: currIfr,
+                    handled: false
+                });
+            }
+            return false;
+        }
+
+        handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb) {
+            let endAlreadyCalled = false;
+            ifr.forEach(ifrDict => {
+                if (!ifrDict.handled) {
+                    endAlreadyCalled = true;
+                    this.getIframeContents(ifrDict.val, c => {
+                        this.createInstanceOnIframe(c).forEachNode(whatToShow, eCb, fCb, endCb);
+                    });
+                }
+            });
+            if (!endAlreadyCalled) {
+                endCb();
+            }
+        }
+
+        iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr = []) {
+            itr = !itr ? this.createIterator(ctx, whatToShow, fCb) : itr;
+            const {
+                prevNode,
+                node
+            } = this.getIteratorNode(itr),
+                  done = () => {
+                if (node !== null) {
+                    eCb(node);
+                }
+                if (itr.nextNode()) {
+                    itr.previousNode();
+                    this.iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr);
+                } else {
+                    this.handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb);
+                }
+            };
+            if (!this.iframes) {
+                done();
+            } else {
+                this.forEachIframe(ctx, currIfr => {
+                    return this.checkIframeFilter(node, prevNode, currIfr, ifr);
+                }, con => {
+                    this.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, done);
+                }, handled => {
+                    if (handled === 0) {
+                        done();
+                    }
+                });
+            }
+        }
+
+        forEachNode(whatToShow, cb, filterCb, end = () => {}) {
+            const contexts = this.getContexts();
+            let open = contexts.length;
+            if (!open) {
+                end();
+            }
+            contexts.forEach(ctx => {
+                this.iterateThroughNodes(whatToShow, ctx, cb, filterCb, () => {
+                    if (--open <= 0) {
+                        end();
+                    }
+                });
+            });
         }
 
     }
