@@ -24,11 +24,11 @@ describe("basic mark with 'filter' callback", function () {
         new Mark($ctx[0]).mark(textOpts, {
             "diacritics": false,
             "separateWordSearch": false,
-            "filter": function (node, term, matches, totalMatches) {
+            "filter": function (node, term, totalMatches, matches) {
                 expect(node.nodeType).toBe(3);
                 expect($.inArray(term, textOpts)).toBeGreaterThan(-1);
-                expect(i[term]).toBe(matches);
                 expect(k).toBe(totalMatches);
+                expect(i[term]).toBe(matches);
                 if(term !== "dolor") {
                     i[term]++
                         k++;

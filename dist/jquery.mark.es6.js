@@ -341,7 +341,7 @@
                     matches = 0;
                 this.log(`Searching with expression "${ regex }"`);
                 this[fn](regex, false, (term, node) => {
-                    return this.opt.filter(node, kw, matches, totalMatches);
+                    return this.opt.filter(node, kw, totalMatches, matches);
                 }, element => {
                     matches++;
                     totalMatches++;

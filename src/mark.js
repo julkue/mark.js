@@ -642,10 +642,10 @@ class Mark {
      * @callback Mark~markFilterCallback
      * @param {HTMLElement} textNode - The text node which includes the match
      * @param {string} match - The matching term
-     * @param {number} termCounter - A counter indicating the number of marks
-     * for the specific match
      * @param {number} totalCounter - A counter indicating the number of all
      * marks
+     * @param {number} termCounter - A counter indicating the number of marks
+     * for the specific match
      */
     /**
      * @typedef Mark~markAccuracyObject
@@ -716,7 +716,7 @@ class Mark {
                 matches = 0;
             this.log(`Searching with expression "${regex}"`);
             this[fn](regex, false, (term, node) => {
-                return this.opt.filter(node, kw, matches, totalMatches);
+                return this.opt.filter(node, kw, totalMatches, matches);
             }, element => {
                 matches++;
                 totalMatches++;

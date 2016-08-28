@@ -364,7 +364,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         matches = 0;
                     _this8.log("Searching with expression \"" + regex + "\"");
                     _this8[fn](regex, false, function (term, node) {
-                        return _this8.opt.filter(node, kw, matches, totalMatches);
+                        return _this8.opt.filter(node, kw, totalMatches, matches);
                     }, function (element) {
                         matches++;
                         totalMatches++;
