@@ -79,6 +79,8 @@ _Note: Run tasks with `$ grunt [task]` (Replace "[task]" with the actual task na
 Pull requests are very much appreciated! :thumbsup:
 
 Please note the following things when doing a pull request:
+- If your pull request is implementing a feature, please open a new issue first.
+  Therein we can discuss about it and determine if it brings a benefit
 - Do not change any version
 - Always include a test if possible. Please avoid referencing existing test
   files to keep flexibility
@@ -89,7 +91,8 @@ Please note the following things when doing a pull request:
   (if not stated in referenced issues)
 - When changing something inside `mark.js`, please run `$ grunt dist` at the end
   to generate files in `dist/`
-- Make sure that you format code to fit the [code style][code-style]
+- Make sure that you format code to fit the [code style][code-style]. If
+  something isn't covered, please see existing code for orientation
 - Pull requests will not be accepted if they worsen test coverage significantly.
   You can view test coverage in `./build/coverage/` after running `$ grunt test`.
 
