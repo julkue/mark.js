@@ -897,7 +897,8 @@ class DOMIterator {
     /**
      * Calls the callback if the specified iframe is ready for DOM access
      * @param  {HTMLElement} ifr - The iframe DOM element
-     * @param  {DOMIterator~onIframeReadySuccessCallback} successFn - Success callback
+     * @param  {DOMIterator~onIframeReadySuccessCallback} successFn - Success
+     * callback
      * @param {DOMIterator~onIframeReadyErrorCallback} errorFn - Error callback
      * @see {@link http://stackoverflow.com/a/36155560/3894981} for
      * background information
