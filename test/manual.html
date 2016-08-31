@@ -18,22 +18,16 @@
     </style>
 </head>
 <body>
-    <div id="context">
-        <p>
-            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
-            invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-            At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-            gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem
-            ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod
-            tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
-            At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
-            gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-        </p>
-    </div>
-    <script src="../dist/mark.js"></script>
+    <div id="context"></div>
+    <script src="../vendor/jquery/dist/jquery.min.js"></script>
+    <script src="../src/mark.js"></script>
     <script>
-        var instance = new Mark(document.getElementById("context"));
-        instance.mark("lorem");
+        var $ctx = $("#context");
+        $ctx.load("fixtures/basic/main.html", function(){
+            new Mark($ctx.get()).mark("lorem", {
+                debug: true
+            });
+        });
     </script>
 </body>
 </html>
