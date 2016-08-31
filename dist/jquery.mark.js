@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.0.0
+ * mark.js v8.0.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -543,9 +543,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             }
         }, {
-            key: "forEachIframe",
-            value: function forEachIframe(ctx, filter, each, end) {
+            key: "waitForIframes",
+            value: function waitForIframes(ctx, done) {
                 var _this11 = this;
+
+                var eachCalled = 0;
+                this.forEachIframe(ctx, function () {
+                    return true;
+                }, function (ifr) {
+                    eachCalled++;
+                    _this11.waitForIframes(ifr.querySelector("html"), function () {
+                        if (! --eachCalled) {
+                            done();
+                        }
+                    });
+                }, function (handled) {
+                    if (!handled) {
+                        done();
+                    }
+                });
+            }
+        }, {
+            key: "forEachIframe",
+            value: function forEachIframe(ctx, filter, each) {
+                var _this12 = this;
+
+                var end = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
 
                 var ifr = ctx.querySelectorAll("iframe"),
                     open = ifr.length,
@@ -560,7 +583,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     checkEnd();
                 }
                 ifr.forEach(function (ifr) {
-                    _this11.onIframeReady(ifr, function (con) {
+                    _this12.onIframeReady(ifr, function (con) {
                         if (filter(ifr)) {
                             handled++;
                             each(con);
@@ -577,8 +600,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "createInstanceOnIframe",
             value: function createInstanceOnIframe(contents) {
-                contents = contents.querySelector("html");
-                return new DOMIterator(contents, this.iframes);
+                return new DOMIterator(contents.querySelector("html"), this.iframes);
             }
         }, {
             key: "compareNodeIframe",
@@ -645,77 +667,68 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: "handleOpenIframes",
-            value: function handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb) {
-                var _this12 = this;
+            value: function handleOpenIframes(ifr, whatToShow, eCb, fCb) {
+                var _this13 = this;
 
-                var endAlreadyCalled = false;
                 ifr.forEach(function (ifrDict) {
                     if (!ifrDict.handled) {
-                        endAlreadyCalled = true;
-                        _this12.getIframeContents(ifrDict.val, function (c) {
-                            _this12.createInstanceOnIframe(c).forEachNode(whatToShow, eCb, fCb, endCb);
+                        _this13.getIframeContents(ifrDict.val, function (con) {
+                            _this13.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb);
                         });
                     }
                 });
-                if (!endAlreadyCalled) {
-                    endCb();
-                }
             }
         }, {
             key: "iterateThroughNodes",
-            value: function iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr) {
-                var _this13 = this;
+            value: function iterateThroughNodes(whatToShow, ctx, eachCb, filterCb, doneCb) {
+                var _this14 = this;
 
-                var ifr = arguments.length <= 6 || arguments[6] === undefined ? [] : arguments[6];
+                var itr = this.createIterator(ctx, whatToShow, filterCb);
+                var ifr = [],
+                    node = void 0,
+                    prevNode = void 0,
+                    retrieveNodes = function retrieveNodes() {
+                    var _getIteratorNode = _this14.getIteratorNode(itr);
 
-                itr = !itr ? this.createIterator(ctx, whatToShow, fCb) : itr;
+                    prevNode = _getIteratorNode.prevNode;
+                    node = _getIteratorNode.node;
 
-                var _getIteratorNode = this.getIteratorNode(itr);
-
-                var prevNode = _getIteratorNode.prevNode;
-                var node = _getIteratorNode.node;
-                var done = function done() {
-                    if (node !== null) {
-                        eCb(node);
-                    }
-                    if (itr.nextNode()) {
-                        itr.previousNode();
-                        _this13.iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr);
-                    } else {
-                        _this13.handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb);
-                    }
+                    return node;
                 };
-                if (!this.iframes) {
-                    done();
-                } else {
-                    this.forEachIframe(ctx, function (currIfr) {
-                        return _this13.checkIframeFilter(node, prevNode, currIfr, ifr);
-                    }, function (con) {
-                        _this13.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, done);
-                    }, function (handled) {
-                        if (handled === 0) {
-                            done();
-                        }
-                    });
+                while (retrieveNodes()) {
+                    if (this.iframes) {
+                        this.forEachIframe(ctx, function (currIfr) {
+                            return _this14.checkIframeFilter(node, prevNode, currIfr, ifr);
+                        }, function (con) {
+                            _this14.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
+                        });
+                    }
+                    eachCb(node);
                 }
+                if (this.iframes) {
+                    this.handleOpenIframes(ifr, whatToShow, eachCb, filterCb);
+                }
+                doneCb();
             }
         }, {
             key: "forEachNode",
-            value: function forEachNode(whatToShow, cb, filterCb) {
-                var _this14 = this;
+            value: function forEachNode(whatToShow, each, filter) {
+                var _this15 = this;
 
-                var end = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
+                var done = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
 
                 var contexts = this.getContexts();
                 var open = contexts.length;
                 if (!open) {
-                    end();
+                    done();
                 }
                 contexts.forEach(function (ctx) {
-                    _this14.iterateThroughNodes(whatToShow, ctx, cb, filterCb, function () {
-                        if (--open <= 0) {
-                            end();
-                        }
+                    _this15.waitForIframes(ctx, function () {
+                        _this15.iterateThroughNodes(whatToShow, ctx, each, filter, function () {
+                            if (--open <= 0) {
+                                done();
+                            }
+                        });
                     });
                 });
             }

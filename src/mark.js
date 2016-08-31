@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.0.0
+ * mark.js v8.0.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -942,6 +942,32 @@ class DOMIterator {
     }
 
     /**
+     * Callback when all iframes are ready for DOM access
+     * @callback DOMIterator~waitForIframesDoneCallback
+     */
+    /**
+     * Iterates over all iframes and calls the done callback when all of them
+     * are ready for DOM access (including nested ones)
+     * @param {HTMLElement} ctx - The context DOM element
+     * @param {DOMIterator~waitForIframesDoneCallback} done - Done callback
+     */
+    waitForIframes(ctx, done) {
+        let eachCalled = 0;
+        this.forEachIframe(ctx, () => true, ifr => {
+            eachCalled++;
+            this.waitForIframes(ifr.querySelector("html"), () => {
+                if(!(--eachCalled)) {
+                    done();
+                }
+            });
+        }, handled => {
+            if(!handled) {
+                done();
+            }
+        });
+    }
+
+    /**
      * Callback allowing to filter an iframe. Must return true when the element
      * should remain, otherwise false
      * @callback DOMIterator~forEachIframeFilterCallback
@@ -964,10 +990,10 @@ class DOMIterator {
      * @param {HTMLElement} ctx - The context DOM element
      * @param {DOMIterator~forEachIframeFilterCallback} filter - Filter callback
      * @param {DOMIterator~forEachIframeEachCallback} each - Each callback
-     * @param {DOMIterator~forEachIframeEndCallback} end - End callback
+     * @param {DOMIterator~forEachIframeEndCallback} [end] - End callback
      * @access protected
      */
-    forEachIframe(ctx, filter, each, end) {
+    forEachIframe(ctx, filter, each, end = () => {}) {
         let ifr = ctx.querySelectorAll("iframe"),
             open = ifr.length,
             handled = 0;
@@ -1011,8 +1037,7 @@ class DOMIterator {
      * @access protected
      */
     createInstanceOnIframe(contents) {
-        contents = contents.querySelector("html");
-        return new DOMIterator(contents, this.iframes);
+        return new DOMIterator(contents.querySelector("html"), this.iframes);
     }
 
     /**
@@ -1070,6 +1095,18 @@ class DOMIterator {
     }
 
     /**
+     * An array containing objects. The object key "val" contains an iframe
+     * DOM element. The object key "handled" contains a boolean indicating if
+     * the iframe was handled already.
+     * It wouldn't be enough to save all open or all already handled iframes.
+     * The information of open iframes is necessary because they may occur after
+     * all other text nodes (and compareNodeIframe would never be true). The
+     * information of already handled iframes is necessary as otherwise they may
+     * be handled multiple times
+     * @typedef DOMIterator~checkIframeFilterIfr
+     * @type {object[]}
+     */
+    /**
      * Checks if an iframe wasn't handled already and if so, calls
      * {@link DOMIterator#compareNodeIframe} to check if it should be handled.
      * Information wheter an iframe was or wasn't handled is given within the
@@ -1078,7 +1115,7 @@ class DOMIterator {
      * @param {HTMLElement} prevNode - The node that should occur before the
      * iframe
      * @param {HTMLElement} currIFr - The iframe to check
-     * @param {DOMIterator~iterateThroughNodesIfr} - The iframe dictionary. Will
+     * @param {DOMIterator~checkIframeFilterIfr} - The iframe dictionary. Will
      * be manipulated (by reference)
      * @return {boolean} Returns true when it should be handled, otherwise false
      * @access protected
@@ -1115,91 +1152,61 @@ class DOMIterator {
     /**
      * Creates an iterator on all open iframes in the specified array and calls
      * the end callback when finished
-     * @param {DOMIterator~iterateThroughNodesIfr} ifr
+     * @param {DOMIterator~checkIframeFilterIfr} ifr
      * @param {DOMIterator~whatToShow} whatToShow
      * @param  {DOMIterator~forEachNodeCallback} eCb - Each callback
      * @param {DOMIterator~filterCb} fCb
-     * @param {DOMIterator~forEachNodeEndCallback} endCb - End callback
      * @access protected
      */
-    handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb) {
-        let endAlreadyCalled = false;
+    handleOpenIframes(ifr, whatToShow, eCb, fCb) {
         ifr.forEach(ifrDict => {
             if(!ifrDict.handled) {
-                endAlreadyCalled = true;
-                this.getIframeContents(ifrDict.val, c => {
-                    this.createInstanceOnIframe(c).forEachNode(
-                        whatToShow, eCb, fCb, endCb
+                this.getIframeContents(ifrDict.val, con => {
+                    this.createInstanceOnIframe(con).forEachNode(
+                        whatToShow, eCb, fCb
                     );
                 });
             }
         });
-        if(!endAlreadyCalled) {
-            endCb();
-        }
     }
 
-    /**
-     * An array containing objects. The object key "val" contains an iframe
-     * DOM element. The object key "handled" contains a boolean indicating if
-     * the iframe was handled already.
-     * It wouldn't be enough to save all open or all already handled iframes.
-     * The information of open iframes is necessary because they may occur after
-     * all other text nodes (and compareNodeIframe would never be true). The
-     * information of already handled iframes is necessary as otherwise they may
-     * be handled multiple times
-     * @typedef DOMIterator~iterateThroughNodesIfr
-     * @type {object[]}
-     */
     /**
      * Iterates through all nodes in the specified context and handles iframe
      * nodes at the correct position
      * @param {DOMIterator~whatToShow} whatToShow
      * @param {HTMLElement} ctx - The context
-     * @param  {DOMIterator~forEachNodeCallback} eCb - Each callback
-     * @param {DOMIterator~filterCb} fCb
+     * @param  {DOMIterator~forEachNodeCallback} eachCb - Each callback
+     * @param {DOMIterator~filterCb} filterCb - Filter callback
      * @param {DOMIterator~forEachNodeEndCallback} endCb - End callback
-     * @param {NodeIterator} itr - A NodeIterator that will be set in recursive
-     * calls
-     * @param {DOMIterator~iterateThroughNodesIfr} ifr - An array of iframes
-     * that will be passed in recursive calls
      * @access protected
      */
-    iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr = []) {
-        itr = !itr ? this.createIterator(ctx, whatToShow, fCb) : itr;
-        const {
-            prevNode,
-            node
-        } = this.getIteratorNode(itr),
-            done = () => {
-                if(node !== null) { // In case all elements were filtered
-                    eCb(node);
-                }
-                if(itr.nextNode()) {
-                    itr.previousNode(); // reset iterator
-                    this.iterateThroughNodes(
-                        whatToShow, ctx, eCb, fCb, endCb, itr, ifr
-                    );
-                } else {
-                    this.handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb);
-                }
+    iterateThroughNodes(whatToShow, ctx, eachCb, filterCb, doneCb) {
+        const itr = this.createIterator(ctx, whatToShow, filterCb);
+        let ifr = [],
+            node, prevNode, retrieveNodes = () => {
+                ({
+                    prevNode,
+                    node
+                } = this.getIteratorNode(itr));
+                return node;
             };
-        if(!this.iframes) {
-            done();
-        } else {
-            this.forEachIframe(ctx, currIfr => {
-                // note that ifr will be manipulated within the following method
-                return this.checkIframeFilter(node, prevNode, currIfr, ifr);
-            }, con => {
-                this.createInstanceOnIframe(con).forEachNode(
-                    whatToShow, eCb, fCb, done
-                );
-            }, handled => {
-                if(handled === 0) { // each callback wasn't called
-                    done();
-                }
-            });
+        while(retrieveNodes()) {
+            if(this.iframes) {
+                this.forEachIframe(ctx, currIfr => {
+                    // note that ifr will be manipulated here
+                    return this.checkIframeFilter(node, prevNode, currIfr, ifr);
+                }, con => {
+                    this.createInstanceOnIframe(con).forEachNode(
+                        whatToShow, eachCb, filterCb
+                    );
+                });
+            }
+            eachCb(node);
         }
+        if(this.iframes){
+            this.handleOpenIframes(ifr, whatToShow, eachCb, filterCb);
+        }
+        doneCb();
     }
 
     /**
@@ -1215,23 +1222,26 @@ class DOMIterator {
      * Iterates over all contexts and initializes
      * {@link DOMIterator#iterateThroughNodes iterateThroughNodes} on them
      * @param {DOMIterator~whatToShow} whatToShow
-     * @param  {DOMIterator~forEachNodeCallback} cb - Each callback
-     * @param {DOMIterator~filterCb} filterCb
-     * @param {DOMIterator~forEachNodeEndCallback} end - End callback
+     * @param  {DOMIterator~forEachNodeCallback} each - Each callback
+     * @param {DOMIterator~filterCb} filter - Filter callback
+     * @param {DOMIterator~forEachNodeEndCallback} done - End callback
      * @access public
      */
-    forEachNode(whatToShow, cb, filterCb, end = () => {}) {
+    forEachNode(whatToShow, each, filter, done = () => {}) {
         const contexts = this.getContexts();
         let open = contexts.length;
         if(!open) {
-            end();
+            done();
         }
         contexts.forEach(ctx => {
-            this.iterateThroughNodes(whatToShow, ctx, cb, filterCb, () => {
-                // call end only if all contexts were handled
-                if(--open <= 0) {
-                    end();
-                }
+            // wait for iframes to avoid recursive calls, otherwise this would
+            // perhaps reach the recursive function call limit with many nodes
+            this.waitForIframes(ctx, () => {
+                this.iterateThroughNodes(whatToShow, ctx, each, filter, () => {
+                    if(--open <= 0) { // call end all contexts were handled
+                        done();
+                    }
+                });
             });
         });
     }

@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.0.0
+ * mark.js v8.0.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -475,7 +475,23 @@
             }
         }
 
-        forEachIframe(ctx, filter, each, end) {
+        waitForIframes(ctx, done) {
+            let eachCalled = 0;
+            this.forEachIframe(ctx, () => true, ifr => {
+                eachCalled++;
+                this.waitForIframes(ifr.querySelector("html"), () => {
+                    if (! --eachCalled) {
+                        done();
+                    }
+                });
+            }, handled => {
+                if (!handled) {
+                    done();
+                }
+            });
+        }
+
+        forEachIframe(ctx, filter, each, end = () => {}) {
             let ifr = ctx.querySelectorAll("iframe"),
                 open = ifr.length,
                 handled = 0;
@@ -504,8 +520,7 @@
         }
 
         createInstanceOnIframe(contents) {
-            contents = contents.querySelector("html");
-            return new DOMIterator(contents, this.iframes);
+            return new DOMIterator(contents.querySelector("html"), this.iframes);
         }
 
         compareNodeIframe(node, prevNode, ifr) {
@@ -568,64 +583,57 @@
             return false;
         }
 
-        handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb) {
-            let endAlreadyCalled = false;
+        handleOpenIframes(ifr, whatToShow, eCb, fCb) {
             ifr.forEach(ifrDict => {
                 if (!ifrDict.handled) {
-                    endAlreadyCalled = true;
-                    this.getIframeContents(ifrDict.val, c => {
-                        this.createInstanceOnIframe(c).forEachNode(whatToShow, eCb, fCb, endCb);
+                    this.getIframeContents(ifrDict.val, con => {
+                        this.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb);
                     });
                 }
             });
-            if (!endAlreadyCalled) {
-                endCb();
-            }
         }
 
-        iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr = []) {
-            itr = !itr ? this.createIterator(ctx, whatToShow, fCb) : itr;
-            const {
+        iterateThroughNodes(whatToShow, ctx, eachCb, filterCb, doneCb) {
+            const itr = this.createIterator(ctx, whatToShow, filterCb);
+            let ifr = [],
+                node,
                 prevNode,
-                node
-            } = this.getIteratorNode(itr),
-                  done = () => {
-                if (node !== null) {
-                    eCb(node);
-                }
-                if (itr.nextNode()) {
-                    itr.previousNode();
-                    this.iterateThroughNodes(whatToShow, ctx, eCb, fCb, endCb, itr, ifr);
-                } else {
-                    this.handleOpenIframes(ifr, whatToShow, eCb, fCb, endCb);
-                }
+                retrieveNodes = () => {
+                ({
+                    prevNode,
+                    node
+                } = this.getIteratorNode(itr));
+                return node;
             };
-            if (!this.iframes) {
-                done();
-            } else {
-                this.forEachIframe(ctx, currIfr => {
-                    return this.checkIframeFilter(node, prevNode, currIfr, ifr);
-                }, con => {
-                    this.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb, done);
-                }, handled => {
-                    if (handled === 0) {
-                        done();
-                    }
-                });
+            while (retrieveNodes()) {
+                if (this.iframes) {
+                    this.forEachIframe(ctx, currIfr => {
+                        return this.checkIframeFilter(node, prevNode, currIfr, ifr);
+                    }, con => {
+                        this.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
+                    });
+                }
+                eachCb(node);
             }
+            if (this.iframes) {
+                this.handleOpenIframes(ifr, whatToShow, eachCb, filterCb);
+            }
+            doneCb();
         }
 
-        forEachNode(whatToShow, cb, filterCb, end = () => {}) {
+        forEachNode(whatToShow, each, filter, done = () => {}) {
             const contexts = this.getContexts();
             let open = contexts.length;
             if (!open) {
-                end();
+                done();
             }
             contexts.forEach(ctx => {
-                this.iterateThroughNodes(whatToShow, ctx, cb, filterCb, () => {
-                    if (--open <= 0) {
-                        end();
-                    }
+                this.waitForIframes(ctx, () => {
+                    this.iterateThroughNodes(whatToShow, ctx, each, filter, () => {
+                        if (--open <= 0) {
+                            done();
+                        }
+                    });
                 });
             });
         }
