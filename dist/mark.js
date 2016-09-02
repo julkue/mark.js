@@ -180,18 +180,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "matchesExclude",
             value: function matchesExclude(el, exclM) {
-                var remain = true;
                 var excl = this.opt.exclude.concat(["script", "style", "title", "head", "html"]);
                 if (exclM) {
                     excl = excl.concat(["*[data-markjs='true']"]);
                 }
-                excl.every(function (sel) {
-                    if (DOMIterator.matches(el, sel)) {
-                        return remain = false;
-                    }
-                    return true;
-                });
-                return !remain;
+                return DOMIterator.matches(el, excl);
             }
         }, {
             key: "wrapRangeInTextNode",
@@ -436,7 +429,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: "iterator",
             get: function get() {
                 if (!this._iterator) {
-                    this._iterator = new DOMIterator(this.ctx, this.opt.iframes);
+                    this._iterator = new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude);
                 }
                 return this._iterator;
             }
@@ -448,12 +441,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var DOMIterator = function () {
         function DOMIterator(ctx) {
             var iframes = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+            var exclude = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
 
             _classCallCheck(this, DOMIterator);
 
             this.ctx = ctx;
 
             this.iframes = iframes;
+
+            this.exclude = exclude;
         }
 
         _createClass(DOMIterator, [{
@@ -583,13 +579,17 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     checkEnd();
                 }
                 ifr.forEach(function (ifr) {
-                    _this12.onIframeReady(ifr, function (con) {
-                        if (filter(ifr)) {
-                            handled++;
-                            each(con);
-                        }
+                    if (DOMIterator.matches(ifr, _this12.exclude)) {
                         checkEnd();
-                    }, checkEnd);
+                    } else {
+                        _this12.onIframeReady(ifr, function (con) {
+                            if (filter(ifr)) {
+                                handled++;
+                                each(con);
+                            }
+                            checkEnd();
+                        }, checkEnd);
+                    }
                 });
             }
         }, {
@@ -734,10 +734,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }], [{
             key: "matches",
-            value: function matches(el, selector) {
-                var fn = el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.oMatchesSelector || el.webkitMatchesSelector;
+            value: function matches(element, selector) {
+                var selectors = typeof selector === "string" ? [selector] : selector,
+                    fn = element.matches || element.matchesSelector || element.msMatchesSelector || element.mozMatchesSelector || element.oMatchesSelector || element.webkitMatchesSelector;
                 if (fn) {
-                    return fn.call(el, selector);
+                    var match = false;
+                    selectors.every(function (sel) {
+                        if (fn.call(element, sel)) {
+                            match = true;
+                            return false;
+                        }
+                        return true;
+                    });
+                    return match;
                 } else {
                     return false;
                 }

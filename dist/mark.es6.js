@@ -49,7 +49,7 @@
 
         get iterator() {
             if (!this._iterator) {
-                this._iterator = new DOMIterator(this.ctx, this.opt.iframes);
+                this._iterator = new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude);
             }
             return this._iterator;
         }
@@ -182,18 +182,11 @@
         }
 
         matchesExclude(el, exclM) {
-            let remain = true;
             let excl = this.opt.exclude.concat(["script", "style", "title", "head", "html"]);
             if (exclM) {
                 excl = excl.concat(["*[data-markjs='true']"]);
             }
-            excl.every(sel => {
-                if (DOMIterator.matches(el, sel)) {
-                    return remain = false;
-                }
-                return true;
-            });
-            return !remain;
+            return DOMIterator.matches(el, excl);
         }
 
         wrapRangeInTextNode(node, start, end) {
@@ -383,10 +376,30 @@
     }
 
     class DOMIterator {
-        constructor(ctx, iframes = true) {
+        constructor(ctx, iframes = true, exclude = []) {
             this.ctx = ctx;
 
             this.iframes = iframes;
+
+            this.exclude = exclude;
+        }
+
+        static matches(element, selector) {
+            const selectors = typeof selector === "string" ? [selector] : selector,
+                  fn = element.matches || element.matchesSelector || element.msMatchesSelector || element.mozMatchesSelector || element.oMatchesSelector || element.webkitMatchesSelector;
+            if (fn) {
+                let match = false;
+                selectors.every(sel => {
+                    if (fn.call(element, sel)) {
+                        match = true;
+                        return false;
+                    }
+                    return true;
+                });
+                return match;
+            } else {
+                return false;
+            }
         }
 
         getContexts() {
@@ -411,15 +424,6 @@
                 }
             });
             return filteredCtx;
-        }
-
-        static matches(el, selector) {
-            const fn = el.matches || el.matchesSelector || el.msMatchesSelector || el.mozMatchesSelector || el.oMatchesSelector || el.webkitMatchesSelector;
-            if (fn) {
-                return fn.call(el, selector);
-            } else {
-                return false;
-            }
         }
 
         getIframeContents(ifr, successFn, errorFn = () => {}) {
@@ -505,13 +509,17 @@
                 checkEnd();
             }
             ifr.forEach(ifr => {
-                this.onIframeReady(ifr, con => {
-                    if (filter(ifr)) {
-                        handled++;
-                        each(con);
-                    }
+                if (DOMIterator.matches(ifr, this.exclude)) {
                     checkEnd();
-                }, checkEnd);
+                } else {
+                    this.onIframeReady(ifr, con => {
+                        if (filter(ifr)) {
+                            handled++;
+                            each(con);
+                        }
+                        checkEnd();
+                    }, checkEnd);
+                }
             });
         }
 

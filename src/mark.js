@@ -64,7 +64,9 @@ class Mark {
      */
     get iterator() {
         if(!this._iterator) {
-            this._iterator = new DOMIterator(this.ctx, this.opt.iframes);
+            this._iterator = new DOMIterator(
+                this.ctx, this.opt.iframes, this.opt.exclude
+            );
         }
         return this._iterator;
     }
@@ -316,7 +318,6 @@ class Mark {
      * @access protected
      */
     matchesExclude(el, exclM) {
-        let remain = true;
         let excl = this.opt.exclude.concat([
             // ignores the elements itself, not their childrens (selector *)
             "script", "style", "title", "head", "html"
@@ -324,13 +325,7 @@ class Mark {
         if(exclM) {
             excl = excl.concat(["*[data-markjs='true']"]);
         }
-        excl.every(sel => {
-            if(DOMIterator.matches(el, sel)) {
-                return remain = false;
-            }
-            return true;
-        });
-        return !remain;
+        return DOMIterator.matches(el, excl);
     }
 
     /**
@@ -790,8 +785,10 @@ class DOMIterator {
      * element, an array of DOM elements or a NodeList
      * @param {boolean} [iframes=true] - A boolean indicating if iframes should
      * be handled
+     * @param {string[]} [exclude=[]] - An array containing exclusion selectors
+     * for iframes
      */
-    constructor(ctx, iframes = true) {
+    constructor(ctx, iframes = true, exclude = []) {
         /**
          * The context
          * @type {HTMLElement|HTMLElement[]|NodeList}
@@ -804,6 +801,44 @@ class DOMIterator {
          * @access protected
          */
         this.iframes = iframes;
+        /**
+         * An array containing exclusion selectors for iframes
+         * @type {string[]}
+         */
+        this.exclude = exclude;
+    }
+
+    /**
+     * Checks if the specified DOM element matches the selector
+     * @param  {HTMLElement} element - The DOM element
+     * @param  {string|string[]} selector - The selector or an array with
+     * selectors
+     * @return {boolean}
+     * @access public
+     */
+    static matches(element, selector) {
+        const selectors = typeof selector === "string" ? [selector] : selector,
+            fn = (
+                element.matches ||
+                element.matchesSelector ||
+                element.msMatchesSelector ||
+                element.mozMatchesSelector ||
+                element.oMatchesSelector ||
+                element.webkitMatchesSelector
+            );
+        if(fn) {
+            let match = false;
+            selectors.every(sel => {
+                if(fn.call(element, sel)) {
+                    match = true;
+                    return false;
+                }
+                return true;
+            });
+            return match;
+        } else { // may be false e.g. when el is a textNode
+            return false;
+        }
     }
 
     /**
@@ -833,29 +868,6 @@ class DOMIterator {
             }
         });
         return filteredCtx;
-    }
-
-    /**
-     * Checks if the specified DOM element matches the selector
-     * @param  {HTMLElement} el - The DOM element
-     * @param  {string} selector - The selector
-     * @return {boolean}
-     * @access public
-     */
-    static matches(el, selector) {
-        const fn = (
-            el.matches ||
-            el.matchesSelector ||
-            el.msMatchesSelector ||
-            el.mozMatchesSelector ||
-            el.oMatchesSelector ||
-            el.webkitMatchesSelector
-        );
-        if(fn) {
-            return fn.call(el, selector);
-        } else { // may occur e.g. when el is a textNode
-            return false;
-        }
     }
 
     /**
@@ -986,7 +998,8 @@ class DOMIterator {
      */
     /**
      * Iterates over all iframes inside the specified context and calls the
-     * callbacks when they're ready
+     * callbacks when they're ready. Filters iframes based on the instance
+     * exclusion selectors
      * @param {HTMLElement} ctx - The context DOM element
      * @param {DOMIterator~forEachIframeFilterCallback} filter - Filter callback
      * @param {DOMIterator~forEachIframeEachCallback} each - Each callback
@@ -1007,13 +1020,17 @@ class DOMIterator {
             checkEnd();
         }
         ifr.forEach(ifr => {
-            this.onIframeReady(ifr, con => {
-                if(filter(ifr)) {
-                    handled++;
-                    each(con);
-                }
+            if(DOMIterator.matches(ifr, this.exclude)) {
                 checkEnd();
-            }, checkEnd);
+            } else {
+                this.onIframeReady(ifr, con => {
+                    if(filter(ifr)) {
+                        handled++;
+                        each(con);
+                    }
+                    checkEnd();
+                }, checkEnd);
+            }
         });
     }
 
@@ -1203,7 +1220,7 @@ class DOMIterator {
             }
             eachCb(node);
         }
-        if(this.iframes){
+        if(this.iframes) {
             this.handleOpenIframes(ifr, whatToShow, eachCb, filterCb);
         }
         doneCb();
