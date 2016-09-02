@@ -1251,15 +1251,20 @@ class DOMIterator {
             done();
         }
         contexts.forEach(ctx => {
-            // wait for iframes to avoid recursive calls, otherwise this would
-            // perhaps reach the recursive function call limit with many nodes
-            this.waitForIframes(ctx, () => {
+            const ready = () => {
                 this.iterateThroughNodes(whatToShow, ctx, each, filter, () => {
                     if(--open <= 0) { // call end all contexts were handled
                         done();
                     }
                 });
-            });
+            };
+            // wait for iframes to avoid recursive calls, otherwise this would
+            // perhaps reach the recursive function call limit with many nodes
+            if(this.iframes){
+                this.waitForIframes(ctx, ready);
+            } else {
+                ready();
+            }
         });
     }
 

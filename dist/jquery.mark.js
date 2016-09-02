@@ -723,13 +723,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     done();
                 }
                 contexts.forEach(function (ctx) {
-                    _this15.waitForIframes(ctx, function () {
+                    var ready = function ready() {
                         _this15.iterateThroughNodes(whatToShow, ctx, each, filter, function () {
                             if (--open <= 0) {
                                 done();
                             }
                         });
-                    });
+                    };
+
+                    if (_this15.iframes) {
+                        _this15.waitForIframes(ctx, ready);
+                    } else {
+                        ready();
+                    }
                 });
             }
         }], [{

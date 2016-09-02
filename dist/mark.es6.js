@@ -636,13 +636,19 @@
                 done();
             }
             contexts.forEach(ctx => {
-                this.waitForIframes(ctx, () => {
+                const ready = () => {
                     this.iterateThroughNodes(whatToShow, ctx, each, filter, () => {
                         if (--open <= 0) {
                             done();
                         }
                     });
-                });
+                };
+
+                if (this.iframes) {
+                    this.waitForIframes(ctx, ready);
+                } else {
+                    ready();
+                }
             });
         }
 
