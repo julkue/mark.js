@@ -1,0 +1,37 @@
+/*!***************************************************
+ * mark.js
+ * https://github.com/julmot/mark.js
+ * Copyright (c) 2014–2016, Julian Motz
+ * Released under the MIT license https://git.io/vwTVl
+ *****************************************************/
+"use strict";
+describe("basic mark with case senstive", function () {
+    var $ctx1, $ctx2;
+    beforeEach(function (done) {
+        loadFixtures("basic/case-sensitive.html");
+
+        $ctx1 = $(".basic-case-sensitive > div:nth-child(1)");
+        $ctx2 = $(".basic-case-sensitive > div:nth-child(2)");
+        new Mark($ctx1.get()).mark("At", {
+            "caseSensitive": true,
+            "done": function () {
+                new Mark($ctx2[0]).mark(["lorem"], {
+                    "diacritics": true,
+                    "separateWordSearch": false,
+                    "caseSensitive": false,
+                    "synonyms" : {
+                      "lorem": "Lorem"
+                    },
+                    "done": function () {
+                        done();
+                    }
+                });
+            }
+        });
+    });
+
+    it("should find case sensitive matches", function () {
+        expect($ctx1.find("mark")).toHaveLength(2);
+        expect($ctx2.find("mark")).toHaveLength(4);
+    });
+});

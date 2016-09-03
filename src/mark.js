@@ -49,7 +49,8 @@ class Mark {
             "filter": () => true,
             "done": () => {},
             "debug": false,
-            "log": window.console
+            "log": window.console,
+            "caseSensitive": false
         }, val);
     }
 
@@ -125,14 +126,15 @@ class Mark {
      * @access protected
      */
     createSynonymsRegExp(str) {
-        const syn = this.opt.synonyms;
+        const syn = this.opt.synonyms,
+            sens = this.opt.caseSensitive ? "" : "i";
         for(let index in syn) {
             if(syn.hasOwnProperty(index)) {
                 const value = syn[index],
                     k1 = this.escapeStr(index),
                     k2 = this.escapeStr(value);
                 str = str.replace(
-                    new RegExp(`(${k1}|${k2})`, "gmi"), `(${k1}|${k2})`
+                    new RegExp(`(${k1}|${k2})`, `gm${sens}`), `(${k1}|${k2})`
                 );
             }
         }
@@ -146,22 +148,17 @@ class Mark {
      * @access protected
      */
     createDiacriticsRegExp(str) {
-        const dct = [
-            "aÀÁÂÃÄÅàáâãäåĀāąĄ",
-            "cÇçćĆčČ",
-            "dđĐďĎ",
-            "eÈÉÊËèéêëěĚĒēęĘ",
-            "iÌÍÎÏìíîïĪī",
-            "lłŁ",
-            "nÑñňŇńŃ",
-            "oÒÓÔÕÕÖØòóôõöøŌō",
-            "rřŘ",
-            "sŠšśŚ",
-            "tťŤ",
-            "uÙÚÛÜùúûüůŮŪū",
-            "yŸÿýÝ",
-            "zŽžżŻźŹ"
-        ];
+        const sens = this.opt.caseSensitive ? "" : "i",
+            dct = this.opt.caseSensitive ? [
+                "aàáâãäåāą", "AÀÁÂÃÄÅĀĄ", "cçćč", "CÇĆČ", "dđď", "DĐĎ",
+                "eèéêëěēę", "EÈÉÊËĚĒĘ", "iìíîïī", "IÌÍÎÏĪ", "lł", "LŁ", "nñňń",
+                "NÑŇŃ", "oòóôõöøō", "OÒÓÔÕÖØŌ", "rř", "RŘ", "sšś", "SŠŚ", "tť",
+                "TŤ", "uùúûüůū", "UÙÚÛÜŮŪ", "yÿý", "YŸÝ", "zžżź", "ZŽŻŹ"
+            ] : [
+                "aÀÁÂÃÄÅàáâãäåĀāąĄ", "cÇçćĆčČ", "dđĐďĎ", "eÈÉÊËèéêëěĚĒēęĘ",
+                "iÌÍÎÏìíîïĪī", "lłŁ", "nÑñňŇńŃ", "oÒÓÔÕÖØòóôõöøŌō", "rřŘ",
+                "sŠšśŚ", "tťŤ", "uÙÚÛÜùúûüůŮŪū", "yŸÿýÝ", "zŽžżŻźŹ"
+            ];
         let handled = [];
         str.split("").forEach(ch => {
             dct.every(dct => {
@@ -175,7 +172,7 @@ class Mark {
                     // Make sure that the character OR any other
                     // character in the diacritics list will be matched
                     str = str.replace(
-                        new RegExp(`[${dct}]`, "gmi"), `[${dct}]`
+                        new RegExp(`[${dct}]`, `gm${sens}`), `[${dct}]`
                     );
                     handled.push(dct);
                 }
@@ -696,7 +693,8 @@ class Mark {
         const {
             keywords: kwArr,
             length: kwArrLen
-        } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
+        } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
+            sens = opt.caseSensitive ? "" : "i";
         let totalMatches = 0,
             fn = "wrapMatches";
         if(this.opt.acrossElements) {
@@ -707,7 +705,7 @@ class Mark {
             return;
         }
         const handler = kw => { // async function calls as iframes are async too
-            let regex = new RegExp(this.createRegExp(kw), "gmi"),
+            let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),
                 matches = 0;
             this.log(`Searching with expression "${regex}"`);
             this[fn](regex, false, (term, node) => {
