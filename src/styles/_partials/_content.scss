@@ -12,10 +12,23 @@ main {
 
     pre {
         padding: 0;
+        white-space: pre;
+        word-break: normal;
+        word-wrap: normal;
         background: transparent;
         @include border-radius(0);
+
+        code.hljs {
+            overflow: auto;
+            white-space: pre;
+
+            span {
+                white-space: pre;
+            }
+        }
+
     }
-    .btn{
+    .btn {
         white-space: normal;
     }
     &:not(.configurator) {
