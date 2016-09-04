@@ -38,7 +38,7 @@
             border: 1px solid $configuratorInvalidBorder;
         }
     }
-    .filters,
+    .exclude,
     .synonyms {
         margin: 0 0 5px;
 
@@ -51,6 +51,9 @@
     }
     button[type="submit"] {
         margin-top: 10px;
+    }
+    .alert{
+        margin: 8px 0 0 0;
     }
     .context {
         /**

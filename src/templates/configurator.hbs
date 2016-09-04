@@ -63,12 +63,12 @@
         </div>
     </div>
 {{/inline}}
-{{#* inline "filter-form-group"}}
+{{#* inline "exclude-form-group"}}
     <div class="form-group">
-        <label>Filter</label>
-        <div class="row filters">
+        <label>Exclude</label>
+        <div class="row exclude">
             <div class="col-xs-8">
-                <input class="form-control input-sm" name="filter[]" type="text" placeholder="(e.g. .ignore)" pattern="([\.|#][A-Za-z0-9-_\.]+)|([A-Za-z\*\.-_]*\[[^]+\])|(^(?![\.]|[#])[A-Za-z]+)" title="A valid selector, e.g. #data-test" />
+                <input class="form-control input-sm" name="exclude[]" type="text" placeholder="(e.g. .ignore)" pattern="([\.|#][A-Za-z0-9-_\.]+)|([A-Za-z\*\.-_]*\[[^]+\])|(^(?![\.]|[#])[A-Za-z]+)" title="A valid selector, e.g. #data-test" />
             </div>
             <div class="col-xs-4">
                 <button type="button" class="btn btn-info btn-sm">
@@ -110,6 +110,16 @@
         <label><input id="{{prefix}}iframes" name="iframes" type="checkbox"> Iframes (is not demonstrated)</label>
     </div>
 {{/inline}}
+{{#* inline "across-elements-checkbox"}}
+    <div class="checkbox">
+        <label><input id="{{prefix}}acrossElements" name="acrossElements" type="checkbox"> Across elements</label>
+    </div>
+{{/inline}}
+{{#* inline "case-sensitive-checkbox"}}
+    <div class="checkbox">
+        <label><input id="{{prefix}}caseSensitive" name="caseSensitive" type="checkbox"> Case sensitive</label>
+    </div>
+{{/inline}}
 {{#* inline "debug-checkbox"}}
     <div class="checkbox">
         <label><input id="{{prefix}}debug" name="debug" type="checkbox"> Debug</label>
@@ -126,7 +136,7 @@
                 {{> keyword-form-group prefix="form-keyword-"}}
                 {{> element-form-group prefix="form-keyword-"}}
                 {{> synonyms-form-group prefix="form-keyword-"}}
-                {{> filter-form-group prefix="form-keyword-"}}
+                {{> exclude-form-group prefix="form-keyword-"}}
             </div>
             <div class="col-sm-6">
                 {{> accuracy-form-group prefix="form-keyword-"}}
@@ -135,6 +145,8 @@
                     {{> separate-word-search-checkbox prefix="form-keyword-"}}
                     {{> diacritics-checkbox prefix="form-keyword-"}}
                     {{> iframes-checkbox prefix="form-keyword-"}}
+                    {{> case-sensitive-checkbox prefix="form-keyword-"}}
+                    {{> across-elements-checkbox prefix="form-keyword-"}}
                     {{> debug-checkbox prefix="form-keyword-"}}
                 </div>
             </div>
@@ -150,7 +162,7 @@
                 {{> array-form-group prefix="form-array-"}}
                 {{> element-form-group prefix="form-array-"}}
                 {{> synonyms-form-group prefix="form-array-"}}
-                {{> filter-form-group prefix="form-array-"}}
+                {{> exclude-form-group prefix="form-array-"}}
             </div>
             <div class="col-sm-6">
                 {{> accuracy-form-group prefix="form-array-"}}
@@ -159,6 +171,8 @@
                     {{> separate-word-search-checkbox prefix="form-array-"}}
                     {{> diacritics-checkbox prefix="form-array-"}}
                     {{> iframes-checkbox prefix="form-array-"}}
+                    {{> case-sensitive-checkbox prefix="form-keyword-"}}
+                    {{> across-elements-checkbox prefix="form-keyword-"}}
                     {{> debug-checkbox prefix="form-array-"}}
                 </div>
             </div>
@@ -173,12 +187,13 @@
             <div class="col-sm-6">
                 {{> regexp-form-group prefix="form-regexp-"}}
                 {{> element-form-group prefix="form-regexp-"}}
-                {{> filter-form-group prefix="form-regexp-"}}
+                {{> exclude-form-group prefix="form-regexp-"}}
             </div>
             <div class="col-sm-6">
                 {{> class-name-form-group prefix="form-regexp-"}}
                 <div class="form-group checkbox-options">
                     {{> iframes-checkbox prefix="form-regexp-"}}
+                    {{> across-elements-checkbox prefix="form-keyword-"}}
                     {{> debug-checkbox prefix="form-regexp-"}}
                 </div>
             </div>
@@ -204,6 +219,10 @@
                     {{> form-keyword}}
                     {{> form-array}}
                     {{> form-regexp}}
+                    <div class="alert alert-info small">
+                        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                        <strong>Note</strong>: The configurator doesn't include callback options!
+                    </div>
                 </div>
             </div>
         </div>
@@ -214,7 +233,7 @@
                 </div>
                 <div class="panel-body context">
                     <p>
-                        Lorem ipsum dolor sit āmet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, one, nò sea takimata 1 sanctus est <span class="ignore">Lorem</span> ipsum dolor sit amet. Lörem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy.
+                        Lorem ipsum dolor sit āmet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, one, nò sea takimata 1 sanctus est <span class="ignore">Lorem</span> ipsum dolor sit amet. Lörem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est <span class="ignore">lorem</span> ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy.
                     </p>
                 </div>
             </div>

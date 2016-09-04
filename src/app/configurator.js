@@ -31,8 +31,8 @@
              */
             var synonymsSel = ".configurator .synonyms";
             var synonymsBtnSel = synonymsSel + " button";
-            var filtersSel = ".configurator .filters";
-            var filtersBtnSel = filtersSel + " button";
+            var excludeSel = ".configurator .exclude";
+            var excludeBtnSel = excludeSel + " button";
 
             /**
              * Returns the current type, "keyword", "array" or "regexp"
@@ -71,7 +71,7 @@
                 return $form
                     .find("input, select")
                     .not("[name='keyword'], [name='array'], [name='regexp']")
-                    .not("[name='type'], [name='filter[]']")
+                    .not("[name='type'], [name='exclude[]']")
                     .serializeArray()
                     .concat(
                         $form.find("input[type='checkbox']")
@@ -94,7 +94,7 @@
             function getOptions() {
                 var options = {
                         "synonyms": {},
-                        "filter": []
+                        "exclude": []
                     },
                     inputValues = getSerializedForm();
                 // Set option values
@@ -125,11 +125,11 @@
                 if($.isEmptyObject(options["synonyms"])) {
                     delete options["synonyms"];
                 }
-                // Map correct filter values
-                getCurrentForm().find("[name='filter[]']").each(function () {
+                // Map correct exclude values
+                getCurrentForm().find("[name='exclude[]']").each(function () {
                     var val = $(this).val().trim();
                     if(val) {
-                        options["filter"].push(val);
+                        options["exclude"].push(val);
                     }
                 });
                 return options;
@@ -146,12 +146,14 @@
                     defaults = {
                         "element": "mark",
                         "className": "",
-                        "filter": [],
+                        "exclude": [],
                         "iframes": false,
                         "separateWordSearch": true,
                         "diacritics": true,
                         "synonyms": {},
                         "accuracy": "partially",
+                        "acrossElements": false,
+                        "caseSensitive": false,
                         "debug": false
                     };
                 for(var opt in options) {
@@ -226,7 +228,7 @@
                 try {
                     $markContext[method](serialize, options);
                 } catch(e) {
-                    // this can be thrown when e.g. the filter selector is "."
+                    // this can be thrown when e.g. the exclude selector is "."
                     console.debug(e);
                 }
                 if(typeof serialize === "string") {
@@ -295,12 +297,12 @@
             }
 
             /**
-             * Initializes dynamic filter addition/deletion
+             * Initializes dynamic exclude addition/deletion
              */
-            function initDynamicFilters() {
-                $body.on("click", filtersBtnSel, function () {
+            function initDynamicExclude() {
+                $body.on("click", excludeBtnSel, function () {
                     var $this = $(this);
-                    var $closest = $this.closest(filtersSel);
+                    var $closest = $this.closest(excludeSel);
                     if($this.find("[data-action='add']").is(":visible")) {
                         var $clone = $closest.clone();
                         $clone.find("[data-action='add']").hide();
@@ -330,7 +332,7 @@
                 if($configurator.length) {
                     initFormToggle();
                     initDynamicSynonyms();
-                    initDynamicFilters();
+                    initDynamicExclude();
                     initFormValidation();
                     initConfigurator();
                 }
