@@ -15,6 +15,9 @@ main {
         background: transparent;
         @include border-radius(0);
     }
+    .btn{
+        white-space: normal;
+    }
     &:not(.configurator) {
         /* Anchor offset */
         a[id]:not([href]) {
