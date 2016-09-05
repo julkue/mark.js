@@ -28,7 +28,8 @@ _regexp_
 Type: `RegExp`
 
 The regular expression to be marked. Example: `/Lor[^]?m/gmi`. Note that groups
-will be ignored.
+will be ignored and {{defaults.title}} will always find all matches, regardless
+of the `g` flag.
 
 _options_
 
