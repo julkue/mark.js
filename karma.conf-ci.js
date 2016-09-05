@@ -139,16 +139,18 @@ module.exports = config => {
             "test/specs/basic/array.js",
             "test/specs/basic/nodelist.js",
             "test/specs/basic/array-keyword.js",
-            "test/specs/basic/!(accuracy)*.js",
-            // depends on diacritics, separateWordSearch
+            "test/specs/basic/!(accuracy|no-options|case-sensitive)*.js",
+            // depends on diacritics, separateWordSearch:
             "test/specs/basic/accuracy*.js",
+            "test/specs/basic/case-sensitive*.js",
             "test/specs/iframes/main.js",
             "test/specs/iframes/unmark.js",
-            "test/specs/**/*.js", {
+            "test/specs/**/!(no-options).js", {
                 pattern: "test/fixtures/**/*.html",
                 included: false,
                 served: true
-            }
+            },
+            "test/specs/basic/no-options.js"
         ],
         exclude: [],
         port: 9876,

@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.1.0
+ * mark.js v8.1.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -694,7 +694,7 @@ class Mark {
             keywords: kwArr,
             length: kwArrLen
         } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
-            sens = opt.caseSensitive ? "" : "i";
+            sens = this.opt.caseSensitive ? "" : "i";
         let totalMatches = 0,
             fn = "wrapMatches";
         if(this.opt.acrossElements) {

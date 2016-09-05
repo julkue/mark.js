@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.1.0
+ * mark.js v8.1.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -344,7 +344,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 var kwArr = _getSeparatedKeywords.keywords;
                 var kwArrLen = _getSeparatedKeywords.length;
-                var sens = opt.caseSensitive ? "" : "i";
+                var sens = this.opt.caseSensitive ? "" : "i";
                 var totalMatches = 0,
                     fn = "wrapMatches";
                 if (this.opt.acrossElements) {
