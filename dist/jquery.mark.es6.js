@@ -40,7 +40,8 @@
                 "done": () => {},
                 "debug": false,
                 "log": window.console,
-                "caseSensitive": false
+                "caseSensitive": false,
+                "ignoreJoiners": false
             }, val);
         }
 
@@ -74,10 +75,16 @@
             if (Object.keys(this.opt.synonyms).length) {
                 str = this.createSynonymsRegExp(str);
             }
+            if (this.opt.ignoreJoiners) {
+                str = this.setupIgnoreJoinersRegExp(str);
+            }
             if (this.opt.diacritics) {
                 str = this.createDiacriticsRegExp(str);
             }
             str = this.createMergedBlanksRegExp(str);
+            if (this.opt.ignoreJoiners) {
+                str = this.createIgnoreJoinersRegExp(str);
+            }
             str = this.createAccuracyRegExp(str);
             return str;
         }
@@ -94,6 +101,21 @@
                 }
             }
             return str;
+        }
+
+        setupIgnoreJoinersRegExp(str) {
+            return str.replace(/[^(|)]/g, function (val, indx, original) {
+                let nextChar = original.charAt(indx + 1);
+                if (/[(|)]/.test(nextChar) || nextChar === "") {
+                    return val;
+                } else {
+                    return val + "\u0000";
+                }
+            });
+        }
+
+        createIgnoreJoinersRegExp(str) {
+            return str.split("\u0000").join("[\\u00ad|\\u200b|\\u200c|\\u200d]?");
         }
 
         createDiacriticsRegExp(str) {

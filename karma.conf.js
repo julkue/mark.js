@@ -22,10 +22,11 @@ module.exports = config => {
             "test/specs/basic/array.js",
             "test/specs/basic/nodelist.js",
             "test/specs/basic/array-keyword.js",
-            "test/specs/basic/!(accuracy|no-options|case-sensitive)*.js",
+            "test/specs/basic/!(accuracy|no-options|case-sensitive|ignore-joiners)*.js",
             // depends on diacritics, separateWordSearch:
             "test/specs/basic/accuracy*.js",
             "test/specs/basic/case-sensitive*.js",
+            "test/specs/basic/ignore-joiners*.js",
             "test/specs/iframes/main.js",
             "test/specs/iframes/unmark.js",
             "test/specs/**/!(no-options).js", {

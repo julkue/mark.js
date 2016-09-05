@@ -58,10 +58,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (Object.keys(this.opt.synonyms).length) {
                     str = this.createSynonymsRegExp(str);
                 }
+                if (this.opt.ignoreJoiners) {
+                    str = this.setupIgnoreJoinersRegExp(str);
+                }
                 if (this.opt.diacritics) {
                     str = this.createDiacriticsRegExp(str);
                 }
                 str = this.createMergedBlanksRegExp(str);
+                if (this.opt.ignoreJoiners) {
+                    str = this.createIgnoreJoinersRegExp(str);
+                }
                 str = this.createAccuracyRegExp(str);
                 return str;
             }
@@ -79,6 +85,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     }
                 }
                 return str;
+            }
+        }, {
+            key: "setupIgnoreJoinersRegExp",
+            value: function setupIgnoreJoinersRegExp(str) {
+                return str.replace(/[^(|)]/g, function (val, indx, original) {
+                    var nextChar = original.charAt(indx + 1);
+                    if (/[(|)]/.test(nextChar) || nextChar === "") {
+                        return val;
+                    } else {
+                        return val + "\u0000";
+                    }
+                });
+            }
+        }, {
+            key: "createIgnoreJoinersRegExp",
+            value: function createIgnoreJoinersRegExp(str) {
+                return str.split("\u0000").join("[\\u00ad|\\u200b|\\u200c|\\u200d]?");
             }
         }, {
             key: "createDiacriticsRegExp",
@@ -422,7 +445,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "done": function done() {},
                     "debug": false,
                     "log": window.console,
-                    "caseSensitive": false
+                    "caseSensitive": false,
+                    "ignoreJoiners": false
                 }, val);
             },
             get: function get() {
