@@ -29,5 +29,14 @@ follows:
 
 Alternatively you can load it with AMD ([RequireJS][requirejs]) or CommonJS.
 
+__Note__: {{defaults.title}} requires UTF-8 encoding. If your server or
+environment serves files with ASCII, you can workaround this behavior by using
+the [`charset` attribute][charset] on above named `<script>` tag, e.g.:
+
+```html
+<script src="vendor/mark.js/dist/mark.min.js" charset="UTF-8"></script>
+```
+
 [ecmascript]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Introduction
 [requirejs]: http://requirejs.org/
+[charset]: http://www.w3schools.com/tags/att_script_charset.asp
