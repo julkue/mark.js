@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with 'filter' callback", function () {
+describe("basic mark with filter callback", function () {
     var $ctx;
     beforeEach(function () {
         loadFixtures("basic/filter.html");
@@ -30,8 +30,8 @@ describe("basic mark with 'filter' callback", function () {
                 expect(k).toBe(totalMatches);
                 expect(i[term]).toBe(matches);
                 if(term !== "dolor") {
-                    i[term]++
-                        k++;
+                    i[term]++;
+                    k++;
                     return true;
                 } else {
                     return false;

@@ -19,9 +19,7 @@ describe("basic mark with accuracy complementary", function () {
                 new Mark($ctx2[0]).mark("lorem", {
                     "accuracy": "complementary",
                     "separateWordSearch": true,
-                    "done": function () {
-                        done();
-                    }
+                    "done": done
                 });
             }
         });

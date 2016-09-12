@@ -16,9 +16,7 @@ describe(
             new Mark($ctx[0]).mark(["test", "lorem test ipsum"], {
                 "diacritics": false,
                 "separateWordSearch": false,
-                "done": function () {
-                    done();
-                }
+                "done": done
             });
         });
 

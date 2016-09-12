@@ -14,9 +14,7 @@ describe("basic mark with accuracy partially", function () {
         new Mark($ctx[0]).mark("lorem", {
             "accuracy": "partially",
             "separateWordSearch": false,
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 

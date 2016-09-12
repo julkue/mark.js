@@ -30,7 +30,7 @@ describe("basic mark in an empty context", function () {
         });
     });
 
-    it("should call the 'done' function", function () {
+    it("should call the done function", function () {
         expect(done1).toBe(true);
         expect(done2).toBe(true);
     });

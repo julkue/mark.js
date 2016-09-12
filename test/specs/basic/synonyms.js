@@ -27,9 +27,7 @@ describe("basic mark with synonyms", function () {
                         "one": "1",
                         "two": "2"
                     },
-                    "done": function () {
-                        done();
-                    }
+                    "done": done
                 });
             }
         });

@@ -24,9 +24,7 @@ describe("basic mark with accuracy exactly", function () {
                         new Mark($ctx3[0]).mark("ipsu", {
                             "accuracy": "exactly",
                             "separateWordSearch": false,
-                            "done": function () {
-                                done();
-                            }
+                            "done": done
                         });
                     }
                 });

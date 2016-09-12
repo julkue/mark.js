@@ -19,7 +19,7 @@ describe("basic mark with ignoreJoiners and diacritics", function () {
         });
     });
 
-    it("should find ignoreJoiners matches with diacritics", function () {
+    it("should find matches containing diacritics", function () {
         expect($ctx.find("mark")).toHaveLength(12);
     });
 });

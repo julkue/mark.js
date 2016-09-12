@@ -6,7 +6,7 @@
  *****************************************************/
 "use strict";
 describe(
-    "mark with acrossElements, regular expression and 'filter' callback",
+    "mark with acrossElements, regular expression and filter callback",
     function () {
         var $ctx;
         beforeEach(function () {

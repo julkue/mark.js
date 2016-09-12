@@ -27,9 +27,7 @@ describe("mark with acrossElements and accuracy exactly", function () {
                             "accuracy": "exactly",
                             "separateWordSearch": false,
                             "acrossElements": true,
-                            "done": function () {
-                                done();
-                            }
+                            "done": done
                         });
                     }
                 });

@@ -34,10 +34,13 @@ describe("unmark with nested iframes", function () {
         }
     });
 
-    it("should remove all marked elements inside iframes recursively", function () {
-        expect(errCall).toBe(0);
-        $elements.each(function () {
-            expect(this).not.toBeInDOM();
-        });
-    });
+    it(
+        "should remove all marked elements inside iframes recursively",
+        function () {
+            expect(errCall).toBe(0);
+            $elements.each(function () {
+                expect(this).not.toBeInDOM();
+            });
+        }
+    );
 });

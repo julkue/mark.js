@@ -21,9 +21,7 @@ describe("mark with acrossElements and multiple blanks", function () {
                     "diacritics": false,
                     "separateWordSearch": false,
                     "acrossElements": true,
-                    "done": function () {
-                        done();
-                    }
+                    "done": done
                 });
             }
         });

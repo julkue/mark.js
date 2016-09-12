@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with case sensitive synonyms and diacritics", function () {
+describe("basic mark with caseSensitive synonyms and diacritics", function () {
     var $ctx;
     beforeEach(function (done) {
         loadFixtures("basic/case-sensitive-synonyms-diacritics.html");
@@ -18,9 +18,7 @@ describe("basic mark with case sensitive synonyms and diacritics", function () {
                 "Dolor": "Ãmet"
             },
             "caseSensitive": true,
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 

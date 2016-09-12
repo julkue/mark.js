@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with separate word search", function () {
+describe("basic mark with separateWordsearch", function () {
     var $ctx1, $ctx2, notFound;
     beforeEach(function (done) {
         loadFixtures("basic/separate-word-search.html");
@@ -23,9 +23,7 @@ describe("basic mark with separate word search", function () {
                 new Mark($ctx2[0]).mark(["lorem ipsum"], {
                     "diacritics": false,
                     "separateWordSearch": true,
-                    "done": function () {
-                        done();
-                    }
+                    "done": done
                 });
             }
         });
@@ -35,7 +33,7 @@ describe("basic mark with separate word search", function () {
         expect($ctx1.find("mark")).toHaveLength(8);
         expect($ctx2.find("mark")).toHaveLength(8);
     });
-    it("should call the 'noMatch' callback for separated words", function () {
+    it("should call the noMatch callback for separated words", function () {
         expect(notFound).toEqual(["test"]);
     });
 });

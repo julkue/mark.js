@@ -22,9 +22,7 @@ describe("basic mark with custom element and class", function () {
                     "separateWordSearch": false,
                     "element": "i",
                     "className": "custom",
-                    "done": function () {
-                        done();
-                    }
+                    "done": done
                 });
             }
         });

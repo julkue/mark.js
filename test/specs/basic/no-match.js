@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with 'noMatch' callback", function () {
+describe("basic mark with noMatch callback", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
         loadFixtures("basic/main.html");
@@ -24,7 +24,7 @@ describe("basic mark with 'noMatch' callback", function () {
         });
     });
 
-    it("should call the 'noMatch' callback for not found terms", function () {
+    it("should call the noMatch callback for not found terms", function () {
         expect(notFound).toEqual(["test"]);
     });
 });

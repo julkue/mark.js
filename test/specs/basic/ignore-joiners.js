@@ -24,8 +24,11 @@ describe("basic mark with ignoreJoiners", function () {
             }
         });
     });
-    it("should find and not find ignoreJoiners matches", function () {
+
+    it("should find matches when enabled", function () {
         expect($ctx1.find("mark")).toHaveLength(4);
+    });
+    it("should not find matches when disabled", function(){
         expect($ctx2.find("mark")).toHaveLength(2);
     });
 });

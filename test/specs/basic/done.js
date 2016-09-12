@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with 'done' callback", function () {
+describe("basic mark with done callback", function () {
     var $ctx, doneCalled, totalMatches;
     beforeEach(function (done) {
         loadFixtures("basic/main.html");
@@ -23,13 +23,13 @@ describe("basic mark with 'done' callback", function () {
         });
     });
 
-    it("should call the 'done' callback once only", function (done) {
+    it("should call the done callback once only", function (done) {
         setTimeout(function () {
             expect(doneCalled).toBe(1);
             done();
         }, 3000);
     });
-    it("should call the 'done' callback with total matches", function () {
+    it("should call the done callback with total matches", function () {
         expect(totalMatches).toBe(4);
     });
 });

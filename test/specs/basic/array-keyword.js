@@ -18,16 +18,14 @@ describe("basic mark with array", function () {
             "noMatch": function (term) {
                 notFound.push(term);
             },
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 
     it("should wrap all matching keywords from the array", function () {
         expect($ctx.find("mark")).toHaveLength(8);
     });
-    it("should call 'noMatch' for not found array items", function () {
+    it("should call noMatch for not found array items", function () {
         expect(notFound).toEqual(["test", "hey"]);
     });
 });

@@ -22,9 +22,7 @@ describe("mark with acrossElements and matches across iframes", function () {
                 "each": function ($m) {
                     $elements = $elements.add($($m));
                 },
-                "done": function () {
-                    done();
-                }
+                "done": done
             });
         } catch(e) {
             errCall++;

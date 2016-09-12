@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with 'debug' callback", function () {
+describe("basic mark with debug callback", function () {
     var $ctx, debugCalled;
     beforeEach(function (done) {
         loadFixtures("basic/main.html");

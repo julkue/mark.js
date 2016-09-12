@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("mark with acrossElements and 'each' callback", function () {
+describe("mark with acrossElements and each callback", function () {
     var $ctx, eachCalled;
     beforeEach(function (done) {
         loadFixtures("across-elements/basic/main.html");
@@ -19,13 +19,11 @@ describe("mark with acrossElements and 'each' callback", function () {
             "each": function () {
                 eachCalled++;
             },
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 
-    it("should call the 'each' callback for each marked element", function () {
+    it("should call the each callback for each marked element", function () {
         expect(eachCalled).toBe(6);
     });
 });

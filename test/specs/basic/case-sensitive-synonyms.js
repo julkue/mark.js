@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with case sensitive synonyms", function () {
+describe("basic mark with caseSensitive synonyms", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
         loadFixtures("basic/case-sensitive-synonyms.html");
@@ -29,15 +29,13 @@ describe("basic mark with case sensitive synonyms", function () {
                         "one": "1",
                         "two": "2"
                     },
-                    "done": function () {
-                        done();
-                    }
+                    "done": done
                 });
             }
         });
     });
 
-    it("should wrap synonyms as well as keywords", function () {
+    it("should wrap keywords and synonyms", function () {
         expect($ctx1.find("mark")).toHaveLength(6);
         expect($ctx2.find("mark")).toHaveLength(5);
     });

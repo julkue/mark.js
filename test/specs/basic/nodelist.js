@@ -14,9 +14,7 @@ describe("basic mark called with a context NodeList", function () {
         new Mark(document.querySelectorAll(".basic-nodelist")).mark("lorem", {
             "diacritics": false,
             "separateWordSearch": false,
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 

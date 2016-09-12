@@ -14,9 +14,7 @@ describe("basic mark in a context with script-tags and style-tags", function () 
         new Mark($ctx[0]).mark("lorem", {
             "diacritics": false,
             "separateWordSearch": false,
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 

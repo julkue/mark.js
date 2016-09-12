@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("mark with regular expression and 'filter' callback", function () {
+describe("mark with regular expression and filter callback", function () {
     var $ctx;
     beforeEach(function () {
         loadFixtures("regexp/filter.html");
@@ -22,7 +22,7 @@ describe("mark with regular expression and 'filter' callback", function () {
                 expect($.inArray(term, textOpts)).toBeGreaterThan(-1);
                 expect(k).toBe(totalMatches);
                 if(term !== "ipsum") {
-                        k++;
+                    k++;
                     return true;
                 } else {
                     return false;

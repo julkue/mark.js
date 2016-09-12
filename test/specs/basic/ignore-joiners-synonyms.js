@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with ignoreJoiners synonyms without diacritics", function () {
+describe("basic mark with ignoreJoiners and synonyms", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
         loadFixtures("basic/ignore-joiners-synonyms.html");
@@ -35,7 +35,7 @@ describe("basic mark with ignoreJoiners synonyms without diacritics", function (
         });
     });
 
-    it("should wrap ignoreJoiners synonyms as well as keywords without diacritics", function () {
+    it("should wrap synonyms", function () {
         expect($ctx1.find("mark")).toHaveLength(8);
         expect($ctx2.find("mark")).toHaveLength(8);
     });

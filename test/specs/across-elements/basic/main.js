@@ -15,9 +15,7 @@ describe("mark with acrossElements", function () {
             "diacritics": false,
             "separateWordSearch": false,
             "acrossElements": true,
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 

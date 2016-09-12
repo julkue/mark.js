@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with synonyms and 'noMatch'", function () {
+describe("basic mark with synonyms and noMatch", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
         loadFixtures("basic/synonyms-no-match.html");
@@ -27,7 +27,7 @@ describe("basic mark with synonyms and 'noMatch'", function () {
         });
     });
 
-    it("should not call 'noMatch' if there are synonym matches", function () {
+    it("should not call noMatch if there are synonym matches", function () {
         expect(notFound).toEqual([]);
     });
 });

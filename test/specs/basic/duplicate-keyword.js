@@ -25,6 +25,7 @@ describe("basic mark with duplicated keywords", function () {
             },
             "done": function () {
                 new Mark($ctx2[0]).mark("lorem test ipsum", {
+                    "separateWordSearch": true,
                     "filter": function(){
                         ctx2Called++;
                         // return false. Otherwise matches would become wrapped
@@ -44,7 +45,7 @@ describe("basic mark with duplicated keywords", function () {
         // it should be called only once, as there's only one unique keyword
         expect(ctx1Called).toBe(1);
     });
-    it("should ignore duplicated 'separateWordSearch' keywords", function(){
+    it("should ignore duplicated keywords with separateWordSearch", function(){
         expect(ctx2Called).toBe(9);
     });
 });

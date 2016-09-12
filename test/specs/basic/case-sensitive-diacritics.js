@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with case senstive diacritics", function () {
+describe("basic mark with caseSenstive and diacritics", function () {
     var $ctx;
     beforeEach(function (done) {
         loadFixtures("basic/case-sensitive-diacritics.html");
@@ -14,9 +14,7 @@ describe("basic mark with case senstive diacritics", function () {
         new Mark($ctx.get()).mark(["Dolor", "Amet", "Aliquam", "Lorem ipsum"], {
             "separateWordSearch": false,
             "caseSensitive": true,
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 

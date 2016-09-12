@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("mark with regular expression and 'noMatch' callback", function () {
+describe("mark with regular expression and noMatch callback", function () {
     var $ctx, notFound, notFoundCalled;
     beforeEach(function (done) {
         loadFixtures("regexp/main.html");
@@ -24,7 +24,7 @@ describe("mark with regular expression and 'noMatch' callback", function () {
         });
     });
 
-    it("should call 'notFound' with the regular expression", function () {
+    it("should call noMatch with the regular expression", function () {
         expect(notFoundCalled).toBe(1);
         expect(notFound instanceof RegExp).toBe(true);
     });

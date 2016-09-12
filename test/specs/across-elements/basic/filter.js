@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("mark with acrossElements and 'filter' callback", function () {
+describe("mark with acrossElements and filter callback", function () {
     var $ctx;
     beforeEach(function () {
         loadFixtures("across-elements/basic/filter.html");
@@ -31,8 +31,8 @@ describe("mark with acrossElements and 'filter' callback", function () {
                 expect(k).toBe(totalMatches);
                 expect(i[term]).toBe(matches);
                 if(term !== "dolor") {
-                    i[term]++
-                        k++;
+                    i[term]++;
+                    k++;
                     return true;
                 } else {
                     return false;

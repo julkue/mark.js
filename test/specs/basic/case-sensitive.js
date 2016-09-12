@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with case senstive", function () {
+describe("basic mark with caseSenstive", function () {
     var $ctx1, $ctx2;
     beforeEach(function (done) {
         loadFixtures("basic/case-sensitive.html");
@@ -22,9 +22,7 @@ describe("basic mark with case senstive", function () {
                     "synonyms" : {
                       "lorem": "Lorem"
                     },
-                    "done": function () {
-                        done();
-                    }
+                    "done": done
                 });
             }
         });
