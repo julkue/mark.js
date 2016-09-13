@@ -20,7 +20,7 @@
   ],
   "devDependencies": {
     "almond": "~0.3",
-    "connect-livereload": "^0.5",
+    "connect-livereload": "^0.6",
     "del": "^2.2.1",
     "grunt": "^1.0.1",
     "grunt-banner": "^0.6",
