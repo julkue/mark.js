@@ -143,6 +143,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 });
                 switch (val) {
                     case "partially":
+                    default:
                         return "()(" + str + ")";
                     case "complementary":
                         return "()([^\\s" + lsJoin + "]*" + str + "[^\\s" + lsJoin + "]*)";
@@ -338,12 +339,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 this.opt = opt;
                 this.log("Searching with expression \"" + regexp + "\"");
-                var totalMatches = 0;
+                var totalMatches = 0,
+                    fn = "wrapMatches";
                 var eachCb = function eachCb(element) {
                     totalMatches++;
                     _this7.opt.each(element);
                 };
-                var fn = "wrapMatches";
                 if (this.opt.acrossElements) {
                     fn = "wrapMatchesAcrossElements";
                 }
@@ -362,21 +363,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this8 = this;
 
                 this.opt = opt;
+                var totalMatches = 0,
+                    fn = "wrapMatches";
 
                 var _getSeparatedKeywords = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
 
                 var kwArr = _getSeparatedKeywords.keywords;
                 var kwArrLen = _getSeparatedKeywords.length;
                 var sens = this.opt.caseSensitive ? "" : "i";
-                var totalMatches = 0,
-                    fn = "wrapMatches";
-                if (this.opt.acrossElements) {
-                    fn = "wrapMatchesAcrossElements";
-                }
-                if (kwArrLen === 0) {
-                    this.opt.done(totalMatches);
-                    return;
-                }
                 var handler = function handler(kw) {
                     var regex = new RegExp(_this8.createRegExp(kw), "gm" + sens),
                         matches = 0;
@@ -398,7 +392,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         }
                     });
                 };
-                handler(kwArr[0]);
+                if (this.opt.acrossElements) {
+                    fn = "wrapMatchesAcrossElements";
+                }
+                if (kwArrLen === 0) {
+                    this.opt.done(totalMatches);
+                } else {
+                    handler(kwArr[0]);
+                }
             }
         }, {
             key: "unmark",
@@ -482,7 +483,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _createClass(DOMIterator, [{
             key: "getContexts",
             value: function getContexts() {
-                var ctx = void 0;
+                var ctx = void 0,
+                    filteredCtx = [];
                 if (typeof this.ctx === "undefined" || !this.ctx) {
                     ctx = [];
                 } else if (NodeList.prototype.isPrototypeOf(this.ctx)) {
@@ -493,7 +495,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     ctx = [this.ctx];
                 }
 
-                var filteredCtx = [];
                 ctx.forEach(function (ctx) {
                     var isDescendant = filteredCtx.filter(function (contexts) {
                         return contexts.contains(ctx);

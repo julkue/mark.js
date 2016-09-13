@@ -32,9 +32,8 @@ describe("mark with disabled iframes", function () {
         expect(errCall).toBe(0);
         var unequal = false;
         $elements.each(function () {
-            if($(this).prop("ownerDocument") != $ctx.prop("ownerDocument")) {
+            if($(this).prop("ownerDocument") !== $ctx.prop("ownerDocument")) {
                 unequal = true;
-                return;
             }
         });
         expect(unequal).toBe(false);

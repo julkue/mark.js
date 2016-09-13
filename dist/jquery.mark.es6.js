@@ -152,6 +152,7 @@
             });
             switch (val) {
                 case "partially":
+                default:
                     return `()(${ str })`;
                 case "complementary":
                     return `()([^\\s${ lsJoin }]*${ str }[^\\s${ lsJoin }]*)`;
@@ -320,12 +321,12 @@
         markRegExp(regexp, opt) {
             this.opt = opt;
             this.log(`Searching with expression "${ regexp }"`);
-            let totalMatches = 0;
+            let totalMatches = 0,
+                fn = "wrapMatches";
             const eachCb = element => {
                 totalMatches++;
                 this.opt.each(element);
             };
-            let fn = "wrapMatches";
             if (this.opt.acrossElements) {
                 fn = "wrapMatchesAcrossElements";
             }
@@ -341,21 +342,14 @@
 
         mark(sv, opt) {
             this.opt = opt;
+            let totalMatches = 0,
+                fn = "wrapMatches";
             const {
                 keywords: kwArr,
                 length: kwArrLen
             } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
-                  sens = this.opt.caseSensitive ? "" : "i";
-            let totalMatches = 0,
-                fn = "wrapMatches";
-            if (this.opt.acrossElements) {
-                fn = "wrapMatchesAcrossElements";
-            }
-            if (kwArrLen === 0) {
-                this.opt.done(totalMatches);
-                return;
-            }
-            const handler = kw => {
+                  sens = this.opt.caseSensitive ? "" : "i",
+                  handler = kw => {
                 let regex = new RegExp(this.createRegExp(kw), `gm${ sens }`),
                     matches = 0;
                 this.log(`Searching with expression "${ regex }"`);
@@ -376,7 +370,14 @@
                     }
                 });
             };
-            handler(kwArr[0]);
+            if (this.opt.acrossElements) {
+                fn = "wrapMatchesAcrossElements";
+            }
+            if (kwArrLen === 0) {
+                this.opt.done(totalMatches);
+            } else {
+                handler(kwArr[0]);
+            }
         }
 
         unmark(opt) {
@@ -429,7 +430,8 @@
         }
 
         getContexts() {
-            let ctx;
+            let ctx,
+                filteredCtx = [];
             if (typeof this.ctx === "undefined" || !this.ctx) {
                 ctx = [];
             } else if (NodeList.prototype.isPrototypeOf(this.ctx)) {
@@ -440,7 +442,6 @@
                 ctx = [this.ctx];
             }
 
-            let filteredCtx = [];
             ctx.forEach(ctx => {
                 const isDescendant = filteredCtx.filter(contexts => {
                     return contexts.contains(ctx);

@@ -69,6 +69,12 @@ module.exports = grunt => {
             build: ["build/*.js"],
             dist: ["dist/*.js"]
         },
+        eslint: {
+            options: {
+                configFile: ".eslintrc"
+            },
+            target: ["src/**/*.js", "test/**/*.js"]
+        },
         jsdoc: {
             dist: {
                 src: [`src/${mainFile}`, "README.md"],
@@ -157,20 +163,27 @@ module.exports = grunt => {
     grunt.registerTask("dev", ["karma:dev:start", "watch"]);
 
     /**
+     * Run lint
+     */
+    grunt.registerTask("lint", function () {
+        grunt.task.run(["eslint"]);
+    });
+
+    /**
      * Run tests
      */
     grunt.registerTask("test", function () {
         grunt.log.subhead(
             "See the table below for test coverage or view 'build/coverage/'"
         );
-        grunt.task.run(["compile"]);
+        grunt.task.run(["compile", "lint"]);
         // continuous integration cross browser test
         if(process.env.CI) {
             if(process.env.SAUCE_USERNAME && process.env.SAUCE_ACCESS_KEY) {
                 grunt.task.run(["karma:buildsl"]);
                 return;
             } else {
-                if(process.env.TRAVIS_PULL_REQUEST !== "false"){
+                if(process.env.TRAVIS_PULL_REQUEST !== "false") {
                     grunt.log.warn(
                         "Make sure SAUCE_USERNAME and SAUCE_ACCESS_KEY " +
                         "environment variables are set."

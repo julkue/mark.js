@@ -33,14 +33,13 @@ describe("mark with iframes where onload was not fired yet", function () {
 
     it("should wrap matches inside iframes", function () {
         expect(errCall).toBe(0);
+        expect($elements).toHaveLength(2);
         var unequal = false;
         $elements.each(function () {
-            if($(this).prop("ownerDocument") != $ctx.prop("ownerDocument")) {
+            if($(this).prop("ownerDocument") !== $ctx.prop("ownerDocument")) {
                 unequal = true;
-                return;
             }
         });
-        expect($elements).toHaveLength(2);
-        expect(errCall).toBe(0);
+        expect(unequal).toBe(true);
     });
 });

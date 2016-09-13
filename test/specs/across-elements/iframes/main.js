@@ -35,9 +35,8 @@ describe("mark with acrossElements and iframes", function () {
         var unequal = false;
         $elements.each(function () {
             // make sure that some elements are inside an iframe
-            if($(this).prop("ownerDocument") != $ctx.prop("ownerDocument")) {
+            if($(this).prop("ownerDocument") !== $ctx.prop("ownerDocument")) {
                 unequal = true;
-                return;
             }
         });
         expect(unequal).toBe(true);

@@ -20,7 +20,7 @@ describe("basic mark with caseSenstive", function () {
                     "separateWordSearch": false,
                     "caseSensitive": false,
                     "synonyms" : {
-                      "lorem": "Lorem"
+                        "lorem": "Lorem"
                     },
                     "done": done
                 });

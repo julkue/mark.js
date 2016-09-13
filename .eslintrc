@@ -1,0 +1,63 @@
+{
+    "env": {
+        "browser": true,
+        "jasmine": true,
+        "jquery": true
+    },
+    "globals": {
+        "Mark": true
+    },
+    "parser": "babel-eslint",
+    "extends": [
+        "eslint:recommended",
+        "plugin:jasmine-jquery/recommended"
+    ],
+    "plugins": [
+        "jasmine-jquery"
+    ],
+    "rules": {
+        "max-len": [
+            "error", {
+                "ignoreStrings": false,
+                "ignoreTrailingComments": false,
+                "ignoreComments": false
+            }
+        ],
+        "indent": [
+            "error",
+            4
+        ],
+        "valid-jsdoc": [
+            "error", {
+                "prefer": {
+                    "arg": "param"
+                },
+                "requireReturn": false,
+                "requireReturnDescription": false,
+                "requireParamDescription": false,
+                "preferType": {
+                    "Boolean": "boolean",
+                    "Number": "number",
+                    "Object": "object",
+                    "String": "string"
+                }
+            }
+        ],
+        "consistent-return": "warn",
+        "curly": "warn",
+        "dot-location": [
+            "error",
+            "property"
+        ],
+        "eqeqeq": "warn",
+        "no-alert": "error",
+        "no-eval": "error",
+        "no-with": "error",
+        "brace-style": "error",
+        "camelcase": "error",
+        "consistent-this": "error",
+        "no-tabs": "error",
+        "arrow-spacing": "error",
+        "one-var": "error"
+    }
+}

@@ -15,9 +15,9 @@ describe("mark with iframes where onload was already fired", function () {
         errCall = 0;
         try {
             var int = setInterval(function () {
-                var iCon = $ctx.find("iframe").first()[0].contentWindow;
-                var readyState = iCon.document.readyState;
-                var href = iCon.location.href;
+                var iCon = $ctx.find("iframe").first()[0].contentWindow,
+                    readyState = iCon.document.readyState,
+                    href = iCon.location.href;
                 // about:blank check is necessary for Chrome
                 // (see Mark~onIframeReady)
                 if(readyState === "complete" && href !== "about:blank") {
@@ -40,14 +40,13 @@ describe("mark with iframes where onload was already fired", function () {
 
     it("should wrap matches inside iframes", function () {
         expect(errCall).toBe(0);
+        expect($elements).toHaveLength(8);
         var unequal = false;
         $elements.each(function () {
-            if($(this).prop("ownerDocument") != $ctx.prop("ownerDocument")) {
+            if($(this).prop("ownerDocument") !== $ctx.prop("ownerDocument")) {
                 unequal = true;
-                return;
             }
         });
-        expect($elements).toHaveLength(8);
-        expect(errCall).toBe(0);
+        expect(unequal).toBe(true);
     });
 });

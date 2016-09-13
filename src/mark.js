@@ -11,7 +11,7 @@
  * @example
  * new Mark(document.querySelector(".context")).markRegExp(/lorem/gmi);
  */
-class Mark {
+class Mark { // eslint-disable-line no-unused-vars
 
     /**
      * @param {HTMLElement|HTMLElement[]|NodeList} ctx - The context DOM
@@ -31,6 +31,7 @@ class Mark {
      * public methods. See {@link Mark#mark}, {@link Mark#markRegExp} and
      * {@link Mark#unmark} for option properties.
      * @type {object}
+     * @param {object} [val] - An object that will be merged with defaults
      * @access protected
      */
     set opt(val) {
@@ -158,7 +159,7 @@ class Mark {
     setupIgnoreJoinersRegExp(str) {
         // adding a "null" unicode character as it will not be modified by the
         // other "create" regular expression functions
-        return str.replace(/[^(|)]/g, function(val, indx, original) {
+        return str.replace(/[^(|)]/g, function (val, indx, original) {
             // don't add a null after an opening "(", around a "|" or before
             // a closing "("
             let nextChar = original.charAt(indx + 1);
@@ -257,6 +258,7 @@ class Mark {
         });
         switch(val) {
         case "partially":
+        default:
             return `()(${str})`;
         case "complementary":
             return `()([^\\s${lsJoin}]*${str}[^\\s${lsJoin}]*)`;
@@ -487,8 +489,8 @@ class Mark {
      * expression that has at least two groups (like returned from
      * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
      * the second will be wrapped
-     * @param {Mark~wrapMatchesEachCallback} eachCb
      * @param {Mark~wrapMatchesFilterCallback} filterCb
+     * @param {Mark~wrapMatchesEachCallback} eachCb
      * @param {Mark~wrapMatchesEndCallback} endCb
      * @access protected
      */
@@ -544,8 +546,8 @@ class Mark {
      * expression that has at least two groups (like returned from
      * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
      * the second will be wrapped
-     * @param {Mark~wrapMatchesAcrossElementsEachCallback} eachCb
      * @param {Mark~wrapMatchesAcrossElementsFilterCallback} filterCb
+     * @param {Mark~wrapMatchesAcrossElementsEachCallback} eachCb
      * @param {Mark~wrapMatchesAcrossElementsEndCallback} endCb
      * @access protected
      */
@@ -644,12 +646,12 @@ class Mark {
     markRegExp(regexp, opt) {
         this.opt = opt;
         this.log(`Searching with expression "${regexp}"`);
-        let totalMatches = 0;
+        let totalMatches = 0,
+            fn = "wrapMatches";
         const eachCb = element => {
             totalMatches++;
             this.opt.each(element);
         };
-        let fn = "wrapMatches";
         if(this.opt.acrossElements) {
             fn = "wrapMatchesAcrossElements";
         }
@@ -734,42 +736,42 @@ class Mark {
      */
     mark(sv, opt) {
         this.opt = opt;
+        let totalMatches = 0,
+            fn = "wrapMatches";
         const {
             keywords: kwArr,
             length: kwArrLen
         } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
-            sens = this.opt.caseSensitive ? "" : "i";
-        let totalMatches = 0,
-            fn = "wrapMatches";
+            sens = this.opt.caseSensitive ? "" : "i",
+            handler = kw => { // async function calls as iframes are async too
+                let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),
+                    matches = 0;
+                this.log(`Searching with expression "${regex}"`);
+                this[fn](regex, false, (term, node) => {
+                    return this.opt.filter(node, kw, totalMatches, matches);
+                }, element => {
+                    matches++;
+                    totalMatches++;
+                    this.opt.each(element);
+                }, () => {
+                    if(matches === 0) {
+                        this.opt.noMatch(kw);
+                    }
+                    if(kwArr[kwArrLen - 1] === kw) {
+                        this.opt.done(totalMatches);
+                    } else {
+                        handler(kwArr[kwArr.indexOf(kw) + 1]);
+                    }
+                });
+            };
         if(this.opt.acrossElements) {
             fn = "wrapMatchesAcrossElements";
         }
         if(kwArrLen === 0) {
             this.opt.done(totalMatches);
-            return;
+        } else {
+            handler(kwArr[0]);
         }
-        const handler = kw => { // async function calls as iframes are async too
-            let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),
-                matches = 0;
-            this.log(`Searching with expression "${regex}"`);
-            this[fn](regex, false, (term, node) => {
-                return this.opt.filter(node, kw, totalMatches, matches);
-            }, element => {
-                matches++;
-                totalMatches++;
-                this.opt.each(element);
-            }, () => {
-                if(matches === 0) {
-                    this.opt.noMatch(kw);
-                }
-                if(kwArr[kwArrLen - 1] === kw) {
-                    this.opt.done(totalMatches);
-                } else {
-                    handler(kwArr[kwArr.indexOf(kw) + 1]);
-                }
-            });
-        };
-        handler(kwArr[0]);
     }
 
     /**
@@ -885,11 +887,12 @@ class DOMIterator {
 
     /**
      * Returns all contexts filtered by duplicates (even nested)
-     * @return [HTMLElement[]] - An array containing DOM contexts
+     * @return {HTMLElement[]} - An array containing DOM contexts
      * @access protected
      */
     getContexts() {
-        let ctx;
+        let ctx,
+            filteredCtx = [];
         if(typeof this.ctx === "undefined" || !this.ctx) { // e.g. null
             ctx = [];
         } else if(NodeList.prototype.isPrototypeOf(this.ctx)) {
@@ -900,7 +903,6 @@ class DOMIterator {
             ctx = [this.ctx];
         }
         // filter duplicate text nodes
-        let filteredCtx = [];
         ctx.forEach(ctx => {
             const isDescendant = filteredCtx.filter(contexts => {
                 return contexts.contains(ctx);
@@ -919,6 +921,7 @@ class DOMIterator {
     /**
      * Calls the success callback function with the iframe document. If it can't
      * be accessed it calls the error callback function
+     * @param {HTMLElement} ifr - The iframe DOM element
      * @param {DOMIterator~getIframeContentsSuccessCallback} successFn
      * @param {function} [errorFn]
      * @access protected
@@ -1105,7 +1108,7 @@ class DOMIterator {
      * @param {HTMLElement} node - The node that should occur after the iframe
      * @param {HTMLElement} prevNode - The node that should occur before the
      * iframe
-     * @param {HTMLElement} iframe - The iframe to check against
+     * @param {HTMLElement} ifr - The iframe to check against
      * @return {boolean}
      * @access protected
      */
@@ -1135,8 +1138,8 @@ class DOMIterator {
      */
     /**
      * Returns the previous and current node of the specified iterator
-     * @param {NodeIterator} - The iterator
-     * @return DOMIterator~getIteratorNodeReturn
+     * @param {NodeIterator} itr - The iterator
+     * @return {DOMIterator~getIteratorNodeReturn}
      * @access protected
      */
     getIteratorNode(itr) {
@@ -1173,9 +1176,9 @@ class DOMIterator {
      * @param {HTMLElement} node - The node that should occur after the iframe
      * @param {HTMLElement} prevNode - The node that should occur before the
      * iframe
-     * @param {HTMLElement} currIFr - The iframe to check
-     * @param {DOMIterator~checkIframeFilterIfr} - The iframe dictionary. Will
-     * be manipulated (by reference)
+     * @param {HTMLElement} currIfr - The iframe to check
+     * @param {DOMIterator~checkIframeFilterIfr} ifr - The iframe dictionary.
+     * Will be manipulated (by reference)
      * @return {boolean} Returns true when it should be handled, otherwise false
      * @access protected
      */
@@ -1236,7 +1239,7 @@ class DOMIterator {
      * @param {HTMLElement} ctx - The context
      * @param  {DOMIterator~forEachNodeCallback} eachCb - Each callback
      * @param {DOMIterator~filterCb} filterCb - Filter callback
-     * @param {DOMIterator~forEachNodeEndCallback} endCb - End callback
+     * @param {DOMIterator~forEachNodeEndCallback} doneCb - End callback
      * @access protected
      */
     iterateThroughNodes(whatToShow, ctx, eachCb, filterCb, doneCb) {
@@ -1302,7 +1305,7 @@ class DOMIterator {
             };
             // wait for iframes to avoid recursive calls, otherwise this would
             // perhaps reach the recursive function call limit with many nodes
-            if(this.iframes){
+            if(this.iframes) {
                 this.waitForIframes(ctx, ready);
             } else {
                 ready();

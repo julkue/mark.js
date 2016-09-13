@@ -68,9 +68,10 @@ framework.
 | Grunt task | Description                                                      |
 |------------|------------------------------------------------------------------|
 | dev        | For development. Will run `test` on file changes                 |
-| dist       | Will trigger `compile`, `test` and creates a JSDOC documentation |
+| dist       | Triggers `compile`, `test` and creates a JSDOC documentation     |
 | compile    | Generates all files in `./dist`                                  |
-| test       | Runs the test and creates test coverage                          |
+| lint       | Runs ESLint lint                                                 |
+| test       | Runs the test, `lint` and creates test coverage                  |
 
 _Note: Run tasks with `$ grunt [task]` (Replace "[task]" with the actual task name)._
 
@@ -92,9 +93,12 @@ Please note the following things when doing a pull request:
 - When changing something inside `mark.js`, please run `$ grunt dist` at the end
   to generate files in `dist/`
 - Make sure that you format code to fit the [code style][code-style]. If
-  something isn't covered, please see existing code for orientation
+  something isn't covered, please see existing code for orientation. The maximum
+  line length for JavaScript files is 80 characters. You'll be notified if
+  something is wrong with the code style when running `$ grunt test` or
+  `$ grunt dist`
 - Pull requests will not be accepted if they worsen test coverage significantly.
-  You can view test coverage in `./build/coverage/` after running `$ grunt test`.
+  You can view test coverage in `./build/coverage/` after running `$ grunt test`
 
 ### 2.6 Contribution and License Agreement
 
