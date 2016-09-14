@@ -154,6 +154,7 @@
                         "accuracy": "partially",
                         "acrossElements": false,
                         "caseSensitive": false,
+                        "ignoreJoiners": false,
                         "debug": false
                     };
                 for(var opt in options) {

@@ -120,6 +120,11 @@
         <label><input id="{{prefix}}caseSensitive" name="caseSensitive" type="checkbox"> Case sensitive</label>
     </div>
 {{/inline}}
+{{#* inline "ignore-joiners-checkbox"}}
+    <div class="checkbox">
+        <label><input id="{{prefix}}ignoreJoiners" name="ignoreJoiners" type="checkbox"> Ignore joiners</label>
+    </div>
+{{/inline}}
 {{#* inline "debug-checkbox"}}
     <div class="checkbox">
         <label><input id="{{prefix}}debug" name="debug" type="checkbox"> Debug</label>
@@ -146,6 +151,7 @@
                     {{> diacritics-checkbox prefix="form-keyword-"}}
                     {{> iframes-checkbox prefix="form-keyword-"}}
                     {{> case-sensitive-checkbox prefix="form-keyword-"}}
+                    {{> ignore-joiners-checkbox prefix="form-keyword-"}}
                     {{> across-elements-checkbox prefix="form-keyword-"}}
                     {{> debug-checkbox prefix="form-keyword-"}}
                 </div>
@@ -172,6 +178,7 @@
                     {{> diacritics-checkbox prefix="form-array-"}}
                     {{> iframes-checkbox prefix="form-array-"}}
                     {{> case-sensitive-checkbox prefix="form-keyword-"}}
+                    {{> ignore-joiners-checkbox prefix="form-keyword-"}}
                     {{> across-elements-checkbox prefix="form-keyword-"}}
                     {{> debug-checkbox prefix="form-array-"}}
                 </div>
@@ -233,7 +240,7 @@
                 </div>
                 <div class="panel-body context">
                     <p>
-                        Lorem ipsum dolor sit āmet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, one, nò sea takimata 1 sanctus est <span class="ignore">Lorem</span> ipsum dolor sit amet. Lörem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est <span class="ignore">lorem</span> ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy.
+                        Lorem ipsum dolor sit āmet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, one, nò sea takimata 1 sanctus est <span class="ignore">Lorem</span> ipsum dolor sit amet. Lörem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam lor&shy;em ipsum nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est <span class="ignore">lorem</span> ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy.
                     </p>
                 </div>
             </div>
