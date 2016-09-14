@@ -92,6 +92,7 @@ content='For both, JavaScript and jQuery:
     "iframes": false,
     "acrossElements": false,
     "caseSensitive": false,
+    "ignoreJoiners": false,
     "each": function(node){
         // node is the marked DOM element
     },
