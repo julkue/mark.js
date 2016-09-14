@@ -500,7 +500,10 @@ class Mark { // eslint-disable-line no-unused-vars
             dict.nodes.forEach(node => {
                 node = node.node;
                 let match;
-                while((match = regex.exec(node.textContent)) !== null) {
+                while(
+                    (match = regex.exec(node.textContent)) !== null &&
+                    match[matchIdx] !== ""
+                ) {
                     if(!filterCb(match[matchIdx], node)) {
                         continue;
                     }
@@ -555,7 +558,10 @@ class Mark { // eslint-disable-line no-unused-vars
         const matchIdx = custom ? 0 : 2;
         this.getTextNodes(dict => {
             let match;
-            while((match = regex.exec(dict.value)) !== null) {
+            while(
+                (match = regex.exec(dict.value)) !== null &&
+                match[matchIdx] !== ""
+            ) {
                 // calculate range inside dict.value
                 let start = match.index;
                 if(!custom) {

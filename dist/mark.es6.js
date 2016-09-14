@@ -268,7 +268,7 @@
                 dict.nodes.forEach(node => {
                     node = node.node;
                     let match;
-                    while ((match = regex.exec(node.textContent)) !== null) {
+                    while ((match = regex.exec(node.textContent)) !== null && match[matchIdx] !== "") {
                         if (!filterCb(match[matchIdx], node)) {
                             continue;
                         }
@@ -290,7 +290,7 @@
             const matchIdx = custom ? 0 : 2;
             this.getTextNodes(dict => {
                 let match;
-                while ((match = regex.exec(dict.value)) !== null) {
+                while ((match = regex.exec(dict.value)) !== null && match[matchIdx] !== "") {
                     let start = match.index;
                     if (!custom) {
                         start += match[matchIdx - 1].length;
