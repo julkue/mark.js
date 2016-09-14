@@ -279,7 +279,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     dict.nodes.forEach(function (node) {
                         node = node.node;
                         var match = void 0;
-                        while ((match = regex.exec(node.textContent)) !== null) {
+                        while ((match = regex.exec(node.textContent)) !== null && match[matchIdx] !== "") {
                             if (!filterCb(match[matchIdx], node)) {
                                 continue;
                             }
@@ -304,7 +304,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var matchIdx = custom ? 0 : 2;
                 this.getTextNodes(function (dict) {
                     var match = void 0;
-                    while ((match = regex.exec(dict.value)) !== null) {
+                    while ((match = regex.exec(dict.value)) !== null && match[matchIdx] !== "") {
                         var start = match.index;
                         if (!custom) {
                             start += match[matchIdx - 1].length;
