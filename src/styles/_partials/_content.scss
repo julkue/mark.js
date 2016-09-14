@@ -26,7 +26,14 @@ main {
                 white-space: pre;
             }
         }
-
+    }
+    section{
+        > article:not(:first-of-type){
+            margin-top: 35px;
+        }
+    }
+    h4{
+        font-weight: bold;
     }
     .btn {
         white-space: normal;

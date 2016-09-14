@@ -4,7 +4,9 @@ title: unmark()
 
 A method to remove highlights created by {{defaults.title}}.
 
-**JavaScript Syntax**:
+#### Syntax
+
+JavaScript:
 
 ```javascript
 var context = document.querySelector(".context");
@@ -12,16 +14,16 @@ var instance = new Mark(context);
 instance.unmark(options);
 ```
 
-**jQuery Syntax**:
+jQuery:
 
 ```javascript
 $(".context").unmark(options);
 ```
 
-Note that this is a chaining method, thus allows you to call further methods on
+__Note__: This is a chaining method, thus allows you to call further methods on
 the returning object.
 
-**Parameters**:
+#### Parameters
 
 _options_
 
@@ -40,9 +42,26 @@ Optional options:
 | log       | object   | console | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                     |
 
 {{> collapsible
-id="unmark-code-overview"
-triggerContent="Click here to see a code overview of all above named options"
-content='<pre><code class="lang-javascript">{
+id="unmark-code-overview-basic"
+triggerContent="Basic example"
+content='JavaScript:
+
+<pre><code class="lang-javascript">var context = document.querySelector(".context"); // requires an element with class "context" to exist
+var instance = new Mark(context);
+instance.unmark();
+</code></pre>
+
+jQuery:
+
+<pre><code class="lang-javascript">$(".context").unmark(); // requires an element with class "context" to exist</code></pre>
+'}}
+
+{{> collapsible
+id="unmark-code-overview-options"
+triggerContent="Example with all above named options and their default values"
+content='For both, JavaScript and jQuery:
+
+<pre><code class="lang-javascript">var options = {
     "element": "",
     "className": "",
     "exclude": [],
@@ -50,8 +69,19 @@ content='<pre><code class="lang-javascript">{
     "done": function(){},
     "debug": false,
     "log": window.console
-}
+};
 </code></pre>
+
+JavaScript:
+
+<pre><code class="lang-javascript">var context = document.querySelector(".context"); // requires an element with class "context" to exist
+var instance = new Mark(context);
+instance.unmark(options);
+</code></pre>
+
+jQuery:
+
+<pre><code class="lang-javascript">$(".context").unmark(options); // requires an element with class "context" to exist</code></pre>
 '}}
 
 [SOP]: https://en.wikipedia.org/wiki/Same-origin_policy

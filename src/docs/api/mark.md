@@ -4,7 +4,9 @@ title: mark()
 
 A method to highlight custom search terms.
 
-**JavaScript Syntax**:
+#### Syntax
+
+JavaScript:
 
 ```javascript
 var context = document.querySelector(".context");
@@ -12,16 +14,16 @@ var instance = new Mark(context);
 instance.mark(keyword [, options]);
 ```
 
-**jQuery Syntax**:
+jQuery:
 
 ```javascript
 $(".context").mark(keyword [, options]);
 ```
 
-Note that this is a chaining method, thus allows you to call further methods on
+__Note__: This is a chaining method, thus allows you to call further methods on
 the returning object.
 
-**Parameters**:
+#### Parameters
 
 _keyword_
 
@@ -56,10 +58,29 @@ Optional options:
 | debug              | boolean          | false       | Set this option to `true` if you want to log messages                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | log                | object           | console     | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
+#### Examples
+
 {{> collapsible
-id="mark-code-overview"
-triggerContent="Click here to see a code overview of all above named options"
-content='<pre><code class="lang-javascript">{
+id="mark-code-overview-basic"
+triggerContent="Basic example"
+content='JavaScript:
+
+<pre><code class="lang-javascript">var context = document.querySelector(".context"); // requires an element with class "context" to exist
+var instance = new Mark(context);
+instance.mark("test"); // will mark the keyword "test"
+</code></pre>
+
+jQuery:
+
+<pre><code class="lang-javascript">$(".context").mark("test"); // will mark the keyword "test", requires an element with class "context" to exist</code></pre>
+'}}
+
+{{> collapsible
+id="mark-code-overview-options"
+triggerContent="Example with all above named options and their default values"
+content='For both, JavaScript and jQuery:
+
+<pre><code class="lang-javascript">var options = {
     "element": "mark",
     "className": "",
     "exclude": [],
@@ -89,8 +110,19 @@ content='<pre><code class="lang-javascript">{
     },
     "debug": false,
     "log": window.console
-}
+};
 </code></pre>
+
+JavaScript:
+
+<pre><code class="lang-javascript">var context = document.querySelector(".context"); // requires an element with class "context" to exist
+var instance = new Mark(context);
+instance.mark("test", options); // will mark the keyword "test"
+</code></pre>
+
+jQuery:
+
+<pre><code class="lang-javascript">$(".context").mark("test", options); // will mark the keyword "test", requires an element with class "context" to exist</code></pre>
 '}}
 
 [diacritic]: https://en.wikipedia.org/wiki/Diacritic
