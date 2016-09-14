@@ -19,7 +19,8 @@ describe(
             });
         });
 
-        it("should not mark regular expressions with infinite matches",
+        it(
+            "should not mark regular expressions with infinite matches",
             function () {
                 expect($ctx.find("mark")).toHaveLength(0);
             }
