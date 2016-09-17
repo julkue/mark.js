@@ -72,6 +72,7 @@
                     .find("input, select")
                     .not("[name='keyword'], [name='array'], [name='regexp']")
                     .not("[name='type'], [name='exclude[]']")
+                    .not("[name='ignoreGroups']")
                     .serializeArray()
                     .concat(
                         $form.find("input[type='checkbox']")
@@ -132,6 +133,8 @@
                         options["exclude"].push(val);
                     }
                 });
+                var $iGroups = getCurrentForm().find("[name='ignoreGroups']");
+                options["ignoreGroups"] = parseInt($iGroups.val()) || 0;
                 return options;
             }
 
@@ -155,6 +158,7 @@
                         "acrossElements": false,
                         "caseSensitive": false,
                         "ignoreJoiners": false,
+                        "ignoreGroups": 0,
                         "debug": false
                     };
                 for(var opt in options) {

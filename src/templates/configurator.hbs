@@ -92,7 +92,13 @@
 {{#* inline "class-name-form-group"}}
     <div class="form-group">
         <label for="{{prefix}}className">Class name:</label>
-        <input class="form-control input-sm" id="{{prefix}}element" name="className" type="text" placeholder="(e.g. highlight)" pattern="-?[_a-zA-Z]+[_a-zA-Z0-9-]*" title="A valid class name not starting with a dot">
+        <input class="form-control input-sm" id="{{prefix}}className" name="className" type="text" placeholder="(e.g. highlight)" pattern="-?[_a-zA-Z]+[_a-zA-Z0-9-]*" title="A valid class name not starting with a dot">
+    </div>
+{{/inline}}
+{{#* inline "ignore-groups-form-group"}}
+    <div class="form-group">
+        <label for="{{prefix}}ignoreGroups">Ignore groups:</label>
+        <input class="form-control input-sm" id="{{prefix}}ignoreGroups" name="ignoreGroups" type="number" placeholder="0">
     </div>
 {{/inline}}
 {{#* inline "separate-word-search-checkbox"}}
@@ -177,9 +183,9 @@
                     {{> separate-word-search-checkbox prefix="form-array-"}}
                     {{> diacritics-checkbox prefix="form-array-"}}
                     {{> iframes-checkbox prefix="form-array-"}}
-                    {{> case-sensitive-checkbox prefix="form-keyword-"}}
-                    {{> ignore-joiners-checkbox prefix="form-keyword-"}}
-                    {{> across-elements-checkbox prefix="form-keyword-"}}
+                    {{> case-sensitive-checkbox prefix="form-array-"}}
+                    {{> ignore-joiners-checkbox prefix="form-array-"}}
+                    {{> across-elements-checkbox prefix="form-array-"}}
                     {{> debug-checkbox prefix="form-array-"}}
                 </div>
             </div>
@@ -198,9 +204,10 @@
             </div>
             <div class="col-sm-6">
                 {{> class-name-form-group prefix="form-regexp-"}}
+                {{> ignore-groups-form-group prefix="form-regexp-"}}
                 <div class="form-group checkbox-options">
                     {{> iframes-checkbox prefix="form-regexp-"}}
-                    {{> across-elements-checkbox prefix="form-keyword-"}}
+                    {{> across-elements-checkbox prefix="form-regexp-"}}
                     {{> debug-checkbox prefix="form-regexp-"}}
                 </div>
             </div>
