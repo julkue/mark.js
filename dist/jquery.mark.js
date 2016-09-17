@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.3.0
+ * mark.js v8.4.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -271,10 +271,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: "wrapMatches",
-            value: function wrapMatches(regex, custom, filterCb, eachCb, endCb) {
+            value: function wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
                 var _this5 = this;
 
-                var matchIdx = custom ? 0 : 2;
+                var matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
                 this.getTextNodes(function (dict) {
                     dict.nodes.forEach(function (node) {
                         node = node.node;
@@ -284,8 +284,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                                 continue;
                             }
                             var pos = match.index;
-                            if (!custom) {
-                                pos += match[matchIdx - 1].length;
+                            if (matchIdx !== 0) {
+                                for (var i = 1; i < matchIdx; i++) {
+                                    pos += match[i].length;
+                                }
                             }
                             node = _this5.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
                             eachCb(node.previousSibling);
@@ -298,16 +300,18 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: "wrapMatchesAcrossElements",
-            value: function wrapMatchesAcrossElements(regex, custom, filterCb, eachCb, endCb) {
+            value: function wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
                 var _this6 = this;
 
-                var matchIdx = custom ? 0 : 2;
+                var matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
                 this.getTextNodes(function (dict) {
                     var match = void 0;
                     while ((match = regex.exec(dict.value)) !== null && match[matchIdx] !== "") {
                         var start = match.index;
-                        if (!custom) {
-                            start += match[matchIdx - 1].length;
+                        if (matchIdx !== 0) {
+                            for (var i = 1; i < matchIdx; i++) {
+                                start += match[i].length;
+                            }
                         }
                         var end = start + match[matchIdx].length;
 
@@ -348,7 +352,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (this.opt.acrossElements) {
                     fn = "wrapMatchesAcrossElements";
                 }
-                this[fn](regexp, true, function (match, node) {
+                this[fn](regexp, this.opt.ignoreGroups, function (match, node) {
                     return _this7.opt.filter(node, match, totalMatches);
                 }, eachCb, function () {
                     if (totalMatches === 0) {
@@ -375,7 +379,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     var regex = new RegExp(_this8.createRegExp(kw), "gm" + sens),
                         matches = 0;
                     _this8.log("Searching with expression \"" + regex + "\"");
-                    _this8[fn](regex, false, function (term, node) {
+                    _this8[fn](regex, 1, function (term, node) {
                         return _this8.opt.filter(node, kw, totalMatches, matches);
                     }, function (element) {
                         matches++;
@@ -438,6 +442,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "synonyms": {},
                     "accuracy": "partially",
                     "acrossElements": false,
+                    "caseSensitive": false,
+                    "ignoreJoiners": false,
+                    "ignoreGroups": 0,
                     "each": function each() {},
                     "noMatch": function noMatch() {},
                     "filter": function filter() {
@@ -445,9 +452,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     },
                     "done": function done() {},
                     "debug": false,
-                    "log": window.console,
-                    "caseSensitive": false,
-                    "ignoreJoiners": false
+                    "log": window.console
                 }, val);
             },
             get: function get() {

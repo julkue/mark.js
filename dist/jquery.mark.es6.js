@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.3.0
+ * mark.js v8.4.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -34,14 +34,15 @@
                 "synonyms": {},
                 "accuracy": "partially",
                 "acrossElements": false,
+                "caseSensitive": false,
+                "ignoreJoiners": false,
+                "ignoreGroups": 0,
                 "each": () => {},
                 "noMatch": () => {},
                 "filter": () => true,
                 "done": () => {},
                 "debug": false,
-                "log": window.console,
-                "caseSensitive": false,
-                "ignoreJoiners": false
+                "log": window.console
             }, val);
         }
 
@@ -262,8 +263,8 @@
             });
         }
 
-        wrapMatches(regex, custom, filterCb, eachCb, endCb) {
-            const matchIdx = custom ? 0 : 2;
+        wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
+            const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
             this.getTextNodes(dict => {
                 dict.nodes.forEach(node => {
                     node = node.node;
@@ -273,8 +274,10 @@
                             continue;
                         }
                         let pos = match.index;
-                        if (!custom) {
-                            pos += match[matchIdx - 1].length;
+                        if (matchIdx !== 0) {
+                            for (let i = 1; i < matchIdx; i++) {
+                                pos += match[i].length;
+                            }
                         }
                         node = this.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
                         eachCb(node.previousSibling);
@@ -286,14 +289,16 @@
             });
         }
 
-        wrapMatchesAcrossElements(regex, custom, filterCb, eachCb, endCb) {
-            const matchIdx = custom ? 0 : 2;
+        wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
+            const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
             this.getTextNodes(dict => {
                 let match;
                 while ((match = regex.exec(dict.value)) !== null && match[matchIdx] !== "") {
                     let start = match.index;
-                    if (!custom) {
-                        start += match[matchIdx - 1].length;
+                    if (matchIdx !== 0) {
+                        for (let i = 1; i < matchIdx; i++) {
+                            start += match[i].length;
+                        }
                     }
                     const end = start + match[matchIdx].length;
 
@@ -330,7 +335,7 @@
             if (this.opt.acrossElements) {
                 fn = "wrapMatchesAcrossElements";
             }
-            this[fn](regexp, true, (match, node) => {
+            this[fn](regexp, this.opt.ignoreGroups, (match, node) => {
                 return this.opt.filter(node, match, totalMatches);
             }, eachCb, () => {
                 if (totalMatches === 0) {
@@ -353,7 +358,7 @@
                 let regex = new RegExp(this.createRegExp(kw), `gm${ sens }`),
                     matches = 0;
                 this.log(`Searching with expression "${ regex }"`);
-                this[fn](regex, false, (term, node) => {
+                this[fn](regex, 1, (term, node) => {
                     return this.opt.filter(node, kw, totalMatches, matches);
                 }, element => {
                     matches++;

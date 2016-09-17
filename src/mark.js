@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.3.0
+ * mark.js v8.4.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -45,14 +45,15 @@ class Mark { // eslint-disable-line no-unused-vars
             "synonyms": {},
             "accuracy": "partially",
             "acrossElements": false,
+            "caseSensitive": false,
+            "ignoreJoiners": false,
+            "ignoreGroups": 0,
             "each": () => {},
             "noMatch": () => {},
             "filter": () => true,
             "done": () => {},
             "debug": false,
-            "log": window.console,
-            "caseSensitive": false,
-            "ignoreJoiners": false
+            "log": window.console
         }, val);
     }
 
@@ -485,17 +486,15 @@ class Mark { // eslint-disable-line no-unused-vars
      * Wraps the instance element and class around matches within single HTML
      * elements in all contexts
      * @param {RegExp} regex - The regular expression to be searched for
-     * @param {boolean} custom - If false, the function expects a regular
-     * expression that has at least two groups (like returned from
-     * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
-     * the second will be wrapped
+     * @param {number} ignoreGroups - A number indicating the amount of RegExp
+     * matching groups to ignore
      * @param {Mark~wrapMatchesFilterCallback} filterCb
      * @param {Mark~wrapMatchesEachCallback} eachCb
      * @param {Mark~wrapMatchesEndCallback} endCb
      * @access protected
      */
-    wrapMatches(regex, custom, filterCb, eachCb, endCb) {
-        const matchIdx = custom ? 0 : 2;
+    wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
+        const matchIdx = ignoreGroups === 0 ? 0: ignoreGroups + 1;
         this.getTextNodes(dict => {
             dict.nodes.forEach(node => {
                 node = node.node;
@@ -508,8 +507,10 @@ class Mark { // eslint-disable-line no-unused-vars
                         continue;
                     }
                     let pos = match.index;
-                    if(!custom) {
-                        pos += match[matchIdx - 1].length;
+                    if(matchIdx !== 0) {
+                        for(let i = 1; i < matchIdx; i++){
+                            pos += match[i].length;
+                        }
                     }
                     node = this.wrapRangeInTextNode(
                         node,
@@ -545,17 +546,15 @@ class Mark { // eslint-disable-line no-unused-vars
      * Wraps the instance element and class around matches across all HTML
      * elements in all contexts
      * @param {RegExp} regex - The regular expression to be searched for
-     * @param {boolean} custom - If false, the function expects a regular
-     * expression that has at least two groups (like returned from
-     * {@link Mark#createAccuracyRegExp}). The first group will be ignored and
-     * the second will be wrapped
+     * @param {number} ignoreGroups - A number indicating the amount of RegExp
+     * matching groups to ignore
      * @param {Mark~wrapMatchesAcrossElementsFilterCallback} filterCb
      * @param {Mark~wrapMatchesAcrossElementsEachCallback} eachCb
      * @param {Mark~wrapMatchesAcrossElementsEndCallback} endCb
      * @access protected
      */
-    wrapMatchesAcrossElements(regex, custom, filterCb, eachCb, endCb) {
-        const matchIdx = custom ? 0 : 2;
+    wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
+        const matchIdx = ignoreGroups === 0 ? 0: ignoreGroups + 1;
         this.getTextNodes(dict => {
             let match;
             while(
@@ -564,8 +563,10 @@ class Mark { // eslint-disable-line no-unused-vars
             ) {
                 // calculate range inside dict.value
                 let start = match.index;
-                if(!custom) {
-                    start += match[matchIdx - 1].length;
+                if(matchIdx !== 0) {
+                    for(let i = 1; i < matchIdx; i++){
+                        start += match[i].length;
+                    }
                 }
                 const end = start + match[matchIdx].length;
                 // note that dict will be updated automatically, as it'll change
@@ -661,7 +662,7 @@ class Mark { // eslint-disable-line no-unused-vars
         if(this.opt.acrossElements) {
             fn = "wrapMatchesAcrossElements";
         }
-        this[fn](regexp, true, (match, node) => {
+        this[fn](regexp, this.opt.ignoreGroups, (match, node) => {
             return this.opt.filter(node, match, totalMatches);
         }, eachCb, () => {
             if(totalMatches === 0) {
@@ -753,7 +754,7 @@ class Mark { // eslint-disable-line no-unused-vars
                 let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),
                     matches = 0;
                 this.log(`Searching with expression "${regex}"`);
-                this[fn](regex, false, (term, node) => {
+                this[fn](regex, 1, (term, node) => {
                     return this.opt.filter(node, kw, totalMatches, matches);
                 }, element => {
                     matches++;
