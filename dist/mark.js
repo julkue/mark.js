@@ -36,7 +36,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _createClass(Mark, [{
             key: "log",
             value: function log(msg) {
-                var level = arguments.length <= 1 || arguments[1] === undefined ? "debug" : arguments[1];
+                var level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "debug";
 
                 var log = this.opt.log;
                 if (!this.opt.debug) {
@@ -180,28 +180,33 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "getTextNodes",
             value: function getTextNodes(cb) {
-                var _this3 = this;
-
                 var val = "",
                     nodes = [];
-                this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
+                this.iterateOverTextNodes(function (node) {
                     nodes.push({
                         start: val.length,
                         end: (val += node.textContent).length,
                         node: node
                     });
-                }, function (node) {
-                    if (_this3.matchesExclude(node.parentNode, true)) {
-                        return NodeFilter.FILTER_REJECT;
-                    } else {
-                        return NodeFilter.FILTER_ACCEPT;
-                    }
                 }, function () {
                     cb({
                         value: val,
                         nodes: nodes
                     });
                 });
+            }
+        }, {
+            key: "iterateOverTextNodes",
+            value: function iterateOverTextNodes(eachCb, endCb) {
+                var _this3 = this;
+
+                this.iterator.forEachNode(NodeFilter.SHOW_TEXT, eachCb, function (node) {
+                    if (_this3.matchesExclude(node.parentNode, true)) {
+                        return NodeFilter.FILTER_REJECT;
+                    } else {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                }, endCb);
             }
         }, {
             key: "matchesExclude",
@@ -473,8 +478,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     var DOMIterator = function () {
         function DOMIterator(ctx) {
-            var iframes = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-            var exclude = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+            var iframes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+            var exclude = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
             _classCallCheck(this, DOMIterator);
 
@@ -513,7 +518,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "getIframeContents",
             value: function getIframeContents(ifr, successFn) {
-                var errorFn = arguments.length <= 2 || arguments[2] === undefined ? function () {} : arguments[2];
+                var errorFn = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : function () {};
 
                 var doc = void 0;
                 try {
@@ -597,7 +602,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function forEachIframe(ctx, filter, each) {
                 var _this12 = this;
 
-                var end = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
+                var end = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function () {};
 
                 var ifr = ctx.querySelectorAll("iframe"),
                     open = ifr.length,
@@ -748,7 +753,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function forEachNode(whatToShow, each, filter) {
                 var _this15 = this;
 
-                var done = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
+                var done = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function () {};
 
                 var contexts = this.getContexts();
                 var open = contexts.length;

@@ -188,24 +188,28 @@
         getTextNodes(cb) {
             let val = "",
                 nodes = [];
-            this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
+            this.iterateOverTextNodes(node => {
                 nodes.push({
                     start: val.length,
                     end: (val += node.textContent).length,
                     node
                 });
-            }, node => {
-                if (this.matchesExclude(node.parentNode, true)) {
-                    return NodeFilter.FILTER_REJECT;
-                } else {
-                    return NodeFilter.FILTER_ACCEPT;
-                }
             }, () => {
                 cb({
                     value: val,
                     nodes: nodes
                 });
             });
+        }
+
+        iterateOverTextNodes(eachCb, endCb) {
+            this.iterator.forEachNode(NodeFilter.SHOW_TEXT, eachCb, node => {
+                if (this.matchesExclude(node.parentNode, true)) {
+                    return NodeFilter.FILTER_REJECT;
+                } else {
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            }, endCb);
         }
 
         matchesExclude(el, exclM) {

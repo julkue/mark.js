@@ -331,24 +331,42 @@ class Mark { // eslint-disable-line no-unused-vars
     getTextNodes(cb) {
         let val = "",
             nodes = [];
-        this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
+        this.iterateOverTextNodes(node => {
             nodes.push({
                 start: val.length,
                 end: (val += node.textContent).length,
                 node
             });
-        }, node => {
-            if(this.matchesExclude(node.parentNode, true)) {
-                return NodeFilter.FILTER_REJECT;
-            } else {
-                return NodeFilter.FILTER_ACCEPT;
-            }
         }, () => {
             cb({
                 value: val,
                 nodes: nodes
             });
         });
+    }
+
+    /**
+     * Each callback
+     * @callback Mark~iterateOverTextNodesEachCallback
+     * @param {HTMLElement} - The DOM text node element
+     */
+    /**
+     * End callback
+     * @callback Mark~iterateOverTextNodesEndCallback
+     */
+    /**
+     * Iterates over text nodes and calls the specified callbacks
+     * @param {Mark~iterateOverTextNodesEachCallback} eachCb
+     * @param {Mark~iterateOverTextNodesEndCallback} endCb
+     */
+    iterateOverTextNodes(eachCb, endCb) {
+        this.iterator.forEachNode(NodeFilter.SHOW_TEXT, eachCb, node => {
+            if(this.matchesExclude(node.parentNode, true)) {
+                return NodeFilter.FILTER_REJECT;
+            } else {
+                return NodeFilter.FILTER_ACCEPT;
+            }
+        }, endCb);
     }
 
     /**
@@ -494,7 +512,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-        const matchIdx = ignoreGroups === 0 ? 0: ignoreGroups + 1;
+        const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
         this.getTextNodes(dict => {
             dict.nodes.forEach(node => {
                 node = node.node;
@@ -508,7 +526,7 @@ class Mark { // eslint-disable-line no-unused-vars
                     }
                     let pos = match.index;
                     if(matchIdx !== 0) {
-                        for(let i = 1; i < matchIdx; i++){
+                        for(let i = 1; i < matchIdx; i++) {
                             pos += match[i].length;
                         }
                     }
@@ -554,7 +572,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
-        const matchIdx = ignoreGroups === 0 ? 0: ignoreGroups + 1;
+        const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
         this.getTextNodes(dict => {
             let match;
             while(
@@ -564,7 +582,7 @@ class Mark { // eslint-disable-line no-unused-vars
                 // calculate range inside dict.value
                 let start = match.index;
                 if(matchIdx !== 0) {
-                    for(let i = 1; i < matchIdx; i++){
+                    for(let i = 1; i < matchIdx; i++) {
                         start += match[i].length;
                     }
                 }
