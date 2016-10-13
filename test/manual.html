@@ -23,9 +23,20 @@
     <script src="../src/mark.js"></script>
     <script>
         var $ctx = $("#context");
-        $ctx.load("fixtures/basic/main.html", function(){
+        $ctx.load("fixtures/basic/large-document.html", function() {
+            var start = new Date(),
+                $elements = $();
             new Mark($ctx.get()).mark("lorem", {
-                debug: true
+                debug: true,
+                each: function(mark) {
+                    $elements = $elements.add($(mark));
+                },
+                done: function() {
+                    var end = new Date(),
+                        time = end.getTime() - start.getTime();
+                    console.log("Time elapsed: " + time + "ms");
+                    console.log($elements.length + " elements: ", $elements);
+                }
             });
         });
     </script>
