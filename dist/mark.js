@@ -180,33 +180,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "getTextNodes",
             value: function getTextNodes(cb) {
+                var _this3 = this;
+
                 var val = "",
                     nodes = [];
-                this.iterateOverTextNodes(function (node) {
+                this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
                     nodes.push({
                         start: val.length,
                         end: (val += node.textContent).length,
                         node: node
                     });
+                }, function (node) {
+                    if (_this3.matchesExclude(node.parentNode, true)) {
+                        return NodeFilter.FILTER_REJECT;
+                    } else {
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
                 }, function () {
                     cb({
                         value: val,
                         nodes: nodes
                     });
                 });
-            }
-        }, {
-            key: "iterateOverTextNodes",
-            value: function iterateOverTextNodes(eachCb, endCb) {
-                var _this3 = this;
-
-                this.iterator.forEachNode(NodeFilter.SHOW_TEXT, eachCb, function (node) {
-                    if (_this3.matchesExclude(node.parentNode, true)) {
-                        return NodeFilter.FILTER_REJECT;
-                    } else {
-                        return NodeFilter.FILTER_ACCEPT;
-                    }
-                }, endCb);
             }
         }, {
             key: "matchesExclude",
@@ -280,24 +275,28 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this5 = this;
 
                 var matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
-                this.iterateOverTextNodes(function (node) {
-                    var match = void 0;
-                    while ((match = regex.exec(node.textContent)) !== null && match[matchIdx] !== "") {
-                        if (!filterCb(match[matchIdx], node)) {
-                            continue;
-                        }
-                        var pos = match.index;
-                        if (matchIdx !== 0) {
-                            for (var i = 1; i < matchIdx; i++) {
-                                pos += match[i].length;
+                this.getTextNodes(function (dict) {
+                    dict.nodes.forEach(function (node) {
+                        node = node.node;
+                        var match = void 0;
+                        while ((match = regex.exec(node.textContent)) !== null && match[matchIdx] !== "") {
+                            if (!filterCb(match[matchIdx], node)) {
+                                continue;
                             }
-                        }
-                        node = _this5.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
-                        eachCb(node.previousSibling);
+                            var pos = match.index;
+                            if (matchIdx !== 0) {
+                                for (var i = 1; i < matchIdx; i++) {
+                                    pos += match[i].length;
+                                }
+                            }
+                            node = _this5.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
+                            eachCb(node.previousSibling);
 
-                        regex.lastIndex = 0;
-                    }
-                }, endCb);
+                            regex.lastIndex = 0;
+                        }
+                    });
+                    endCb();
+                });
             }
         }, {
             key: "wrapMatchesAcrossElements",

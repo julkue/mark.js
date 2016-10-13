@@ -331,42 +331,24 @@ class Mark { // eslint-disable-line no-unused-vars
     getTextNodes(cb) {
         let val = "",
             nodes = [];
-        this.iterateOverTextNodes(node => {
+        this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
             nodes.push({
                 start: val.length,
                 end: (val += node.textContent).length,
                 node
             });
+        }, node => {
+            if(this.matchesExclude(node.parentNode, true)) {
+                return NodeFilter.FILTER_REJECT;
+            } else {
+                return NodeFilter.FILTER_ACCEPT;
+            }
         }, () => {
             cb({
                 value: val,
                 nodes: nodes
             });
         });
-    }
-
-    /**
-     * Each callback
-     * @callback Mark~iterateOverTextNodesEachCallback
-     * @param {HTMLElement} - The DOM text node element
-     */
-    /**
-     * End callback
-     * @callback Mark~iterateOverTextNodesEndCallback
-     */
-    /**
-     * Iterates over text nodes and calls the specified callbacks
-     * @param {Mark~iterateOverTextNodesEachCallback} eachCb
-     * @param {Mark~iterateOverTextNodesEndCallback} endCb
-     */
-    iterateOverTextNodes(eachCb, endCb) {
-        this.iterator.forEachNode(NodeFilter.SHOW_TEXT, eachCb, node => {
-            if(this.matchesExclude(node.parentNode, true)) {
-                return NodeFilter.FILTER_REJECT;
-            } else {
-                return NodeFilter.FILTER_ACCEPT;
-            }
-        }, endCb);
     }
 
     /**
@@ -513,32 +495,36 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
         const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
-        this.iterateOverTextNodes(node => {
-            let match;
-            while(
-                (match = regex.exec(node.textContent)) !== null &&
-                match[matchIdx] !== ""
-            ) {
-                if(!filterCb(match[matchIdx], node)) {
-                    continue;
-                }
-                let pos = match.index;
-                if(matchIdx !== 0) {
-                    for(let i = 1; i < matchIdx; i++) {
-                        pos += match[i].length;
+        this.getTextNodes(dict => {
+            dict.nodes.forEach(node => {
+                node = node.node;
+                let match;
+                while(
+                    (match = regex.exec(node.textContent)) !== null &&
+                    match[matchIdx] !== ""
+                ) {
+                    if(!filterCb(match[matchIdx], node)) {
+                        continue;
                     }
+                    let pos = match.index;
+                    if(matchIdx !== 0) {
+                        for(let i = 1; i < matchIdx; i++) {
+                            pos += match[i].length;
+                        }
+                    }
+                    node = this.wrapRangeInTextNode(
+                        node,
+                        pos,
+                        pos + match[matchIdx].length
+                    );
+                    eachCb(node.previousSibling);
+                    // reset index of last match as the node changed and the
+                    // index isn't valid anymore http://tinyurl.com/htsudjd
+                    regex.lastIndex = 0;
                 }
-                node = this.wrapRangeInTextNode(
-                    node,
-                    pos,
-                    pos + match[matchIdx].length
-                );
-                eachCb(node.previousSibling);
-                // reset index of last match as the node changed and the
-                // index isn't valid anymore http://tinyurl.com/htsudjd
-                regex.lastIndex = 0;
-            }
-        }, endCb);
+            });
+            endCb();
+        });
     }
 
     /**
