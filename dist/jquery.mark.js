@@ -280,28 +280,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this5 = this;
 
                 var matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
-                this.getTextNodes(function (dict) {
-                    dict.nodes.forEach(function (node) {
-                        node = node.node;
-                        var match = void 0;
-                        while ((match = regex.exec(node.textContent)) !== null && match[matchIdx] !== "") {
-                            if (!filterCb(match[matchIdx], node)) {
-                                continue;
-                            }
-                            var pos = match.index;
-                            if (matchIdx !== 0) {
-                                for (var i = 1; i < matchIdx; i++) {
-                                    pos += match[i].length;
-                                }
-                            }
-                            node = _this5.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
-                            eachCb(node.previousSibling);
-
-                            regex.lastIndex = 0;
+                this.iterateOverTextNodes(function (node) {
+                    var match = void 0;
+                    while ((match = regex.exec(node.textContent)) !== null && match[matchIdx] !== "") {
+                        if (!filterCb(match[matchIdx], node)) {
+                            continue;
                         }
-                    });
-                    endCb();
-                });
+                        var pos = match.index;
+                        if (matchIdx !== 0) {
+                            for (var i = 1; i < matchIdx; i++) {
+                                pos += match[i].length;
+                            }
+                        }
+                        node = _this5.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
+                        eachCb(node.previousSibling);
+
+                        regex.lastIndex = 0;
+                    }
+                }, endCb);
             }
         }, {
             key: "wrapMatchesAcrossElements",

@@ -513,36 +513,32 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
         const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
-        this.getTextNodes(dict => {
-            dict.nodes.forEach(node => {
-                node = node.node;
-                let match;
-                while(
-                    (match = regex.exec(node.textContent)) !== null &&
-                    match[matchIdx] !== ""
-                ) {
-                    if(!filterCb(match[matchIdx], node)) {
-                        continue;
-                    }
-                    let pos = match.index;
-                    if(matchIdx !== 0) {
-                        for(let i = 1; i < matchIdx; i++) {
-                            pos += match[i].length;
-                        }
-                    }
-                    node = this.wrapRangeInTextNode(
-                        node,
-                        pos,
-                        pos + match[matchIdx].length
-                    );
-                    eachCb(node.previousSibling);
-                    // reset index of last match as the node changed and the
-                    // index isn't valid anymore http://tinyurl.com/htsudjd
-                    regex.lastIndex = 0;
+        this.iterateOverTextNodes(node => {
+            let match;
+            while(
+                (match = regex.exec(node.textContent)) !== null &&
+                match[matchIdx] !== ""
+            ) {
+                if(!filterCb(match[matchIdx], node)) {
+                    continue;
                 }
-            });
-            endCb();
-        });
+                let pos = match.index;
+                if(matchIdx !== 0) {
+                    for(let i = 1; i < matchIdx; i++) {
+                        pos += match[i].length;
+                    }
+                }
+                node = this.wrapRangeInTextNode(
+                    node,
+                    pos,
+                    pos + match[matchIdx].length
+                );
+                eachCb(node.previousSibling);
+                // reset index of last match as the node changed and the
+                // index isn't valid anymore http://tinyurl.com/htsudjd
+                regex.lastIndex = 0;
+            }
+        }, endCb);
     }
 
     /**
