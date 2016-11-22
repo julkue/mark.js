@@ -105,7 +105,7 @@
         }
 
         setupIgnoreJoinersRegExp(str) {
-            return str.replace(/[^(|)]/g, function (val, indx, original) {
+            return str.replace(/[^(|)]/g, (val, indx, original) => {
                 let nextChar = original.charAt(indx + 1);
                 if (/[(|)]/.test(nextChar) || nextChar === "") {
                     return val;
