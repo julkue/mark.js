@@ -160,11 +160,11 @@ class Mark { // eslint-disable-line no-unused-vars
     setupIgnoreJoinersRegExp(str) {
         // adding a "null" unicode character as it will not be modified by the
         // other "create" regular expression functions
-        return str.replace(/[^(|)]/g, (val, indx, original) => {
+        return str.replace(/[^(|)\\]/g, (val, indx, original) => {
             // don't add a null after an opening "(", around a "|" or before
             // a closing "("
             let nextChar = original.charAt(indx + 1);
-            if(/[(|)]/.test(nextChar) || nextChar === "") {
+            if(/[(|)\\]/.test(nextChar) || nextChar === "") {
                 return val;
             } else {
                 return val + "\u0000";
