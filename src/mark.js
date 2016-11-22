@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.0
+ * mark.js v8.4.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -494,7 +494,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-        const matchIdx = ignoreGroups === 0 ? 0: ignoreGroups + 1;
+        const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
         this.getTextNodes(dict => {
             dict.nodes.forEach(node => {
                 node = node.node;
@@ -508,7 +508,7 @@ class Mark { // eslint-disable-line no-unused-vars
                     }
                     let pos = match.index;
                     if(matchIdx !== 0) {
-                        for(let i = 1; i < matchIdx; i++){
+                        for(let i = 1; i < matchIdx; i++) {
                             pos += match[i].length;
                         }
                     }
@@ -554,7 +554,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
-        const matchIdx = ignoreGroups === 0 ? 0: ignoreGroups + 1;
+        const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
         this.getTextNodes(dict => {
             let match;
             while(
@@ -564,7 +564,7 @@ class Mark { // eslint-disable-line no-unused-vars
                 // calculate range inside dict.value
                 let start = match.index;
                 if(matchIdx !== 0) {
-                    for(let i = 1; i < matchIdx; i++){
+                    for(let i = 1; i < matchIdx; i++) {
                         start += match[i].length;
                     }
                 }
@@ -597,7 +597,29 @@ class Mark { // eslint-disable-line no-unused-vars
             docFrag.appendChild(node.removeChild(node.firstChild));
         }
         parent.replaceChild(docFrag, node);
-        parent.normalize();
+        this.normalizeTextNode(parent);
+    }
+
+    /**
+     * Normalizes text nodes as the IE11 team will not solve a bug where the
+     * normalize() method doesn't work
+     * @see {@link http://tinyurl.com/z5asa8c}
+     * @param {HTMLElement} node - The DOM node to normalize
+     * @access protected
+     */
+    normalizeTextNode(node) {
+        if(!node) {
+            return;
+        }
+        if(node.nodeType === 3) {
+            while(node.nextSibling && node.nextSibling.nodeType === 3) {
+                node.nodeValue += node.nextSibling.nodeValue;
+                node.parentNode.removeChild(node.nextSibling);
+            }
+        } else {
+            this.normalizeTextNode(node.firstChild);
+        }
+        this.normalizeTextNode(node.nextSibling);
     }
 
     /**

@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.0
+ * mark.js v8.4.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -36,7 +36,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         _createClass(Mark, [{
             key: "log",
             value: function log(msg) {
-                var level = arguments.length <= 1 || arguments[1] === undefined ? "debug" : arguments[1];
+                var level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "debug";
 
                 var log = this.opt.log;
                 if (!this.opt.debug) {
@@ -334,7 +334,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     docFrag.appendChild(node.removeChild(node.firstChild));
                 }
                 parent.replaceChild(docFrag, node);
-                parent.normalize();
+                this.normalizeTextNode(parent);
+            }
+        }, {
+            key: "normalizeTextNode",
+            value: function normalizeTextNode(node) {
+                if (!node) {
+                    return;
+                }
+                if (node.nodeType === 3) {
+                    while (node.nextSibling && node.nextSibling.nodeType === 3) {
+                        node.nodeValue += node.nextSibling.nodeValue;
+                        node.parentNode.removeChild(node.nextSibling);
+                    }
+                } else {
+                    this.normalizeTextNode(node.firstChild);
+                }
+                this.normalizeTextNode(node.nextSibling);
             }
         }, {
             key: "markRegExp",
@@ -370,12 +386,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var totalMatches = 0,
                     fn = "wrapMatches";
 
-                var _getSeparatedKeywords = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
-
-                var kwArr = _getSeparatedKeywords.keywords;
-                var kwArrLen = _getSeparatedKeywords.length;
-                var sens = this.opt.caseSensitive ? "" : "i";
-                var handler = function handler(kw) {
+                var _getSeparatedKeywords = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
+                    kwArr = _getSeparatedKeywords.keywords,
+                    kwArrLen = _getSeparatedKeywords.length,
+                    sens = this.opt.caseSensitive ? "" : "i",
+                    handler = function handler(kw) {
                     var regex = new RegExp(_this8.createRegExp(kw), "gm" + sens),
                         matches = 0;
                     _this8.log("Searching with expression \"" + regex + "\"");
@@ -396,6 +411,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         }
                     });
                 };
+
                 if (this.opt.acrossElements) {
                     fn = "wrapMatchesAcrossElements";
                 }
@@ -473,8 +489,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
     var DOMIterator = function () {
         function DOMIterator(ctx) {
-            var iframes = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
-            var exclude = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+            var iframes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+            var exclude = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
             _classCallCheck(this, DOMIterator);
 
@@ -513,7 +529,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "getIframeContents",
             value: function getIframeContents(ifr, successFn) {
-                var errorFn = arguments.length <= 2 || arguments[2] === undefined ? function () {} : arguments[2];
+                var errorFn = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : function () {};
 
                 var doc = void 0;
                 try {
@@ -597,7 +613,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function forEachIframe(ctx, filter, each) {
                 var _this12 = this;
 
-                var end = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
+                var end = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function () {};
 
                 var ifr = ctx.querySelectorAll("iframe"),
                     open = ifr.length,
@@ -748,7 +764,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function forEachNode(whatToShow, each, filter) {
                 var _this15 = this;
 
-                var done = arguments.length <= 3 || arguments[3] === undefined ? function () {} : arguments[3];
+                var done = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function () {};
 
                 var contexts = this.getContexts();
                 var open = contexts.length;
