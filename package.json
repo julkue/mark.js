@@ -42,7 +42,7 @@
     "matchdep": "^1.0",
     "metalsmith": "^2.1.0",
     "metalsmith-beautify": "^0.1.0",
-    "metalsmith-collections": "^0.7.0",
+    "metalsmith-collections": "^0.9.0",
     "metalsmith-in-place": "^1.4.4",
     "metalsmith-layouts": "^1.6.5",
     "metalsmith-markdown": "^0.2.1",
