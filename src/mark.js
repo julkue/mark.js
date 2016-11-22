@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.1
+ * mark.js v8.4.2
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -160,11 +160,11 @@ class Mark { // eslint-disable-line no-unused-vars
     setupIgnoreJoinersRegExp(str) {
         // adding a "null" unicode character as it will not be modified by the
         // other "create" regular expression functions
-        return str.replace(/[^(|)]/g, function (val, indx, original) {
+        return str.replace(/[^(|)\\]/g, (val, indx, original) => {
             // don't add a null after an opening "(", around a "|" or before
-            // a closing "("
+            // a closing "(", or between an escapement (e.g. \+)
             let nextChar = original.charAt(indx + 1);
-            if(/[(|)]/.test(nextChar) || nextChar === "") {
+            if(/[(|)\\]/.test(nextChar) || nextChar === "") {
                 return val;
             } else {
                 return val + "\u0000";

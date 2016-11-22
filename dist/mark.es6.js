@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.1
+ * mark.js v8.4.2
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -105,9 +105,9 @@
         }
 
         setupIgnoreJoinersRegExp(str) {
-            return str.replace(/[^(|)]/g, function (val, indx, original) {
+            return str.replace(/[^(|)\\]/g, (val, indx, original) => {
                 let nextChar = original.charAt(indx + 1);
-                if (/[(|)]/.test(nextChar) || nextChar === "") {
+                if (/[(|)\\]/.test(nextChar) || nextChar === "") {
                     return val;
                 } else {
                     return val + "\u0000";
