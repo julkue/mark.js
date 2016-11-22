@@ -16,8 +16,8 @@ matches. You can pass a single element (e.g. the return value of
 `document.getElementById()` or `document.querySelector()`), an array containing
 multiple single elements, or a NodeList.
 
-If for example you'd like to highlight matches in a div with a class `test` then
-you'd have to use:
+If for example you'd like to highlight matches in a div with a class `context`
+then you'd have to use:
 
 ```javascript
 var instance = new Mark(document.querySelector("div.context"));
