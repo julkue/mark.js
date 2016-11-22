@@ -162,7 +162,7 @@ class Mark { // eslint-disable-line no-unused-vars
         // other "create" regular expression functions
         return str.replace(/[^(|)\\]/g, (val, indx, original) => {
             // don't add a null after an opening "(", around a "|" or before
-            // a closing "("
+            // a closing "(", or between an escapement (e.g. \+)
             let nextChar = original.charAt(indx + 1);
             if(/[(|)\\]/.test(nextChar) || nextChar === "") {
                 return val;
