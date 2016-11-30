@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.0
+ * mark.js v8.4.2
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -160,11 +160,11 @@ class Mark { // eslint-disable-line no-unused-vars
     setupIgnoreJoinersRegExp(str) {
         // adding a "null" unicode character as it will not be modified by the
         // other "create" regular expression functions
-        return str.replace(/[^(|)]/g, function (val, indx, original) {
+        return str.replace(/[^(|)\\]/g, (val, indx, original) => {
             // don't add a null after an opening "(", around a "|" or before
-            // a closing "("
+            // a closing "(", or between an escapement (e.g. \+)
             let nextChar = original.charAt(indx + 1);
-            if(/[(|)]/.test(nextChar) || nextChar === "") {
+            if(/[(|)\\]/.test(nextChar) || nextChar === "") {
                 return val;
             } else {
                 return val + "\u0000";
@@ -597,7 +597,29 @@ class Mark { // eslint-disable-line no-unused-vars
             docFrag.appendChild(node.removeChild(node.firstChild));
         }
         parent.replaceChild(docFrag, node);
-        parent.normalize();
+        this.normalizeTextNode(parent);
+    }
+
+    /**
+     * Normalizes text nodes as the IE11 team will not solve a bug where the
+     * normalize() method doesn't work
+     * @see {@link http://tinyurl.com/z5asa8c}
+     * @param {HTMLElement} node - The DOM node to normalize
+     * @access protected
+     */
+    normalizeTextNode(node) {
+        if(!node) {
+            return;
+        }
+        if(node.nodeType === 3) {
+            while(node.nextSibling && node.nextSibling.nodeType === 3) {
+                node.nodeValue += node.nextSibling.nodeValue;
+                node.parentNode.removeChild(node.nextSibling);
+            }
+        } else {
+            this.normalizeTextNode(node.firstChild);
+        }
+        this.normalizeTextNode(node.nextSibling);
     }
 
     /**

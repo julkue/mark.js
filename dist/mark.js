@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.0
+ * mark.js v8.4.2
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -11,7 +11,7 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -89,19 +89,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "setupIgnoreJoinersRegExp",
             value: function setupIgnoreJoinersRegExp(str) {
-                return str.replace(/[^(|)]/g, function (val, indx, original) {
+                return str.replace(/[^(|)\\]/g, function (val, indx, original) {
                     var nextChar = original.charAt(indx + 1);
-                    if (/[(|)]/.test(nextChar) || nextChar === "") {
+                    if (/[(|)\\]/.test(nextChar) || nextChar === "") {
                         return val;
                     } else {
-                        return val + "\u0000";
+                        return val + "\0";
                     }
                 });
             }
         }, {
             key: "createIgnoreJoinersRegExp",
             value: function createIgnoreJoinersRegExp(str) {
-                return str.split("\u0000").join("[\\u00ad|\\u200b|\\u200c|\\u200d]?");
+                return str.split("\0").join("[\\u00ad|\\u200b|\\u200c|\\u200d]?");
             }
         }, {
             key: "createDiacriticsRegExp",
@@ -334,7 +334,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     docFrag.appendChild(node.removeChild(node.firstChild));
                 }
                 parent.replaceChild(docFrag, node);
-                parent.normalize();
+                this.normalizeTextNode(parent);
+            }
+        }, {
+            key: "normalizeTextNode",
+            value: function normalizeTextNode(node) {
+                if (!node) {
+                    return;
+                }
+                if (node.nodeType === 3) {
+                    while (node.nextSibling && node.nextSibling.nodeType === 3) {
+                        node.nodeValue += node.nextSibling.nodeValue;
+                        node.parentNode.removeChild(node.nextSibling);
+                    }
+                } else {
+                    this.normalizeTextNode(node.firstChild);
+                }
+                this.normalizeTextNode(node.nextSibling);
             }
         }, {
             key: "markRegExp",
@@ -370,12 +386,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var totalMatches = 0,
                     fn = "wrapMatches";
 
-                var _getSeparatedKeywords = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv);
-
-                var kwArr = _getSeparatedKeywords.keywords;
-                var kwArrLen = _getSeparatedKeywords.length;
-                var sens = this.opt.caseSensitive ? "" : "i";
-                var handler = function handler(kw) {
+                var _getSeparatedKeywords = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
+                    kwArr = _getSeparatedKeywords.keywords,
+                    kwArrLen = _getSeparatedKeywords.length,
+                    sens = this.opt.caseSensitive ? "" : "i",
+                    handler = function handler(kw) {
                     var regex = new RegExp(_this8.createRegExp(kw), "gm" + sens),
                         matches = 0;
                     _this8.log("Searching with expression \"" + regex + "\"");
@@ -396,6 +411,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         }
                     });
                 };
+
                 if (this.opt.acrossElements) {
                     fn = "wrapMatchesAcrossElements";
                 }
