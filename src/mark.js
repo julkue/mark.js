@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.2
+ * mark.js v8.4.3
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -230,13 +230,14 @@ class Mark { // eslint-disable-line no-unused-vars
 
     /**
      * Creates a regular expression string that merges whitespace characters
-     * including subsequent ones into a single pattern
+     * including subsequent ones into a single pattern, one or multiple
+     * whitespaces
      * @param  {string} str - The search term to be used
      * @return {string}
      * @access protected
      */
     createMergedBlanksRegExp(str) {
-        return str.replace(/[\s]+/gmi, "[\\s]*");
+        return str.replace(/[\s]+/gmi, "[\\s]+");
     }
 
     /**

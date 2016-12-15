@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.2
+ * mark.js v8.4.3
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -127,7 +127,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "createMergedBlanksRegExp",
             value: function createMergedBlanksRegExp(str) {
-                return str.replace(/[\s]+/gmi, "[\\s]*");
+                return str.replace(/[\s]+/gmi, "[\\s]+");
             }
         }, {
             key: "createAccuracyRegExp",
