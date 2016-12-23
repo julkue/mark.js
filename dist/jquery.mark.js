@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.3
+ * mark.js v8.4.4
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -427,14 +427,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this9 = this;
 
                 this.opt = opt;
-                var sel = this.opt.element ? this.opt.element : "*";
+                var stack = [],
+                    sel = this.opt.element ? this.opt.element : "*";
                 sel += "[data-markjs]";
                 if (this.opt.className) {
                     sel += "." + this.opt.className;
                 }
                 this.log("Removal selector \"" + sel + "\"");
                 this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, function (node) {
-                    _this9.unwrapMatches(node);
+                    stack.push(node);
                 }, function (node) {
                     var matchesSel = DOMIterator.matches(node, sel),
                         matchesExclude = _this9.matchesExclude(node, false);
@@ -443,7 +444,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     } else {
                         return NodeFilter.FILTER_ACCEPT;
                     }
-                }, this.opt.done);
+                }, function () {
+                    stack.forEach(function (node) {
+                        _this9.unwrapMatches(node);
+                    });
+                    _this9.opt.done();
+                });
             }
         }, {
             key: "opt",

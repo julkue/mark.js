@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.4.3
+ * mark.js v8.4.4
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2016, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -812,14 +812,15 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     unmark(opt) {
         this.opt = opt;
-        let sel = this.opt.element ? this.opt.element : "*";
+        let stack = [],
+            sel = this.opt.element ? this.opt.element : "*";
         sel += "[data-markjs]";
         if(this.opt.className) {
             sel += `.${this.opt.className}`;
         }
         this.log(`Removal selector "${sel}"`);
         this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, node => {
-            this.unwrapMatches(node);
+            stack.push(node);
         }, node => {
             const matchesSel = DOMIterator.matches(node, sel),
                 matchesExclude = this.matchesExclude(node, false);
@@ -828,7 +829,12 @@ class Mark { // eslint-disable-line no-unused-vars
             } else {
                 return NodeFilter.FILTER_ACCEPT;
             }
-        }, this.opt.done);
+        }, () => {
+            stack.forEach(node => {
+                this.unwrapMatches(node);
+            });
+            this.opt.done();
+        });
     }
 }
 

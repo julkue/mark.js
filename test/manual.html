@@ -24,18 +24,30 @@
     <script>
         var $ctx = $("#context");
         $ctx.load("fixtures/basic/large-document.html", function() {
+            // mark
             var start = new Date(),
-                $elements = $();
-            new Mark($ctx.get()).mark("lorem", {
+                instance = new Mark($ctx.get());
+            instance.mark("lorem", {
                 debug: true,
-                each: function(mark) {
-                    $elements = $elements.add($(mark));
-                },
-                done: function() {
+                done: function(counter) {
                     var end = new Date(),
                         time = end.getTime() - start.getTime();
-                    console.log("Time elapsed: " + time + "ms");
-                    console.log($elements.length + " elements: ", $elements);
+                    console.log(
+                        "Time elapsed: " + time + "ms.",
+                        "Elements: " + counter
+                    );
+                    // unmark
+                    setTimeout(function(){
+                        start = new Date();
+                        instance.unmark({
+                            debug: true,
+                            done: function(){
+                                var end = new Date(),
+                                    time = end.getTime() - start.getTime();
+                                console.log("Time elapsed: " + time + "ms.");
+                            }
+                        });
+                    }, 2000);
                 }
             });
         });
