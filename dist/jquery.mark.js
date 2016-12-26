@@ -31,6 +31,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             _classCallCheck(this, Mark);
 
             this.ctx = ctx;
+
+            this.ie = false;
+            var ua = window.navigator.userAgent;
+            if (ua.indexOf("MSIE") > -1 || ua.indexOf("Trident") > -1) {
+                this.ie = true;
+            }
         }
 
         _createClass(Mark, [{
@@ -334,7 +340,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     docFrag.appendChild(node.removeChild(node.firstChild));
                 }
                 parent.replaceChild(docFrag, node);
-                this.normalizeTextNode(parent);
+                if (!this.ie) {
+                    parent.normalize();
+                } else {
+                    this.normalizeTextNode(parent);
+                }
             }
         }, {
             key: "normalizeTextNode",

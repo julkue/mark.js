@@ -21,6 +21,12 @@
     class Mark {
         constructor(ctx) {
             this.ctx = ctx;
+
+            this.ie = false;
+            const ua = window.navigator.userAgent;
+            if (ua.indexOf("MSIE") > -1 || ua.indexOf("Trident") > -1) {
+                this.ie = true;
+            }
         }
 
         set opt(val) {
@@ -320,7 +326,11 @@
                 docFrag.appendChild(node.removeChild(node.firstChild));
             }
             parent.replaceChild(docFrag, node);
-            this.normalizeTextNode(parent);
+            if (!this.ie) {
+                parent.normalize();
+            } else {
+                this.normalizeTextNode(parent);
+            }
         }
 
         normalizeTextNode(node) {

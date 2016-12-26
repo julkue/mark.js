@@ -24,6 +24,17 @@ class Mark { // eslint-disable-line no-unused-vars
          * @access protected
          */
         this.ctx = ctx;
+        /**
+         * Specifies if the current browser is a IE (necessary for the node
+         * normalization bug workaround). See {@link Mark#unwrapMatches}
+         * @type {boolean}
+         * @access protected
+         */
+        this.ie = false;
+        const ua = window.navigator.userAgent;
+        if(ua.indexOf("MSIE") > -1 || ua.indexOf("Trident") > -1) {
+            this.ie = true;
+        }
     }
 
     /**
@@ -598,12 +609,17 @@ class Mark { // eslint-disable-line no-unused-vars
             docFrag.appendChild(node.removeChild(node.firstChild));
         }
         parent.replaceChild(docFrag, node);
-        this.normalizeTextNode(parent);
+        if(!this.ie) { // use browser's normalize method
+            parent.normalize();
+        } else { // custom method (needs more time)
+            this.normalizeTextNode(parent);
+        }
     }
 
     /**
-     * Normalizes text nodes as the IE11 team will not solve a bug where the
-     * normalize() method doesn't work
+     * Normalizes text nodes. It's a workaround for the native normalize method
+     * that has a bug in IE (see attached link). Should only be used in IE
+     * browsers as it's slower than the native method.
      * @see {@link http://tinyurl.com/z5asa8c}
      * @param {HTMLElement} node - The DOM node to normalize
      * @access protected
