@@ -828,15 +828,14 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     unmark(opt) {
         this.opt = opt;
-        let stack = [],
-            sel = this.opt.element ? this.opt.element : "*";
+        let sel = this.opt.element ? this.opt.element : "*";
         sel += "[data-markjs]";
         if(this.opt.className) {
             sel += `.${this.opt.className}`;
         }
         this.log(`Removal selector "${sel}"`);
         this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, node => {
-            stack.push(node);
+            this.unwrapMatches(node);
         }, node => {
             const matchesSel = DOMIterator.matches(node, sel),
                 matchesExclude = this.matchesExclude(node, false);
@@ -845,12 +844,7 @@ class Mark { // eslint-disable-line no-unused-vars
             } else {
                 return NodeFilter.FILTER_ACCEPT;
             }
-        }, () => {
-            stack.forEach(node => {
-                this.unwrapMatches(node);
-            });
-            this.opt.done();
-        });
+        }, this.opt.done);
     }
 }
 
@@ -1297,6 +1291,7 @@ class DOMIterator {
     iterateThroughNodes(whatToShow, ctx, eachCb, filterCb, doneCb) {
         const itr = this.createIterator(ctx, whatToShow, filterCb);
         let ifr = [],
+            elements = [],
             node, prevNode, retrieveNodes = () => {
                 ({
                     prevNode,
@@ -1315,8 +1310,13 @@ class DOMIterator {
                     );
                 });
             }
-            eachCb(node);
+            // it's faster to call the each callback in an array loop
+            // than in this while loop
+            elements.push(node);
         }
+        elements.forEach(node => {
+            eachCb(node);
+        });
         if(this.iframes) {
             this.handleOpenIframes(ifr, whatToShow, eachCb, filterCb);
         }

@@ -437,15 +437,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this9 = this;
 
                 this.opt = opt;
-                var stack = [],
-                    sel = this.opt.element ? this.opt.element : "*";
+                var sel = this.opt.element ? this.opt.element : "*";
                 sel += "[data-markjs]";
                 if (this.opt.className) {
                     sel += "." + this.opt.className;
                 }
                 this.log("Removal selector \"" + sel + "\"");
                 this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, function (node) {
-                    stack.push(node);
+                    _this9.unwrapMatches(node);
                 }, function (node) {
                     var matchesSel = DOMIterator.matches(node, sel),
                         matchesExclude = _this9.matchesExclude(node, false);
@@ -454,12 +453,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     } else {
                         return NodeFilter.FILTER_ACCEPT;
                     }
-                }, function () {
-                    stack.forEach(function (node) {
-                        _this9.unwrapMatches(node);
-                    });
-                    _this9.opt.done();
-                });
+                }, this.opt.done);
             }
         }, {
             key: "opt",
@@ -750,6 +744,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 var itr = this.createIterator(ctx, whatToShow, filterCb);
                 var ifr = [],
+                    elements = [],
                     node = void 0,
                     prevNode = void 0,
                     retrieveNodes = function retrieveNodes() {
@@ -768,8 +763,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             _this14.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
                         });
                     }
-                    eachCb(node);
+
+                    elements.push(node);
                 }
+                elements.forEach(function (node) {
+                    eachCb(node);
+                });
                 if (this.iframes) {
                     this.handleOpenIframes(ifr, whatToShow, eachCb, filterCb);
                 }
