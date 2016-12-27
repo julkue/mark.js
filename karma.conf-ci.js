@@ -74,6 +74,12 @@ module.exports = config => {
             platform: "OS X 10.11",
             version: "9"
         },
+        "SL_macOS_Safari_10": {
+            base: "SauceLabs",
+            browserName: "safari",
+            platform: "macOS 10.12",
+            version: "10.0"
+        },
         "SL_Win_IE_9": {
             base: "SauceLabs",
             browserName: "internet explorer",
@@ -92,34 +98,41 @@ module.exports = config => {
             platform: "Windows 7",
             version: "11"
         },
+        "SL_Win_Edge_13": {
+            base: "SauceLabs",
+            browserName: "microsoftedge",
+            platform: "Windows 10",
+            version: "13.10586"
+        },
         "SL_Win_Edge_Latest": {
             base: "SauceLabs",
             browserName: "microsoftedge",
             platform: "Windows 10",
             version: "latest"
         },
-        "SL_iOS_9": {
-            base: "SauceLabs",
-            browserName: "iphone",
-            platform: "OS X 10.10",
-            version: "9.3"
-        },
         "SL_iOS_8": {
             base: "SauceLabs",
             browserName: "iphone",
-            platform: "OS X 10.10",
             version: "8.4"
+        },
+        "SL_iOS_9": {
+            base: "SauceLabs",
+            browserName: "iphone",
+            version: "9.3"
+        },
+        "SL_iOS_10": {
+            base: "SauceLabs",
+            browserName: "iphone",
+            version: "10.0"
         },
         "SL_Android_4": {
             base: "SauceLabs",
             browserName: "android",
-            platform: "Linux",
             version: "4.4"
         },
         "SL_Android_5": {
             base: "SauceLabs",
             browserName: "android",
-            platform: "Linux",
             version: "5.1"
         }
     };
