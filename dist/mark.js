@@ -1,7 +1,7 @@
 /*!***************************************************
- * mark.js v8.4.3
+ * mark.js v8.5.0
  * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2016, Julian Motz
+ * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 
@@ -31,6 +31,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             _classCallCheck(this, Mark);
 
             this.ctx = ctx;
+
+            this.ie = false;
+            var ua = window.navigator.userAgent;
+            if (ua.indexOf("MSIE") > -1 || ua.indexOf("Trident") > -1) {
+                this.ie = true;
+            }
         }
 
         _createClass(Mark, [{
@@ -334,7 +340,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     docFrag.appendChild(node.removeChild(node.firstChild));
                 }
                 parent.replaceChild(docFrag, node);
-                this.normalizeTextNode(parent);
+                if (!this.ie) {
+                    parent.normalize();
+                } else {
+                    this.normalizeTextNode(parent);
+                }
             }
         }, {
             key: "normalizeTextNode",
@@ -734,6 +744,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 var itr = this.createIterator(ctx, whatToShow, filterCb);
                 var ifr = [],
+                    elements = [],
                     node = void 0,
                     prevNode = void 0,
                     retrieveNodes = function retrieveNodes() {
@@ -752,8 +763,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             _this14.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
                         });
                     }
-                    eachCb(node);
+
+                    elements.push(node);
                 }
+                elements.forEach(function (node) {
+                    eachCb(node);
+                });
                 if (this.iframes) {
                     this.handleOpenIframes(ifr, whatToShow, eachCb, filterCb);
                 }

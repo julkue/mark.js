@@ -4,7 +4,7 @@
 /*!***************************************************
  * mark.js
  * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2016, Julian Motz
+ * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 -->
@@ -23,9 +23,32 @@
     <script src="../src/mark.js"></script>
     <script>
         var $ctx = $("#context");
-        $ctx.load("fixtures/basic/main.html", function(){
-            new Mark($ctx.get()).mark("lorem", {
-                debug: true
+        $ctx.load("fixtures/basic/large-document.html", function() {
+            // mark
+            var start = new Date(),
+                instance = new Mark($ctx.get());
+            instance.mark("lorem", {
+                debug: true,
+                done: function(counter) {
+                    var end = new Date(),
+                        time = end.getTime() - start.getTime();
+                    console.log(
+                        "Time elapsed: " + time + "ms.",
+                        "Elements: " + counter
+                    );
+                    // unmark
+                    setTimeout(function(){
+                        start = new Date();
+                        instance.unmark({
+                            debug: true,
+                            done: function(){
+                                var end = new Date(),
+                                    time = end.getTime() - start.getTime();
+                                console.log("Time elapsed: " + time + "ms.");
+                            }
+                        });
+                    }, 2000);
+                }
             });
         });
     </script>

@@ -1,7 +1,7 @@
 /*!***************************************************
- * mark.js v8.4.3
+ * mark.js v8.5.0
  * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2016, Julian Motz
+ * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 
@@ -21,6 +21,12 @@
     class Mark {
         constructor(ctx) {
             this.ctx = ctx;
+
+            this.ie = false;
+            const ua = window.navigator.userAgent;
+            if (ua.indexOf("MSIE") > -1 || ua.indexOf("Trident") > -1) {
+                this.ie = true;
+            }
         }
 
         set opt(val) {
@@ -320,7 +326,11 @@
                 docFrag.appendChild(node.removeChild(node.firstChild));
             }
             parent.replaceChild(docFrag, node);
-            this.normalizeTextNode(parent);
+            if (!this.ie) {
+                parent.normalize();
+            } else {
+                this.normalizeTextNode(parent);
+            }
         }
 
         normalizeTextNode(node) {
@@ -651,6 +661,7 @@
         iterateThroughNodes(whatToShow, ctx, eachCb, filterCb, doneCb) {
             const itr = this.createIterator(ctx, whatToShow, filterCb);
             let ifr = [],
+                elements = [],
                 node,
                 prevNode,
                 retrieveNodes = () => {
@@ -668,8 +679,12 @@
                         this.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
                     });
                 }
-                eachCb(node);
+
+                elements.push(node);
             }
+            elements.forEach(node => {
+                eachCb(node);
+            });
             if (this.iframes) {
                 this.handleOpenIframes(ifr, whatToShow, eachCb, filterCb);
             }
