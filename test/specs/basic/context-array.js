@@ -5,13 +5,13 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark called with a context NodeList", function () {
+describe("basic mark called with an array of contexts", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic/nodelist.html");
+        loadFixtures("basic/context-array.html");
 
-        $ctx = $(".basic-nodelist");
-        new Mark(document.querySelectorAll(".basic-nodelist")).mark("lorem", {
+        $ctx = $(".basic-context-array");
+        new Mark($ctx.get()).mark("lorem", {
             "diacritics": false,
             "separateWordSearch": false,
             "done": done

@@ -5,7 +5,7 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with array", function () {
+describe("basic mark with an array of keywords", function () {
     var $ctx, notFound;
     beforeEach(function (done) {
         loadFixtures("basic/array-keyword.html");

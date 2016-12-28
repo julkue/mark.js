@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.5.0
+ * mark.js v8.6.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -522,6 +522,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     ctx = Array.prototype.slice.call(this.ctx);
                 } else if (Array.isArray(this.ctx)) {
                     ctx = this.ctx;
+                } else if (typeof this.ctx === "string") {
+                    ctx = Array.prototype.slice.call(document.querySelectorAll(this.ctx));
                 } else {
                     ctx = [this.ctx];
                 }

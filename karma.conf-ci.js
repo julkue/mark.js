@@ -149,8 +149,10 @@ module.exports = config => {
             "test/specs/basic/debug.js",
             "test/specs/basic/main.js",
             "test/specs/basic/unmark.js",
-            "test/specs/basic/array.js",
-            "test/specs/basic/nodelist.js",
+            "test/specs/basic/context-array.js",
+            "test/specs/basic/context-nodelist.js",
+            "test/specs/basic/context-direct.js",
+            "test/specs/basic/context-string.js",
             "test/specs/basic/array-keyword.js",
             "test/specs/basic/!(accuracy|no-options|case-sensitive|ignore-joiners)*.js",
             // depends on diacritics, separateWordSearch:

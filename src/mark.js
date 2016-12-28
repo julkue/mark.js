@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.5.0
+ * mark.js v8.6.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -14,13 +14,14 @@
 class Mark { // eslint-disable-line no-unused-vars
 
     /**
-     * @param {HTMLElement|HTMLElement[]|NodeList} ctx - The context DOM
-     * element, an array of DOM elements or a NodeList
+     * @param {HTMLElement|HTMLElement[]|NodeList|string} ctx - The context DOM
+     * element, an array of DOM elements, a NodeList or a selector
      */
     constructor(ctx) {
         /**
-         * The context
-         * @type {HTMLElement|HTMLElement[]|NodeList}
+         * The context of the instance. Either a DOM element, an array of DOM
+         * elements, a NodeList or a selector
+         * @type {HTMLElement|HTMLElement[]|NodeList|string}
          * @access protected
          */
         this.ctx = ctx;
@@ -871,8 +872,8 @@ class Mark { // eslint-disable-line no-unused-vars
 class DOMIterator {
 
     /**
-     * @param {HTMLElement|HTMLElement[]|NodeList} ctx - The context DOM
-     * element, an array of DOM elements or a NodeList
+     * @param {HTMLElement|HTMLElement[]|NodeList|string} ctx - The context DOM
+     * element, an array of DOM elements, a NodeList or a selector
      * @param {boolean} [iframes=true] - A boolean indicating if iframes should
      * be handled
      * @param {string[]} [exclude=[]] - An array containing exclusion selectors
@@ -880,8 +881,9 @@ class DOMIterator {
      */
     constructor(ctx, iframes = true, exclude = []) {
         /**
-         * The context
-         * @type {HTMLElement|HTMLElement[]|NodeList}
+         * The context of the instance. Either a DOM element, an array of DOM
+         * elements, a NodeList or a selector
+         * @type {HTMLElement|HTMLElement[]|NodeList|string}
          * @access protected
          */
         this.ctx = ctx;
@@ -945,6 +947,10 @@ class DOMIterator {
             ctx = Array.prototype.slice.call(this.ctx);
         } else if(Array.isArray(this.ctx)) {
             ctx = this.ctx;
+        } else if(typeof this.ctx === "string") {
+            ctx = Array.prototype.slice.call(
+                document.querySelectorAll(this.ctx)
+            );
         } else { // e.g. HTMLElement or element inside iframe
             ctx = [this.ctx];
         }

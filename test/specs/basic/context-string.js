@@ -5,22 +5,20 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark directly inside the context", function () {
+describe("basic mark called with a string selector as context", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic/only-context.html");
+        loadFixtures("basic/context-string.html");
 
-        $ctx = $(".basic-only-context");
-        new Mark($ctx[0]).mark("lorem ipsum", {
+        $ctx = $(".basic-context-string");
+        new Mark(".basic-context-string").mark("lorem", {
             "diacritics": false,
             "separateWordSearch": false,
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 
     it("should wrap matches", function () {
-        expect($ctx.find("mark")).toHaveLength(4);
+        expect($ctx.find("mark")).toHaveLength(8);
     });
 });
