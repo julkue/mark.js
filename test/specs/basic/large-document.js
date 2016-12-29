@@ -6,30 +6,36 @@
  *****************************************************/
 "use strict";
 describe("basic mark in large documents", function () {
-    var $ctx, err, start, end;
+    var $ctx, err, start, end, diff;
     beforeEach(function (done) {
         loadFixtures("basic/large-document.html");
 
         $ctx = $(".basic-large-document");
         err = false;
         start = new Date();
-        try{
+        try {
             new Mark($ctx[0]).mark("lorem", {
                 "diacritics": false,
                 "separateWordSearch": false,
-                "done": function(){
+                "done": function () {
                     end = new Date();
+                    diff = end.getTime() - start.getTime();
                     done();
                 }
             });
-        } catch(e){
+        } catch(e) {
             err = true;
         }
-    });
+    }, 60000);
 
-    it("should wrap matches without recursion error", function () {
+    it("should not throw a recursion error", function () {
         expect(err).toBe(false);
-        expect($ctx.find("mark")).toHaveLength(13028);
-        expect(end.getTime() - start.getTime()).toBeLessThan(10000); // 10 sec
+    });
+    it("should wrap matches", function () {
+        expect($ctx.find("mark")).toHaveLength(9569);
+    });
+    it("should be faster than 15 seconds", function () {
+        // normally 10 seconds, but IE9 needs more time -.-
+        expect(diff).toBeLessThan(15000);
     });
 });
