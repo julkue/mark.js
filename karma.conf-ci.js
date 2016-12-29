@@ -177,9 +177,8 @@ module.exports = config => {
         plugins: [
             "karma-jasmine",
             "karma-jasmine-jquery",
-            "karma-phantomjs-launcher",
-            "karma-spec-reporter",
             "karma-sauce-launcher",
+            "karma-summary-reporter",
             "karma-coverage"
         ],
         sauceLabs: {
@@ -187,11 +186,11 @@ module.exports = config => {
         },
         customLaunchers: customLaunchers,
         browsers: Object.keys(customLaunchers),
-        reporters: ["spec", "saucelabs", "coverage"],
-        // in case Sauce Labs is slow
-        captureTimeout: 180000, // 3 min
-        browserDisconnectTimeout: 60000, // 1 min
-        browserNoActivityTimeout: 60000, // 1 min
+        reporters: ["summary", "saucelabs", "coverage"],
+        // in case Sauce Labs or the browser is slow
+        captureTimeout: 300000, // 5 min
+        browserDisconnectTimeout: 180000, // 3 min
+        browserNoActivityTimeout: 180000, // 3 min
         browserDisconnectTolerance: 15,
         singleRun: true,
         preprocessors: {
