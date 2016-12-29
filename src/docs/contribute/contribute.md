@@ -8,5 +8,5 @@ found a bug, please don't hesitate to [open an issue][issues] on GitHub!
 Before submitting pull requests or creating issues, please read the
 [guidelines for contributing][contributing-guidelines].
 
-[issues]: https://github.com/julmot/mark.js/issues/new
-[contributing-guidelines]: https://github.com/julmot/mark.js/blob/master/CONTRIBUTING.md
+[issues]: https://github.com/julmot/{{defaults.title}}/issues/new
+[contributing-guidelines]: https://github.com/julmot/{{defaults.title}}/blob/master/CONTRIBUTING.md

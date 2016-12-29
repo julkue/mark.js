@@ -9,5 +9,5 @@ available on:
 - [cdnjs][cdnjs]
 
 [cdn]: https://en.wikipedia.org/wiki/Content_delivery_network
-[cdnjs]: https://cdnjs.com/libraries/mark.js/
-[jsdelivr]: http://www.jsdelivr.com/projects/mark.js
+[cdnjs]: https://cdnjs.com/libraries/{{defaults.title}}/
+[jsdelivr]: http://www.jsdelivr.com/projects/{{defaults.title}}

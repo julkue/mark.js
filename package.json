@@ -48,5 +48,6 @@
     "metalsmith-markdown": "^0.2.1",
     "ncp": "^2.0.0"
   },
-  "private": true
+  "private": true,
+  "copyrightYear": "2016–2017"
 }

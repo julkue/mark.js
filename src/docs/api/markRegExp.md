@@ -20,8 +20,9 @@ jQuery:
 $(".context").markRegExp(regexp [, options]);
 ```
 
-__Note__: This is a chaining method, thus allows you to call further methods on
-the returning object.
+__Note__: Even if this is a chaining method and therefore allows you to call
+further methods on the returning object, it's recommended to always use the
+`done` callback as {{defaults.title}} works asynchronous.
 
 #### Parameters
 

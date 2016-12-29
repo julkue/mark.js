@@ -13,14 +13,17 @@ var instance = new Mark(context);
 
 The variable `context` defines where you want {{defaults.title}} to search for
 matches. You can pass a single element (e.g. the return value of
-`document.getElementById()` or `document.querySelector()`), an array containing
-multiple single elements, or a NodeList.
+`document.getElementById(...)` or `document.querySelector(...)`), an array
+containing multiple single elements, or a NodeList (e.g.
+`document.querySelectorAll(...)`). Alternatively you can pass a string selector.
 
 If for example you'd like to highlight matches in a div with a class `context`
 then you'd have to use:
 
 ```javascript
 var instance = new Mark(document.querySelector("div.context"));
+// or
+var instance = new Mark("div.context");
 ```
 
 **jQuery**

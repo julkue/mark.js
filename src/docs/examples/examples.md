@@ -2,7 +2,8 @@
 heading: false
 ---
 
-Have a look at the [Configurator][configurator] to see mark.js in action.
+Have a look at the [Configurator][configurator] to see {{defaults.title}} in
+action.
 
 Other examples:
 
@@ -24,4 +25,3 @@ Other examples:
 [jsfiddle-regexp]: https://jsfiddle.net/julmot/ova17daa/
 [jsfiddle-url-referrer]: https://jsfiddle.net/julmot/bL6bb5oo/
 [jsfiddle-animated]: https://jsfiddle.net/julmot/hexomvbL/
-
