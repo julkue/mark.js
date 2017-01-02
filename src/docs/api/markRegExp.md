@@ -83,6 +83,7 @@ content='For both, JavaScript and jQuery:
     "exclude": [],
     "iframes": false,
     "acrossElements": false,
+    "ignoreGroups": 0,
     "each": function(node){
         // node is the marked DOM element
     },
