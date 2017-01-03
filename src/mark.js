@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.6.0
+ * mark.js v8.6.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -448,32 +448,33 @@ class Mark { // eslint-disable-line no-unused-vars
         dict.nodes.every((n, i) => {
             const sibl = dict.nodes[i + 1];
             if(typeof sibl === "undefined" || sibl.start > start) {
+                if(!filterCb(n.node)) {
+                    return false;
+                }
                 // map range from dict.value to text node
                 const s = start - n.start,
-                    e = (end > n.end ? n.end : end) - n.start;
-                if(filterCb(n.node)) {
-                    n.node = this.wrapRangeInTextNode(n.node, s, e);
-                    // recalculate positions to also find subsequent matches in
-                    // the same text node. Necessary as the text node in dict
-                    // now only contains the splitted part after the wrapped one
-                    const startStr = dict.value.substr(0, n.start),
-                        endStr = dict.value.substr(e + n.start);
-                    dict.value = startStr + endStr;
-                    dict.nodes.forEach((k, j) => {
-                        if(j >= i) {
-                            if(dict.nodes[j].start > 0 && j !== i) {
-                                dict.nodes[j].start -= e;
-                            }
-                            dict.nodes[j].end -= e;
+                    e = (end > n.end ? n.end : end) - n.start,
+                    startStr = dict.value.substr(0, n.start),
+                    endStr = dict.value.substr(e + n.start);
+                n.node = this.wrapRangeInTextNode(n.node, s, e);
+                // recalculate positions to also find subsequent matches in the
+                // same text node. Necessary as the text node in dict now only
+                // contains the splitted part after the wrapped one
+                dict.value = startStr + endStr;
+                dict.nodes.forEach((k, j) => {
+                    if(j >= i) {
+                        if(dict.nodes[j].start > 0 && j !== i) {
+                            dict.nodes[j].start -= e;
                         }
-                    });
-                    end -= e;
-                    eachCb(n.node.previousSibling, n.start);
-                    if(end > n.end) {
-                        start = n.end;
-                    } else {
-                        return false;
+                        dict.nodes[j].end -= e;
                     }
+                });
+                end -= e;
+                eachCb(n.node.previousSibling, n.start);
+                if(end > n.end) {
+                    start = n.end;
+                } else {
+                    return false;
                 }
             }
             return true;

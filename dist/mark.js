@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.6.0
+ * mark.js v8.6.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -242,31 +242,35 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     var sibl = dict.nodes[i + 1];
                     if (typeof sibl === "undefined" || sibl.start > start) {
                         var _ret = function () {
-                            var s = start - n.start,
-                                e = (end > n.end ? n.end : end) - n.start;
-                            if (filterCb(n.node)) {
-                                n.node = _this4.wrapRangeInTextNode(n.node, s, e);
+                            if (!filterCb(n.node)) {
+                                return {
+                                    v: false
+                                };
+                            }
 
-                                var startStr = dict.value.substr(0, n.start),
-                                    endStr = dict.value.substr(e + n.start);
-                                dict.value = startStr + endStr;
-                                dict.nodes.forEach(function (k, j) {
-                                    if (j >= i) {
-                                        if (dict.nodes[j].start > 0 && j !== i) {
-                                            dict.nodes[j].start -= e;
-                                        }
-                                        dict.nodes[j].end -= e;
+                            var s = start - n.start,
+                                e = (end > n.end ? n.end : end) - n.start,
+                                startStr = dict.value.substr(0, n.start),
+                                endStr = dict.value.substr(e + n.start);
+                            n.node = _this4.wrapRangeInTextNode(n.node, s, e);
+
+                            dict.value = startStr + endStr;
+                            dict.nodes.forEach(function (k, j) {
+                                if (j >= i) {
+                                    if (dict.nodes[j].start > 0 && j !== i) {
+                                        dict.nodes[j].start -= e;
                                     }
-                                });
-                                end -= e;
-                                eachCb(n.node.previousSibling, n.start);
-                                if (end > n.end) {
-                                    start = n.end;
-                                } else {
-                                    return {
-                                        v: false
-                                    };
+                                    dict.nodes[j].end -= e;
                                 }
+                            });
+                            end -= e;
+                            eachCb(n.node.previousSibling, n.start);
+                            if (end > n.end) {
+                                start = n.end;
+                            } else {
+                                return {
+                                    v: false
+                                };
                             }
                         }();
 
