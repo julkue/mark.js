@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.6.1
+ * mark.js v8.7.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -351,7 +351,7 @@ class Mark { // eslint-disable-line no-unused-vars
                 node
             });
         }, node => {
-            if(this.matchesExclude(node.parentNode, true)) {
+            if(this.matchesExclude(node.parentNode)) {
                 return NodeFilter.FILTER_REJECT;
             } else {
                 return NodeFilter.FILTER_ACCEPT;
@@ -369,20 +369,14 @@ class Mark { // eslint-disable-line no-unused-vars
      * it checks for elements in which no marks should be performed (e.g.
      * script and style tags) and optionally already marked elements
      * @param  {HTMLElement} el - The element to check
-     * @param {boolean} exclM - If already marked elements should be excluded
-     * too
      * @return {boolean}
      * @access protected
      */
-    matchesExclude(el, exclM) {
-        let excl = this.opt.exclude.concat([
+    matchesExclude(el) {
+        return DOMIterator.matches(el, this.opt.exclude.concat([
             // ignores the elements itself, not their childrens (selector *)
             "script", "style", "title", "head", "html"
-        ]);
-        if(exclM) {
-            excl = excl.concat(["*[data-markjs='true']"]);
-        }
-        return DOMIterator.matches(el, excl);
+        ]));
     }
 
     /**
@@ -840,7 +834,7 @@ class Mark { // eslint-disable-line no-unused-vars
             this.unwrapMatches(node);
         }, node => {
             const matchesSel = DOMIterator.matches(node, sel),
-                matchesExclude = this.matchesExclude(node, false);
+                matchesExclude = this.matchesExclude(node);
             if(!matchesSel || matchesExclude) {
                 return NodeFilter.FILTER_REJECT;
             } else {

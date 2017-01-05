@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.6.1
+ * mark.js v8.7.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -197,7 +197,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         node: node
                     });
                 }, function (node) {
-                    if (_this3.matchesExclude(node.parentNode, true)) {
+                    if (_this3.matchesExclude(node.parentNode)) {
                         return NodeFilter.FILTER_REJECT;
                     } else {
                         return NodeFilter.FILTER_ACCEPT;
@@ -211,12 +211,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             }
         }, {
             key: "matchesExclude",
-            value: function matchesExclude(el, exclM) {
-                var excl = this.opt.exclude.concat(["script", "style", "title", "head", "html"]);
-                if (exclM) {
-                    excl = excl.concat(["*[data-markjs='true']"]);
-                }
-                return DOMIterator.matches(el, excl);
+            value: function matchesExclude(el) {
+                return DOMIterator.matches(el, this.opt.exclude.concat(["script", "style", "title", "head", "html"]));
             }
         }, {
             key: "wrapRangeInTextNode",
@@ -451,7 +447,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     _this9.unwrapMatches(node);
                 }, function (node) {
                     var matchesSel = DOMIterator.matches(node, sel),
-                        matchesExclude = _this9.matchesExclude(node, false);
+                        matchesExclude = _this9.matchesExclude(node);
                     if (!matchesSel || matchesExclude) {
                         return NodeFilter.FILTER_REJECT;
                     } else {

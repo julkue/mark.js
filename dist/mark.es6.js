@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.6.1
+ * mark.js v8.7.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -201,7 +201,7 @@
                     node
                 });
             }, node => {
-                if (this.matchesExclude(node.parentNode, true)) {
+                if (this.matchesExclude(node.parentNode)) {
                     return NodeFilter.FILTER_REJECT;
                 } else {
                     return NodeFilter.FILTER_ACCEPT;
@@ -214,12 +214,8 @@
             });
         }
 
-        matchesExclude(el, exclM) {
-            let excl = this.opt.exclude.concat(["script", "style", "title", "head", "html"]);
-            if (exclM) {
-                excl = excl.concat(["*[data-markjs='true']"]);
-            }
-            return DOMIterator.matches(el, excl);
+        matchesExclude(el) {
+            return DOMIterator.matches(el, this.opt.exclude.concat(["script", "style", "title", "head", "html"]));
         }
 
         wrapRangeInTextNode(node, start, end) {
@@ -424,7 +420,7 @@
                 this.unwrapMatches(node);
             }, node => {
                 const matchesSel = DOMIterator.matches(node, sel),
-                      matchesExclude = this.matchesExclude(node, false);
+                      matchesExclude = this.matchesExclude(node);
                 if (!matchesSel || matchesExclude) {
                     return NodeFilter.FILTER_REJECT;
                 } else {
