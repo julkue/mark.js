@@ -12,6 +12,7 @@ vendor/
 
 # Personal
 TODO
+npm-debug.log*
 
 # Build (do not ignore templates)
 build/*.js
