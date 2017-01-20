@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.7.0
+ * mark.js v8.8.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -35,6 +35,7 @@
                 "className": "",
                 "exclude": [],
                 "iframes": false,
+                "iframesTimeout": 5000,
                 "separateWordSearch": true,
                 "diacritics": true,
                 "synonyms": {},
@@ -58,7 +59,7 @@
 
         get iterator() {
             if (!this._iterator) {
-                this._iterator = new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude);
+                this._iterator = new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude, this.opt.iframesTimeout);
             }
             return this._iterator;
         }
@@ -431,12 +432,14 @@
     }
 
     class DOMIterator {
-        constructor(ctx, iframes = true, exclude = []) {
+        constructor(ctx, iframes = true, exclude = [], iframesTimeout = 5000) {
             this.ctx = ctx;
 
             this.iframes = iframes;
 
             this.exclude = exclude;
+
+            this.iframesTimeout = iframesTimeout;
         }
 
         static matches(element, selector) {
@@ -499,37 +502,45 @@
             }
         }
 
+        isIframeBlank(ifr) {
+            const bl = "about:blank",
+                  src = ifr.getAttribute("src").trim(),
+                  href = ifr.contentWindow.location.href;
+            return href === bl && src !== bl && src;
+        }
+
+        observeIframeLoad(ifr, successFn, errorFn) {
+            let called = false,
+                tout = null;
+            const listener = () => {
+                if (called) {
+                    return;
+                }
+                called = true;
+                clearTimeout(tout);
+                try {
+                    if (!this.isIframeBlank(ifr)) {
+                        ifr.removeEventListener("load", listener);
+                        this.getIframeContents(ifr, successFn, errorFn);
+                    }
+                } catch (e) {
+                    errorFn();
+                }
+            };
+            ifr.addEventListener("load", listener);
+            tout = setTimeout(listener, this.iframesTimeout);
+        }
+
         onIframeReady(ifr, successFn, errorFn) {
             try {
-                const ifrWin = ifr.contentWindow,
-                      bl = "about:blank",
-                      compl = "complete",
-                      isBlank = () => {
-                    const src = ifr.getAttribute("src").trim(),
-                          href = ifrWin.location.href;
-                    return href === bl && src !== bl && src;
-                },
-                      observeOnload = () => {
-                    const listener = () => {
-                        try {
-                            if (!isBlank()) {
-                                ifr.removeEventListener("load", listener);
-                                this.getIframeContents(ifr, successFn, errorFn);
-                            }
-                        } catch (e) {
-                            errorFn();
-                        }
-                    };
-                    ifr.addEventListener("load", listener);
-                };
-                if (ifrWin.document.readyState === compl) {
-                    if (isBlank()) {
-                        observeOnload();
+                if (ifr.contentWindow.document.readyState === "complete") {
+                    if (this.isIframeBlank(ifr)) {
+                        this.observeIframeLoad(ifr, successFn, errorFn);
                     } else {
                         this.getIframeContents(ifr, successFn, errorFn);
                     }
                 } else {
-                    observeOnload();
+                    this.observeIframeLoad(ifr, successFn, errorFn);
                 }
             } catch (e) {
                 errorFn();

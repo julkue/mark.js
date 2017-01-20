@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.7.0
+ * mark.js v8.8.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -52,6 +52,7 @@ class Mark { // eslint-disable-line no-unused-vars
             "className": "",
             "exclude": [],
             "iframes": false,
+            "iframesTimeout": 5000,
             "separateWordSearch": true,
             "diacritics": true,
             "synonyms": {},
@@ -81,7 +82,10 @@ class Mark { // eslint-disable-line no-unused-vars
     get iterator() {
         if(!this._iterator) {
             this._iterator = new DOMIterator(
-                this.ctx, this.opt.iframes, this.opt.exclude
+                this.ctx,
+                this.opt.iframes,
+                this.opt.exclude,
+                this.opt.iframesTimeout
             );
         }
         return this._iterator;
@@ -874,8 +878,13 @@ class DOMIterator {
      * be handled
      * @param {string[]} [exclude=[]] - An array containing exclusion selectors
      * for iframes
+     * @param {number} [iframesTimeout=5000] - A number indicating the ms to
+     * wait before an iframe should be skipped, in case the load event isn't
+     * fired. This also applies if the user is offline and the resource of the
+     * iframe is online (either by the browsers "offline" mode or because
+     * there's no internet connection)
      */
-    constructor(ctx, iframes = true, exclude = []) {
+    constructor(ctx, iframes = true, exclude = [], iframesTimeout = 5000) {
         /**
          * The context of the instance. Either a DOM element, an array of DOM
          * elements, a NodeList or a selector
@@ -894,6 +903,11 @@ class DOMIterator {
          * @type {string[]}
          */
         this.exclude = exclude;
+        /**
+         * The maximum ms to wait for a load event before skipping an iframe
+         * @type {number}
+         */
+        this.iframesTimeout = iframesTimeout;
     }
 
     /**
@@ -991,6 +1005,51 @@ class DOMIterator {
     }
 
     /**
+     * Checks if an iframe is empty (if about:blank is the shown page)
+     * @param {HTMLElement} ifr - The iframe DOM element
+     * @return {boolean}
+     * @access protected
+     */
+    isIframeBlank(ifr) {
+        const bl = "about:blank",
+            src = ifr.getAttribute("src").trim(),
+            href = ifr.contentWindow.location.href;
+        return href === bl && src !== bl && src;
+    }
+
+    /**
+     * Observes the onload event of an iframe and calls the success callback or
+     * the error callback if the iframe is inaccessible. If the event isn't
+     * fired within the specified {@link DOMIterator#iframesTimeout}, then it'll
+     * call the error callback too
+     * @param {HTMLElement} ifr - The iframe DOM element
+     * @param {DOMIterator~getIframeContentsSuccessCallback} successFn
+     * @param {function} errorFn
+     * @access protected
+     */
+    observeIframeLoad(ifr, successFn, errorFn) {
+        let called = false,
+            tout = null;
+        const listener = () => {
+            if(called) {
+                return;
+            }
+            called = true;
+            clearTimeout(tout);
+            try {
+                if(!this.isIframeBlank(ifr)) {
+                    ifr.removeEventListener("load", listener);
+                    this.getIframeContents(ifr, successFn, errorFn);
+                }
+            } catch(e) { // isIframeBlank maybe throws throws an error
+                errorFn();
+            }
+        };
+        ifr.addEventListener("load", listener);
+        tout = setTimeout(listener, this.iframesTimeout);
+    }
+
+    /**
      * Callback when the iframe is ready
      * @callback DOMIterator~onIframeReadySuccessCallback
      * @param {HTMLDocument} contents - The contentDocument of the iframe
@@ -1011,37 +1070,16 @@ class DOMIterator {
      */
     onIframeReady(ifr, successFn, errorFn) {
         try {
-            const ifrWin = ifr.contentWindow,
-                bl = "about:blank",
-                compl = "complete",
-                isBlank = () => {
-                    const src = ifr.getAttribute("src").trim(),
-                        href = ifrWin.location.href;
-                    return href === bl && src !== bl && src;
-                },
-                observeOnload = () => {
-                    const listener = () => {
-                        try {
-                            if(!isBlank()) {
-                                ifr.removeEventListener("load", listener);
-                                this.getIframeContents(ifr, successFn, errorFn);
-                            }
-                        } catch(e) {
-                            errorFn();
-                        }
-                    };
-                    ifr.addEventListener("load", listener);
-                };
-            if(ifrWin.document.readyState === compl) {
-                if(isBlank()) {
-                    observeOnload();
+            if(ifr.contentWindow.document.readyState === "complete") {
+                if(this.isIframeBlank(ifr)) {
+                    this.observeIframeLoad(ifr, successFn, errorFn);
                 } else {
                     this.getIframeContents(ifr, successFn, errorFn);
                 }
             } else {
-                observeOnload();
+                this.observeIframeLoad(ifr, successFn, errorFn);
             }
-        } catch(e) { // accessing contentDocument failed
+        } catch(e) { // accessing document failed
             errorFn();
         }
     }

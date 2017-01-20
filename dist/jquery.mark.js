@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.7.0
+ * mark.js v8.8.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -463,6 +463,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "className": "",
                     "exclude": [],
                     "iframes": false,
+                    "iframesTimeout": 5000,
                     "separateWordSearch": true,
                     "diacritics": true,
                     "synonyms": {},
@@ -488,7 +489,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: "iterator",
             get: function get() {
                 if (!this._iterator) {
-                    this._iterator = new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude);
+                    this._iterator = new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude, this.opt.iframesTimeout);
                 }
                 return this._iterator;
             }
@@ -501,6 +502,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         function DOMIterator(ctx) {
             var iframes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
             var exclude = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+            var iframesTimeout = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 5000;
 
             _classCallCheck(this, DOMIterator);
 
@@ -509,6 +511,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             this.iframes = iframes;
 
             this.exclude = exclude;
+
+            this.iframesTimeout = iframesTimeout;
         }
 
         _createClass(DOMIterator, [{
@@ -558,43 +562,51 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             }
         }, {
-            key: "onIframeReady",
-            value: function onIframeReady(ifr, successFn, errorFn) {
+            key: "isIframeBlank",
+            value: function isIframeBlank(ifr) {
+                var bl = "about:blank",
+                    src = ifr.getAttribute("src").trim(),
+                    href = ifr.contentWindow.location.href;
+                return href === bl && src !== bl && src;
+            }
+        }, {
+            key: "observeIframeLoad",
+            value: function observeIframeLoad(ifr, successFn, errorFn) {
                 var _this10 = this;
 
-                try {
-                    (function () {
-                        var ifrWin = ifr.contentWindow,
-                            bl = "about:blank",
-                            compl = "complete",
-                            isBlank = function isBlank() {
-                            var src = ifr.getAttribute("src").trim(),
-                                href = ifrWin.location.href;
-                            return href === bl && src !== bl && src;
-                        },
-                            observeOnload = function observeOnload() {
-                            var listener = function listener() {
-                                try {
-                                    if (!isBlank()) {
-                                        ifr.removeEventListener("load", listener);
-                                        _this10.getIframeContents(ifr, successFn, errorFn);
-                                    }
-                                } catch (e) {
-                                    errorFn();
-                                }
-                            };
-                            ifr.addEventListener("load", listener);
-                        };
-                        if (ifrWin.document.readyState === compl) {
-                            if (isBlank()) {
-                                observeOnload();
-                            } else {
-                                _this10.getIframeContents(ifr, successFn, errorFn);
-                            }
-                        } else {
-                            observeOnload();
+                var called = false,
+                    tout = null;
+                var listener = function listener() {
+                    if (called) {
+                        return;
+                    }
+                    called = true;
+                    clearTimeout(tout);
+                    try {
+                        if (!_this10.isIframeBlank(ifr)) {
+                            ifr.removeEventListener("load", listener);
+                            _this10.getIframeContents(ifr, successFn, errorFn);
                         }
-                    })();
+                    } catch (e) {
+                        errorFn();
+                    }
+                };
+                ifr.addEventListener("load", listener);
+                tout = setTimeout(listener, this.iframesTimeout);
+            }
+        }, {
+            key: "onIframeReady",
+            value: function onIframeReady(ifr, successFn, errorFn) {
+                try {
+                    if (ifr.contentWindow.document.readyState === "complete") {
+                        if (this.isIframeBlank(ifr)) {
+                            this.observeIframeLoad(ifr, successFn, errorFn);
+                        } else {
+                            this.getIframeContents(ifr, successFn, errorFn);
+                        }
+                    } else {
+                        this.observeIframeLoad(ifr, successFn, errorFn);
+                    }
                 } catch (e) {
                     errorFn();
                 }
