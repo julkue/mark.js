@@ -46,6 +46,7 @@ Optional options:
 | className          | string   | ""      | A class name that will be appended to `element`                                                                                                                                                                                                                                                                                                           |
 | exclude            | array    | [ ]     | An array with exclusion selectors. Matches inside these elements will be ignored. Example: `"filter": ["h1", ".ignore"]`                                                                                                                                                                                                                                  |
 | iframes            | boolean  | false   | Whether to search also inside iframes. If you don't have permissions to some iframes (e.g. because they have a [different origin][SOP]) they will be silently skipped. If you don't want to search inside specific iframes (e.g. facebook share), you can pass an `exclude` selector that matches these iframes                                           |
+| iframesTimeout     | number   | 5000    | The maximum ms to wait for a `load` event before skipping an iframe. Especially important when there's no internet connection or a browser "offline" mode is enabled and an iframe has an online `src` – then the `load` event is never fired                                                                                                             |
 | acrossElements     | boolean  | false   | Whether to search for matches across elements                                                                                                                                                                                                                                                                                                             |
 | ignoreGroups       | number   | 0       | Indicates the number of matching groups to ignore in the replacement. Can be used e.g. to implement non-capturing lookbehind groups. Note that when the value is > 0 (when groups should be ignored), it expects a total amount of groups in the RegExp of `ignoreGroups` + 1                                                                             |
 | each               | function |         | A callback for each marked element. Receives the marked DOM element as a parameter                                                                                                                                                                                                                                                                        |
@@ -82,6 +83,7 @@ content='For both, JavaScript and jQuery:
     "className": "",
     "exclude": [],
     "iframes": false,
+    "iframesTimeout": 5000,
     "acrossElements": false,
     "ignoreGroups": 0,
     "each": function(node){

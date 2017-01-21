@@ -102,6 +102,12 @@
         <input class="form-control input-sm" id="{{prefix}}ignoreGroups" name="ignoreGroups" type="number" placeholder="0">
     </div>
 {{/inline}}
+{{#* inline "iframes-timeout-form-group"}}
+    <div class="form-group">
+        <label for="{{prefix}}iframesTimeout">Iframes timeout:</label>
+        <input class="form-control input-sm" id="{{prefix}}iframesTimeout" name="iframesTimeout" type="number" placeholder="5000">
+    </div>
+{{/inline}}
 {{#* inline "separate-word-search-checkbox"}}
     <div class="checkbox">
         <label><input id="{{prefix}}separateWordSearch" name="separateWordSearch" type="checkbox" checked> Separate word search</label>
@@ -149,6 +155,7 @@
                 {{> element-form-group prefix="form-keyword-"}}
                 {{> synonyms-form-group prefix="form-keyword-"}}
                 {{> exclude-form-group prefix="form-keyword-"}}
+                {{> iframes-timeout-form-group prefix="form-keyword-"}}
             </div>
             <div class="col-sm-6">
                 {{> accuracy-form-group prefix="form-keyword-"}}
@@ -176,6 +183,7 @@
                 {{> element-form-group prefix="form-array-"}}
                 {{> synonyms-form-group prefix="form-array-"}}
                 {{> exclude-form-group prefix="form-array-"}}
+                {{> iframes-timeout-form-group prefix="form-array-"}}
             </div>
             <div class="col-sm-6">
                 {{> accuracy-form-group prefix="form-array-"}}
@@ -202,6 +210,7 @@
                 {{> regexp-form-group prefix="form-regexp-"}}
                 {{> element-form-group prefix="form-regexp-"}}
                 {{> exclude-form-group prefix="form-regexp-"}}
+                {{> iframes-timeout-form-group prefix="form-regexp-"}}
             </div>
             <div class="col-sm-6">
                 {{> class-name-form-group prefix="form-regexp-"}}
@@ -234,7 +243,7 @@
                     {{> form-keyword}}
                     {{> form-array}}
                     {{> form-regexp}}
-                    <div class="alert alert-info small">
+                    <div class="alert alert-info alert-dismissable small">
                         <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
                         <strong>Note</strong>: The configurator doesn't include callback options!
                     </div>
