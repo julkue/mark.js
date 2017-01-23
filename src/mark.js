@@ -50,6 +50,7 @@ class Mark { // eslint-disable-line no-unused-vars
         this._opt = Object.assign({}, {
             "element": "",
             "className": "",
+            "style": "",
             "exclude": [],
             "iframes": false,
             "iframesTimeout": 5000,
@@ -402,6 +403,9 @@ class Mark { // eslint-disable-line no-unused-vars
         repl.setAttribute("data-markjs", "true");
         if(this.opt.className) {
             repl.setAttribute("class", this.opt.className);
+        }
+        if(this.opt.style) {
+            repl.setAttribute("style", this.opt.style);
         }
         repl.textContent = startNode.textContent;
         startNode.parentNode.replaceChild(repl, startNode);
