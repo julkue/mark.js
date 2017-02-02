@@ -60,6 +60,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "createRegExp",
             value: function createRegExp(str) {
+                if (this.opt.useWildcards) {
+                    str = this.setupWildcardsRegExp(str);
+                }
                 str = this.escapeStr(str);
                 if (Object.keys(this.opt.synonyms).length) {
                     str = this.createSynonymsRegExp(str);
@@ -74,6 +77,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (this.opt.ignoreJoiners) {
                     str = this.createIgnoreJoinersRegExp(str);
                 }
+                if (this.opt.useWildcards) {
+                    str = this.createWildcardsRegExp(str);
+                }
                 str = this.createAccuracyRegExp(str);
                 return str;
             }
@@ -85,12 +91,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 for (var index in syn) {
                     if (syn.hasOwnProperty(index)) {
                         var value = syn[index],
-                            k1 = this.escapeStr(index),
-                            k2 = this.escapeStr(value);
+                            k1 = this.opt.useWildcards ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
+                            k2 = this.opt.useWildcards ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
                         str = str.replace(new RegExp("(" + k1 + "|" + k2 + ")", "gm" + sens), "(" + k1 + "|" + k2 + ")");
                     }
                 }
                 return str;
+            }
+        }, {
+            key: "setupWildcardsRegExp",
+            value: function setupWildcardsRegExp(str) {
+                return str.replace(/\?/g, "\x01").replace(/\*/g, "\x02");
+            }
+        }, {
+            key: "createWildcardsRegExp",
+            value: function createWildcardsRegExp(str) {
+                return str.replace(/\u0001/g, "\\S{1}").replace(/\u0002/g, "\\S*");
             }
         }, {
             key: "setupIgnoreJoinersRegExp",
@@ -472,6 +488,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "caseSensitive": false,
                     "ignoreJoiners": false,
                     "ignoreGroups": 0,
+                    "useWildcards": false,
                     "each": function each() {},
                     "noMatch": function noMatch() {},
                     "filter": function filter() {

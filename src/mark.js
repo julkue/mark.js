@@ -61,6 +61,7 @@ class Mark { // eslint-disable-line no-unused-vars
             "caseSensitive": false,
             "ignoreJoiners": false,
             "ignoreGroups": 0,
+            "useWildcards": false,
             "each": () => {},
             "noMatch": () => {},
             "filter": () => true,
@@ -126,6 +127,9 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     createRegExp(str) {
+        if(this.opt.useWildcards) {
+            str = this.setupWildcardsRegExp(str);
+        }
         str = this.escapeStr(str);
         if(Object.keys(this.opt.synonyms).length) {
             str = this.createSynonymsRegExp(str);
@@ -139,6 +143,9 @@ class Mark { // eslint-disable-line no-unused-vars
         str = this.createMergedBlanksRegExp(str);
         if(this.opt.ignoreJoiners) {
             str = this.createIgnoreJoinersRegExp(str);
+        }
+        if(this.opt.useWildcards) {
+            str = this.createWildcardsRegExp(str);
         }
         str = this.createAccuracyRegExp(str);
         return str;
@@ -156,14 +163,45 @@ class Mark { // eslint-disable-line no-unused-vars
         for(let index in syn) {
             if(syn.hasOwnProperty(index)) {
                 const value = syn[index],
-                    k1 = this.escapeStr(index),
-                    k2 = this.escapeStr(value);
+                    k1 = this.opt.useWildcards ?
+                        this.setupWildcardsRegExp(index) :
+                        this.escapeStr(index),
+                    k2 = this.opt.useWildcards ?
+                        this.setupWildcardsRegExp(value) :
+                        this.escapeStr(value);
                 str = str.replace(
                     new RegExp(`(${k1}|${k2})`, `gm${sens}`), `(${k1}|${k2})`
                 );
             }
         }
         return str;
+    }
+
+    /**
+     * Sets up the regular expression string to allow later insertion of
+     * wildcard regular expression matches
+     * @param  {string} str - The search term to be used
+     * @return {string}
+     * @access protected
+     */
+    setupWildcardsRegExp(str) {
+        // replace single character wildcard with unicode 0001
+        // replace multiple character wildcard with unicode 0002
+        return str.replace(/\?/g, "\u0001").replace(/\*/g, "\u0002");
+    }
+
+    /**
+     * Sets up the regular expression string to allow later insertion of
+     * wildcard regular expression matches
+     * @param  {string} str - The search term to be used
+     * @return {string}
+     * @access protected
+     */
+    createWildcardsRegExp(str) {
+        // replace unicode 0001 with a non-white-space match of one character
+        // replace unicode 0002 with a non-white-space match of zero or more
+        // characters
+        return str.replace(/\u0001/g, "\\S{1}").replace(/\u0002/g, "\\S*");
     }
 
     /**
