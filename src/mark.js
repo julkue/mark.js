@@ -281,7 +281,19 @@ class Mark { // eslint-disable-line no-unused-vars
         default:
             return `()(${str})`;
         case "complementary":
-            return `()([^\\s${lsJoin}]*${str}[^\\s${lsJoin}]*)`;
+            lsJoin = lsJoin.length ?
+                `^\\s${lsJoin}` :
+                [
+                    "A-Za-z\-", // Basic Latin + dash
+                    "\u00AD", // Soft hyphen
+                    "\u00AF", // Macron
+                    "\u00B4", // Acute accent
+                    "\u00B8", // Cedilla
+                    "\u00C0-\uD7FF",
+                    "\uF900-\uFDCF",
+                    "\uFDF0-\uFFEF"
+                ].join("");
+            return `()([${lsJoin}]*${str}[${lsJoin}]*)`;
         case "exactly":
             return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
         }
