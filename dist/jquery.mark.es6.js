@@ -163,7 +163,7 @@
                 default:
                     return `()(${str})`;
                 case "complementary":
-                    lsJoin = lsJoin.length ? `^\\s${lsJoin}` : ["A-Za-z\\-", "\\u00AD", "\\u00C0-\\uD7FF", "\\uF900-\\uFDCF", "\\uFDF0-\\uFFEF"].join("");
+                    lsJoin = lsJoin.length ? `^\\s${lsJoin}` : ["A-Za-z\\-", "\\u00C0-\\uD7FF", "\\uF900-\\uFDCF", "\\uFDF0-\\uFFEF"].join("");
                     return `()([${lsJoin}]*${str}[${lsJoin}]*)`;
                 case "exactly":
                     return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;

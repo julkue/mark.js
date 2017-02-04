@@ -284,7 +284,6 @@ class Mark { // eslint-disable-line no-unused-vars
             lsJoin = lsJoin.length ?
                 `^\\s${lsJoin}` : [
                     "A-Za-z\\-", // Basic Latin + dash
-                    "\\u00AD", // Soft hyphen
                     "\\u00C0-\\uD7FF", // Language blocks & everything else
                     "\\uF900-\\uFDCF", // Ideographs & forms
                     "\\uFDF0-\\uFFEF" // more forms, variants & specials
