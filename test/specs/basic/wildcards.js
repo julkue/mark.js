@@ -15,15 +15,15 @@ describe("basic mark with wildcards", function () {
         $ctx3 = $(".basic-wildcards > div:nth-child(3)");
         new Mark($ctx1.get()).mark("lor?m", {
             "separateWordSearch": false,
-            "useWildcards": true,
+            "wildcards": true,
             "done": function () {
                 new Mark($ctx2[0]).mark("lor*m", {
                     "separateWordSearch": false,
-                    "useWildcards": true,
+                    "wildcards": true,
                     "done": function () {
                         new Mark($ctx3[0]).mark(["lor?m", "Lor*m"], {
                             "separateWordSearch": false,
-                            "useWildcards": false,
+                            "wildcards": false,
                             "done": done
                         });
                     }

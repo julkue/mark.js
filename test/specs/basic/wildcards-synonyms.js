@@ -17,14 +17,14 @@ describe("basic mark with wildcards and synonyms", function () {
                 "Lor?m": "Ips?m"
             },
             "separateWordSearch": false,
-            "useWildcards": true,
+            "wildcards": true,
             "done": function () {
                 new Mark($ctx2[0]).mark("Lor*m", {
                     "synonyms": {
                         "Lor*m": "Ips*m"
                     },
                     "separateWordSearch": false,
-                    "useWildcards": true,
+                    "wildcards": true,
                     "done": done
                 });
             }

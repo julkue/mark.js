@@ -61,7 +61,7 @@ class Mark { // eslint-disable-line no-unused-vars
             "caseSensitive": false,
             "ignoreJoiners": false,
             "ignoreGroups": 0,
-            "useWildcards": false,
+            "wildcards": false,
             "each": () => {},
             "noMatch": () => {},
             "filter": () => true,
@@ -127,7 +127,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     createRegExp(str) {
-        if(this.opt.useWildcards) {
+        if(this.opt.wildcards) {
             str = this.setupWildcardsRegExp(str);
         }
         str = this.escapeStr(str);
@@ -144,7 +144,7 @@ class Mark { // eslint-disable-line no-unused-vars
         if(this.opt.ignoreJoiners) {
             str = this.createIgnoreJoinersRegExp(str);
         }
-        if(this.opt.useWildcards) {
+        if(this.opt.wildcards) {
             str = this.createWildcardsRegExp(str);
         }
         str = this.createAccuracyRegExp(str);
@@ -163,10 +163,10 @@ class Mark { // eslint-disable-line no-unused-vars
         for(let index in syn) {
             if(syn.hasOwnProperty(index)) {
                 const value = syn[index],
-                    k1 = this.opt.useWildcards ?
+                    k1 = this.opt.wildcards ?
                         this.setupWildcardsRegExp(index) :
                         this.escapeStr(index),
-                    k2 = this.opt.useWildcards ?
+                    k2 = this.opt.wildcards ?
                         this.setupWildcardsRegExp(value) :
                         this.escapeStr(value);
                 str = str.replace(

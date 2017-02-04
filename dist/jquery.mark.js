@@ -60,7 +60,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "createRegExp",
             value: function createRegExp(str) {
-                if (this.opt.useWildcards) {
+                if (this.opt.wildcards) {
                     str = this.setupWildcardsRegExp(str);
                 }
                 str = this.escapeStr(str);
@@ -77,7 +77,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (this.opt.ignoreJoiners) {
                     str = this.createIgnoreJoinersRegExp(str);
                 }
-                if (this.opt.useWildcards) {
+                if (this.opt.wildcards) {
                     str = this.createWildcardsRegExp(str);
                 }
                 str = this.createAccuracyRegExp(str);
@@ -91,8 +91,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 for (var index in syn) {
                     if (syn.hasOwnProperty(index)) {
                         var value = syn[index],
-                            k1 = this.opt.useWildcards ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
-                            k2 = this.opt.useWildcards ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
+                            k1 = this.opt.wildcards ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
+                            k2 = this.opt.wildcards ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
                         str = str.replace(new RegExp("(" + k1 + "|" + k2 + ")", "gm" + sens), "(" + k1 + "|" + k2 + ")");
                     }
                 }
@@ -488,7 +488,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "caseSensitive": false,
                     "ignoreJoiners": false,
                     "ignoreGroups": 0,
-                    "useWildcards": false,
+                    "wildcards": false,
                     "each": function each() {},
                     "noMatch": function noMatch() {},
                     "filter": function filter() {
