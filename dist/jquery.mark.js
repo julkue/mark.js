@@ -152,8 +152,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     default:
                         return "()(" + str + ")";
                     case "complementary":
-                        lsJoin = lsJoin.length ? "^\\s" + lsJoin : ["A-Za-z\\-", "\\u00C0-\\uD7FF", "\\uF900-\\uFDCF", "\\uFDF0-\\uFFEF"].join("");
-                        return "()([" + lsJoin + "]*" + str + "[" + lsJoin + "]*)";
+                        lsJoin = lsJoin.length ? "\\s" + lsJoin : this.escapeStr(" \xA0!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~\xA1\xBF");
+                        return "()([^" + lsJoin + "]*" + str + "[^" + lsJoin + "]*)";
                     case "exactly":
                         return "(^|\\s" + lsJoin + ")(" + str + ")(?=$|\\s" + lsJoin + ")";
                 }
