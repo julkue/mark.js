@@ -282,8 +282,7 @@ class Mark { // eslint-disable-line no-unused-vars
             return `()(${str})`;
         case "complementary":
             lsJoin = lsJoin.length ?
-                `^\\s${lsJoin}` :
-                [
+                `^\\s${lsJoin}` : [
                     "A-Za-z\\-", // Basic Latin + dash
                     "\\u00AD", // Soft hyphen
                     "\\u00C0-\\uD7FF", // Language blocks & everything else
