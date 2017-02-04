@@ -16,7 +16,7 @@ describe("basic mark with accuracy complementary", function () {
             "accuracy": "complementary",
             "separateWordSearch": false,
             "done": function () {
-                new Mark($ctx2[0]).mark("lorem", {
+                new Mark($ctx2[0]).mark(["lorem", "ipsumtest"], {
                     "accuracy": "complementary",
                     "separateWordSearch": true,
                     "done": done
@@ -33,6 +33,7 @@ describe("basic mark with accuracy complementary", function () {
         });
     });
     it("should work with separateWordSearch", function () {
+        expect($ctx2.find("mark")).toHaveLength(2);
         var textOpts = ["testLorem", "ipsumtest"];
         $ctx2.find("mark").each(function () {
             expect($.inArray($(this).text(), textOpts)).toBeGreaterThan(-1);
