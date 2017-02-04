@@ -23,9 +23,7 @@ describe("basic mark with synonyms and diacritics", function () {
                     "synonyms": {
                         "Lorem": "amet"
                     },
-                    "done": function () {
-                        done();
-                    }
+                    "done": done
                 });
             }
         });
