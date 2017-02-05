@@ -70,7 +70,7 @@
                 return;
             }
             if (typeof log === "object" && typeof log[level] === "function") {
-                log[level](`mark.js: ${ msg }`);
+                log[level](`mark.js: ${msg}`);
             }
         }
 
@@ -105,7 +105,7 @@
                     const value = syn[index],
                           k1 = this.escapeStr(index),
                           k2 = this.escapeStr(value);
-                    str = str.replace(new RegExp(`(${ k1 }|${ k2 })`, `gm${ sens }`), `(${ k1 }|${ k2 })`);
+                    str = str.replace(new RegExp(`(${k1}|${k2})`, `gm${sens}`), `(${k1}|${k2})`);
                 }
             }
             return str;
@@ -137,7 +137,7 @@
                             return false;
                         }
 
-                        str = str.replace(new RegExp(`[${ dct }]`, `gm${ sens }`), `[${ dct }]`);
+                        str = str.replace(new RegExp(`[${dct}]`, `gm${sens}`), `[${dct}]`);
                         handled.push(dct);
                     }
                     return true;
@@ -157,17 +157,17 @@
                 ls = typeof acc === "string" ? [] : acc.limiters,
                 lsJoin = "";
             ls.forEach(limiter => {
-                lsJoin += `|${ this.escapeStr(limiter) }`;
+                lsJoin += `|${this.escapeStr(limiter)}`;
             });
             switch (val) {
                 case "partially":
                 default:
-                    return `()(${ str })`;
+                    return `()(${str})`;
                 case "complementary":
                     lsJoin = "\\s" + (lsJoin ? lsJoin : this.escapeStr(chars));
-                    return `()([^${ lsJoin }]*${ str }[^${ lsJoin }]*)`;
+                    return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
                 case "exactly":
-                    return `(^|\\s${ lsJoin })(${ str })(?=$|\\s${ lsJoin })`;
+                    return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
             }
         }
 
@@ -351,7 +351,7 @@
 
         markRegExp(regexp, opt) {
             this.opt = opt;
-            this.log(`Searching with expression "${ regexp }"`);
+            this.log(`Searching with expression "${regexp}"`);
             let totalMatches = 0,
                 fn = "wrapMatches";
             const eachCb = element => {
@@ -381,9 +381,9 @@
             } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
                   sens = this.opt.caseSensitive ? "" : "i",
                   handler = kw => {
-                let regex = new RegExp(this.createRegExp(kw), `gm${ sens }`),
+                let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),
                     matches = 0;
-                this.log(`Searching with expression "${ regex }"`);
+                this.log(`Searching with expression "${regex}"`);
                 this[fn](regex, 1, (term, node) => {
                     return this.opt.filter(node, kw, totalMatches, matches);
                 }, element => {
@@ -416,9 +416,9 @@
             let sel = this.opt.element ? this.opt.element : "*";
             sel += "[data-markjs]";
             if (this.opt.className) {
-                sel += `.${ this.opt.className }`;
+                sel += `.${this.opt.className}`;
             }
-            this.log(`Removal selector "${ sel }"`);
+            this.log(`Removal selector "${sel}"`);
             this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, node => {
                 this.unwrapMatches(node);
             }, node => {
