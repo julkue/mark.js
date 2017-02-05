@@ -140,6 +140,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function createAccuracyRegExp(str) {
                 var _this = this;
 
+                var chars = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~\xA1\xBF";
                 var acc = this.opt.accuracy,
                     val = typeof acc === "string" ? acc : acc.value,
                     ls = typeof acc === "string" ? [] : acc.limiters,
@@ -152,7 +153,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     default:
                         return "()(" + str + ")";
                     case "complementary":
-                        lsJoin = lsJoin.length ? "\\s" + lsJoin : this.escapeStr(" \xA0!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~\xA1\xBF");
+                        lsJoin = "\\s" + (lsJoin ? lsJoin : this.escapeStr(chars));
                         return "()([^" + lsJoin + "]*" + str + "[^" + lsJoin + "]*)";
                     case "exactly":
                         return "(^|\\s" + lsJoin + ")(" + str + ")(?=$|\\s" + lsJoin + ")";

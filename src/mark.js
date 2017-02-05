@@ -269,6 +269,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     createAccuracyRegExp(str) {
+        const chars = `!"#$%&'()*+,-./:;<=>?@[\\]^_\`{|}~¡¿`;
         let acc = this.opt.accuracy,
             val = typeof acc === "string" ? acc : acc.value,
             ls = typeof acc === "string" ? [] : acc.limiters,
@@ -281,9 +282,7 @@ class Mark { // eslint-disable-line no-unused-vars
         default:
             return `()(${str})`;
         case "complementary":
-            lsJoin = lsJoin.length ? `\\s` + lsJoin :
-                // common limiters set by default
-                this.escapeStr(`\x20\xa0!"#$%&'()*+,-./:;<=>?@[\\]^_\`{|}~¡¿`);
+            lsJoin = "\\s" + (lsJoin ? lsJoin : this.escapeStr(chars));
             return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
         case "exactly":
             return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
