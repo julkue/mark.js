@@ -158,9 +158,15 @@ class Mark { // eslint-disable-line no-unused-vars
                 const value = syn[index],
                     k1 = this.escapeStr(index),
                     k2 = this.escapeStr(value);
-                str = str.replace(
-                    new RegExp(`(${k1}|${k2})`, `gm${sens}`), `(${k1}|${k2})`
-                );
+                if(k1 !== "" && k2 !== "") {
+                    str = str.replace(
+                        new RegExp(
+                            `(${k1}|${k2})`,
+                            `gm${sens}`
+                        ),
+                        `(${k1}|${k2})`
+                    );
+                }
             }
         }
         return str;
