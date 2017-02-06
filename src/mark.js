@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.8.1
+ * mark.js v8.8.2
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -158,9 +158,15 @@ class Mark { // eslint-disable-line no-unused-vars
                 const value = syn[index],
                     k1 = this.escapeStr(index),
                     k2 = this.escapeStr(value);
-                str = str.replace(
-                    new RegExp(`(${k1}|${k2})`, `gm${sens}`), `(${k1}|${k2})`
-                );
+                if(k1 !== "" && k2 !== "") {
+                    str = str.replace(
+                        new RegExp(
+                            `(${k1}|${k2})`,
+                            `gm${sens}`
+                        ),
+                        `(${k1}|${k2})`
+                    );
+                }
             }
         }
         return str;
