@@ -44,7 +44,7 @@
                 "caseSensitive": false,
                 "ignoreJoiners": false,
                 "ignoreGroups": 0,
-                "wildcards": false,
+                "wildcards": "disable",
                 "each": () => {},
                 "noMatch": () => {},
                 "filter": () => true,
@@ -80,7 +80,7 @@
         }
 
         createRegExp(str) {
-            if (this.opt.wildcards) {
+            if (this.opt.wildcards !== "disable") {
                 str = this.setupWildcardsRegExp(str);
             }
             str = this.escapeStr(str);
@@ -97,7 +97,7 @@
             if (this.opt.ignoreJoiners) {
                 str = this.createIgnoreJoinersRegExp(str);
             }
-            if (this.opt.wildcards) {
+            if (this.opt.wildcards !== "disable") {
                 str = this.createWildcardsRegExp(str);
             }
             str = this.createAccuracyRegExp(str);
@@ -110,10 +110,10 @@
             for (let index in syn) {
                 if (syn.hasOwnProperty(index)) {
                     const value = syn[index],
-                        k1 = this.opt.wildcards ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
-                        k2 = this.opt.wildcards ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
+                          k1 = this.opt.wildcards !== "disable" ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
+                          k2 = this.opt.wildcards !== "disable" ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
                     if (k1 !== "" && k2 !== "") {
-                        str = str.replace(new RegExp(`(${ k1 }|${ k2 })`, `gm${ sens }`), `(${ k1 }|${ k2 })`);
+                        str = str.replace(new RegExp(`(${k1}|${k2})`, `gm${sens}`), `(${k1}|${k2})`);
                     }
                 }
             }
@@ -121,11 +121,18 @@
         }
 
         setupWildcardsRegExp(str) {
-            return str.replace(/\?/g, "\u0001").replace(/\*/g, "\u0002");
+            str = str.replace(/(?:\\)*\?/g, val => {
+                return val.charAt(0) === "\\" ? "?" : "\u0001";
+            });
+
+            return str.replace(/(?:\\)*\*/g, val => {
+                return val.charAt(0) === "\\" ? "*" : "\u0002";
+            });
         }
 
         createWildcardsRegExp(str) {
-            return str.replace(/\u0001/g, "\\S{1}").replace(/\u0002/g, "\\S*");
+            let spaces = this.opt.wildcards === "includeSpaces";
+            return str.replace(/\u0001/g, spaces ? "[\\S\\s]{1}" : "\\S{1}").replace(/\u0002/g, spaces ? "[\\S\\s]*?" : "\\S*");
         }
 
         setupIgnoreJoinersRegExp(str) {
@@ -182,7 +189,7 @@
                     return `()(${str})`;
                 case "complementary":
                     lsJoin = "\\s" + (lsJoin ? lsJoin : this.escapeStr(chars));
-                    return `()([^${ lsJoin }]*${ str }[^${ lsJoin }]*)`;
+                    return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
                 case "exactly":
                     return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
             }
@@ -392,6 +399,7 @@
             this.opt = opt;
             let totalMatches = 0,
                 fn = "wrapMatches";
+
             const {
                 keywords: kwArr,
                 length: kwArrLen

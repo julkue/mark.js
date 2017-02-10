@@ -61,7 +61,7 @@ class Mark { // eslint-disable-line no-unused-vars
             "caseSensitive": false,
             "ignoreJoiners": false,
             "ignoreGroups": 0,
-            "wildcards": false,
+            "wildcards": "disable",
             "each": () => {},
             "noMatch": () => {},
             "filter": () => true,
@@ -127,7 +127,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     createRegExp(str) {
-        if(this.opt.wildcards) {
+        if(this.opt.wildcards !== "disable") {
             str = this.setupWildcardsRegExp(str);
         }
         str = this.escapeStr(str);
@@ -144,7 +144,7 @@ class Mark { // eslint-disable-line no-unused-vars
         if(this.opt.ignoreJoiners) {
             str = this.createIgnoreJoinersRegExp(str);
         }
-        if(this.opt.wildcards) {
+        if(this.opt.wildcards !== "disable") {
             str = this.createWildcardsRegExp(str);
         }
         str = this.createAccuracyRegExp(str);
@@ -163,10 +163,10 @@ class Mark { // eslint-disable-line no-unused-vars
         for(let index in syn) {
             if(syn.hasOwnProperty(index)) {
                 const value = syn[index],
-                    k1 = this.opt.wildcards ?
+                    k1 = this.opt.wildcards !== "disable" ?
                         this.setupWildcardsRegExp(index) :
                         this.escapeStr(index),
-                    k2 = this.opt.wildcards ?
+                    k2 = this.opt.wildcards !== "disable" ?
                         this.setupWildcardsRegExp(value) :
                         this.escapeStr(value);
                 if(k1 !== "" && k2 !== "") {
@@ -192,8 +192,13 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     setupWildcardsRegExp(str) {
         // replace single character wildcard with unicode 0001
+        str = str.replace(/(?:\\)*\?/g, val => {
+            return val.charAt(0) === "\\" ? "?" : "\u0001";
+        });
         // replace multiple character wildcard with unicode 0002
-        return str.replace(/\?/g, "\u0001").replace(/\*/g, "\u0002");
+        return str.replace(/(?:\\)*\*/g, val => {
+            return val.charAt(0) === "\\" ? "*" : "\u0002";
+        });
     }
 
     /**
@@ -204,10 +209,19 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     createWildcardsRegExp(str) {
-        // replace unicode 0001 with a non-white-space match of one character
-        // replace unicode 0002 with a non-white-space match of zero or more
-        // characters
-        return str.replace(/\u0001/g, "\\S{1}").replace(/\u0002/g, "\\S*");
+        // default to "enable" (i.e. to not include spaces)
+        // "includeSpaces" uses `[\\S\\s]` instead of `.` because the latter
+        // does not match new line characters
+        let spaces = this.opt.wildcards === "includeSpaces";
+        return str
+            // replace unicode 0001 with a RegExp class to match any single
+            // character, or any single non-whitespace character depending
+            // on the setting
+            .replace(/\u0001/g, spaces ? "[\\S\\s]{1}" : "\\S{1}")
+            // replace unicode 0002 with a RegExp class to match zero or
+            // more characters, or zero or more non-whitespace characters
+            // depending on the setting
+            .replace(/\u0002/g, spaces ? "[\\S\\s]*?" : "\\S*");
     }
 
     /**
@@ -814,6 +828,20 @@ class Mark { // eslint-disable-line no-unused-vars
      *   <li><i>limiters</i>: A custom array of string limiters for accuracy
      *   "exactly" or "complementary"</li>
      * </ul>
+     * @property {"disable"|"enable"|"includeSpaces"}
+     * [wildcards="disable"] - Set to any of the following string values:
+     * <ul>
+     *   <li><i>disable</i>: Disable wildcard usage</li>
+     *   <li><i>enable</i>: When searching for "lor?m", the "?" will match any
+     *   single non-space character (e.g. "loram", "lor3m", etc). When searching
+     *   for "lor*m", the "*" will match one or more non-space characters (e.g.
+     *   "lorm", "lor123m", etc).</li>
+     *   <li><i>includeSpaces</i>: When searching for "lor?m", the "?" will
+     *   match any single space or non-space character (e.g. "lor m", "loram",
+     *   etc). When searching for "lor*m", the "*" will match one or more space
+     *   or non-space characters (e.g. "lorm", "lore et dolor ipsum", "lor: m",
+     *   etc).</li>
+     * </ul>
      * @property {boolean} [acrossElements=false] - Whether to find matches
      * across HTML elements. By default, only matches within single HTML
      * elements will be found
@@ -832,6 +860,7 @@ class Mark { // eslint-disable-line no-unused-vars
         this.opt = opt;
         let totalMatches = 0,
             fn = "wrapMatches";
+
         const {
             keywords: kwArr,
             length: kwArrLen

@@ -14,11 +14,11 @@ describe("basic mark with wildcards and diacritics", function () {
         $ctx2 = $(".basic-wildcards-diacritics > div:nth-child(2)");
         new Mark($ctx1[0]).mark("lor?m", {
             "separateWordSearch": false,
-            "wildcards": true,
+            "wildcards": "enable",
             "done": function () {
                 new Mark($ctx2[0]).mark("lör*m", {
                     "separateWordSearch": false,
-                    "wildcards": true,
+                    "wildcards": "enable",
                     "done": done
                 });
             }
