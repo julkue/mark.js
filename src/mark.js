@@ -183,6 +183,24 @@ class Mark { // eslint-disable-line no-unused-vars
         return str;
     }
 
+   /**
+    * @typedef Mark~markWildcardsSetting
+    * @type {string}
+    * @property {"disable"|"enable"|"includeSpaces"}
+    * [wildcards="disable"] - Set to any of the following string values:
+    * <ul>
+    *   <li><i>disable</i>: Disable wildcard usage</li>
+    *   <li><i>enable</i>: When searching for "lor?m", the "?" will match any
+    *   single non-space character (e.g. "loram", "lor3m", etc). When searching
+    *   for "lor*m", the "*" will match one or more non-space characters (e.g.
+    *   "lorm", "lor123m", etc).</li>
+    *   <li><i>includeSpaces</i>: When searching for "lor?m", the "?" will
+    *   match any single space or non-space character (e.g. "lor m", "loram",
+    *   etc). When searching for "lor*m", the "*" will match one or more space
+    *   or non-space characters (e.g. "lorm", "lore et dolor ipsum", "lor: m",
+    *   etc).</li>
+    * </ul>
+    */
     /**
      * Sets up the regular expression string to allow later insertion of
      * wildcard regular expression matches
@@ -828,20 +846,7 @@ class Mark { // eslint-disable-line no-unused-vars
      *   <li><i>limiters</i>: A custom array of string limiters for accuracy
      *   "exactly" or "complementary"</li>
      * </ul>
-     * @property {"disable"|"enable"|"includeSpaces"}
-     * [wildcards="disable"] - Set to any of the following string values:
-     * <ul>
-     *   <li><i>disable</i>: Disable wildcard usage</li>
-     *   <li><i>enable</i>: When searching for "lor?m", the "?" will match any
-     *   single non-space character (e.g. "loram", "lor3m", etc). When searching
-     *   for "lor*m", the "*" will match one or more non-space characters (e.g.
-     *   "lorm", "lor123m", etc).</li>
-     *   <li><i>includeSpaces</i>: When searching for "lor?m", the "?" will
-     *   match any single space or non-space character (e.g. "lor m", "loram",
-     *   etc). When searching for "lor*m", the "*" will match one or more space
-     *   or non-space characters (e.g. "lorm", "lore et dolor ipsum", "lor: m",
-     *   etc).</li>
-     * </ul>
+     * @property {Mark~markWildcardsSetting} [wildcards]
      * @property {boolean} [acrossElements=false] - Whether to find matches
      * across HTML elements. By default, only matches within single HTML
      * elements will be found
