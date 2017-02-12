@@ -16,11 +16,11 @@ describe("basic mark with wildcards between words", function () {
         $ctx4 = $(".basic-wildcards-between-words > div:nth-child(4)");
         new Mark($ctx1[0]).mark("lorem?ipsum", {
             "separateWordSearch": false,
-            "wildcards": "enable",
+            "wildcards": "enabled",
             "done": function () {
                 new Mark($ctx2[0]).mark("lorem*ipsum", {
                     "separateWordSearch": false,
-                    "wildcards": "enable",
+                    "wildcards": "enabled",
                     "done": function () {
                         new Mark($ctx3[0]).mark("lorem?ipsum", {
                             "separateWordSearch": false,
@@ -40,27 +40,27 @@ describe("basic mark with wildcards between words", function () {
     });
 
     it(
-        "should match wildcard of single non-whitespace in the keyword pattern",
+        "should match wildcard with zero to one non-whitespace in the keyword",
         function () {
-            expect($ctx1.find("mark")).toHaveLength(3);
+            expect($ctx1.find("mark")).toHaveLength(4);
         }
     );
     it(
-        "should match wildcard of zero+ non-whitespaces in the keyword pattern",
+        "should match wildcard with zero or more non-whitespace in the keyword",
         function () {
-            expect($ctx2.find("mark")).toHaveLength(4);
+            expect($ctx2.find("mark")).toHaveLength(5);
         }
     );
     it(
-        "should match wildcard of any single character in the keyword pattern",
+        "should match wildcard with zero to one character in the keyword",
         function () {
-            expect($ctx3.find("mark")).toHaveLength(5);
+            expect($ctx3.find("mark")).toHaveLength(6);
         }
     );
     it(
-        "should match wildcard of zero+ characters in the keyword pattern",
+        "should match wildcard with zero or more characters in the keyword",
         function () {
-            expect($ctx4.find("mark")).toHaveLength(8);
+            expect($ctx4.find("mark")).toHaveLength(9);
         }
     );
 

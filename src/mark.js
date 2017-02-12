@@ -235,7 +235,7 @@ class Mark { // eslint-disable-line no-unused-vars
             // replace unicode 0001 with a RegExp class to match any single
             // character, or any single non-whitespace character depending
             // on the setting
-            .replace(/\u0001/g, spaces ? "[\\S\\s]{1}" : "\\S{1}")
+            .replace(/\u0001/g, spaces ? "[\\S\\s]?" : "\\S?")
             // replace unicode 0002 with a RegExp class to match zero or
             // more characters, or zero or more non-whitespace characters
             // depending on the setting

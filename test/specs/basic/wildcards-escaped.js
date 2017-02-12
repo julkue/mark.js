@@ -15,18 +15,18 @@ describe("basic mark with escaped wildcards", function () {
         $ctx3 = $(".basic-wildcards > div:nth-child(3)");
         new Mark($ctx1[0]).mark('lor\\?m', {
             "separateWordSearch": false,
-            "wildcards": "enable",
+            "wildcards": "enabled",
             "done": function () {
                 new Mark($ctx2[0]).mark('lor\\*m', {
                     "separateWordSearch": false,
-                    "wildcards": "enable",
+                    "wildcards": "enabled",
                     "done": function () {
                         new Mark($ctx3[0]).mark([
                             'lor\\?m',
                             'Lor\\*m'
                         ], {
                             "separateWordSearch": false,
-                            "wildcards": "enable",
+                            "wildcards": "enabled",
                             "done": done
                         });
                     }

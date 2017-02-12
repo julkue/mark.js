@@ -60,7 +60,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "createRegExp",
             value: function createRegExp(str) {
-                if (this.opt.wildcards !== "disable") {
+                if (this.opt.wildcards !== "disabled") {
                     str = this.setupWildcardsRegExp(str);
                 }
                 str = this.escapeStr(str);
@@ -77,7 +77,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (this.opt.ignoreJoiners) {
                     str = this.createIgnoreJoinersRegExp(str);
                 }
-                if (this.opt.wildcards !== "disable") {
+                if (this.opt.wildcards !== "disabled") {
                     str = this.createWildcardsRegExp(str);
                 }
                 str = this.createAccuracyRegExp(str);
@@ -91,8 +91,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 for (var index in syn) {
                     if (syn.hasOwnProperty(index)) {
                         var value = syn[index],
-                            k1 = this.opt.wildcards !== "disable" ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
-                            k2 = this.opt.wildcards !== "disable" ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
+                            k1 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
+                            k2 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
                         if (k1 !== "" && k2 !== "") {
                             str = str.replace(new RegExp("(" + k1 + "|" + k2 + ")", "gm" + sens), "(" + k1 + "|" + k2 + ")");
                         }
@@ -114,8 +114,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "createWildcardsRegExp",
             value: function createWildcardsRegExp(str) {
-                var spaces = this.opt.wildcards === "includeSpaces";
-                return str.replace(/\u0001/g, spaces ? "[\\S\\s]{1}" : "\\S{1}").replace(/\u0002/g, spaces ? "[\\S\\s]*?" : "\\S*");
+                var spaces = this.opt.wildcards === "withSpaces";
+                return str.replace(/\u0001/g, spaces ? "[\\S\\s]?" : "\\S?").replace(/\u0002/g, spaces ? "[\\S\\s]*?" : "\\S*");
             }
         }, {
             key: "setupIgnoreJoinersRegExp",
@@ -499,7 +499,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "caseSensitive": false,
                     "ignoreJoiners": false,
                     "ignoreGroups": 0,
-                    "wildcards": "disable",
+                    "wildcards": "disabled",
                     "each": function each() {},
                     "noMatch": function noMatch() {},
                     "filter": function filter() {

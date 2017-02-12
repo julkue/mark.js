@@ -16,19 +16,19 @@ describe("basic mark with wildcards", function () {
         $ctx4 = $(".basic-wildcards > div:nth-child(4)");
         new Mark($ctx1[0]).mark("lor?m", {
             "separateWordSearch": false,
-            "wildcards": "enable",
+            "wildcards": "enabled",
             "done": function () {
                 new Mark($ctx2[0]).mark("lor*m", {
                     "separateWordSearch": false,
-                    "wildcards": "enable",
+                    "wildcards": "enabled",
                     "done": function () {
                         new Mark($ctx3[0]).mark(["lor?m", "Lor*m"], {
                             "separateWordSearch": false,
-                            "wildcards": "enable",
+                            "wildcards": "enabled",
                             "done": function () {
                                 new Mark($ctx4[0]).mark(["lor?m", "Lor*m"], {
                                     "separateWordSearch": false,
-                                    "wildcards": "disable",
+                                    "wildcards": "disabled",
                                     "done": done
                                 });
                             }
@@ -40,13 +40,13 @@ describe("basic mark with wildcards", function () {
     });
 
     it("should find '?' wildcard matches", function () {
-        expect($ctx1.find("mark")).toHaveLength(5);
+        expect($ctx1.find("mark")).toHaveLength(6);
     });
     it("should find '*' wildcard matches", function () {
         expect($ctx2.find("mark")).toHaveLength(8);
     });
     it("should find both '?' and '*' matches", function () {
-        expect($ctx3.find("mark")).toHaveLength(13);
+        expect($ctx3.find("mark")).toHaveLength(14);
     });
     it("should find wildcards as plain characters when disabled", function () {
         expect($ctx4.find("mark")).toHaveLength(2);
