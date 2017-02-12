@@ -61,7 +61,7 @@ class Mark { // eslint-disable-line no-unused-vars
             "caseSensitive": false,
             "ignoreJoiners": false,
             "ignoreGroups": 0,
-            "wildcards": "disable",
+            "wildcards": "disabled",
             "each": () => {},
             "noMatch": () => {},
             "filter": () => true,
@@ -127,7 +127,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     createRegExp(str) {
-        if(this.opt.wildcards !== "disable") {
+        if(this.opt.wildcards !== "disabled") {
             str = this.setupWildcardsRegExp(str);
         }
         str = this.escapeStr(str);
@@ -144,7 +144,7 @@ class Mark { // eslint-disable-line no-unused-vars
         if(this.opt.ignoreJoiners) {
             str = this.createIgnoreJoinersRegExp(str);
         }
-        if(this.opt.wildcards !== "disable") {
+        if(this.opt.wildcards !== "disabled") {
             str = this.createWildcardsRegExp(str);
         }
         str = this.createAccuracyRegExp(str);
@@ -163,10 +163,10 @@ class Mark { // eslint-disable-line no-unused-vars
         for(let index in syn) {
             if(syn.hasOwnProperty(index)) {
                 const value = syn[index],
-                    k1 = this.opt.wildcards !== "disable" ?
+                    k1 = this.opt.wildcards !== "disabled" ?
                         this.setupWildcardsRegExp(index) :
                         this.escapeStr(index),
-                    k2 = this.opt.wildcards !== "disable" ?
+                    k2 = this.opt.wildcards !== "disabled" ?
                         this.setupWildcardsRegExp(value) :
                         this.escapeStr(value);
                 if(k1 !== "" && k2 !== "") {
@@ -186,17 +186,17 @@ class Mark { // eslint-disable-line no-unused-vars
    /**
     * @typedef Mark~markWildcardsSetting
     * @type {string}
-    * @property {"disable"|"enable"|"includeSpaces"}
-    * [wildcards="disable"] - Set to any of the following string values:
+    * @property {"disabled"|"enabled"|"withSpaces"}
+    * [wildcards="disabled"] - Set to any of the following string values:
     * <ul>
-    *   <li><i>disable</i>: Disable wildcard usage</li>
-    *   <li><i>enable</i>: When searching for "lor?m", the "?" will match any
-    *   single non-space character (e.g. "loram", "lor3m", etc). When searching
-    *   for "lor*m", the "*" will match one or more non-space characters (e.g.
-    *   "lorm", "lor123m", etc).</li>
-    *   <li><i>includeSpaces</i>: When searching for "lor?m", the "?" will
-    *   match any single space or non-space character (e.g. "lor m", "loram",
-    *   etc). When searching for "lor*m", the "*" will match one or more space
+    *   <li><i>disabled</i>: Disable wildcard usage</li>
+    *   <li><i>enabled</i>: When searching for "lor?m", the "?" will match zero
+    *   or one non-space character (e.g. "lorm", "loram", "lor3m", etc). When
+    *   searching for "lor*m", the "*" will match zero or more non-space
+    *   characters (e.g. "lorm", "loram", "lor123m", etc).</li>
+    *   <li><i>withSpaces</i>: When searching for "lor?m", the "?" will
+    *   match zero or one space or non-space character (e.g. "lor m", "loram",
+    *   etc). When searching for "lor*m", the "*" will match zero or more space
     *   or non-space characters (e.g. "lorm", "lore et dolor ipsum", "lor: m",
     *   etc).</li>
     * </ul>
@@ -228,9 +228,9 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     createWildcardsRegExp(str) {
         // default to "enable" (i.e. to not include spaces)
-        // "includeSpaces" uses `[\\S\\s]` instead of `.` because the latter
+        // "withSpaces" uses `[\\S\\s]` instead of `.` because the latter
         // does not match new line characters
-        let spaces = this.opt.wildcards === "includeSpaces";
+        let spaces = this.opt.wildcards === "withSpaces";
         return str
             // replace unicode 0001 with a RegExp class to match any single
             // character, or any single non-whitespace character depending

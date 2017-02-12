@@ -24,11 +24,11 @@ describe("basic mark with wildcards between words", function () {
                     "done": function () {
                         new Mark($ctx3[0]).mark("lorem?ipsum", {
                             "separateWordSearch": false,
-                            "wildcards": "includeSpaces",
+                            "wildcards": "withSpaces",
                             "done": function () {
                                 new Mark($ctx4[0]).mark("lorem*ipsum", {
                                     "separateWordSearch": false,
-                                    "wildcards": "includeSpaces",
+                                    "wildcards": "withSpaces",
                                     "done": done
                                 });
                             }
