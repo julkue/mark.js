@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.8.3
+ * mark.js v8.9.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -164,11 +164,11 @@ class Mark { // eslint-disable-line no-unused-vars
             if(syn.hasOwnProperty(index)) {
                 const value = syn[index],
                     k1 = this.opt.wildcards !== "disabled" ?
-                        this.setupWildcardsRegExp(index) :
-                        this.escapeStr(index),
+                    this.setupWildcardsRegExp(index) :
+                    this.escapeStr(index),
                     k2 = this.opt.wildcards !== "disabled" ?
-                        this.setupWildcardsRegExp(value) :
-                        this.escapeStr(value);
+                    this.setupWildcardsRegExp(value) :
+                    this.escapeStr(value);
                 if(k1 !== "" && k2 !== "") {
                     str = str.replace(
                         new RegExp(
@@ -183,24 +183,6 @@ class Mark { // eslint-disable-line no-unused-vars
         return str;
     }
 
-   /**
-    * @typedef Mark~markWildcardsSetting
-    * @type {string}
-    * @property {"disabled"|"enabled"|"withSpaces"}
-    * [wildcards="disabled"] - Set to any of the following string values:
-    * <ul>
-    *   <li><i>disabled</i>: Disable wildcard usage</li>
-    *   <li><i>enabled</i>: When searching for "lor?m", the "?" will match zero
-    *   or one non-space character (e.g. "lorm", "loram", "lor3m", etc). When
-    *   searching for "lor*m", the "*" will match zero or more non-space
-    *   characters (e.g. "lorm", "loram", "lor123m", etc).</li>
-    *   <li><i>withSpaces</i>: When searching for "lor?m", the "?" will
-    *   match zero or one space or non-space character (e.g. "lor m", "loram",
-    *   etc). When searching for "lor*m", the "*" will match zero or more space
-    *   or non-space characters (e.g. "lorm", "lore et dolor ipsum", "lor: m",
-    *   etc).</li>
-    * </ul>
-    */
     /**
      * Sets up the regular expression string to allow later insertion of
      * wildcard regular expression matches
@@ -819,16 +801,8 @@ class Mark { // eslint-disable-line no-unused-vars
      * <code>["-", ","]</code>
      */
     /**
-     * These options also include the common options from
-     * {@link Mark~commonOptions}
-     * @typedef Mark~markOptions
-     * @type {object.<string>}
-     * @property {boolean} [separateWordSearch=true] - Whether to search for
-     * each word separated by a blank instead of the complete term
-     * @property {boolean} [diacritics=true] - If diacritic characters should be
-     * matched. ({@link https://en.wikipedia.org/wiki/Diacritic Diacritics})
-     * @property {object} [synonyms] - An object with synonyms. The key will be
-     * a synonym for the value and the value for the key
+     * @typedef Mark~markAccuracySetting
+     * @type {string}
      * @property {"partially"|"complementary"|"exactly"|Mark~markAccuracyObject}
      * [accuracy="partially"] - Either one of the following string values:
      * <ul>
@@ -846,6 +820,37 @@ class Mark { // eslint-disable-line no-unused-vars
      *   <li><i>limiters</i>: A custom array of string limiters for accuracy
      *   "exactly" or "complementary"</li>
      * </ul>
+     */
+    /**
+     * @typedef Mark~markWildcardsSetting
+     * @type {string}
+     * @property {"disabled"|"enabled"|"withSpaces"}
+     * [wildcards="disabled"] - Set to any of the following string values:
+     * <ul>
+     *   <li><i>disabled</i>: Disable wildcard usage</li>
+     *   <li><i>enabled</i>: When searching for "lor?m", the "?" will match zero
+     *   or one non-space character (e.g. "lorm", "loram", "lor3m", etc). When
+     *   searching for "lor*m", the "*" will match zero or more non-space
+     *   characters (e.g. "lorm", "loram", "lor123m", etc).</li>
+     *   <li><i>withSpaces</i>: When searching for "lor?m", the "?" will
+     *   match zero or one space or non-space character (e.g. "lor m", "loram",
+     *   etc). When searching for "lor*m", the "*" will match zero or more space
+     *   or non-space characters (e.g. "lorm", "lore et dolor ipsum", "lor: m",
+     *   etc).</li>
+     * </ul>
+     */
+    /**
+     * These options also include the common options from
+     * {@link Mark~commonOptions}
+     * @typedef Mark~markOptions
+     * @type {object.<string>}
+     * @property {boolean} [separateWordSearch=true] - Whether to search for
+     * each word separated by a blank instead of the complete term
+     * @property {boolean} [diacritics=true] - If diacritic characters should be
+     * matched. ({@link https://en.wikipedia.org/wiki/Diacritic Diacritics})
+     * @property {object} [synonyms] - An object with synonyms. The key will be
+     * a synonym for the value and the value for the key
+     * @property {Mark~markAccuracySetting} [accuracy]
      * @property {Mark~markWildcardsSetting} [wildcards]
      * @property {boolean} [acrossElements=false] - Whether to find matches
      * across HTML elements. By default, only matches within single HTML
