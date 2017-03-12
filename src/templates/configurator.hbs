@@ -90,6 +90,16 @@
         </select>
     </div>
 {{/inline}}
+{{#* inline "wildcards-form-group"}}
+    <div class="form-group">
+        <label for="{{prefix}}wildcards">Wildcards:</label>
+        <select class="form-control input-sm" id="{{prefix}}wildcards" name="wildcards">
+            <option value="disabled" selected>disabled</option>
+            <option value="enabled">enabled</option>
+            <option value="withSpaces">withSpaces</option>
+        </select>
+    </div>
+{{/inline}}
 {{#* inline "class-name-form-group"}}
     <div class="form-group">
         <label for="{{prefix}}className">Class name:</label>
@@ -156,6 +166,7 @@
                 {{> synonyms-form-group prefix="form-keyword-"}}
                 {{> exclude-form-group prefix="form-keyword-"}}
                 {{> iframes-timeout-form-group prefix="form-keyword-"}}
+                {{> wildcards-form-group prefix="form-keyword-"}}
             </div>
             <div class="col-sm-6">
                 {{> accuracy-form-group prefix="form-keyword-"}}
@@ -184,6 +195,7 @@
                 {{> synonyms-form-group prefix="form-array-"}}
                 {{> exclude-form-group prefix="form-array-"}}
                 {{> iframes-timeout-form-group prefix="form-array-"}}
+                {{> wildcards-form-group prefix="form-array-"}}
             </div>
             <div class="col-sm-6">
                 {{> accuracy-form-group prefix="form-array-"}}

@@ -160,6 +160,7 @@
                         "caseSensitive": false,
                         "ignoreJoiners": false,
                         "ignoreGroups": 0,
+                        "wildcards": "disabled",
                         "debug": false
                     };
                 for(var opt in options) {
