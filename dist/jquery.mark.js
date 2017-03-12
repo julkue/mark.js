@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.8.3
+ * mark.js v8.9.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -60,6 +60,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "createRegExp",
             value: function createRegExp(str) {
+                if (this.opt.wildcards !== "disabled") {
+                    str = this.setupWildcardsRegExp(str);
+                }
                 str = this.escapeStr(str);
                 if (Object.keys(this.opt.synonyms).length) {
                     str = this.createSynonymsRegExp(str);
@@ -74,6 +77,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (this.opt.ignoreJoiners) {
                     str = this.createIgnoreJoinersRegExp(str);
                 }
+                if (this.opt.wildcards !== "disabled") {
+                    str = this.createWildcardsRegExp(str);
+                }
                 str = this.createAccuracyRegExp(str);
                 return str;
             }
@@ -85,14 +91,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 for (var index in syn) {
                     if (syn.hasOwnProperty(index)) {
                         var value = syn[index],
-                            k1 = this.escapeStr(index),
-                            k2 = this.escapeStr(value);
+                            k1 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
+                            k2 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
                         if (k1 !== "" && k2 !== "") {
                             str = str.replace(new RegExp("(" + k1 + "|" + k2 + ")", "gm" + sens), "(" + k1 + "|" + k2 + ")");
                         }
                     }
                 }
                 return str;
+            }
+        }, {
+            key: "setupWildcardsRegExp",
+            value: function setupWildcardsRegExp(str) {
+                str = str.replace(/(?:\\)*\?/g, function (val) {
+                    return val.charAt(0) === "\\" ? "?" : "\x01";
+                });
+
+                return str.replace(/(?:\\)*\*/g, function (val) {
+                    return val.charAt(0) === "\\" ? "*" : "\x02";
+                });
+            }
+        }, {
+            key: "createWildcardsRegExp",
+            value: function createWildcardsRegExp(str) {
+                var spaces = this.opt.wildcards === "withSpaces";
+                return str.replace(/\u0001/g, spaces ? "[\\S\\s]?" : "\\S?").replace(/\u0002/g, spaces ? "[\\S\\s]*?" : "\\S*");
             }
         }, {
             key: "setupIgnoreJoinersRegExp",
@@ -476,6 +499,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "caseSensitive": false,
                     "ignoreJoiners": false,
                     "ignoreGroups": 0,
+                    "wildcards": "disabled",
                     "each": function each() {},
                     "noMatch": function noMatch() {},
                     "filter": function filter() {

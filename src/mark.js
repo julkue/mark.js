@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.8.3
+ * mark.js v8.9.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -61,6 +61,7 @@ class Mark { // eslint-disable-line no-unused-vars
             "caseSensitive": false,
             "ignoreJoiners": false,
             "ignoreGroups": 0,
+            "wildcards": "disabled",
             "each": () => {},
             "noMatch": () => {},
             "filter": () => true,
@@ -126,6 +127,9 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     createRegExp(str) {
+        if(this.opt.wildcards !== "disabled") {
+            str = this.setupWildcardsRegExp(str);
+        }
         str = this.escapeStr(str);
         if(Object.keys(this.opt.synonyms).length) {
             str = this.createSynonymsRegExp(str);
@@ -139,6 +143,9 @@ class Mark { // eslint-disable-line no-unused-vars
         str = this.createMergedBlanksRegExp(str);
         if(this.opt.ignoreJoiners) {
             str = this.createIgnoreJoinersRegExp(str);
+        }
+        if(this.opt.wildcards !== "disabled") {
+            str = this.createWildcardsRegExp(str);
         }
         str = this.createAccuracyRegExp(str);
         return str;
@@ -156,8 +163,12 @@ class Mark { // eslint-disable-line no-unused-vars
         for(let index in syn) {
             if(syn.hasOwnProperty(index)) {
                 const value = syn[index],
-                    k1 = this.escapeStr(index),
-                    k2 = this.escapeStr(value);
+                    k1 = this.opt.wildcards !== "disabled" ?
+                    this.setupWildcardsRegExp(index) :
+                    this.escapeStr(index),
+                    k2 = this.opt.wildcards !== "disabled" ?
+                    this.setupWildcardsRegExp(value) :
+                    this.escapeStr(value);
                 if(k1 !== "" && k2 !== "") {
                     str = str.replace(
                         new RegExp(
@@ -170,6 +181,47 @@ class Mark { // eslint-disable-line no-unused-vars
             }
         }
         return str;
+    }
+
+    /**
+     * Sets up the regular expression string to allow later insertion of
+     * wildcard regular expression matches
+     * @param  {string} str - The search term to be used
+     * @return {string}
+     * @access protected
+     */
+    setupWildcardsRegExp(str) {
+        // replace single character wildcard with unicode 0001
+        str = str.replace(/(?:\\)*\?/g, val => {
+            return val.charAt(0) === "\\" ? "?" : "\u0001";
+        });
+        // replace multiple character wildcard with unicode 0002
+        return str.replace(/(?:\\)*\*/g, val => {
+            return val.charAt(0) === "\\" ? "*" : "\u0002";
+        });
+    }
+
+    /**
+     * Sets up the regular expression string to allow later insertion of
+     * wildcard regular expression matches
+     * @param  {string} str - The search term to be used
+     * @return {string}
+     * @access protected
+     */
+    createWildcardsRegExp(str) {
+        // default to "enable" (i.e. to not include spaces)
+        // "withSpaces" uses `[\\S\\s]` instead of `.` because the latter
+        // does not match new line characters
+        let spaces = this.opt.wildcards === "withSpaces";
+        return str
+            // replace unicode 0001 with a RegExp class to match any single
+            // character, or any single non-whitespace character depending
+            // on the setting
+            .replace(/\u0001/g, spaces ? "[\\S\\s]?" : "\\S?")
+            // replace unicode 0002 with a RegExp class to match zero or
+            // more characters, or zero or more non-whitespace characters
+            // depending on the setting
+            .replace(/\u0002/g, spaces ? "[\\S\\s]*?" : "\\S*");
     }
 
     /**
@@ -749,16 +801,8 @@ class Mark { // eslint-disable-line no-unused-vars
      * <code>["-", ","]</code>
      */
     /**
-     * These options also include the common options from
-     * {@link Mark~commonOptions}
-     * @typedef Mark~markOptions
-     * @type {object.<string>}
-     * @property {boolean} [separateWordSearch=true] - Whether to search for
-     * each word separated by a blank instead of the complete term
-     * @property {boolean} [diacritics=true] - If diacritic characters should be
-     * matched. ({@link https://en.wikipedia.org/wiki/Diacritic Diacritics})
-     * @property {object} [synonyms] - An object with synonyms. The key will be
-     * a synonym for the value and the value for the key
+     * @typedef Mark~markAccuracySetting
+     * @type {string}
      * @property {"partially"|"complementary"|"exactly"|Mark~markAccuracyObject}
      * [accuracy="partially"] - Either one of the following string values:
      * <ul>
@@ -776,6 +820,38 @@ class Mark { // eslint-disable-line no-unused-vars
      *   <li><i>limiters</i>: A custom array of string limiters for accuracy
      *   "exactly" or "complementary"</li>
      * </ul>
+     */
+    /**
+     * @typedef Mark~markWildcardsSetting
+     * @type {string}
+     * @property {"disabled"|"enabled"|"withSpaces"}
+     * [wildcards="disabled"] - Set to any of the following string values:
+     * <ul>
+     *   <li><i>disabled</i>: Disable wildcard usage</li>
+     *   <li><i>enabled</i>: When searching for "lor?m", the "?" will match zero
+     *   or one non-space character (e.g. "lorm", "loram", "lor3m", etc). When
+     *   searching for "lor*m", the "*" will match zero or more non-space
+     *   characters (e.g. "lorm", "loram", "lor123m", etc).</li>
+     *   <li><i>withSpaces</i>: When searching for "lor?m", the "?" will
+     *   match zero or one space or non-space character (e.g. "lor m", "loram",
+     *   etc). When searching for "lor*m", the "*" will match zero or more space
+     *   or non-space characters (e.g. "lorm", "lore et dolor ipsum", "lor: m",
+     *   etc).</li>
+     * </ul>
+     */
+    /**
+     * These options also include the common options from
+     * {@link Mark~commonOptions}
+     * @typedef Mark~markOptions
+     * @type {object.<string>}
+     * @property {boolean} [separateWordSearch=true] - Whether to search for
+     * each word separated by a blank instead of the complete term
+     * @property {boolean} [diacritics=true] - If diacritic characters should be
+     * matched. ({@link https://en.wikipedia.org/wiki/Diacritic Diacritics})
+     * @property {object} [synonyms] - An object with synonyms. The key will be
+     * a synonym for the value and the value for the key
+     * @property {Mark~markAccuracySetting} [accuracy]
+     * @property {Mark~markWildcardsSetting} [wildcards]
      * @property {boolean} [acrossElements=false] - Whether to find matches
      * across HTML elements. By default, only matches within single HTML
      * elements will be found
@@ -794,6 +870,7 @@ class Mark { // eslint-disable-line no-unused-vars
         this.opt = opt;
         let totalMatches = 0,
             fn = "wrapMatches";
+
         const {
             keywords: kwArr,
             length: kwArrLen

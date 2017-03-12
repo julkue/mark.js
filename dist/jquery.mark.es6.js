@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.8.3
+ * mark.js v8.9.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -44,6 +44,7 @@
                 "caseSensitive": false,
                 "ignoreJoiners": false,
                 "ignoreGroups": 0,
+                "wildcards": "disabled",
                 "each": () => {},
                 "noMatch": () => {},
                 "filter": () => true,
@@ -79,6 +80,9 @@
         }
 
         createRegExp(str) {
+            if (this.opt.wildcards !== "disabled") {
+                str = this.setupWildcardsRegExp(str);
+            }
             str = this.escapeStr(str);
             if (Object.keys(this.opt.synonyms).length) {
                 str = this.createSynonymsRegExp(str);
@@ -93,6 +97,9 @@
             if (this.opt.ignoreJoiners) {
                 str = this.createIgnoreJoinersRegExp(str);
             }
+            if (this.opt.wildcards !== "disabled") {
+                str = this.createWildcardsRegExp(str);
+            }
             str = this.createAccuracyRegExp(str);
             return str;
         }
@@ -103,14 +110,29 @@
             for (let index in syn) {
                 if (syn.hasOwnProperty(index)) {
                     const value = syn[index],
-                          k1 = this.escapeStr(index),
-                          k2 = this.escapeStr(value);
+                          k1 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
+                          k2 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
                     if (k1 !== "" && k2 !== "") {
                         str = str.replace(new RegExp(`(${ k1 }|${ k2 })`, `gm${ sens }`), `(${ k1 }|${ k2 })`);
                     }
                 }
             }
             return str;
+        }
+
+        setupWildcardsRegExp(str) {
+            str = str.replace(/(?:\\)*\?/g, val => {
+                return val.charAt(0) === "\\" ? "?" : "\u0001";
+            });
+
+            return str.replace(/(?:\\)*\*/g, val => {
+                return val.charAt(0) === "\\" ? "*" : "\u0002";
+            });
+        }
+
+        createWildcardsRegExp(str) {
+            let spaces = this.opt.wildcards === "withSpaces";
+            return str.replace(/\u0001/g, spaces ? "[\\S\\s]?" : "\\S?").replace(/\u0002/g, spaces ? "[\\S\\s]*?" : "\\S*");
         }
 
         setupIgnoreJoinersRegExp(str) {
@@ -377,6 +399,7 @@
             this.opt = opt;
             let totalMatches = 0,
                 fn = "wrapMatches";
+
             const {
                 keywords: kwArr,
                 length: kwArrLen

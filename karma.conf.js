@@ -25,11 +25,12 @@ module.exports = config => {
             "test/specs/basic/context-string.js",
             "test/specs/basic/array-keyword.js",
             "test/specs/basic/custom-element-class.js",
-            "test/specs/basic/!(accuracy|no-options|case-sensitive|ignore-joiners)*.js",
-            // depends on diacritics, separateWordSearch:
+            "test/specs/basic/!(accuracy|no-options|case-sensitive|ignore-joiners|wildcards)*.js",
+            // depends on diacritics, separateWordSearch or synonyms:
             "test/specs/basic/accuracy*.js",
             "test/specs/basic/case-sensitive*.js",
             "test/specs/basic/ignore-joiners*.js",
+            "test/specs/basic/wildcards*.js",
             "test/specs/iframes/main.js",
             "test/specs/iframes/unmark.js",
             "test/specs/**/!(no-options).js", {
