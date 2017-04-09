@@ -25,6 +25,10 @@
         new Mark(this.get()).markRegExp(regexp, opt);
         return this;
     };
+    $.fn.markRanges = function (ranges, opt) {
+        new Mark(this.get()).markRanges(ranges, opt);
+        return this;
+    };
     $.fn.unmark = function (opt) {
         new Mark(this.get()).unmark(opt);
         return this;

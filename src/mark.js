@@ -40,8 +40,8 @@ class Mark { // eslint-disable-line no-unused-vars
 
     /**
      * Options defined by the user. They will be initialized from one of the
-     * public methods. See {@link Mark#mark}, {@link Mark#markRegExp} and
-     * {@link Mark#unmark} for option properties.
+     * public methods. See {@link Mark#mark}, {@link Mark#markRegExp},
+     * {@link Mark#markRanges} and {@link Mark#unmark} for option properties.
      * @type {object}
      * @param {object} [val] - An object that will be merged with defaults
      * @access protected
@@ -61,6 +61,7 @@ class Mark { // eslint-disable-line no-unused-vars
             "caseSensitive": false,
             "ignoreJoiners": false,
             "ignoreGroups": 0,
+            "invalidMax": true,
             "wildcards": "disabled",
             "each": () => {},
             "noMatch": () => {},
@@ -385,6 +386,76 @@ class Mark { // eslint-disable-line no-unused-vars
     }
 
     /**
+     * Check if a value is a number
+     * @param {number|string} value - the value to check;
+     * numeric strings allowed
+     * @return {boolean}
+     * @access protected
+     */
+    isNumeric(value) {
+        // http://stackoverflow.com/a/16655847/145346
+        // eslint-disable-next-line eqeqeq
+        return Number(parseFloat(value)) == value;
+    }
+
+    /**
+     * @typedef Mark~setOfRanges
+     * @type {number[]}
+     * @property {numer} start - The start position within the composite value
+     * @property {number} end - The end position within the composite value
+     */
+    /**
+     * @typedef Mark~setOfRangeArrays
+     * @type {Array.<number[]>}
+     * @property {Mark~setOfRanges}
+     */
+    /**
+     * Returns a processed list of integer offset indexes that do not overlap
+     * each other, and remove any string values or additional elements
+     * @param {Mark~setOfRangeArrays} array - unprocessed raw array
+     * @return {Mark~setOfRangeArrays} - processed array
+     * @throws Will throw an error if an array of arrays is not passed
+     * @access protected
+     */
+    checkRanges(array) {
+        // indexes are an array of arrays [[0, 1], [4, 6]]
+        // [ [start1, end1], [start2, end2] ]
+        // quick validity check of the first entry only
+        if (!Array.isArray(array) || !Array.isArray(array[0])) {
+            throw new Error("markRange() will only accept an array of arrays");
+        }
+        const stack = [];
+        let last = 0;
+        array
+            // acending sort to ensure there is no overlap in start & end
+            // offsets
+            .sort((a, b) => {
+                return a[0] - b[0];
+            })
+            .forEach(item => {
+                if (Array.isArray(item)) {
+                    const start = parseInt(item[0], 10),
+                        end = parseInt(item[1], 10);
+                    // ignore overlapping values & non-numeric entries
+                    if (
+                        this.isNumeric(item[0]) &&
+                        this.isNumeric(item[1]) &&
+                        end - last > 0 &&
+                        end - start > 0
+                    ) {
+                        stack.push([start, end]);
+                        last = end;
+                    } else {
+                        this.log(`Ignoring range: ${JSON.stringify(item)}`);
+                    }
+                } else {
+                    this.log(`Ignoring non-array: ${JSON.stringify(item)}`);
+                }
+            });
+        return stack;
+    }
+
+    /**
      * @typedef Mark~getTextNodesDict
      * @type {object.<string>}
      * @property {string} value - The composite value of all text nodes
@@ -658,6 +729,78 @@ class Mark { // eslint-disable-line no-unused-vars
     }
 
     /**
+     * Callback for each wrapped element
+     * @callback Mark~wrapRangeFromIndexCallback
+     * @param {HTMLElement} element - The marked DOM element
+     */
+    /**
+     * Filter callback before each wrapping
+     * @callback Mark~wrapRangeFromIndexFilterCallback
+     * @param {array} range - array of range start and end points
+     * @param {string} match - string extracted from the matching range
+     * @param {HTMLElement} node - The text node which includes the range
+     * @param {number} counter - A counter indicating the number of all marks
+     */
+    /**
+     * Callback on end
+     * @callback Mark~wrapRangeFromIndexEndCallback
+     */
+    /**
+     * Wraps the indicated ranges across all HTML elements in all contexts
+     * @param {Mark~setOfRangeArrays} ranges - An array of arrays containing
+     * the start and end points for each mark element
+     * @param {Mark~wrapRangeFromIndexFilterCallback} filterCb
+     * @param {Mark~wrapRangeFromIndexEachCallback} eachCb
+     * @param {Mark~wrapRangeFromIndexEndCallback} endCb
+     * @access protected
+     */
+    wrapRangeFromIndex(ranges, filterCb, eachCb, endCb) {
+        this.getTextNodes(dict => {
+            const originalLength = dict.value.length;
+            let start, end, max, offset;
+            ranges.forEach((range, counter) => {
+                max = dict.value.length;
+                // adjust offset to account for wrapped text node
+                offset = originalLength - max;
+                start = range[0] - offset;
+                end = range[1] - offset;
+                // invalidMax default is true; stop at max
+                if (this.opt.invalidMax === false) {
+                    start = start > max ? max : start;
+                    end = end > max ? max : end;
+                }
+                if (start < 0 || end - start < 0 || start > max || end > max) {
+                    this.log(`Invalid range: ${JSON.stringify(range)}`);
+                } else if (
+                    // whitespace only; even if wrapped it is not visible
+                    dict.value.substring(start, end).replace(/\s+/g, "") === ""
+                ) {
+                    this.log(
+                        "Skipping whitespace only range: " +
+                        JSON.stringify(range)
+                    );
+                } else {
+                    this.wrapRangeInMappedTextNode(dict, start, end, node => {
+                        // range, match, node, counter
+                        return filterCb(
+                            range,
+                            dict.value.substring(start, end),
+                            node,
+                            counter
+                        );
+                    }, node => {
+                        // add ranges to attributes for cross-reference
+                        node.setAttribute('data-range-start', range[0]);
+                        node.setAttribute('data-range-end', range[1]);
+                        eachCb(node, range);
+                    });
+                }
+            });
+            endCb();
+        });
+    }
+
+    /**
      * Unwraps the specified DOM node with its content (text nodes or HTML)
      * without destroying possibly present events (using innerHTML) and
      * normalizes the parent at the end (merge splitted text nodes)
@@ -711,7 +854,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @type {object.<string>}
      * @property {string} [element="mark"] - HTML element tag name
      * @property {string} [className] - An optional class name
-     * @property {string[]} [exclude - An array with exclusion selectors.
+     * @property {string[]} [exclude] - An array with exclusion selectors.
      * Elements matching those selectors will be ignored
      * @property {boolean} [iframes=false] - Whether to search inside iframes
      * @property {Mark~commonDoneCallback} [done]
@@ -904,6 +1047,75 @@ class Mark { // eslint-disable-line no-unused-vars
             this.opt.done(totalMatches);
         } else {
             handler(kwArr[0]);
+        }
+    }
+
+    /**
+     * Callback for each marked element
+     * @callback Mark~markRangesEachCallback
+     * @param {HTMLElement} element - The marked DOM element
+     * @param {array} range - array of range start and end points
+     */
+    /**
+     * Callback if there were no matches
+     * @callback Mark~markRangesNoMatchCallback
+     * @param {Mark~setOfRangeArrays} rawRanges - the original array of arrays
+     * or an array of arrays of specific non-matches
+     * passed to the markRanges function
+     */
+    /**
+     * Callback to filter matches
+     * @callback Mark~markRangesFilterCallback
+     * @param {array} range - array of range start and end points
+     * @param {string} match - string extracted from the matching range
+     * @param {HTMLElement} node - The text node which includes the range
+     * @param {number} counter - A counter indicating the number of all marks
+     */
+    /**
+     * These options also include the common options from
+     * {@link Mark~commonOptions}
+     * @typedef Mark~markRangesOptions
+     * @type {object.<string>}
+     * @property {boolean} [invalidMax=true] - Whether to allow an end range
+     * greater than the max text length; if false, these ranges are invalid
+     * @property {Mark~markRangesEachCallback} [each]
+     * @property {Mark~markRangesNoMatchCallback} [noMatch]
+     * @property {Mark~markRangesFilterCallback} [filter]
+     */
+    /**
+     * Marks an array of arrays containing a start and end point
+     * @param  {Mark~setOfRangeArrays} rawRanges - The original (preprocessed)
+     * array of arrays containing a start and end points for each mark element
+     * @param  {Mark~markRangesOptions} [opt] - Optional options object
+     * @access public
+     */
+    markRanges(rawRanges, opt) {
+        this.opt = opt;
+        let matches = 0,
+            totalMatches = 0,
+            ranges = this.checkRanges(rawRanges);
+        if (ranges.length) {
+            this.log(
+                "Starting to mark with the following ranges: " +
+                JSON.stringify(ranges)
+            );
+            this.wrapRangeFromIndex(
+                ranges, (range, match, node, counter) => {
+                    return this.opt.filter(range, match, node, counter);
+                }, (element, range) => {
+                    matches++;
+                    totalMatches++;
+                    this.opt.each(element, range);
+                }, () => {
+                    if(matches === 0) {
+                        this.opt.noMatch(rawRanges);
+                    }
+                    this.opt.done(totalMatches);
+                }
+            );
+        } else {
+            this.opt.noMatch(rawRanges);
+            this.opt.done(totalMatches);
         }
     }
 

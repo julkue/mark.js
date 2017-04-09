@@ -211,9 +211,43 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 };
             }
         }, {
+            key: "isNumeric",
+            value: function isNumeric(value) {
+                return Number(parseFloat(value)) == value;
+            }
+        }, {
+            key: "checkRanges",
+            value: function checkRanges(array) {
+                var _this3 = this;
+
+                if (!Array.isArray(array) || !Array.isArray(array[0])) {
+                    throw new Error("markRange() will only accept an array of arrays");
+                }
+                var stack = [];
+                var last = 0;
+                array.sort(function (a, b) {
+                    return a[0] - b[0];
+                }).forEach(function (item) {
+                    if (Array.isArray(item)) {
+                        var start = parseInt(item[0], 10),
+                            end = parseInt(item[1], 10);
+
+                        if (_this3.isNumeric(item[0]) && _this3.isNumeric(item[1]) && end - last > 0 && end - start > 0) {
+                            stack.push([start, end]);
+                            last = end;
+                        } else {
+                            _this3.log("Ignoring range: " + JSON.stringify(item));
+                        }
+                    } else {
+                        _this3.log("Ignoring non-array: " + JSON.stringify(item));
+                    }
+                });
+                return stack;
+            }
+        }, {
             key: "getTextNodes",
             value: function getTextNodes(cb) {
-                var _this3 = this;
+                var _this4 = this;
 
                 var val = "",
                     nodes = [];
@@ -224,7 +258,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         node: node
                     });
                 }, function (node) {
-                    if (_this3.matchesExclude(node.parentNode)) {
+                    if (_this4.matchesExclude(node.parentNode)) {
                         return NodeFilter.FILTER_REJECT;
                     } else {
                         return NodeFilter.FILTER_ACCEPT;
@@ -259,45 +293,37 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "wrapRangeInMappedTextNode",
             value: function wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
-                var _this4 = this;
+                var _this5 = this;
 
                 dict.nodes.every(function (n, i) {
                     var sibl = dict.nodes[i + 1];
                     if (typeof sibl === "undefined" || sibl.start > start) {
-                        var _ret = function () {
-                            if (!filterCb(n.node)) {
-                                return {
-                                    v: false
-                                };
-                            }
+                        if (!filterCb(n.node)) {
+                            return false;
+                        }
 
-                            var s = start - n.start,
-                                e = (end > n.end ? n.end : end) - n.start,
-                                startStr = dict.value.substr(0, n.start),
-                                endStr = dict.value.substr(e + n.start);
-                            n.node = _this4.wrapRangeInTextNode(n.node, s, e);
+                        var s = start - n.start,
+                            e = (end > n.end ? n.end : end) - n.start,
+                            startStr = dict.value.substr(0, n.start),
+                            endStr = dict.value.substr(e + n.start);
+                        n.node = _this5.wrapRangeInTextNode(n.node, s, e);
 
-                            dict.value = startStr + endStr;
-                            dict.nodes.forEach(function (k, j) {
-                                if (j >= i) {
-                                    if (dict.nodes[j].start > 0 && j !== i) {
-                                        dict.nodes[j].start -= e;
-                                    }
-                                    dict.nodes[j].end -= e;
+                        dict.value = startStr + endStr;
+                        dict.nodes.forEach(function (k, j) {
+                            if (j >= i) {
+                                if (dict.nodes[j].start > 0 && j !== i) {
+                                    dict.nodes[j].start -= e;
                                 }
-                            });
-                            end -= e;
-                            eachCb(n.node.previousSibling, n.start);
-                            if (end > n.end) {
-                                start = n.end;
-                            } else {
-                                return {
-                                    v: false
-                                };
+                                dict.nodes[j].end -= e;
                             }
-                        }();
-
-                        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+                        });
+                        end -= e;
+                        eachCb(n.node.previousSibling, n.start);
+                        if (end > n.end) {
+                            start = n.end;
+                        } else {
+                            return false;
+                        }
                     }
                     return true;
                 });
@@ -305,7 +331,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "wrapMatches",
             value: function wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-                var _this5 = this;
+                var _this6 = this;
 
                 var matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
                 this.getTextNodes(function (dict) {
@@ -322,7 +348,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                                     pos += match[i].length;
                                 }
                             }
-                            node = _this5.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
+                            node = _this6.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
                             eachCb(node.previousSibling);
 
                             regex.lastIndex = 0;
@@ -334,7 +360,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "wrapMatchesAcrossElements",
             value: function wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
-                var _this6 = this;
+                var _this7 = this;
 
                 var matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
                 this.getTextNodes(function (dict) {
@@ -348,13 +374,52 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         }
                         var end = start + match[matchIdx].length;
 
-                        _this6.wrapRangeInMappedTextNode(dict, start, end, function (node) {
+                        _this7.wrapRangeInMappedTextNode(dict, start, end, function (node) {
                             return filterCb(match[matchIdx], node);
                         }, function (node, lastIndex) {
                             regex.lastIndex = lastIndex;
                             eachCb(node);
                         });
                     }
+                    endCb();
+                });
+            }
+        }, {
+            key: "wrapRangeFromIndex",
+            value: function wrapRangeFromIndex(ranges, filterCb, eachCb, endCb) {
+                var _this8 = this;
+
+                this.getTextNodes(function (dict) {
+                    var originalLength = dict.value.length;
+                    var start = void 0,
+                        end = void 0,
+                        max = void 0,
+                        offset = void 0;
+                    ranges.forEach(function (range, counter) {
+                        max = dict.value.length;
+
+                        offset = originalLength - max;
+                        start = range[0] - offset;
+                        end = range[1] - offset;
+
+                        if (_this8.opt.invalidMax === false) {
+                            start = start > max ? max : start;
+                            end = end > max ? max : end;
+                        }
+                        if (start < 0 || end - start < 0 || start > max || end > max) {
+                            _this8.log("Invalid range: " + JSON.stringify(range));
+                        } else if (dict.value.substring(start, end).replace(/\s+/g, "") === "") {
+                            _this8.log("Skipping whitespace only range: " + JSON.stringify(range));
+                        } else {
+                            _this8.wrapRangeInMappedTextNode(dict, start, end, function (node) {
+                                return filterCb(range, dict.value.substring(start, end), node, counter);
+                            }, function (node) {
+                                node.setAttribute('data-range-start', range[0]);
+                                node.setAttribute('data-range-end', range[1]);
+                                eachCb(node, range);
+                            });
+                        }
+                    });
                     endCb();
                 });
             }
@@ -392,7 +457,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "markRegExp",
             value: function markRegExp(regexp, opt) {
-                var _this7 = this;
+                var _this9 = this;
 
                 this.opt = opt;
                 this.log("Searching with expression \"" + regexp + "\"");
@@ -400,24 +465,24 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     fn = "wrapMatches";
                 var eachCb = function eachCb(element) {
                     totalMatches++;
-                    _this7.opt.each(element);
+                    _this9.opt.each(element);
                 };
                 if (this.opt.acrossElements) {
                     fn = "wrapMatchesAcrossElements";
                 }
                 this[fn](regexp, this.opt.ignoreGroups, function (match, node) {
-                    return _this7.opt.filter(node, match, totalMatches);
+                    return _this9.opt.filter(node, match, totalMatches);
                 }, eachCb, function () {
                     if (totalMatches === 0) {
-                        _this7.opt.noMatch(regexp);
+                        _this9.opt.noMatch(regexp);
                     }
-                    _this7.opt.done(totalMatches);
+                    _this9.opt.done(totalMatches);
                 });
             }
         }, {
             key: "mark",
             value: function mark(sv, opt) {
-                var _this8 = this;
+                var _this10 = this;
 
                 this.opt = opt;
                 var totalMatches = 0,
@@ -428,21 +493,21 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     kwArrLen = _getSeparatedKeywords.length,
                     sens = this.opt.caseSensitive ? "" : "i",
                     handler = function handler(kw) {
-                    var regex = new RegExp(_this8.createRegExp(kw), "gm" + sens),
+                    var regex = new RegExp(_this10.createRegExp(kw), "gm" + sens),
                         matches = 0;
-                    _this8.log("Searching with expression \"" + regex + "\"");
-                    _this8[fn](regex, 1, function (term, node) {
-                        return _this8.opt.filter(node, kw, totalMatches, matches);
+                    _this10.log("Searching with expression \"" + regex + "\"");
+                    _this10[fn](regex, 1, function (term, node) {
+                        return _this10.opt.filter(node, kw, totalMatches, matches);
                     }, function (element) {
                         matches++;
                         totalMatches++;
-                        _this8.opt.each(element);
+                        _this10.opt.each(element);
                     }, function () {
                         if (matches === 0) {
-                            _this8.opt.noMatch(kw);
+                            _this10.opt.noMatch(kw);
                         }
                         if (kwArr[kwArrLen - 1] === kw) {
-                            _this8.opt.done(totalMatches);
+                            _this10.opt.done(totalMatches);
                         } else {
                             handler(kwArr[kwArr.indexOf(kw) + 1]);
                         }
@@ -459,9 +524,37 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
             }
         }, {
+            key: "markRanges",
+            value: function markRanges(rawRanges, opt) {
+                var _this11 = this;
+
+                this.opt = opt;
+                var matches = 0,
+                    totalMatches = 0,
+                    ranges = this.checkRanges(rawRanges);
+                if (ranges.length) {
+                    this.log("Starting to mark with the following ranges: " + JSON.stringify(ranges));
+                    this.wrapRangeFromIndex(ranges, function (range, match, node, counter) {
+                        return _this11.opt.filter(range, match, node, counter);
+                    }, function (element, range) {
+                        matches++;
+                        totalMatches++;
+                        _this11.opt.each(element, range);
+                    }, function () {
+                        if (matches === 0) {
+                            _this11.opt.noMatch(rawRanges);
+                        }
+                        _this11.opt.done(totalMatches);
+                    });
+                } else {
+                    this.opt.noMatch(rawRanges);
+                    this.opt.done(totalMatches);
+                }
+            }
+        }, {
             key: "unmark",
             value: function unmark(opt) {
-                var _this9 = this;
+                var _this12 = this;
 
                 this.opt = opt;
                 var sel = this.opt.element ? this.opt.element : "*";
@@ -471,10 +564,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
                 this.log("Removal selector \"" + sel + "\"");
                 this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, function (node) {
-                    _this9.unwrapMatches(node);
+                    _this12.unwrapMatches(node);
                 }, function (node) {
                     var matchesSel = DOMIterator.matches(node, sel),
-                        matchesExclude = _this9.matchesExclude(node);
+                        matchesExclude = _this12.matchesExclude(node);
                     if (!matchesSel || matchesExclude) {
                         return NodeFilter.FILTER_REJECT;
                     } else {
@@ -499,6 +592,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "caseSensitive": false,
                     "ignoreJoiners": false,
                     "ignoreGroups": 0,
+                    "invalidMax": true,
                     "wildcards": "disabled",
                     "each": function each() {},
                     "noMatch": function noMatch() {},
@@ -600,7 +694,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "observeIframeLoad",
             value: function observeIframeLoad(ifr, successFn, errorFn) {
-                var _this10 = this;
+                var _this13 = this;
 
                 var called = false,
                     tout = null;
@@ -611,9 +705,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     called = true;
                     clearTimeout(tout);
                     try {
-                        if (!_this10.isIframeBlank(ifr)) {
+                        if (!_this13.isIframeBlank(ifr)) {
                             ifr.removeEventListener("load", listener);
-                            _this10.getIframeContents(ifr, successFn, errorFn);
+                            _this13.getIframeContents(ifr, successFn, errorFn);
                         }
                     } catch (e) {
                         errorFn();
@@ -642,14 +736,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "waitForIframes",
             value: function waitForIframes(ctx, done) {
-                var _this11 = this;
+                var _this14 = this;
 
                 var eachCalled = 0;
                 this.forEachIframe(ctx, function () {
                     return true;
                 }, function (ifr) {
                     eachCalled++;
-                    _this11.waitForIframes(ifr.querySelector("html"), function () {
+                    _this14.waitForIframes(ifr.querySelector("html"), function () {
                         if (! --eachCalled) {
                             done();
                         }
@@ -663,7 +757,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "forEachIframe",
             value: function forEachIframe(ctx, filter, each) {
-                var _this12 = this;
+                var _this15 = this;
 
                 var end = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function () {};
 
@@ -680,10 +774,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     checkEnd();
                 }
                 ifr.forEach(function (ifr) {
-                    if (DOMIterator.matches(ifr, _this12.exclude)) {
+                    if (DOMIterator.matches(ifr, _this15.exclude)) {
                         checkEnd();
                     } else {
-                        _this12.onIframeReady(ifr, function (con) {
+                        _this15.onIframeReady(ifr, function (con) {
                             if (filter(ifr)) {
                                 handled++;
                                 each(con);
@@ -769,12 +863,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "handleOpenIframes",
             value: function handleOpenIframes(ifr, whatToShow, eCb, fCb) {
-                var _this13 = this;
+                var _this16 = this;
 
                 ifr.forEach(function (ifrDict) {
                     if (!ifrDict.handled) {
-                        _this13.getIframeContents(ifrDict.val, function (con) {
-                            _this13.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb);
+                        _this16.getIframeContents(ifrDict.val, function (con) {
+                            _this16.createInstanceOnIframe(con).forEachNode(whatToShow, eCb, fCb);
                         });
                     }
                 });
@@ -782,7 +876,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "iterateThroughNodes",
             value: function iterateThroughNodes(whatToShow, ctx, eachCb, filterCb, doneCb) {
-                var _this14 = this;
+                var _this17 = this;
 
                 var itr = this.createIterator(ctx, whatToShow, filterCb);
                 var ifr = [],
@@ -790,7 +884,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     node = void 0,
                     prevNode = void 0,
                     retrieveNodes = function retrieveNodes() {
-                    var _getIteratorNode = _this14.getIteratorNode(itr);
+                    var _getIteratorNode = _this17.getIteratorNode(itr);
 
                     prevNode = _getIteratorNode.prevNode;
                     node = _getIteratorNode.node;
@@ -800,9 +894,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 while (retrieveNodes()) {
                     if (this.iframes) {
                         this.forEachIframe(ctx, function (currIfr) {
-                            return _this14.checkIframeFilter(node, prevNode, currIfr, ifr);
+                            return _this17.checkIframeFilter(node, prevNode, currIfr, ifr);
                         }, function (con) {
-                            _this14.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
+                            _this17.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
                         });
                     }
 
@@ -819,7 +913,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         }, {
             key: "forEachNode",
             value: function forEachNode(whatToShow, each, filter) {
-                var _this15 = this;
+                var _this18 = this;
 
                 var done = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : function () {};
 
@@ -830,15 +924,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }
                 contexts.forEach(function (ctx) {
                     var ready = function ready() {
-                        _this15.iterateThroughNodes(whatToShow, ctx, each, filter, function () {
+                        _this18.iterateThroughNodes(whatToShow, ctx, each, filter, function () {
                             if (--open <= 0) {
                                 done();
                             }
                         });
                     };
 
-                    if (_this15.iframes) {
-                        _this15.waitForIframes(ctx, ready);
+                    if (_this18.iframes) {
+                        _this18.waitForIframes(ctx, ready);
                     } else {
                         ready();
                     }
@@ -874,6 +968,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     };
     $.fn.markRegExp = function (regexp, opt) {
         new Mark(this.get()).markRegExp(regexp, opt);
+        return this;
+    };
+    $.fn.markRanges = function (ranges, opt) {
+        new Mark(this.get()).markRanges(ranges, opt);
         return this;
     };
     $.fn.unmark = function (opt) {

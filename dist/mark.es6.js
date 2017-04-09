@@ -44,6 +44,7 @@
                 "caseSensitive": false,
                 "ignoreJoiners": false,
                 "ignoreGroups": 0,
+                "invalidMax": true,
                 "wildcards": "disabled",
                 "each": () => {},
                 "noMatch": () => {},
@@ -71,7 +72,7 @@
                 return;
             }
             if (typeof log === "object" && typeof log[level] === "function") {
-                log[level](`mark.js: ${ msg }`);
+                log[level](`mark.js: ${msg}`);
             }
         }
 
@@ -113,7 +114,7 @@
                           k1 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
                           k2 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
                     if (k1 !== "" && k2 !== "") {
-                        str = str.replace(new RegExp(`(${ k1 }|${ k2 })`, `gm${ sens }`), `(${ k1 }|${ k2 })`);
+                        str = str.replace(new RegExp(`(${k1}|${k2})`, `gm${sens}`), `(${k1}|${k2})`);
                     }
                 }
             }
@@ -161,7 +162,7 @@
                             return false;
                         }
 
-                        str = str.replace(new RegExp(`[${ dct }]`, `gm${ sens }`), `[${ dct }]`);
+                        str = str.replace(new RegExp(`[${dct}]`, `gm${sens}`), `[${dct}]`);
                         handled.push(dct);
                     }
                     return true;
@@ -181,17 +182,17 @@
                 ls = typeof acc === "string" ? [] : acc.limiters,
                 lsJoin = "";
             ls.forEach(limiter => {
-                lsJoin += `|${ this.escapeStr(limiter) }`;
+                lsJoin += `|${this.escapeStr(limiter)}`;
             });
             switch (val) {
                 case "partially":
                 default:
-                    return `()(${ str })`;
+                    return `()(${str})`;
                 case "complementary":
                     lsJoin = "\\s" + (lsJoin ? lsJoin : this.escapeStr(chars));
-                    return `()([^${ lsJoin }]*${ str }[^${ lsJoin }]*)`;
+                    return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
                 case "exactly":
-                    return `(^|\\s${ lsJoin })(${ str })(?=$|\\s${ lsJoin })`;
+                    return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
             }
         }
 
@@ -216,6 +217,36 @@
                 }),
                 "length": stack.length
             };
+        }
+
+        isNumeric(value) {
+            return Number(parseFloat(value)) == value;
+        }
+
+        checkRanges(array) {
+            if (!Array.isArray(array) || !Array.isArray(array[0])) {
+                throw new Error("markRange() will only accept an array of arrays");
+            }
+            const stack = [];
+            let last = 0;
+            array.sort((a, b) => {
+                return a[0] - b[0];
+            }).forEach(item => {
+                if (Array.isArray(item)) {
+                    const start = parseInt(item[0], 10),
+                          end = parseInt(item[1], 10);
+
+                    if (this.isNumeric(item[0]) && this.isNumeric(item[1]) && end - last > 0 && end - start > 0) {
+                        stack.push([start, end]);
+                        last = end;
+                    } else {
+                        this.log(`Ignoring range: ${JSON.stringify(item)}`);
+                    }
+                } else {
+                    this.log(`Ignoring non-array: ${JSON.stringify(item)}`);
+                }
+            });
+            return stack;
         }
 
         getTextNodes(cb) {
@@ -344,6 +375,39 @@
             });
         }
 
+        wrapRangeFromIndex(ranges, filterCb, eachCb, endCb) {
+            this.getTextNodes(dict => {
+                const originalLength = dict.value.length;
+                let start, end, max, offset;
+                ranges.forEach((range, counter) => {
+                    max = dict.value.length;
+
+                    offset = originalLength - max;
+                    start = range[0] - offset;
+                    end = range[1] - offset;
+
+                    if (this.opt.invalidMax === false) {
+                        start = start > max ? max : start;
+                        end = end > max ? max : end;
+                    }
+                    if (start < 0 || end - start < 0 || start > max || end > max) {
+                        this.log(`Invalid range: ${JSON.stringify(range)}`);
+                    } else if (dict.value.substring(start, end).replace(/\s+/g, "") === "") {
+                        this.log("Skipping whitespace only range: " + JSON.stringify(range));
+                    } else {
+                        this.wrapRangeInMappedTextNode(dict, start, end, node => {
+                            return filterCb(range, dict.value.substring(start, end), node, counter);
+                        }, node => {
+                            node.setAttribute('data-range-start', range[0]);
+                            node.setAttribute('data-range-end', range[1]);
+                            eachCb(node, range);
+                        });
+                    }
+                });
+                endCb();
+            });
+        }
+
         unwrapMatches(node) {
             const parent = node.parentNode;
             let docFrag = document.createDocumentFragment();
@@ -375,7 +439,7 @@
 
         markRegExp(regexp, opt) {
             this.opt = opt;
-            this.log(`Searching with expression "${ regexp }"`);
+            this.log(`Searching with expression "${regexp}"`);
             let totalMatches = 0,
                 fn = "wrapMatches";
             const eachCb = element => {
@@ -406,9 +470,9 @@
             } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
                   sens = this.opt.caseSensitive ? "" : "i",
                   handler = kw => {
-                let regex = new RegExp(this.createRegExp(kw), `gm${ sens }`),
+                let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),
                     matches = 0;
-                this.log(`Searching with expression "${ regex }"`);
+                this.log(`Searching with expression "${regex}"`);
                 this[fn](regex, 1, (term, node) => {
                     return this.opt.filter(node, kw, totalMatches, matches);
                 }, element => {
@@ -436,14 +500,39 @@
             }
         }
 
+        markRanges(rawRanges, opt) {
+            this.opt = opt;
+            let matches = 0,
+                totalMatches = 0,
+                ranges = this.checkRanges(rawRanges);
+            if (ranges.length) {
+                this.log("Starting to mark with the following ranges: " + JSON.stringify(ranges));
+                this.wrapRangeFromIndex(ranges, (range, match, node, counter) => {
+                    return this.opt.filter(range, match, node, counter);
+                }, (element, range) => {
+                    matches++;
+                    totalMatches++;
+                    this.opt.each(element, range);
+                }, () => {
+                    if (matches === 0) {
+                        this.opt.noMatch(rawRanges);
+                    }
+                    this.opt.done(totalMatches);
+                });
+            } else {
+                this.opt.noMatch(rawRanges);
+                this.opt.done(totalMatches);
+            }
+        }
+
         unmark(opt) {
             this.opt = opt;
             let sel = this.opt.element ? this.opt.element : "*";
             sel += "[data-markjs]";
             if (this.opt.className) {
-                sel += `.${ this.opt.className }`;
+                sel += `.${this.opt.className}`;
             }
-            this.log(`Removal selector "${ sel }"`);
+            this.log(`Removal selector "${sel}"`);
             this.iterator.forEachNode(NodeFilter.SHOW_ELEMENT, node => {
                 this.unwrapMatches(node);
             }, node => {
@@ -762,6 +851,10 @@
         };
         this.markRegExp = (sv, opt) => {
             instance.markRegExp(sv, opt);
+            return this;
+        };
+        this.markRanges = (sv, opt) => {
+            instance.markRanges(sv, opt);
             return this;
         };
         this.unmark = opt => {

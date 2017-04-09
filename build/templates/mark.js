@@ -28,6 +28,10 @@
             instance.markRegExp(sv, opt);
             return this;
         };
+        this.markRanges = (sv, opt) => {
+            instance.markRanges(sv, opt);
+            return this;
+        };
         this.unmark = (opt) => {
             instance.unmark(opt);
             return this;
