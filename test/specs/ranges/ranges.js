@@ -7,13 +7,15 @@
 "use strict";
 
 describe("mark with range", function () {
-    var $ctx1, $ctx2, ranges, array, notFound;
+    var $ctx1, $ctx2, ranges, range, notFound,
+        // [single word, characters spanning spaces, anything]
+        terms = ["nonumy", "nt ut labor", "vero"];
 
     // in case the fixture whitespace is altered
     function getRange($el, string) {
-        var start = $el[0].textContent.indexOf(string),
+        var start = $el.text().indexOf(string),
             end = start + string.length;
-        return start > -1 ? [start, end] : [];
+        return start > -1 ? { "start": start, "end": end } : null;
     }
 
     beforeEach(function (done) {
@@ -24,18 +26,27 @@ describe("mark with range", function () {
         $ctx1 = $(".ranges > div:nth-child(1)");
         $ctx2 = $(".ranges > div:nth-child(2)");
 
-        // single word; additional values should be ignored
-        array = getRange($ctx1, "nonumy");
-        ranges.push([array[0], array[1], 92, "94"]);
+        // single word
+        range = getRange($ctx1, terms[0]);
+        ranges.push({
+            start: range.start,
+            len: range.end - range.start,
+            // end value will get ignored because "len" overrides "end"
+            // internally
+            end: range.end + 20
+        });
         // characters spanning spaces
-        ranges.push(getRange($ctx1, "nt ut labor"));
-        array = getRange($ctx1, "vero");
+        ranges.push(getRange($ctx1, terms[1]));
+        range = getRange($ctx1, terms[2]);
         // will be parsed into integers
-        ranges.push([array[0] + ".674", array[1] + .234]);
+        ranges.push({ start: range.start + ".674", end: range.end + .234 });
 
         new Mark($ctx1[0]).markRanges(ranges, {
             "done": function () {
-                new Mark($ctx2[0]).markRanges([[10, 10]], {
+                new Mark($ctx2[0]).markRanges([
+                    {start: 10, end: 10},
+                    {start: 20, len: 0}
+                ], {
                     "noMatch": function (item) {
                         notFound = item;
                     },
@@ -45,29 +56,35 @@ describe("mark with range", function () {
         });
     });
 
-    it("should mark correct range and set data-range attributes", function () {
+    it("should mark correct range (ignore end when len is set)", function () {
         var $match = $ctx1.find("mark:eq(0)"),
-            range = getRange($ctx1, "nonumy");
-        expect($match.text()).toEqual("nonumy");
-        expect($match.attr('data-range-start')).toEqual(range[0].toString());
-        expect($match.attr('data-range-end')).toEqual(range[1].toString());
+            range = getRange($ctx1, terms[0]);
+        expect($match.text()).toEqual(terms[0]);
+        expect($match.attr('data-range-start')).toEqual(range.start.toString());
+        expect($match.attr('data-range-len'))
+            .toEqual((range.end - range.start).toString());
+        // end attribute should not have been set
+        expect($match.attr('data-range-end') || "").toEqual("");
         // extra mark around <br>
         expect($ctx1.find("mark")).toHaveLength(4);
     });
     it("should mark correct range including spaces and breaks", function () {
-        var range = getRange($ctx1, "nt ut labor"),
-            $match = $ctx1.find("mark[data-range-start='"+ range[0] + "']");
-        expect($match.text()).toEqual("nt ut labor");
-        expect($match.attr("data-range-start")).toEqual(range[0].toString());
-        expect($match.attr("data-range-end")).toEqual(range[1].toString());
+        var range = getRange($ctx1, terms[1]),
+            $match = $ctx1.find("mark[data-range-start='"+ range.start + "']");
+        expect($match.text()).toEqual(terms[1]);
+        expect($match.attr("data-range-start")).toEqual(range.start.toString());
+        expect($match.attr("data-range-end")).toEqual(range.end.toString());
     });
     it("should mark and parse integer ranges", function () {
-        var vero = getRange($ctx1, "vero"),
-            $match = $ctx1.find("mark[data-range-start='" + vero[0] + "']");
-        expect($match.text()).toEqual("vero");
-        expect($match.attr('data-range-end')).toEqual(vero[1].toString());
+        var range = getRange($ctx1, terms[2]),
+            $match = $ctx1.find("mark[data-range-start='" + range.start + "']");
+        expect($match.text()).toEqual(terms[2]);
+        expect($match.attr('data-range-end')).toEqual(range.end.toString());
     });
     it("should ignore range with equal start and end", function () {
-        expect(notFound).toEqual([[10, 10]]);
+        expect(JSON.stringify(notFound)).toEqual(JSON.stringify([
+          {start: 10, end: 10},
+          {start: 20, len: 0}
+        ]));
     });
 });

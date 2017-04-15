@@ -220,26 +220,26 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function checkRanges(array) {
                 var _this3 = this;
 
-                if (!Array.isArray(array) || !Array.isArray(array[0])) {
-                    throw new Error("markRange() will only accept an array of arrays");
+                if (!Array.isArray(array) || toString.call(array[0]) !== "[object Object]") {
+                    throw new Error("markRange() will only accept an array of objects");
                 }
                 var stack = [];
                 var last = 0;
                 array.sort(function (a, b) {
-                    return a[0] - b[0];
+                    return a.start - b.start;
                 }).forEach(function (item) {
-                    if (Array.isArray(item)) {
-                        var start = parseInt(item[0], 10),
-                            end = parseInt(item[1], 10);
+                    if (item.start) {
+                        var start = parseInt(item.start, 10),
+                            end = item.len ? start + parseInt(item.len, 10) : parseInt(item.end, 10);
 
-                        if (_this3.isNumeric(item[0]) && _this3.isNumeric(item[1]) && end - last > 0 && end - start > 0) {
-                            stack.push([start, end]);
+                        if (_this3.isNumeric(item.start) && _this3.isNumeric(item.len || item.end) && end - last > 0 && end - start > 0) {
+                            stack.push(item);
                             last = end;
                         } else {
                             _this3.log("Ignoring range: " + JSON.stringify(item));
                         }
                     } else {
-                        _this3.log("Ignoring non-array: " + JSON.stringify(item));
+                        _this3.log("Ignoring range: " + JSON.stringify(item));
                     }
                 });
                 return stack;
@@ -399,8 +399,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         max = dict.value.length;
 
                         offset = originalLength - max;
-                        start = range[0] - offset;
-                        end = range[1] - offset;
+                        start = parseInt(range.start, 10) - offset;
+                        end = range.len ? start + parseInt(range.len, 10) : parseInt(range.end, 10) - offset;
 
                         if (_this8.opt.invalidMax === false) {
                             start = start > max ? max : start;
@@ -414,8 +414,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             _this8.wrapRangeInMappedTextNode(dict, start, end, function (node) {
                                 return filterCb(range, dict.value.substring(start, end), node, counter);
                             }, function (node) {
-                                node.setAttribute('data-range-start', range[0]);
-                                node.setAttribute('data-range-end', range[1]);
+                                var end = range.len ? "len" : "end",
+                                    val = parseInt(range.len ? range.len : range.end, 10);
+                                node.setAttribute('data-range-start', parseInt(range.start, 10));
+                                node.setAttribute("data-range-" + end, val);
                                 eachCb(node, range);
                             });
                         }

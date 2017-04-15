@@ -16,11 +16,11 @@ describe("mark with range across elements", function () {
         // searching for "do<span>lor sit</span> amet"
         index = txt.indexOf("dolor");
         // don't include span tags when determining end
-        ranges.push([index, index + 14]);
+        ranges.push({ start: index, len: 14 });
 
         // searching for "amet.\n    </p><p>\n        Testing"
         index = txt.lastIndexOf("amet");
-        ranges.push([index, txt.indexOf(" 1234")]);
+        ranges.push({ start: index, end: txt.indexOf(" 1234") });
 
         new Mark($ctx[0]).markRanges(ranges, {
             "done": done
@@ -29,10 +29,10 @@ describe("mark with range across elements", function () {
 
     it("should properly mark ranges across elements", function () {
         var match1 = $ctx.find(
-                "mark[data-range-start=" + ranges[0][0] + "]"
+                "mark[data-range-start=" + ranges[0].start + "]"
             ).text(),
             match2 = $ctx.find(
-                "mark[data-range-start=" + ranges[1][0] + "]"
+                "mark[data-range-start=" + ranges[1].start + "]"
             ).text().replace(/\s+/g, "");
         expect(match1).toEqual("dolor sit amet");
         expect(match2).toEqual("amet.Testing");

@@ -400,29 +400,30 @@ class Mark { // eslint-disable-line no-unused-vars
 
     /**
      * @typedef Mark~setOfRanges
-     * @type {number[]}
-     * @property {numer} start - The start position within the composite value
+     * @type {object[]}
+     * @property {number} start - The start position within the composite value
      * @property {number} end - The end position within the composite value
-     */
-    /**
-     * @typedef Mark~setOfRangeArrays
-     * @type {Array.<number[]>}
-     * @property {Mark~setOfRanges}
+     * @property {number} len - The length of the string to mark within the
+     * composite value. If set, this value will override the end value
      */
     /**
      * Returns a processed list of integer offset indexes that do not overlap
      * each other, and remove any string values or additional elements
-     * @param {Mark~setOfRangeArrays} array - unprocessed raw array
-     * @return {Mark~setOfRangeArrays} - processed array
-     * @throws Will throw an error if an array of arrays is not passed
+     * @param {Mark~setOfRanges} array - unprocessed raw array
+     * @return {Mark~setOfRanges} - processed array with any invalid entries
+     * removed
+     * @throws Will throw an error if an array of objects is not passed
      * @access protected
      */
     checkRanges(array) {
-        // indexes are an array of arrays [[0, 1], [4, 6]]
-        // [ [start1, end1], [start2, end2] ]
+        // start, end or length indexes are included in an array of objects
+        // [{start: 0, end: 1}, {start: 4, len: 5}]
         // quick validity check of the first entry only
-        if (!Array.isArray(array) || !Array.isArray(array[0])) {
-            throw new Error("markRange() will only accept an array of arrays");
+        if (
+            !Array.isArray(array) ||
+            toString.call( array[0] ) !== "[object Object]"
+        ) {
+            throw new Error("markRange() will only accept an array of objects");
         }
         const stack = [];
         let last = 0;
@@ -430,26 +431,28 @@ class Mark { // eslint-disable-line no-unused-vars
             // acending sort to ensure there is no overlap in start & end
             // offsets
             .sort((a, b) => {
-                return a[0] - b[0];
+                return a.start - b.start;
             })
             .forEach(item => {
-                if (Array.isArray(item)) {
-                    const start = parseInt(item[0], 10),
-                        end = parseInt(item[1], 10);
+                if (item.start) {
+                    const start = parseInt(item.start, 10),
+                        end = item.len ?
+                            start + parseInt(item.len, 10) :
+                            parseInt(item.end, 10);
                     // ignore overlapping values & non-numeric entries
                     if (
-                        this.isNumeric(item[0]) &&
-                        this.isNumeric(item[1]) &&
+                        this.isNumeric(item.start) &&
+                        this.isNumeric(item.len || item.end) &&
                         end - last > 0 &&
                         end - start > 0
                     ) {
-                        stack.push([start, end]);
+                        stack.push(item);
                         last = end;
                     } else {
                         this.log(`Ignoring range: ${JSON.stringify(item)}`);
                     }
                 } else {
-                    this.log(`Ignoring non-array: ${JSON.stringify(item)}`);
+                    this.log(`Ignoring range: ${JSON.stringify(item)}`);
                 }
             });
         return stack;
@@ -736,7 +739,8 @@ class Mark { // eslint-disable-line no-unused-vars
     /**
      * Filter callback before each wrapping
      * @callback Mark~wrapRangeFromIndexFilterCallback
-     * @param {array} range - array of range start and end points
+     * @param {object} range - object containing the range start, and end or
+     * length
      * @param {string} match - string extracted from the matching range
      * @param {HTMLElement} node - The text node which includes the range
      * @param {number} counter - A counter indicating the number of all marks
@@ -747,8 +751,7 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     /**
      * Wraps the indicated ranges across all HTML elements in all contexts
-     * @param {Mark~setOfRangeArrays} ranges - An array of arrays containing
-     * the start and end points for each mark element
+     * @param {Mark~setOfRanges} ranges
      * @param {Mark~wrapRangeFromIndexFilterCallback} filterCb
      * @param {Mark~wrapRangeFromIndexEachCallback} eachCb
      * @param {Mark~wrapRangeFromIndexEndCallback} endCb
@@ -762,8 +765,10 @@ class Mark { // eslint-disable-line no-unused-vars
                 max = dict.value.length;
                 // adjust offset to account for wrapped text node
                 offset = originalLength - max;
-                start = range[0] - offset;
-                end = range[1] - offset;
+                start = parseInt(range.start, 10) - offset;
+                end = range.len ?
+                    start + parseInt(range.len, 10) :
+                    parseInt(range.end, 10) - offset;
                 // invalidMax default is true; stop at max
                 if (this.opt.invalidMax === false) {
                     start = start > max ? max : start;
@@ -790,8 +795,16 @@ class Mark { // eslint-disable-line no-unused-vars
                         );
                     }, node => {
                         // add ranges to attributes for cross-reference
-                        node.setAttribute('data-range-start', range[0]);
-                        node.setAttribute('data-range-end', range[1]);
+                        let end = range.len ? "len" : "end",
+                            val = parseInt(
+                                range.len ? range.len : range.end,
+                                10
+                            );
+                        node.setAttribute(
+                            'data-range-start',
+                            parseInt(range.start, 10)
+                        );
+                        node.setAttribute(`data-range-${end}`, val);
                         eachCb(node, range);
                     });
                 }
@@ -1059,8 +1072,8 @@ class Mark { // eslint-disable-line no-unused-vars
     /**
      * Callback if there were no matches
      * @callback Mark~markRangesNoMatchCallback
-     * @param {Mark~setOfRangeArrays} rawRanges - the original array of arrays
-     * or an array of arrays of specific non-matches
+     * @param {Mark~setOfRanges} rawRanges - the original array of objects
+     * or an array of objects of specific non-matches
      * passed to the markRanges function
      */
     /**
@@ -1083,9 +1096,10 @@ class Mark { // eslint-disable-line no-unused-vars
      * @property {Mark~markRangesFilterCallback} [filter]
      */
     /**
-     * Marks an array of arrays containing a start and end point
-     * @param  {Mark~setOfRangeArrays} rawRanges - The original (preprocessed)
-     * array of arrays containing a start and end points for each mark element
+     * Marks an array of objects containing a start with an end or length of the
+     * string to mark
+     * @param  {Mark~setOfRanges} rawRanges - The original (preprocessed)
+     * array of objects
      * @param  {Mark~markRangesOptions} [opt] - Optional options object
      * @access public
      */

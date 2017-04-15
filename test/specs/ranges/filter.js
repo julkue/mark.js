@@ -8,7 +8,7 @@
 describe("mark with range filter callback", function () {
     var $ctx, filterCalled, termCount, rangeCount, ranges, results,
         // will target the first unique term 
-        terms = ["ipsum", "amet", "elitr", "nonumy", "tempor"],
+        terms = ["ipsum", "amet", "elitr", "tempor", "nonumy"],
         // term to filter out
         skip = "elitr";
 
@@ -16,7 +16,7 @@ describe("mark with range filter callback", function () {
     function getRange($el, string) {
         var start = $el.text().indexOf(string),
             end = start + string.length;
-        return start > -1 ? [start, end] : null;
+        return start > -1 ? { "start": start, "end": end } : null;
     }
 
     beforeEach(function (done) {
@@ -33,20 +33,36 @@ describe("mark with range filter callback", function () {
             if (range) {
                 results[item] = {
                     "name": item,
-                    "range": range,
+                    "start": range.start,
+                    "end": range.end,
                     "index": index
                 };
+                range.index = index;
+                // make sure the entire range object is being passed
+                range.foo = "bar" + index;
                 ranges.push(range);
             }
         });
 
-        new Mark($ctx[0]).markRanges(ranges, {debug:true,
+        new Mark($ctx[0]).markRanges(ranges, {
             "filter": function (range, match, node, counter) {
                 filterCalled++;
                 var item = results[match];
-                if (item && item.index === counter) {
+                // check indexes; this won't always equal the counter 
+                // because the values within "terms" may not be in order
+                if (
+                    item &&
+                    item.index === range.index &&
+                    // make sure we're getting a counter value
+                    (counter === filterCalled - 1)
+                ) {
                     termCount++;
-                    if (item.range.toString() === range.toString()) {
+                    if (
+                      item.start === range.start &&
+                      item.end === range.end &&
+                      // check extra data
+                      range.foo === "bar" + item.index
+                    ) {
                         rangeCount++;
                     }
                 }

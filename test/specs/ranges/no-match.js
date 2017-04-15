@@ -16,17 +16,27 @@ describe("mark with range no matches", function () {
         $ctx2 = $(".ranges-no-match > div:nth-child(2)");
         $ctx3 = $(".ranges-no-match > div:nth-child(3)");
         // [0, 3] "should" only contain whitespace
-        new Mark($ctx1[0]).markRanges([[-20, -12], [0, 3], [1500, 2000]], {
+        new Mark($ctx1[0]).markRanges([
+            { start: -20, end: -12 },
+            { start: 0, end: 3 },
+            { start: 1500, end: 2000 }
+        ], {
             "noMatch": function(item) {
                 notFound = notFound.concat(item);
             },
             "done": function () {
-                new Mark($ctx2[0]).markRanges([[-8, 5], [-1, 20], [99, 9999]], {
+                new Mark($ctx2[0]).markRanges([
+                    { start: -8, end: 5 },
+                    { start: -1, end: 20 },
+                    { start: 99, end: 9999 }
+                ], {
                     "noMatch": function(item) {
                         notFound = notFound.concat(item);
                     },
                     "done": function() {
-                        new Mark($ctx3[0]).markRanges([[88, 8888]], {
+                        new Mark($ctx3[0]).markRanges([
+                            { start: 88, end: 8888 }
+                        ], {
                             invalidMax: false,
                             "noMatch": function(item) {
                                 notFound = notFound.concat(item);
@@ -58,8 +68,14 @@ describe("mark with range no matches", function () {
         var ranges = notFound.sort(function(a, b) {
             return a[0] - b[0];
         });
-        expect(JSON.stringify(ranges))
-            .toEqual("[[-20,-12],[-8,5],[-1,20],[0,3],[99,9999],[1500,2000]]");
+        expect(JSON.stringify(ranges)).toEqual(JSON.stringify([
+          { start: -20, end: -12 },
+          { start: 0, end: 3 },
+          { start: 1500, end: 2000 },
+          { start: -8, end: 5 },
+          { start: -1, end: 20 },
+          { start: 99, end: 9999 }
+        ]));
         expect(errCall).toBe(1);
     });
     it("should allow out of range max with invalidMax disabled", function () {

@@ -11,7 +11,12 @@ describe("mark ranges ignoring overlapping values", function () {
         loadFixtures("ranges/overlap.html");
 
         $ctx = $(".ranges-overlap");
-        new Mark($ctx[0]).markRanges([[20,30], [25, 26], [40,50], [45, 46]], {
+        new Mark($ctx[0]).markRanges([
+            { start: 20, len: 10 },
+            { start: 25, len: 1 },
+            { start: 40, len: 10 },
+            { start: 45, len: 1 }
+        ], {
             "done": done
         });
     });
