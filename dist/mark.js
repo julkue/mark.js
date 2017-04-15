@@ -220,7 +220,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             value: function checkRanges(array) {
                 var _this3 = this;
 
-                if (!Array.isArray(array) || toString.call(array[0]) !== "[object Object]") {
+                if (!Array.isArray(array) || Object.prototype.toString.call(array[0]) !== "[object Object]") {
                     throw new Error("markRange() will only accept an array of objects");
                 }
                 var stack = [];

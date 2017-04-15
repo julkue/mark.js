@@ -421,7 +421,7 @@ class Mark { // eslint-disable-line no-unused-vars
         // quick validity check of the first entry only
         if (
             !Array.isArray(array) ||
-            toString.call( array[0] ) !== "[object Object]"
+            Object.prototype.toString.call( array[0] ) !== "[object Object]"
         ) {
             throw new Error("markRange() will only accept an array of objects");
         }
