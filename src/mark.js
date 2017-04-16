@@ -423,7 +423,7 @@ class Mark { // eslint-disable-line no-unused-vars
             !Array.isArray(array) ||
             Object.prototype.toString.call( array[0] ) !== "[object Object]"
         ) {
-            throw new Error("markRange() will only accept an array of objects");
+            return this.log("markRange() will only accept an array of objects");
         }
         const stack = [];
         let last = 0;
