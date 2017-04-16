@@ -61,7 +61,6 @@ class Mark { // eslint-disable-line no-unused-vars
             "caseSensitive": false,
             "ignoreJoiners": false,
             "ignoreGroups": 0,
-            "invalidMax": true,
             "wildcards": "disabled",
             "each": () => {},
             "noMatch": () => {},
@@ -766,13 +765,16 @@ class Mark { // eslint-disable-line no-unused-vars
                 // adjust offset to account for wrapped text node
                 offset = originalLength - max;
                 start = parseInt(range.start, 10) - offset;
+                // make sure to stop at max
+                start = start > max ? max : start;
                 end = range.len ?
                     start + parseInt(range.len, 10) :
                     parseInt(range.end, 10) - offset;
-                // invalidMax default is true; stop at max
-                if (this.opt.invalidMax === false) {
-                    start = start > max ? max : start;
-                    end = end > max ? max : end;
+                if (end > max) {
+                    end = max;
+                    this.log(
+                      `End range automatically set to the max value of ${max}`
+                    );
                 }
                 if (start < 0 || end - start < 0 || start > max || end > max) {
                     this.log(`Invalid range: ${JSON.stringify(range)}`);
@@ -786,7 +788,6 @@ class Mark { // eslint-disable-line no-unused-vars
                     );
                 } else {
                     this.wrapRangeInMappedTextNode(dict, start, end, node => {
-                        // range, match, node, counter
                         return filterCb(
                             range,
                             dict.value.substring(start, end),
@@ -1089,8 +1090,6 @@ class Mark { // eslint-disable-line no-unused-vars
      * {@link Mark~commonOptions}
      * @typedef Mark~markRangesOptions
      * @type {object.<string>}
-     * @property {boolean} [invalidMax=true] - Whether to allow an end range
-     * greater than the max text length; if false, these ranges are invalid
      * @property {Mark~markRangesEachCallback} [each]
      * @property {Mark~markRangesNoMatchCallback} [noMatch]
      * @property {Mark~markRangesFilterCallback} [filter]
