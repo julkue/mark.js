@@ -795,17 +795,6 @@ class Mark { // eslint-disable-line no-unused-vars
                             counter
                         );
                     }, node => {
-                        // add ranges to attributes for cross-reference
-                        let end = range.len ? "len" : "end",
-                            val = parseInt(
-                                range.len ? range.len : range.end,
-                                10
-                            );
-                        node.setAttribute(
-                            'data-range-start',
-                            parseInt(range.start, 10)
-                        );
-                        node.setAttribute(`data-range-${end}`, val);
                         eachCb(node, range);
                     });
                 }
