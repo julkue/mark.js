@@ -15,9 +15,10 @@ describe("mark with range no matches", function () {
         $ctx1 = $(".ranges-no-match > div:nth-child(1)");
         $ctx2 = $(".ranges-no-match > div:nth-child(2)");
         $ctx3 = $(".ranges-no-match > div:nth-child(3)");
-        // [0, 3] "should" only contain whitespace
         new Mark($ctx1[0]).markRanges([
             { start: -20, end: -12 },
+            // { start: 0, end: 3 } "should" only contain whitespace, so it
+            // will be skipped
             { start: 0, end: 3 },
             { start: 1500, end: 2000 }
         ], {
