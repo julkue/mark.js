@@ -16,45 +16,45 @@ describe("mark with range no matches", function () {
         $ctx2 = $(".ranges-no-match > div:nth-child(2)");
         $ctx3 = $(".ranges-no-match > div:nth-child(3)");
         new Mark($ctx1[0]).markRanges([
-            { start: -20, end: -12 },
-            // { start: 0, end: 3 } "should" only contain whitespace, so it
+            { start: -20, length: -12 },
+            // { start: 0, length: 3 } "should" only contain whitespace, so it
             // will be skipped
-            { start: 0, end: 3 },
-            { start: 1500, end: 2000 }
+            { start: 0, length: 3 },
+            { start: 1500, length: 500 }
         ], {
             "noMatch": function(item) {
                 notFound = notFound.concat(item);
             },
             "done": function () {
                 new Mark($ctx2[0]).markRanges([
-                    { start: -8, end: 5 },
-                    { start: -1, end: 20 },
-                    { start: 99, end: 9999 }
+                    { start: -8, length: 5 },
+                    { start: -1, length: 20 }
                 ], {
                     "noMatch": function(item) {
                         notFound = notFound.concat(item);
                     },
                     "done": function() {
                         new Mark($ctx3[0]).markRanges([
-                            { start: 88, end: 8888 }
+                            { start: 99, length: 9999 }
                         ], {
-                            invalidMax: false,
+                            "each": function(node, range) {
+                                $(node).attr({
+                                    "data-range-start": range.start,
+                                    "data-range-length": range.length
+                                });
+                            },
                             "noMatch": function(item) {
                                 notFound = notFound.concat(item);
                             },
                             "done": function () {
-                                // non-array first element throws an error
-                                try {
-                                    new Mark($ctx3[0]).markRanges(["pie"], {
-                                        "noMatch": function(item) {
-                                            notFound = notFound.concat(item);
-                                        },
-                                        "done": done
-                                    });
-                                } catch (err) {
-                                    errCall++;
-                                    done();
-                                }
+                                // non-array first element shows an error
+                                new Mark($ctx3[0]).markRanges(["pie"], {
+                                    "noMatch": function(item) {
+                                        errCall++;
+                                        notFound = notFound.concat(item);
+                                    },
+                                    "done": done
+                                });
                             }
                         });
                     }
@@ -70,21 +70,21 @@ describe("mark with range no matches", function () {
             return a[0] - b[0];
         });
         expect(JSON.stringify(ranges)).toEqual(JSON.stringify([
-          { start: -20, end: -12 },
-          { start: 0, end: 3 },
-          { start: 1500, end: 2000 },
-          { start: -8, end: 5 },
-          { start: -1, end: 20 },
-          { start: 99, end: 9999 }
+            { start: -20, length: -12 },
+            { start: 0, length: 3 },
+            { start: 1500, length: 500 },
+            { start: -8, length: 5 },
+            { start: -1, length: 20 },
+            "pie"
         ]));
         expect(errCall).toBe(1);
     });
-    it("should allow out of range max with invalidMax disabled", function () {
+    it("should allow out of range max", function () {
         var $mark3 = $ctx3.find("mark");
         // using 2 because the closing </p> gets wrapped creating a second mark
         expect($mark3).toHaveLength(2);
-        expect($mark3.attr("data-range-start")).toBe("88");
+        expect($mark3.attr("data-range-start")).toBe("99");
         // end range does not get adjusted
-        expect($mark3.attr("data-range-end")).toBe("8888");
+        expect($mark3.attr("data-range-length")).toBe("9999");
     });
 });

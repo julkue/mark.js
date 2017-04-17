@@ -13,9 +13,9 @@ describe("mark with range each callback", function () {
 
         $ctx = $(".ranges-each");
         new Mark($ctx[0]).markRanges([
-            { start: 20, len: 20 },
-            { start: 60, end: 80 },
-            { start: 100, end: 120 }
+            { start: 20, length: 20 },
+            { start: 60, length: 20 },
+            { start: 100, length: 20 }
         ], {
             "each": function () {
                 eachCalled++;

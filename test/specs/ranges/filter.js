@@ -15,8 +15,8 @@ describe("mark with range filter callback", function () {
     // in case the fixture whitespace is altered
     function getRange($el, string) {
         var start = $el.text().indexOf(string),
-            end = start + string.length;
-        return start > -1 ? { "start": start, "end": end } : null;
+            length = string.length;
+        return start > -1 ? { "start": start, "length": length } : null;
     }
 
     beforeEach(function (done) {
@@ -34,7 +34,7 @@ describe("mark with range filter callback", function () {
                 results[item] = {
                     "name": item,
                     "start": range.start,
-                    "end": range.end,
+                    "length": range.length,
                     "index": index
                 };
                 range.index = index;
@@ -59,7 +59,7 @@ describe("mark with range filter callback", function () {
                     termCount++;
                     if (
                       item.start === range.start &&
-                      item.end === range.end &&
+                      item.length === range.length &&
                       // check extra data
                       range.foo === "bar" + item.index
                     ) {
@@ -73,11 +73,11 @@ describe("mark with range filter callback", function () {
     });
 
     it("should call the filter callback for each range element", function () {
-        var len = terms.length;
-        expect(filterCalled).toBe(len);
-        expect(termCount).toBe(len);
-        expect(rangeCount).toBe(len);
-        expect($ctx.find("mark")).toHaveLength(len - 1);
+        var length = terms.length;
+        expect(filterCalled).toBe(length);
+        expect(termCount).toBe(length);
+        expect(rangeCount).toBe(length);
+        expect($ctx.find("mark")).toHaveLength(length - 1);
         expect($ctx.find("mark:contains(" + skip + ")")).toHaveLength(0);
     });
 });

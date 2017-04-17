@@ -12,11 +12,14 @@ describe("mark ranges ignoring overlapping values", function () {
 
         $ctx = $(".ranges-overlap");
         new Mark($ctx[0]).markRanges([
-            { start: 20, len: 10 },
-            { start: 25, len: 1 },
-            { start: 40, len: 10 },
-            { start: 45, len: 1 }
+            { start: 20, length: 10 },
+            { start: 25, length: 1 },
+            { start: 40, length: 10 },
+            { start: 45, length: 1 }
         ], {
+            "each": function(node, range) {
+                $(node).attr("data-range-start", range.start);
+            },
             "done": done
         });
     });

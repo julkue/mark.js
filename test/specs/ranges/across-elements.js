@@ -15,14 +15,20 @@ describe("mark with range across elements", function () {
 
         // searching for "do<span>lor sit</span> amet"
         index = txt.indexOf("dolor");
-        // don't include span tags when determining end
-        ranges.push({ start: index, len: 14 });
+        // don't include span tags when determining length
+        ranges.push({ start: index, length: 14 });
 
         // searching for "amet.\n    </p><p>\n        Testing"
         index = txt.lastIndexOf("amet");
-        ranges.push({ start: index, end: txt.indexOf(" 1234") });
+        ranges.push({
+            start: index,
+            length: txt.indexOf(" 1234") - index
+        });
 
         new Mark($ctx[0]).markRanges(ranges, {
+            "each": function(node, range) {
+                $(node).attr("data-range-start", range.start);
+            },
             "done": done
         });
     });

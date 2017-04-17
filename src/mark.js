@@ -398,12 +398,16 @@ class Mark { // eslint-disable-line no-unused-vars
     }
 
     /**
+     * @typedef Mark~rangeObject
+     * @type {object}
+     * @property {number} start - The start position within the composite value
+     * @property {number} length - The length of the string to mark within the
+     * composite value.
+     */
+    /**
      * @typedef Mark~setOfRanges
      * @type {object[]}
-     * @property {number} start - The start position within the composite value
-     * @property {number} end - The end position within the composite value
-     * @property {number} len - The length of the string to mark within the
-     * composite value. If set, this value will override the end value
+     * @property {Mark~rangeObject}
      */
     /**
      * Returns a processed list of integer offset indexes that do not overlap
@@ -415,14 +419,15 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     checkRanges(array) {
-        // start, end or length indexes are included in an array of objects
-        // [{start: 0, end: 1}, {start: 4, len: 5}]
+        // start and length indexes are included in an array of objects
+        // [{start: 0, length: 1}, {start: 4, length: 5}]
         // quick validity check of the first entry only
         if (
             !Array.isArray(array) ||
             Object.prototype.toString.call( array[0] ) !== "[object Object]"
         ) {
-            return this.log("markRange() will only accept an array of objects");
+            this.log("markRange() will only accept an array of objects");
+            return [];
         }
         const stack = [];
         let last = 0;
@@ -435,13 +440,11 @@ class Mark { // eslint-disable-line no-unused-vars
             .forEach(item => {
                 if (item.start) {
                     const start = parseInt(item.start, 10),
-                        end = item.len ?
-                            start + parseInt(item.len, 10) :
-                            parseInt(item.end, 10);
+                        end = start + parseInt(item.length, 10);
                     // ignore overlapping values & non-numeric entries
                     if (
                         this.isNumeric(item.start) &&
-                        this.isNumeric(item.len || item.end) &&
+                        this.isNumeric(item.length) &&
                         end - last > 0 &&
                         end - start > 0
                     ) {
@@ -738,8 +741,7 @@ class Mark { // eslint-disable-line no-unused-vars
     /**
      * Filter callback before each wrapping
      * @callback Mark~wrapRangeFromIndexFilterCallback
-     * @param {object} range - object containing the range start, and end or
-     * length
+     * @param {Mark~rangeObject} range - the current range object
      * @param {string} match - string extracted from the matching range
      * @param {HTMLElement} node - The text node which includes the range
      * @param {number} counter - A counter indicating the number of all marks
@@ -767,9 +769,7 @@ class Mark { // eslint-disable-line no-unused-vars
                 start = parseInt(range.start, 10) - offset;
                 // make sure to stop at max
                 start = start > max ? max : start;
-                end = range.len ?
-                    start + parseInt(range.len, 10) :
-                    parseInt(range.end, 10) - offset;
+                end = start + parseInt(range.length, 10);
                 if (end > max) {
                     end = max;
                     this.log(
@@ -1096,7 +1096,7 @@ class Mark { // eslint-disable-line no-unused-vars
         let matches = 0,
             totalMatches = 0,
             ranges = this.checkRanges(rawRanges);
-        if (ranges.length) {
+        if (ranges && ranges.length) {
             this.log(
                 "Starting to mark with the following ranges: " +
                 JSON.stringify(ranges)
