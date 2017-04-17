@@ -221,7 +221,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this3 = this;
 
                 if (!Array.isArray(array) || Object.prototype.toString.call(array[0]) !== "[object Object]") {
-                    throw new Error("markRange() will only accept an array of objects");
+                    this.log("markRange() will only accept an array of objects");
+                    return [];
                 }
                 var stack = [];
                 var last = 0;
@@ -230,9 +231,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 }).forEach(function (item) {
                     if (item.start) {
                         var start = parseInt(item.start, 10),
-                            end = item.len ? start + parseInt(item.len, 10) : parseInt(item.end, 10);
+                            end = start + parseInt(item.length, 10);
 
-                        if (_this3.isNumeric(item.start) && _this3.isNumeric(item.len || item.end) && end - last > 0 && end - start > 0) {
+                        if (_this3.isNumeric(item.start) && _this3.isNumeric(item.length) && end - last > 0 && end - start > 0) {
                             stack.push(item);
                             last = end;
                         } else {
@@ -400,11 +401,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                         offset = originalLength - max;
                         start = parseInt(range.start, 10) - offset;
-                        end = range.len ? start + parseInt(range.len, 10) : parseInt(range.end, 10) - offset;
 
-                        if (_this8.opt.invalidMax === false) {
-                            start = start > max ? max : start;
-                            end = end > max ? max : end;
+                        start = start > max ? max : start;
+                        end = start + parseInt(range.length, 10);
+                        if (end > max) {
+                            end = max;
+                            _this8.log("End range automatically set to the max value of " + max);
                         }
                         if (start < 0 || end - start < 0 || start > max || end > max) {
                             _this8.log("Invalid range: " + JSON.stringify(range));
@@ -414,10 +416,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                             _this8.wrapRangeInMappedTextNode(dict, start, end, function (node) {
                                 return filterCb(range, dict.value.substring(start, end), node, counter);
                             }, function (node) {
-                                var end = range.len ? "len" : "end",
-                                    val = parseInt(range.len ? range.len : range.end, 10);
-                                node.setAttribute('data-range-start', parseInt(range.start, 10));
-                                node.setAttribute("data-range-" + end, val);
                                 eachCb(node, range);
                             });
                         }
@@ -534,7 +532,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var matches = 0,
                     totalMatches = 0,
                     ranges = this.checkRanges(rawRanges);
-                if (ranges.length) {
+                if (ranges && ranges.length) {
                     this.log("Starting to mark with the following ranges: " + JSON.stringify(ranges));
                     this.wrapRangeFromIndex(ranges, function (range, match, node, counter) {
                         return _this11.opt.filter(range, match, node, counter);
@@ -594,7 +592,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "caseSensitive": false,
                     "ignoreJoiners": false,
                     "ignoreGroups": 0,
-                    "invalidMax": true,
                     "wildcards": "disabled",
                     "each": function each() {},
                     "noMatch": function noMatch() {},

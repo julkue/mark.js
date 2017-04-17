@@ -44,7 +44,6 @@
                 "caseSensitive": false,
                 "ignoreJoiners": false,
                 "ignoreGroups": 0,
-                "invalidMax": true,
                 "wildcards": "disabled",
                 "each": () => {},
                 "noMatch": () => {},
@@ -225,7 +224,8 @@
 
         checkRanges(array) {
             if (!Array.isArray(array) || Object.prototype.toString.call(array[0]) !== "[object Object]") {
-                throw new Error("markRange() will only accept an array of objects");
+                this.log("markRange() will only accept an array of objects");
+                return [];
             }
             const stack = [];
             let last = 0;
@@ -234,9 +234,9 @@
             }).forEach(item => {
                 if (item.start) {
                     const start = parseInt(item.start, 10),
-                          end = item.len ? start + parseInt(item.len, 10) : parseInt(item.end, 10);
+                          end = start + parseInt(item.length, 10);
 
-                    if (this.isNumeric(item.start) && this.isNumeric(item.len || item.end) && end - last > 0 && end - start > 0) {
+                    if (this.isNumeric(item.start) && this.isNumeric(item.length) && end - last > 0 && end - start > 0) {
                         stack.push(item);
                         last = end;
                     } else {
@@ -384,11 +384,12 @@
 
                     offset = originalLength - max;
                     start = parseInt(range.start, 10) - offset;
-                    end = range.len ? start + parseInt(range.len, 10) : parseInt(range.end, 10) - offset;
 
-                    if (this.opt.invalidMax === false) {
-                        start = start > max ? max : start;
-                        end = end > max ? max : end;
+                    start = start > max ? max : start;
+                    end = start + parseInt(range.length, 10);
+                    if (end > max) {
+                        end = max;
+                        this.log(`End range automatically set to the max value of ${max}`);
                     }
                     if (start < 0 || end - start < 0 || start > max || end > max) {
                         this.log(`Invalid range: ${JSON.stringify(range)}`);
@@ -398,10 +399,6 @@
                         this.wrapRangeInMappedTextNode(dict, start, end, node => {
                             return filterCb(range, dict.value.substring(start, end), node, counter);
                         }, node => {
-                            let end = range.len ? "len" : "end",
-                                val = parseInt(range.len ? range.len : range.end, 10);
-                            node.setAttribute('data-range-start', parseInt(range.start, 10));
-                            node.setAttribute(`data-range-${end}`, val);
                             eachCb(node, range);
                         });
                     }
@@ -507,7 +504,7 @@
             let matches = 0,
                 totalMatches = 0,
                 ranges = this.checkRanges(rawRanges);
-            if (ranges.length) {
+            if (ranges && ranges.length) {
                 this.log("Starting to mark with the following ranges: " + JSON.stringify(ranges));
                 this.wrapRangeFromIndex(ranges, (range, match, node, counter) => {
                     return this.opt.filter(range, match, node, counter);
