@@ -61,6 +61,7 @@ class Mark { // eslint-disable-line no-unused-vars
             "caseSensitive": false,
             "ignoreJoiners": false,
             "ignoreGroups": 0,
+            "ignorePunctuation": [],
             "wildcards": "disabled",
             "each": () => {},
             "noMatch": () => {},
@@ -134,15 +135,15 @@ class Mark { // eslint-disable-line no-unused-vars
         if(Object.keys(this.opt.synonyms).length) {
             str = this.createSynonymsRegExp(str);
         }
-        if(this.opt.ignoreJoiners) {
+        if(this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
             str = this.setupIgnoreJoinersRegExp(str);
         }
         if(this.opt.diacritics) {
             str = this.createDiacriticsRegExp(str);
         }
         str = this.createMergedBlanksRegExp(str);
-        if(this.opt.ignoreJoiners) {
-            str = this.createIgnoreJoinersRegExp(str);
+        if(this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
+            str = this.createJoinersRegExp(str);
         }
         if(this.opt.wildcards !== "disabled") {
             str = this.createWildcardsRegExp(str);
@@ -247,18 +248,27 @@ class Mark { // eslint-disable-line no-unused-vars
     }
 
     /**
-     * Creates a regular expression string to allow ignoring of
-     * designated characters (soft hyphens & zero width characters)
+     * Creates a regular expression string to allow ignoring of designated
+     * characters (soft hyphens, zero width characters & punctuation)
      * @param  {string} str - The search term to be used
      * @return {string}
      * @access protected
      */
-    createIgnoreJoinersRegExp(str) {
-        // u+00ad = soft hyphen
-        // u+200b = zero-width space
-        // u+200c = zero-width non-joiner
-        // u+200d = zero-width joiner
-        return str.split("\u0000").join("[\\u00ad|\\u200b|\\u200c|\\u200d]?");
+    createJoinersRegExp(str) {
+        let joiner = [];
+        if (this.opt.ignorePunctuation.length) {
+            joiner.push(this.escapeStr(this.opt.ignorePunctuation.join("")));
+        }
+        if (this.opt.ignoreJoiners) {
+            // u+00ad = soft hyphen
+            // u+200b = zero-width space
+            // u+200c = zero-width non-joiner
+            // u+200d = zero-width joiner
+            joiner.push("\\u00ad\\u200b\\u200c\\u200d");
+        }
+        return joiner.length ?
+            str.split("\u0000").join(`[${joiner.join("")}]*`) :
+            str;
     }
 
     /**
@@ -840,6 +850,25 @@ class Mark { // eslint-disable-line no-unused-vars
      * </ul>
      */
     /**
+     * @typedef Mark~markIgnorePunctuationSetting
+     * @type {string[]}
+     * @property {string} The strings in this setting will contain punctuation
+     * marks that will be ignored:
+     * <ul>
+     *   <li>These punctuation marks can be between any characters, e.g. setting
+     *   this option to <code>["'"]</code> would match "Worlds", "World's" and
+     *   "Wo'rlds"</li>
+     *   <li>One or more apostrophes between the letters would still produce a
+     *   match (e.g. "W'o''r'l'd's").</li>
+     *   <li>A typical setting for this option could be as follows:
+     *   <pre>ignorePunctuation: ":;.,-–—‒_(){}[]!'\"+=".split(""),</pre> This
+     *   setting includes common punctuation as well as a minus, en-dash,
+     *   em-dash and figure-dash
+     *   ({@link https://en.wikipedia.org/wiki/Dash#Figure_dash ref}), as well
+     *   as an underscore.</li>
+     * </ul>
+     */
+    /**
      * These options also include the common options from
      * {@link Mark~commonOptions}
      * @typedef Mark~markOptions
@@ -855,6 +884,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @property {boolean} [acrossElements=false] - Whether to find matches
      * across HTML elements. By default, only matches within single HTML
      * elements will be found
+     * @property {Mark~markIgnorePunctuationSetting} [ignorePunctuation]
      * @property {Mark~markEachCallback} [each]
      * @property {Mark~markNoMatchCallback} [noMatch]
      * @property {Mark~markFilterCallback} [filter]
