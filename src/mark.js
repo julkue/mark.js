@@ -729,7 +729,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * Elements matching those selectors will be ignored
      * @property {boolean} [iframes=false] - Whether to search inside iframes
      * @property {Mark~commonDoneCallback} [done]
-     * @property {boolean} [debug=false] - Wheter to log messages
+     * @property {boolean} [debug=false] - Whether to log messages
      * @property {object} [log=window.console] - Where to log messages (only if
      * debug is true)
      */
@@ -755,6 +755,8 @@ class Mark { // eslint-disable-line no-unused-vars
      * {@link Mark~commonOptions}
      * @typedef Mark~markRegExpOptions
      * @type {object.<string>}
+     * @property {boolean} [separateGroups] - Whether to mark each regular
+     * expression group as a separate match
      * @property {Mark~markRegExpEachCallback} [each]
      * @property {Mark~markRegExpNoMatchCallback} [noMatch]
      * @property {Mark~markRegExpFilterCallback} [filter]
@@ -1357,7 +1359,7 @@ class DOMIterator {
     /**
      * Checks if an iframe wasn't handled already and if so, calls
      * {@link DOMIterator#compareNodeIframe} to check if it should be handled.
-     * Information wheter an iframe was or wasn't handled is given within the
+     * Information whether an iframe was or wasn't handled is given within the
      * <code>ifr</code> dictionary
      * @param {HTMLElement} node - The node that should occur after the iframe
      * @param {HTMLElement} prevNode - The node that should occur before the
