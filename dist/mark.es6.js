@@ -225,6 +225,7 @@
         checkRanges(array) {
             if (!Array.isArray(array) || Object.prototype.toString.call(array[0]) !== "[object Object]") {
                 this.log("markRange() will only accept an array of objects");
+                this.opt.noMatch(array);
                 return [];
             }
             const stack = [];
@@ -232,21 +233,70 @@
             array.sort((a, b) => {
                 return a.start - b.start;
             }).forEach(item => {
-                if (item.start) {
-                    const start = parseInt(item.start, 10),
-                          end = start + parseInt(item.length, 10);
-
-                    if (this.isNumeric(item.start) && this.isNumeric(item.length) && end - last > 0 && end - start > 0) {
-                        stack.push(item);
-                        last = end;
-                    } else {
-                        this.log(`Ignoring range: ${JSON.stringify(item)}`);
-                    }
-                } else {
-                    this.log(`Ignoring range: ${JSON.stringify(item)}`);
+                let { start, end, valid } = this.validateInitialRange(item, last);
+                if (valid) {
+                    item.start = start;
+                    item.length = end - start;
+                    stack.push(item);
+                    last = end;
                 }
             });
             return stack;
+        }
+
+        validateInitialRange(range, last) {
+            let start,
+                end,
+                valid = false;
+            if (range.start) {
+                start = parseInt(range.start, 10);
+                end = start + parseInt(range.length, 10);
+
+                if (this.isNumeric(range.start) && this.isNumeric(range.length) && end - last > 0 && end - start > 0) {
+                    valid = true;
+                } else {
+                    this.log(`Ignoring range: ${JSON.stringify(range)}`);
+                    this.opt.noMatch(range);
+                }
+            } else {
+                this.log(`Ignoring range: ${JSON.stringify(range)}`);
+                this.opt.noMatch(range);
+            }
+            return {
+                start: start,
+                end: end,
+                valid: valid
+            };
+        }
+
+        validateRange(range, originalLength, string) {
+            let end,
+                valid = true,
+                max = string.length,
+                offset = originalLength - max,
+                start = parseInt(range.start, 10) - offset;
+
+            start = start > max ? max : start;
+            end = start + parseInt(range.length, 10);
+            if (end > max) {
+                end = max;
+                this.log(`End range automatically set to the max value of ${max}`);
+            }
+            if (start < 0 || end - start < 0 || start > max || end > max) {
+                valid = false;
+                this.log(`Invalid range: ${JSON.stringify(range)}`);
+                this.opt.noMatch(range);
+            } else if (string.substring(start, end).replace(/\s+/g, "") === "") {
+                valid = false;
+
+                this.log("Skipping whitespace only range: " + JSON.stringify(range));
+                this.opt.noMatch(range);
+            }
+            return {
+                start: start,
+                end: end,
+                valid: valid
+            };
         }
 
         getTextNodes(cb) {
@@ -378,24 +428,9 @@
         wrapRangeFromIndex(ranges, filterCb, eachCb, endCb) {
             this.getTextNodes(dict => {
                 const originalLength = dict.value.length;
-                let start, end, max, offset;
                 ranges.forEach((range, counter) => {
-                    max = dict.value.length;
-
-                    offset = originalLength - max;
-                    start = parseInt(range.start, 10) - offset;
-
-                    start = start > max ? max : start;
-                    end = start + parseInt(range.length, 10);
-                    if (end > max) {
-                        end = max;
-                        this.log(`End range automatically set to the max value of ${max}`);
-                    }
-                    if (start < 0 || end - start < 0 || start > max || end > max) {
-                        this.log(`Invalid range: ${JSON.stringify(range)}`);
-                    } else if (dict.value.substring(start, end).replace(/\s+/g, "") === "") {
-                        this.log("Skipping whitespace only range: " + JSON.stringify(range));
-                    } else {
+                    let { start, end, valid } = this.validateRange(range, originalLength, dict.value);
+                    if (valid) {
                         this.wrapRangeInMappedTextNode(dict, start, end, node => {
                             return filterCb(range, dict.value.substring(start, end), node, counter);
                         }, node => {
@@ -501,25 +536,19 @@
 
         markRanges(rawRanges, opt) {
             this.opt = opt;
-            let matches = 0,
-                totalMatches = 0,
+            let totalMatches = 0,
                 ranges = this.checkRanges(rawRanges);
             if (ranges && ranges.length) {
                 this.log("Starting to mark with the following ranges: " + JSON.stringify(ranges));
                 this.wrapRangeFromIndex(ranges, (range, match, node, counter) => {
                     return this.opt.filter(range, match, node, counter);
                 }, (element, range) => {
-                    matches++;
                     totalMatches++;
                     this.opt.each(element, range);
                 }, () => {
-                    if (matches === 0) {
-                        this.opt.noMatch(rawRanges);
-                    }
                     this.opt.done(totalMatches);
                 });
             } else {
-                this.opt.noMatch(rawRanges);
                 this.opt.done(totalMatches);
             }
         }

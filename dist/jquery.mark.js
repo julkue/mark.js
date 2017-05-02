@@ -222,6 +222,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 if (!Array.isArray(array) || Object.prototype.toString.call(array[0]) !== "[object Object]") {
                     this.log("markRange() will only accept an array of objects");
+                    this.opt.noMatch(array);
                     return [];
                 }
                 var stack = [];
@@ -229,21 +230,76 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 array.sort(function (a, b) {
                     return a.start - b.start;
                 }).forEach(function (item) {
-                    if (item.start) {
-                        var start = parseInt(item.start, 10),
-                            end = start + parseInt(item.length, 10);
+                    var _validateInitialRange = _this3.validateInitialRange(item, last),
+                        start = _validateInitialRange.start,
+                        end = _validateInitialRange.end,
+                        valid = _validateInitialRange.valid;
 
-                        if (_this3.isNumeric(item.start) && _this3.isNumeric(item.length) && end - last > 0 && end - start > 0) {
-                            stack.push(item);
-                            last = end;
-                        } else {
-                            _this3.log("Ignoring range: " + JSON.stringify(item));
-                        }
-                    } else {
-                        _this3.log("Ignoring range: " + JSON.stringify(item));
+                    if (valid) {
+                        item.start = start;
+                        item.length = end - start;
+                        stack.push(item);
+                        last = end;
                     }
                 });
                 return stack;
+            }
+        }, {
+            key: "validateInitialRange",
+            value: function validateInitialRange(range, last) {
+                var start = void 0,
+                    end = void 0,
+                    valid = false;
+                if (range.start) {
+                    start = parseInt(range.start, 10);
+                    end = start + parseInt(range.length, 10);
+
+                    if (this.isNumeric(range.start) && this.isNumeric(range.length) && end - last > 0 && end - start > 0) {
+                        valid = true;
+                    } else {
+                        this.log("Ignoring range: " + JSON.stringify(range));
+                        this.opt.noMatch(range);
+                    }
+                } else {
+                    this.log("Ignoring range: " + JSON.stringify(range));
+                    this.opt.noMatch(range);
+                }
+                return {
+                    start: start,
+                    end: end,
+                    valid: valid
+                };
+            }
+        }, {
+            key: "validateRange",
+            value: function validateRange(range, originalLength, string) {
+                var end = void 0,
+                    valid = true,
+                    max = string.length,
+                    offset = originalLength - max,
+                    start = parseInt(range.start, 10) - offset;
+
+                start = start > max ? max : start;
+                end = start + parseInt(range.length, 10);
+                if (end > max) {
+                    end = max;
+                    this.log("End range automatically set to the max value of " + max);
+                }
+                if (start < 0 || end - start < 0 || start > max || end > max) {
+                    valid = false;
+                    this.log("Invalid range: " + JSON.stringify(range));
+                    this.opt.noMatch(range);
+                } else if (string.substring(start, end).replace(/\s+/g, "") === "") {
+                    valid = false;
+
+                    this.log("Skipping whitespace only range: " + JSON.stringify(range));
+                    this.opt.noMatch(range);
+                }
+                return {
+                    start: start,
+                    end: end,
+                    valid: valid
+                };
             }
         }, {
             key: "getTextNodes",
@@ -392,27 +448,13 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                 this.getTextNodes(function (dict) {
                     var originalLength = dict.value.length;
-                    var start = void 0,
-                        end = void 0,
-                        max = void 0,
-                        offset = void 0;
                     ranges.forEach(function (range, counter) {
-                        max = dict.value.length;
+                        var _validateRange = _this8.validateRange(range, originalLength, dict.value),
+                            start = _validateRange.start,
+                            end = _validateRange.end,
+                            valid = _validateRange.valid;
 
-                        offset = originalLength - max;
-                        start = parseInt(range.start, 10) - offset;
-
-                        start = start > max ? max : start;
-                        end = start + parseInt(range.length, 10);
-                        if (end > max) {
-                            end = max;
-                            _this8.log("End range automatically set to the max value of " + max);
-                        }
-                        if (start < 0 || end - start < 0 || start > max || end > max) {
-                            _this8.log("Invalid range: " + JSON.stringify(range));
-                        } else if (dict.value.substring(start, end).replace(/\s+/g, "") === "") {
-                            _this8.log("Skipping whitespace only range: " + JSON.stringify(range));
-                        } else {
+                        if (valid) {
                             _this8.wrapRangeInMappedTextNode(dict, start, end, function (node) {
                                 return filterCb(range, dict.value.substring(start, end), node, counter);
                             }, function (node) {
@@ -529,25 +571,19 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this11 = this;
 
                 this.opt = opt;
-                var matches = 0,
-                    totalMatches = 0,
+                var totalMatches = 0,
                     ranges = this.checkRanges(rawRanges);
                 if (ranges && ranges.length) {
                     this.log("Starting to mark with the following ranges: " + JSON.stringify(ranges));
                     this.wrapRangeFromIndex(ranges, function (range, match, node, counter) {
                         return _this11.opt.filter(range, match, node, counter);
                     }, function (element, range) {
-                        matches++;
                         totalMatches++;
                         _this11.opt.each(element, range);
                     }, function () {
-                        if (matches === 0) {
-                            _this11.opt.noMatch(rawRanges);
-                        }
                         _this11.opt.done(totalMatches);
                     });
                 } else {
-                    this.opt.noMatch(rawRanges);
                     this.opt.done(totalMatches);
                 }
             }

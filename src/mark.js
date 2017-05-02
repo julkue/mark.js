@@ -813,7 +813,9 @@ class Mark { // eslint-disable-line no-unused-vars
      * Callback for each wrapped element
      * @callback Mark~wrapRangeFromIndexEachCallback
      * @param {HTMLElement} element - The marked DOM element
-     * @param {Mark~rangeObject} range - the current range object
+     * @param {Mark~rangeObject} range - the current range object; provided
+     * start and length values will be numeric integers modified from the
+     * provided original ranges.
      */
     /**
      * Filter callback before each wrapping
