@@ -438,26 +438,97 @@ class Mark { // eslint-disable-line no-unused-vars
                 return a.start - b.start;
             })
             .forEach(item => {
-                if (item.start) {
-                    const start = parseInt(item.start, 10),
-                        end = start + parseInt(item.length, 10);
-                    // ignore overlapping values & non-numeric entries
-                    if (
-                        this.isNumeric(item.start) &&
-                        this.isNumeric(item.length) &&
-                        end - last > 0 &&
-                        end - start > 0
-                    ) {
-                        stack.push(item);
-                        last = end;
-                    } else {
-                        this.log(`Ignoring range: ${JSON.stringify(item)}`);
-                    }
-                } else {
-                    this.log(`Ignoring range: ${JSON.stringify(item)}`);
+                let {start, end, valid} = this.validateInitialRange(item, last);
+                if (valid) {
+                    // preserve item in case there are extra key:values within
+                    item.start = start;
+                    item.length = end - start;
+                    stack.push(item);
+                    last = end;
                 }
             });
         return stack;
+    }
+
+    /**
+     * @typedef Mark~validObject
+     * @type {object}
+     * @property {number} start - The start position within the composite value
+     * @property {number} end - The calculated end position within the composite
+     * value.
+     * @property {boolean} valid - boolean value indicating that the start and
+     * calculated end range is valid
+     */
+     /**
+      * Check valid range initially for MarkRange
+      * @param {Mark~rangeObject} range - the current range object
+      * @param {number} last - last index of range
+      * @return {Mark~validObject}
+      * @access protected
+      */
+    validateInitialRange(range, last) {
+        let start, end,
+            valid = false;
+        if (range.start) {
+            start = parseInt(range.start, 10);
+            end = start + parseInt(range.length, 10);
+            // ignore overlapping values & non-numeric entries
+            if (
+                this.isNumeric(range.start) &&
+                this.isNumeric(range.length) &&
+                end - last > 0 &&
+                end - start > 0
+            ) {
+                valid = true;
+            } else {
+                this.log(`Ignoring range: ${JSON.stringify(range)}`);
+            }
+        } else {
+            this.log(`Ignoring range: ${JSON.stringify(range)}`);
+        }
+        return {
+            start: start,
+            end: end,
+            valid: valid
+        }
+    }
+
+    /**
+     * Check valid range for MarkRange
+     * @param {Mark~rangeObject} range - the current range object
+     * @param {number} originalLength - original length of the context string
+     * @param {string} string - current content string
+     * @return {Mark~validObject}
+     * @access protected
+     */
+    validateRange(range, originalLength, string) {
+        let end,
+            valid = true,
+            // the max value changes after the DOM is manipulated
+            max = string.length,
+            // adjust offset to account for wrapped text node
+            offset = originalLength - max,
+            start = parseInt(range.start, 10) - offset;
+        // make sure to stop at max
+        start = start > max ? max : start;
+        end = start + parseInt(range.length, 10);
+        if (end > max) {
+            end = max;
+            this.log(`End range automatically set to the max value of ${max}`);
+        }
+        if (start < 0 || end - start < 0 || start > max || end > max) {
+            valid = false;
+            this.log(`Invalid range: ${JSON.stringify(range)}`);
+        } else if (string.substring(start, end).replace(/\s+/g, "") === "") {
+            valid = false;
+            // whitespace only; even if wrapped it is not visible
+            this.log("Skipping whitespace only range: " +JSON.stringify(range));
+        }
+        return {
+            start: start,
+            end: end,
+            valid: valid
+        };
     }
 
     /**
@@ -735,8 +806,9 @@ class Mark { // eslint-disable-line no-unused-vars
 
     /**
      * Callback for each wrapped element
-     * @callback Mark~wrapRangeFromIndexCallback
+     * @callback Mark~wrapRangeFromIndexEachCallback
      * @param {HTMLElement} element - The marked DOM element
+     * @param {Mark~rangeObject} range - the current range object
      */
     /**
      * Filter callback before each wrapping
@@ -761,32 +833,13 @@ class Mark { // eslint-disable-line no-unused-vars
     wrapRangeFromIndex(ranges, filterCb, eachCb, endCb) {
         this.getTextNodes(dict => {
             const originalLength = dict.value.length;
-            let start, end, max, offset;
             ranges.forEach((range, counter) => {
-                max = dict.value.length;
-                // adjust offset to account for wrapped text node
-                offset = originalLength - max;
-                start = parseInt(range.start, 10) - offset;
-                // make sure to stop at max
-                start = start > max ? max : start;
-                end = start + parseInt(range.length, 10);
-                if (end > max) {
-                    end = max;
-                    this.log(
-                      `End range automatically set to the max value of ${max}`
-                    );
-                }
-                if (start < 0 || end - start < 0 || start > max || end > max) {
-                    this.log(`Invalid range: ${JSON.stringify(range)}`);
-                } else if (
-                    // whitespace only; even if wrapped it is not visible
-                    dict.value.substring(start, end).replace(/\s+/g, "") === ""
-                ) {
-                    this.log(
-                        "Skipping whitespace only range: " +
-                        JSON.stringify(range)
-                    );
-                } else {
+                let {start, end, valid} = this.validateRange(
+                      range,
+                      originalLength,
+                      dict.value
+                );
+                if (valid) {
                     this.wrapRangeInMappedTextNode(dict, start, end, node => {
                         return filterCb(
                             range,
@@ -1060,11 +1113,10 @@ class Mark { // eslint-disable-line no-unused-vars
      * @param {array} range - array of range start and end points
      */
     /**
-     * Callback if there were no matches
+     * Callback if a processed range is invalid, out-of-bounds, overlaps another
+     * range, or only matches whitespace
      * @callback Mark~markRangesNoMatchCallback
-     * @param {Mark~setOfRanges} rawRanges - the original array of objects
-     * or an array of objects of specific non-matches
-     * passed to the markRanges function
+     * @param {Mark~rangeObject} range - a range object
      */
     /**
      * Callback to filter matches
