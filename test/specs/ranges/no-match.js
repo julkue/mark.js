@@ -11,7 +11,7 @@ describe("mark with range no matches", function () {
         loadFixtures("ranges/no-match.html");
         errCall = 0;
         notFound = [];
-
+ 
         $ctx1 = $(".ranges-no-match > div:nth-child(1)");
         $ctx2 = $(".ranges-no-match > div:nth-child(2)");
         $ctx3 = $(".ranges-no-match > div:nth-child(3)");
@@ -20,6 +20,9 @@ describe("mark with range no matches", function () {
             // { start: 0, length: 3 } "should" only contain whitespace, so it
             // will be skipped
             { start: 0, length: 3 },
+            // found
+            { start: 30, length: 5},
+            // skipped
             { start: 1500, length: 500 }
         ], {
             "noMatch": function(item) {
@@ -63,8 +66,8 @@ describe("mark with range no matches", function () {
         });
     });
 
-    it("should report range non-matches", function () {
-        expect($ctx1.find("mark")).toHaveLength(0);
+    it("should report each range non-match", function () {
+        expect($ctx1.find("mark")).toHaveLength(1);
         expect($ctx2.find("mark")).toHaveLength(0);
         var ranges = notFound.sort(function(a, b) {
             return a[0] - b[0];

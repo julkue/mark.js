@@ -58,7 +58,7 @@ describe("mark with range", function () {
                     { start: 30, length: 0.6 }
                 ], {
                     "noMatch": function (item) {
-                        notFound = item;
+                        notFound = notFound.concat(item);
                     },
                     "each": each,
                     "done": done
@@ -86,8 +86,6 @@ describe("mark with range", function () {
     it("should mark and parse integer ranges", function () {
         var $match,
             range = getRange($ctx1, terms[2]);
-        range.start += .674;
-        range.length += .234;
         $match = $ctx1.find("mark[data-range-start='" + range.start + "']");
         expect($match.text()).toBe(terms[2]);
         expect($match.attr("data-range-length")).toBe(range.length.toString());

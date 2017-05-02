@@ -427,6 +427,7 @@ class Mark { // eslint-disable-line no-unused-vars
             Object.prototype.toString.call( array[0] ) !== "[object Object]"
         ) {
             this.log("markRange() will only accept an array of objects");
+            this.opt.noMatch(array);
             return [];
         }
         const stack = [];
@@ -482,9 +483,11 @@ class Mark { // eslint-disable-line no-unused-vars
                 valid = true;
             } else {
                 this.log(`Ignoring range: ${JSON.stringify(range)}`);
+                this.opt.noMatch(range);
             }
         } else {
             this.log(`Ignoring range: ${JSON.stringify(range)}`);
+            this.opt.noMatch(range);
         }
         return {
             start: start,
@@ -519,10 +522,12 @@ class Mark { // eslint-disable-line no-unused-vars
         if (start < 0 || end - start < 0 || start > max || end > max) {
             valid = false;
             this.log(`Invalid range: ${JSON.stringify(range)}`);
+            this.opt.noMatch(range);
         } else if (string.substring(start, end).replace(/\s+/g, "") === "") {
             valid = false;
             // whitespace only; even if wrapped it is not visible
             this.log("Skipping whitespace only range: " +JSON.stringify(range));
+            this.opt.noMatch(range);
         }
         return {
             start: start,
@@ -1145,8 +1150,7 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     markRanges(rawRanges, opt) {
         this.opt = opt;
-        let matches = 0,
-            totalMatches = 0,
+        let totalMatches = 0,
             ranges = this.checkRanges(rawRanges);
         if (ranges && ranges.length) {
             this.log(
@@ -1157,18 +1161,13 @@ class Mark { // eslint-disable-line no-unused-vars
                 ranges, (range, match, node, counter) => {
                     return this.opt.filter(range, match, node, counter);
                 }, (element, range) => {
-                    matches++;
                     totalMatches++;
                     this.opt.each(element, range);
                 }, () => {
-                    if(matches === 0) {
-                        this.opt.noMatch(rawRanges);
-                    }
                     this.opt.done(totalMatches);
                 }
             );
         } else {
-            this.opt.noMatch(rawRanges);
             this.opt.done(totalMatches);
         }
     }
