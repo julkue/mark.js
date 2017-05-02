@@ -825,9 +825,9 @@ class Mark { // eslint-disable-line no-unused-vars
     /**
      * Filter callback before each wrapping
      * @callback Mark~wrapRangeFromIndexFilterCallback
+     * @param {HTMLElement} node - The text node which includes the range
      * @param {Mark~rangeObject} range - the current range object
      * @param {string} match - string extracted from the matching range
-     * @param {HTMLElement} node - The text node which includes the range
      * @param {number} counter - A counter indicating the number of all marks
      */
     /**
@@ -854,9 +854,9 @@ class Mark { // eslint-disable-line no-unused-vars
                 if (valid) {
                     this.wrapRangeInMappedTextNode(dict, start, end, node => {
                         return filterCb(
+                            node,
                             range,
                             dict.value.substring(start, end),
-                            node,
                             counter
                         );
                     }, node => {
@@ -1165,8 +1165,8 @@ class Mark { // eslint-disable-line no-unused-vars
                 JSON.stringify(ranges)
             );
             this.wrapRangeFromIndex(
-                ranges, (range, match, node, counter) => {
-                    return this.opt.filter(range, match, node, counter);
+                ranges, (node, range, match, counter) => {
+                    return this.opt.filter(node, range, match, counter);
                 }, (element, range) => {
                     totalMatches++;
                     this.opt.each(element, range);

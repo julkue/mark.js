@@ -432,7 +432,7 @@
                     let { start, end, valid } = this.validateRange(range, originalLength, dict.value);
                     if (valid) {
                         this.wrapRangeInMappedTextNode(dict, start, end, node => {
-                            return filterCb(range, dict.value.substring(start, end), node, counter);
+                            return filterCb(node, range, dict.value.substring(start, end), counter);
                         }, node => {
                             eachCb(node, range);
                         });
@@ -540,8 +540,8 @@
                 ranges = this.checkRanges(rawRanges);
             if (ranges && ranges.length) {
                 this.log("Starting to mark with the following ranges: " + JSON.stringify(ranges));
-                this.wrapRangeFromIndex(ranges, (range, match, node, counter) => {
-                    return this.opt.filter(range, match, node, counter);
+                this.wrapRangeFromIndex(ranges, (node, range, match, counter) => {
+                    return this.opt.filter(node, range, match, counter);
                 }, (element, range) => {
                     totalMatches++;
                     this.opt.each(element, range);

@@ -456,7 +456,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
                         if (valid) {
                             _this8.wrapRangeInMappedTextNode(dict, start, end, function (node) {
-                                return filterCb(range, dict.value.substring(start, end), node, counter);
+                                return filterCb(node, range, dict.value.substring(start, end), counter);
                             }, function (node) {
                                 eachCb(node, range);
                             });
@@ -575,8 +575,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     ranges = this.checkRanges(rawRanges);
                 if (ranges && ranges.length) {
                     this.log("Starting to mark with the following ranges: " + JSON.stringify(ranges));
-                    this.wrapRangeFromIndex(ranges, function (range, match, node, counter) {
-                        return _this11.opt.filter(range, match, node, counter);
+                    this.wrapRangeFromIndex(ranges, function (node, range, match, counter) {
+                        return _this11.opt.filter(node, range, match, counter);
                     }, function (element, range) {
                         totalMatches++;
                         _this11.opt.each(element, range);

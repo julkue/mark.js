@@ -45,7 +45,7 @@ describe("mark with range filter callback", function () {
         });
 
         new Mark($ctx[0]).markRanges(ranges, {
-            "filter": function (range, match, node, counter) {
+            "filter": function (node, range, match, counter) {
                 filterCalled++;
                 var item = results[match];
                 // check indexes; this won't always equal the counter 
