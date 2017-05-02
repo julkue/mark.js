@@ -461,7 +461,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * calculated end range is valid
      */
      /**
-      * Check valid range initially for MarkRange
+      * Check valid range initially for markRange
       * @param {Mark~rangeObject} range - the current range object
       * @param {number} last - last index of range
       * @return {Mark~validObject}
@@ -497,7 +497,7 @@ class Mark { // eslint-disable-line no-unused-vars
     }
 
     /**
-     * Check valid range for MarkRange
+     * Check valid range for markRange
      * @param {Mark~rangeObject} range - the current range object
      * @param {number} originalLength - original length of the context string
      * @param {string} string - current content string
