@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.9.0
+ * mark.js v8.9.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -264,40 +264,32 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 dict.nodes.every(function (n, i) {
                     var sibl = dict.nodes[i + 1];
                     if (typeof sibl === "undefined" || sibl.start > start) {
-                        var _ret = function () {
-                            if (!filterCb(n.node)) {
-                                return {
-                                    v: false
-                                };
-                            }
+                        if (!filterCb(n.node)) {
+                            return false;
+                        }
 
-                            var s = start - n.start,
-                                e = (end > n.end ? n.end : end) - n.start,
-                                startStr = dict.value.substr(0, n.start),
-                                endStr = dict.value.substr(e + n.start);
-                            n.node = _this4.wrapRangeInTextNode(n.node, s, e);
+                        var s = start - n.start,
+                            e = (end > n.end ? n.end : end) - n.start,
+                            startStr = dict.value.substr(0, n.start),
+                            endStr = dict.value.substr(e + n.start);
+                        n.node = _this4.wrapRangeInTextNode(n.node, s, e);
 
-                            dict.value = startStr + endStr;
-                            dict.nodes.forEach(function (k, j) {
-                                if (j >= i) {
-                                    if (dict.nodes[j].start > 0 && j !== i) {
-                                        dict.nodes[j].start -= e;
-                                    }
-                                    dict.nodes[j].end -= e;
+                        dict.value = startStr + endStr;
+                        dict.nodes.forEach(function (k, j) {
+                            if (j >= i) {
+                                if (dict.nodes[j].start > 0 && j !== i) {
+                                    dict.nodes[j].start -= e;
                                 }
-                            });
-                            end -= e;
-                            eachCb(n.node.previousSibling, n.start);
-                            if (end > n.end) {
-                                start = n.end;
-                            } else {
-                                return {
-                                    v: false
-                                };
+                                dict.nodes[j].end -= e;
                             }
-                        }();
-
-                        if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
+                        });
+                        end -= e;
+                        eachCb(n.node.previousSibling, n.start);
+                        if (end > n.end) {
+                            start = n.end;
+                        } else {
+                            return false;
+                        }
                     }
                     return true;
                 });
@@ -802,7 +794,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         this.forEachIframe(ctx, function (currIfr) {
                             return _this14.checkIframeFilter(node, prevNode, currIfr, ifr);
                         }, function (con) {
-                            _this14.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
+                            _this14.createInstanceOnIframe(con).forEachNode(whatToShow, function (ifrNode) {
+                                return elements.push(ifrNode);
+                            }, filterCb);
                         });
                     }
 
