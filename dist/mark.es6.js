@@ -831,7 +831,7 @@
                     this.forEachIframe(ctx, currIfr => {
                         return this.checkIframeFilter(node, prevNode, currIfr, ifr);
                     }, con => {
-                        this.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
+                        this.createInstanceOnIframe(con).forEachNode(whatToShow, ifrNode => elements.push(ifrNode), filterCb);
                     });
                 }
 

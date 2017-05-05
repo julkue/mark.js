@@ -1704,7 +1704,7 @@ class DOMIterator {
                     return this.checkIframeFilter(node, prevNode, currIfr, ifr);
                 }, con => {
                     this.createInstanceOnIframe(con).forEachNode(
-                        whatToShow, eachCb, filterCb
+                        whatToShow, ifrNode => elements.push(ifrNode), filterCb
                     );
                 });
             }

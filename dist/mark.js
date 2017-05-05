@@ -931,7 +931,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                         this.forEachIframe(ctx, function (currIfr) {
                             return _this17.checkIframeFilter(node, prevNode, currIfr, ifr);
                         }, function (con) {
-                            _this17.createInstanceOnIframe(con).forEachNode(whatToShow, eachCb, filterCb);
+                            _this17.createInstanceOnIframe(con).forEachNode(whatToShow, function (ifrNode) {
+                                return elements.push(ifrNode);
+                            }, filterCb);
                         });
                     }
 
