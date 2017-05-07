@@ -6,8 +6,8 @@
  *****************************************************/
 "use strict";
 describe("mark with range filter callback", function () {
-    var $ctx, filterCalled, termCount, rangeCount, ranges, results,
-        // will target the first unique term 
+    var $ctx, filterCalled, nodeCounter, termCount, rangeCount, ranges, results,
+        // will target the first unique term
         terms = ["ipsum", "amet", "elitr", "tempor", "nonumy"],
         // term to filter out
         skip = "elitr";
@@ -23,6 +23,7 @@ describe("mark with range filter callback", function () {
         loadFixtures("ranges/filter.html");
 
         filterCalled = 0;
+        nodeCounter = 0;
         termCount = 0;
         rangeCount = 0;
         $ctx = $(".ranges-filter");
@@ -48,8 +49,11 @@ describe("mark with range filter callback", function () {
         new Mark($ctx[0]).markRanges(ranges, {
             "filter": function (node, range, match, counter) {
                 filterCalled++;
+                if (node.nodeType === 3) {
+                    nodeCounter++;
+                }
                 var item = results[match];
-                // check indexes; this won't always equal the counter 
+                // check indexes; this won't always equal the counter
                 // because the values within "terms" may not be in order
                 if (
                     item &&
@@ -76,6 +80,7 @@ describe("mark with range filter callback", function () {
     it("should call the filter callback for each range element", function () {
         var length = terms.length;
         expect(filterCalled).toBe(length);
+        expect(nodeCounter).toBe(length);
         expect(termCount).toBe(length);
         expect(rangeCount).toBe(length);
         expect($ctx.find("mark")).toHaveLength(length - 1);
