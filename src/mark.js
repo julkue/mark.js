@@ -440,7 +440,7 @@ class Mark { // eslint-disable-line no-unused-vars
             })
             .forEach(item => {
                 let {start, end, valid} =
-                    this.callRangeNotMatchOnInvalidRanges(item, last);
+                    this.callNoMatchOnInvalidRanges(item, last);
                 if (valid) {
                     // preserve item in case there are extra key:values within
                     item.start = start;
@@ -470,7 +470,7 @@ class Mark { // eslint-disable-line no-unused-vars
       * @return {Mark~validObject}
       * @access protected
       */
-    callRangeNotMatchOnInvalidRanges(range, last) {
+    callNoMatchOnInvalidRanges(range, last) {
         let start, end,
             valid = false;
         if (range && typeof range.start !== "undefined") {
@@ -513,7 +513,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @return {Mark~validObject}
      * @access protected
      */
-    checkRangeWhitespaceRanges(range, originalLength, string) {
+    checkWhitespaceRanges(range, originalLength, string) {
         let end,
             valid = true,
             // the max value changes after the DOM is manipulated
@@ -850,7 +850,7 @@ class Mark { // eslint-disable-line no-unused-vars
         this.getTextNodes(dict => {
             const originalLength = dict.value.length;
             ranges.forEach((range, counter) => {
-                let {start, end, valid} = this.checkRangeWhitespaceRanges(
+                let {start, end, valid} = this.checkWhitespaceRanges(
                       range,
                       originalLength,
                       dict.value

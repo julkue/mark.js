@@ -233,7 +233,7 @@
             array.sort((a, b) => {
                 return a.start - b.start;
             }).forEach(item => {
-                let { start, end, valid } = this.callRangeNotMatchOnInvalidRanges(item, last);
+                let { start, end, valid } = this.callNoMatchOnInvalidRanges(item, last);
                 if (valid) {
                     item.start = start;
                     item.length = end - start;
@@ -244,7 +244,7 @@
             return stack;
         }
 
-        callRangeNotMatchOnInvalidRanges(range, last) {
+        callNoMatchOnInvalidRanges(range, last) {
             let start,
                 end,
                 valid = false;
@@ -269,7 +269,7 @@
             };
         }
 
-        checkRangeWhitespaceRanges(range, originalLength, string) {
+        checkWhitespaceRanges(range, originalLength, string) {
             let end,
                 valid = true,
                 max = string.length,
@@ -429,7 +429,7 @@
             this.getTextNodes(dict => {
                 const originalLength = dict.value.length;
                 ranges.forEach((range, counter) => {
-                    let { start, end, valid } = this.checkRangeWhitespaceRanges(range, originalLength, dict.value);
+                    let { start, end, valid } = this.checkWhitespaceRanges(range, originalLength, dict.value);
                     if (valid) {
                         this.wrapRangeInMappedTextNode(dict, start, end, node => {
                             return filterCb(node, range, dict.value.substring(start, end), counter);

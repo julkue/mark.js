@@ -230,10 +230,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 array.sort(function (a, b) {
                     return a.start - b.start;
                 }).forEach(function (item) {
-                    var _callRangeNotMatchOnI = _this3.callRangeNotMatchOnInvalidRanges(item, last),
-                        start = _callRangeNotMatchOnI.start,
-                        end = _callRangeNotMatchOnI.end,
-                        valid = _callRangeNotMatchOnI.valid;
+                    var _callNoMatchOnInvalid = _this3.callNoMatchOnInvalidRanges(item, last),
+                        start = _callNoMatchOnInvalid.start,
+                        end = _callNoMatchOnInvalid.end,
+                        valid = _callNoMatchOnInvalid.valid;
 
                     if (valid) {
                         item.start = start;
@@ -245,8 +245,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return stack;
             }
         }, {
-            key: "callRangeNotMatchOnInvalidRanges",
-            value: function callRangeNotMatchOnInvalidRanges(range, last) {
+            key: "callNoMatchOnInvalidRanges",
+            value: function callNoMatchOnInvalidRanges(range, last) {
                 var start = void 0,
                     end = void 0,
                     valid = false;
@@ -271,8 +271,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 };
             }
         }, {
-            key: "checkRangeWhitespaceRanges",
-            value: function checkRangeWhitespaceRanges(range, originalLength, string) {
+            key: "checkWhitespaceRanges",
+            value: function checkWhitespaceRanges(range, originalLength, string) {
                 var end = void 0,
                     valid = true,
                     max = string.length,
@@ -449,10 +449,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.getTextNodes(function (dict) {
                     var originalLength = dict.value.length;
                     ranges.forEach(function (range, counter) {
-                        var _checkRangeWhitespace = _this8.checkRangeWhitespaceRanges(range, originalLength, dict.value),
-                            start = _checkRangeWhitespace.start,
-                            end = _checkRangeWhitespace.end,
-                            valid = _checkRangeWhitespace.valid;
+                        var _checkWhitespaceRange = _this8.checkWhitespaceRanges(range, originalLength, dict.value),
+                            start = _checkWhitespaceRange.start,
+                            end = _checkWhitespaceRange.end,
+                            valid = _checkWhitespaceRange.valid;
 
                         if (valid) {
                             _this8.wrapRangeInMappedTextNode(dict, start, end, function (node) {
