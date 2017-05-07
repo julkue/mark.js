@@ -9,6 +9,7 @@ describe("mark with range across elements", function () {
     var $ctx, txt, ranges, index;
     beforeEach(function (done) {
         loadFixtures("ranges/across-elements.html");
+
         $ctx = $(".ranges-across-elements");
         txt = $ctx.text();
         ranges = [];

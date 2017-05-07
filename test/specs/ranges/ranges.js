@@ -28,9 +28,9 @@ describe("mark with range", function () {
 
     beforeEach(function (done) {
         loadFixtures("ranges/ranges.html");
+
         notFound = [];
         ranges = [];
-
         $ctx1 = $(".ranges > div:nth-child(1)");
         $ctx2 = $(".ranges > div:nth-child(2)");
 

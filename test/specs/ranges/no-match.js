@@ -9,9 +9,9 @@ describe("mark with range no matches", function () {
     var $ctx1, $ctx2, $ctx3, errCall, notFound;
     beforeEach(function (done) {
         loadFixtures("ranges/no-match.html");
+
         errCall = 0;
         notFound = [];
- 
         $ctx1 = $(".ranges-no-match > div:nth-child(1)");
         $ctx2 = $(".ranges-no-match > div:nth-child(2)");
         $ctx3 = $(".ranges-no-match > div:nth-child(3)");

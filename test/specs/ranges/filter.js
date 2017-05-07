@@ -21,6 +21,7 @@ describe("mark with range filter callback", function () {
 
     beforeEach(function (done) {
         loadFixtures("ranges/filter.html");
+
         filterCalled = 0;
         termCount = 0;
         rangeCount = 0;
