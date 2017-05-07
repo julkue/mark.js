@@ -472,7 +472,7 @@ class Mark { // eslint-disable-line no-unused-vars
     validateInitialRange(range, last) {
         let start, end,
             valid = false;
-        if (range.start) {
+        if (range && typeof range.start !== "undefined") {
             start = parseInt(range.start, 10);
             end = start + parseInt(range.length, 10);
             // ignore overlapping values & non-numeric entries
@@ -484,11 +484,14 @@ class Mark { // eslint-disable-line no-unused-vars
             ) {
                 valid = true;
             } else {
-                this.log(`Ignoring range: ${JSON.stringify(range)}`);
+                this.log(
+                    `Ignoring invalid or overlapping range: ` +
+                    `${JSON.stringify(range)}`
+                );
                 this.opt.noMatch(range);
             }
         } else {
-            this.log(`Ignoring range: ${JSON.stringify(range)}`);
+            this.log(`Ignoring invalid range: ${JSON.stringify(range)}`);
             this.opt.noMatch(range);
         }
         return {
