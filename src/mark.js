@@ -1133,9 +1133,9 @@ class Mark { // eslint-disable-line no-unused-vars
     /**
      * Callback to filter matches
      * @callback Mark~markRangesFilterCallback
+     * @param {HTMLElement} node - The text node which includes the range
      * @param {array} range - array of range start and end points
      * @param {string} match - string extracted from the matching range
-     * @param {HTMLElement} node - The text node which includes the range
      * @param {number} counter - A counter indicating the number of all marks
      */
     /**
