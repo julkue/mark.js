@@ -27,7 +27,7 @@ describe("mark with range", function () {
     }
 
     beforeEach(function (done) {
-        loadFixtures("ranges/ranges.html");
+        loadFixtures("ranges/main.html");
 
         notFound = [];
         ranges = [];
