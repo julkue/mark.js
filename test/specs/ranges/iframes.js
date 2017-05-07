@@ -12,7 +12,7 @@ describe("mark with range in iframes", function () {
 
         $ctx = $(".ranges-iframes");
         new Mark($ctx[0]).markRanges([
-            // lorem in iframes.html
+            // "lorem" in iframes.html
             { start: 14, length: 5 },
             // "lorem" in inc.html iframe
             { start: 70, length: 5 },
