@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.9.1
+ * mark.js v8.10.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -218,6 +218,87 @@
             };
         }
 
+        isNumeric(value) {
+            return Number(parseFloat(value)) == value;
+        }
+
+        checkRanges(array) {
+            if (!Array.isArray(array) || Object.prototype.toString.call(array[0]) !== "[object Object]") {
+                this.log("markRanges() will only accept an array of objects");
+                this.opt.noMatch(array);
+                return [];
+            }
+            const stack = [];
+            let last = 0;
+            array.sort((a, b) => {
+                return a.start - b.start;
+            }).forEach(item => {
+                let { start, end, valid } = this.callNoMatchOnInvalidRanges(item, last);
+                if (valid) {
+                    item.start = start;
+                    item.length = end - start;
+                    stack.push(item);
+                    last = end;
+                }
+            });
+            return stack;
+        }
+
+        callNoMatchOnInvalidRanges(range, last) {
+            let start,
+                end,
+                valid = false;
+            if (range && typeof range.start !== "undefined") {
+                start = parseInt(range.start, 10);
+                end = start + parseInt(range.length, 10);
+
+                if (this.isNumeric(range.start) && this.isNumeric(range.length) && end - last > 0 && end - start > 0) {
+                    valid = true;
+                } else {
+                    this.log(`Ignoring invalid or overlapping range: ` + `${JSON.stringify(range)}`);
+                    this.opt.noMatch(range);
+                }
+            } else {
+                this.log(`Ignoring invalid range: ${JSON.stringify(range)}`);
+                this.opt.noMatch(range);
+            }
+            return {
+                start: start,
+                end: end,
+                valid: valid
+            };
+        }
+
+        checkWhitespaceRanges(range, originalLength, string) {
+            let end,
+                valid = true,
+                max = string.length,
+                offset = originalLength - max,
+                start = parseInt(range.start, 10) - offset;
+
+            start = start > max ? max : start;
+            end = start + parseInt(range.length, 10);
+            if (end > max) {
+                end = max;
+                this.log(`End range automatically set to the max value of ${max}`);
+            }
+            if (start < 0 || end - start < 0 || start > max || end > max) {
+                valid = false;
+                this.log(`Invalid range: ${JSON.stringify(range)}`);
+                this.opt.noMatch(range);
+            } else if (string.substring(start, end).replace(/\s+/g, "") === "") {
+                valid = false;
+
+                this.log("Skipping whitespace only range: " + JSON.stringify(range));
+                this.opt.noMatch(range);
+            }
+            return {
+                start: start,
+                end: end,
+                valid: valid
+            };
+        }
+
         getTextNodes(cb) {
             let val = "",
                 nodes = [];
@@ -344,6 +425,23 @@
             });
         }
 
+        wrapRangeFromIndex(ranges, filterCb, eachCb, endCb) {
+            this.getTextNodes(dict => {
+                const originalLength = dict.value.length;
+                ranges.forEach((range, counter) => {
+                    let { start, end, valid } = this.checkWhitespaceRanges(range, originalLength, dict.value);
+                    if (valid) {
+                        this.wrapRangeInMappedTextNode(dict, start, end, node => {
+                            return filterCb(node, range, dict.value.substring(start, end), counter);
+                        }, node => {
+                            eachCb(node, range);
+                        });
+                    }
+                });
+                endCb();
+            });
+        }
+
         unwrapMatches(node) {
             const parent = node.parentNode;
             let docFrag = document.createDocumentFragment();
@@ -433,6 +531,25 @@
                 this.opt.done(totalMatches);
             } else {
                 handler(kwArr[0]);
+            }
+        }
+
+        markRanges(rawRanges, opt) {
+            this.opt = opt;
+            let totalMatches = 0,
+                ranges = this.checkRanges(rawRanges);
+            if (ranges && ranges.length) {
+                this.log("Starting to mark with the following ranges: " + JSON.stringify(ranges));
+                this.wrapRangeFromIndex(ranges, (node, range, match, counter) => {
+                    return this.opt.filter(node, range, match, counter);
+                }, (element, range) => {
+                    totalMatches++;
+                    this.opt.each(element, range);
+                }, () => {
+                    this.opt.done(totalMatches);
+                });
+            } else {
+                this.opt.done(totalMatches);
             }
         }
 
@@ -760,6 +877,10 @@
     };
     $.fn.markRegExp = function (regexp, opt) {
         new Mark(this.get()).markRegExp(regexp, opt);
+        return this;
+    };
+    $.fn.markRanges = function (ranges, opt) {
+        new Mark(this.get()).markRanges(ranges, opt);
         return this;
     };
     $.fn.unmark = function (opt) {
