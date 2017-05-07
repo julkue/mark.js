@@ -53,3 +53,91 @@ Optional options:
 | done               | function         |             | A callback function after all marks are done. Receives the total number of marks as a parameter                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | debug              | boolean          | false       | Set this option to `true` if you want to log messages                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | log                | object           | console     | Log messages to a specific object (only if  `debug` is true)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+
+#### Examples
+
+{{> collapsible
+id="markranges-code-overview-basic"
+triggerContent="Basic example"
+content='JavaScript:
+
+<pre><code class="lang-javascript">var context = document.querySelector(".context"); // requires an element with class "context" to exist
+var instance = new Mark(context);
+instance.markRanges([{
+    start: 15,
+    length: 5
+}, {
+    start: 25:
+    length: 8
+}]); // marks matches with ranges 15-20 and 25-33
+</code></pre>
+
+jQuery:
+
+<pre><code class="lang-javascript">$(".context").markRanges([{
+    start: 15,
+    length: 5
+}, {
+    start: 25:
+    length: 8
+}]); // marks matches with ranges 15-20 and 25-33
+</code></pre>
+'}}
+
+{{> collapsible
+id="markranges-code-overview-options"
+triggerContent="Example with all above named options and their default values"
+content='For both, JavaScript and jQuery:
+
+<pre><code class="lang-javascript">var options = {
+    "element": "mark",
+    "className": "",
+    "exclude": [],
+    "iframes": false,
+    "iframesTimeout": 5000,
+    "each": function(node, range){
+        // node is the marked DOM element
+        // range is the corresponding range
+    },
+    "filter": function(textNode, range, term, counter){
+        // textNode is the text node which contains the found term
+        // range is the found range
+        // term is the extracted term from the matching range
+        // counter is a counter indicating the number of marks for the found term
+        return true; // must return either true or false
+    },
+    "noMatch": function(range){
+        // the not found range
+    },
+    "done": function(counter){
+        // counter is a counter indicating the total number of all marks
+    },
+    "debug": false,
+    "log": window.console
+};
+</code></pre>
+
+JavaScript:
+
+<pre><code class="lang-javascript">var context = document.querySelector(".context"); // requires an element with class "context" to exist
+var instance = new Mark(context);
+instance.markRanges([{
+    start: 15,
+    length: 5
+}, {
+    start: 25:
+    length: 8
+}], options);
+</code></pre>
+
+jQuery:
+
+<pre><code class="lang-javascript">$(".context").markRanges([{
+    start: 15,
+    length: 5
+}, {
+    start: 25:
+    length: 8
+}], options);
+</code></pre>
+'}}
