@@ -461,7 +461,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * calculated end range is valid
      */
      /**
-      * Initial validation of ranges for markRange. Preliminary checks are done
+      * Initial validation of ranges for markRanges. Preliminary checks are done
       * to ensure the start and length values exist and are not zero or non-
       * numeric
       * @param {Mark~rangeObject} range - the current range object
