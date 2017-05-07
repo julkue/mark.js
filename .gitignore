@@ -4,6 +4,7 @@ build/
 node_modules/
 .sass-cache/
 .work-files/
+.idea/
 TODO
 _sprites.scss
 sprites*.png

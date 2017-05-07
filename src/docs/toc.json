@@ -24,7 +24,8 @@
     "api": {
         "pattern": "api/*.md",
         "refer": false,
-        "sortBy": ["General", "mark()", "markRegExp()", "unmark()"],
+        "sortBy": ["General", "mark()", "markRegExp()", "markRanges()",
+            "unmark()"],
         "metadata": {
             "name": "API"
         }
