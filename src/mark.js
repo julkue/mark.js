@@ -426,7 +426,7 @@ class Mark { // eslint-disable-line no-unused-vars
             !Array.isArray(array) ||
             Object.prototype.toString.call( array[0] ) !== "[object Object]"
         ) {
-            this.log("markRange() will only accept an array of objects");
+            this.log("markRanges() will only accept an array of objects");
             this.opt.noMatch(array);
             return [];
         }
@@ -499,7 +499,7 @@ class Mark { // eslint-disable-line no-unused-vars
     }
 
     /**
-     * Check valid range for markRange. Check ranges with access to the context
+     * Check valid range for markRanges. Check ranges with access to the context
      * string. Range values are double checked, lengths that extend the mark
      * beyond the string length are limitied and ranges containing only
      * whitespace are ignored
