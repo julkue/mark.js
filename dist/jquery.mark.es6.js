@@ -224,7 +224,7 @@
 
         checkRanges(array) {
             if (!Array.isArray(array) || Object.prototype.toString.call(array[0]) !== "[object Object]") {
-                this.log("markRange() will only accept an array of objects");
+                this.log("markRanges() will only accept an array of objects");
                 this.opt.noMatch(array);
                 return [];
             }
@@ -233,7 +233,7 @@
             array.sort((a, b) => {
                 return a.start - b.start;
             }).forEach(item => {
-                let { start, end, valid } = this.validateInitialRange(item, last);
+                let { start, end, valid } = this.callRangeNotMatchOnInvalidRanges(item, last);
                 if (valid) {
                     item.start = start;
                     item.length = end - start;
@@ -244,22 +244,22 @@
             return stack;
         }
 
-        validateInitialRange(range, last) {
+        callRangeNotMatchOnInvalidRanges(range, last) {
             let start,
                 end,
                 valid = false;
-            if (range.start) {
+            if (range && typeof range.start !== "undefined") {
                 start = parseInt(range.start, 10);
                 end = start + parseInt(range.length, 10);
 
                 if (this.isNumeric(range.start) && this.isNumeric(range.length) && end - last > 0 && end - start > 0) {
                     valid = true;
                 } else {
-                    this.log(`Ignoring range: ${JSON.stringify(range)}`);
+                    this.log(`Ignoring invalid or overlapping range: ` + `${JSON.stringify(range)}`);
                     this.opt.noMatch(range);
                 }
             } else {
-                this.log(`Ignoring range: ${JSON.stringify(range)}`);
+                this.log(`Ignoring invalid range: ${JSON.stringify(range)}`);
                 this.opt.noMatch(range);
             }
             return {
@@ -269,7 +269,7 @@
             };
         }
 
-        validateRange(range, originalLength, string) {
+        checkRangeWhitespaceRanges(range, originalLength, string) {
             let end,
                 valid = true,
                 max = string.length,
@@ -429,7 +429,7 @@
             this.getTextNodes(dict => {
                 const originalLength = dict.value.length;
                 ranges.forEach((range, counter) => {
-                    let { start, end, valid } = this.validateRange(range, originalLength, dict.value);
+                    let { start, end, valid } = this.checkRangeWhitespaceRanges(range, originalLength, dict.value);
                     if (valid) {
                         this.wrapRangeInMappedTextNode(dict, start, end, node => {
                             return filterCb(node, range, dict.value.substring(start, end), counter);

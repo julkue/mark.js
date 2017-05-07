@@ -221,7 +221,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 var _this3 = this;
 
                 if (!Array.isArray(array) || Object.prototype.toString.call(array[0]) !== "[object Object]") {
-                    this.log("markRange() will only accept an array of objects");
+                    this.log("markRanges() will only accept an array of objects");
                     this.opt.noMatch(array);
                     return [];
                 }
@@ -230,10 +230,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 array.sort(function (a, b) {
                     return a.start - b.start;
                 }).forEach(function (item) {
-                    var _validateInitialRange = _this3.validateInitialRange(item, last),
-                        start = _validateInitialRange.start,
-                        end = _validateInitialRange.end,
-                        valid = _validateInitialRange.valid;
+                    var _callRangeNotMatchOnI = _this3.callRangeNotMatchOnInvalidRanges(item, last),
+                        start = _callRangeNotMatchOnI.start,
+                        end = _callRangeNotMatchOnI.end,
+                        valid = _callRangeNotMatchOnI.valid;
 
                     if (valid) {
                         item.start = start;
@@ -245,23 +245,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 return stack;
             }
         }, {
-            key: "validateInitialRange",
-            value: function validateInitialRange(range, last) {
+            key: "callRangeNotMatchOnInvalidRanges",
+            value: function callRangeNotMatchOnInvalidRanges(range, last) {
                 var start = void 0,
                     end = void 0,
                     valid = false;
-                if (range.start) {
+                if (range && typeof range.start !== "undefined") {
                     start = parseInt(range.start, 10);
                     end = start + parseInt(range.length, 10);
 
                     if (this.isNumeric(range.start) && this.isNumeric(range.length) && end - last > 0 && end - start > 0) {
                         valid = true;
                     } else {
-                        this.log("Ignoring range: " + JSON.stringify(range));
+                        this.log("Ignoring invalid or overlapping range: " + ("" + JSON.stringify(range)));
                         this.opt.noMatch(range);
                     }
                 } else {
-                    this.log("Ignoring range: " + JSON.stringify(range));
+                    this.log("Ignoring invalid range: " + JSON.stringify(range));
                     this.opt.noMatch(range);
                 }
                 return {
@@ -271,8 +271,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 };
             }
         }, {
-            key: "validateRange",
-            value: function validateRange(range, originalLength, string) {
+            key: "checkRangeWhitespaceRanges",
+            value: function checkRangeWhitespaceRanges(range, originalLength, string) {
                 var end = void 0,
                     valid = true,
                     max = string.length,
@@ -449,10 +449,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 this.getTextNodes(function (dict) {
                     var originalLength = dict.value.length;
                     ranges.forEach(function (range, counter) {
-                        var _validateRange = _this8.validateRange(range, originalLength, dict.value),
-                            start = _validateRange.start,
-                            end = _validateRange.end,
-                            valid = _validateRange.valid;
+                        var _checkRangeWhitespace = _this8.checkRangeWhitespaceRanges(range, originalLength, dict.value),
+                            start = _checkRangeWhitespace.start,
+                            end = _checkRangeWhitespace.end,
+                            valid = _checkRangeWhitespace.valid;
 
                         if (valid) {
                             _this8.wrapRangeInMappedTextNode(dict, start, end, function (node) {
