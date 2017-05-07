@@ -18,12 +18,10 @@ It is intensively tested in:
 ![Safari][safari-icon]
 ![Edge][edge-icon]
 ![IE9-11][ie-icon]
-![IE10-11][ie-tile-icon]  
 
-[firefox-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/firefox/firefox_48x48.png
-[chrome-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/chrome/chrome_48x48.png
-[opera-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/opera/opera_48x48.png
-[safari-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/safari/safari_48x48.png
-[edge-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/edge/edge_48x48.png
-[ie-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer/internet-explorer_48x48.png
-[ie-tile-icon]: https://raw.githubusercontent.com/alrra/browser-logos/master/internet-explorer-tile/internet-explorer-tile_48x48.png
+[firefox-icon]: https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/archive/firefox_3.5-22/firefox_3.5-22_48x48.png
+[chrome-icon]: https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/archive/chrome_12-48/chrome_12-48_48x48.png
+[opera-icon]: https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/archive/opera_15-32/opera_15-32_48x48.png
+[safari-icon]: https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/archive/safari_1-7/safari_1-7_48x48.png
+[edge-icon]: https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/edge/edge_48x48.png
+[ie-icon]: https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/archive/internet-explorer_9-11/internet-explorer_9-11_48x48.png
