@@ -58,6 +58,14 @@
         "consistent-this": "error",
         "no-tabs": "error",
         "arrow-spacing": "error",
-        "one-var": "error"
+        "one-var": "error",
+        "complexity": [
+            "error",
+            10
+        ],
+        "max-depth": [
+            "error",
+            8
+        ]
     }
 }
