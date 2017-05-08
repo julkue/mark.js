@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.10.0
+ * mark.js v8.11.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -67,15 +67,15 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 if (Object.keys(this.opt.synonyms).length) {
                     str = this.createSynonymsRegExp(str);
                 }
-                if (this.opt.ignoreJoiners) {
+                if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
                     str = this.setupIgnoreJoinersRegExp(str);
                 }
                 if (this.opt.diacritics) {
                     str = this.createDiacriticsRegExp(str);
                 }
                 str = this.createMergedBlanksRegExp(str);
-                if (this.opt.ignoreJoiners) {
-                    str = this.createIgnoreJoinersRegExp(str);
+                if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
+                    str = this.createJoinersRegExp(str);
                 }
                 if (this.opt.wildcards !== "disabled") {
                     str = this.createWildcardsRegExp(str);
@@ -130,9 +130,16 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 });
             }
         }, {
-            key: "createIgnoreJoinersRegExp",
-            value: function createIgnoreJoinersRegExp(str) {
-                return str.split("\0").join("[\\u00ad|\\u200b|\\u200c|\\u200d]?");
+            key: "createJoinersRegExp",
+            value: function createJoinersRegExp(str) {
+                var joiner = [];
+                if (this.opt.ignorePunctuation.length) {
+                    joiner.push(this.escapeStr(this.opt.ignorePunctuation.join("")));
+                }
+                if (this.opt.ignoreJoiners) {
+                    joiner.push("\\u00ad\\u200b\\u200c\\u200d");
+                }
+                return joiner.length ? str.split("\0").join("[" + joiner.join("") + "]*") : str;
             }
         }, {
             key: "createDiacriticsRegExp",
@@ -628,6 +635,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                     "caseSensitive": false,
                     "ignoreJoiners": false,
                     "ignoreGroups": 0,
+                    "ignorePunctuation": [],
                     "wildcards": "disabled",
                     "each": function each() {},
                     "noMatch": function noMatch() {},
