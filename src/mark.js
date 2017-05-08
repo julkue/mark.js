@@ -249,7 +249,9 @@ class Mark { // eslint-disable-line no-unused-vars
 
     /**
      * Creates a regular expression string to allow ignoring of designated
-     * characters (soft hyphens, zero width characters & punctuation)
+     * characters (soft hyphens, zero width characters & punctuation) based on
+     * the specified option values of <code>ignorePunctuation</code> and
+     * <code>ignoreJoiners</code>
      * @param  {string} str - The search term to be used
      * @return {string}
      * @access protected
