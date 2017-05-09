@@ -730,7 +730,6 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
         const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
-            // typeof ignoreGroups === "boolean" ? ignoreGroups : false,
             wrapGroups = (node, pos, len) => {
                 node = this.wrapRangeInTextNode(node, pos, pos + len);
                 eachCb(node.previousSibling);
