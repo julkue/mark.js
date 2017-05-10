@@ -160,26 +160,46 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     createSynonymsRegExp(str) {
         const syn = this.opt.synonyms,
-            sens = this.opt.caseSensitive ? "" : "i";
+            sens = this.opt.caseSensitive ? "" : "i",
+            // add replacement character placeholder before and after the
+            // synonym group
+            joinerPlaceholder = this.opt.ignoreJoiners ||
+                this.opt.ignorePunctuation.length ? "\u0000" : "";
         for(let index in syn) {
             if(syn.hasOwnProperty(index)) {
                 const value = syn[index],
                     k1 = this.opt.wildcards !== "disabled" ?
-                    this.setupWildcardsRegExp(index) :
-                    this.escapeStr(index),
+                        this.setupWildcardsRegExp(index) :
+                        this.escapeStr(index),
                     k2 = this.opt.wildcards !== "disabled" ?
-                    this.setupWildcardsRegExp(value) :
-                    this.escapeStr(value);
+                        this.setupWildcardsRegExp(value) :
+                        this.escapeStr(value);
                 if(k1 !== "" && k2 !== "") {
                     str = str.replace(
                         new RegExp(
                             `(${k1}|${k2})`,
                             `gm${sens}`
                         ),
-                        `(${k1}|${k2})`
+                        joinerPlaceholder +
+                        `(${this.processSynomyms(k1)}|` +
+                        `${this.processSynomyms(k2)})` +
+                        joinerPlaceholder
                     );
                 }
             }
+        }
+        return str;
+    }
+
+    /**
+     * Setup synonyms to work with ignoreJoiners and or ignorePunctuation
+     * @param {string} str - synonym key or value to process
+     * @return {string} - processed synonym string
+     *
+     */
+    processSynomyms(str) {
+        if(this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
+            str = this.setupIgnoreJoinersRegExp(str);
         }
         return str;
     }
@@ -258,8 +278,9 @@ class Mark { // eslint-disable-line no-unused-vars
      */
     createJoinersRegExp(str) {
         let joiner = [];
-        if (this.opt.ignorePunctuation.length) {
-            joiner.push(this.escapeStr(this.opt.ignorePunctuation.join("")));
+        const ignorePunctuation = this.opt.ignorePunctuation;
+        if (Array.isArray(ignorePunctuation) && ignorePunctuation.length) {
+            joiner.push(this.escapeStr(ignorePunctuation.join("")));
         }
         if (this.opt.ignoreJoiners) {
             // u+00ad = soft hyphen
@@ -269,7 +290,7 @@ class Mark { // eslint-disable-line no-unused-vars
             joiner.push("\\u00ad\\u200b\\u200c\\u200d");
         }
         return joiner.length ?
-            str.split("\u0000").join(`[${joiner.join("")}]*`) :
+            str.split(/\u0000+/).join(`[${joiner.join("")}]*`) :
             str;
     }
 

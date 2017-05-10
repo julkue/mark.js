@@ -21,6 +21,7 @@ describe("basic mark with ignorePunctuation and accuracy", function () {
         $ctx2 = $(".basic-ignore-punctuation-accuracy > div:nth-child(2)");
         new Mark($ctx1[0]).mark("rem ips", {
             "separateWordSearch": false,
+            "diacritics": false,
             "accuracy": {
                 "value": "complementary",
                 // remove certain limiters for the given HTML
@@ -30,6 +31,7 @@ describe("basic mark with ignorePunctuation and accuracy", function () {
             "done": function () {
                 new Mark($ctx2[0]).mark(["ipsum"], {
                     "separateWordSearch": false,
+                    "diacritics": false,
                     "accuracy": "exact",
                     "ignorePunctuation": punctuation,
                     "done": done

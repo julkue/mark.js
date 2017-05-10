@@ -16,18 +16,22 @@ describe("basic mark with wildcards between words", function () {
         $ctx4 = $(".basic-wildcards-between-words > div:nth-child(4)");
         new Mark($ctx1[0]).mark("lorem?ipsum", {
             "separateWordSearch": false,
+            "diacritics": false,
             "wildcards": "enabled",
             "done": function () {
                 new Mark($ctx2[0]).mark("lorem*ipsum", {
                     "separateWordSearch": false,
+                    "diacritics": false,
                     "wildcards": "enabled",
                     "done": function () {
                         new Mark($ctx3[0]).mark("lorem?ipsum", {
                             "separateWordSearch": false,
+                            "diacritics": false,
                             "wildcards": "withSpaces",
                             "done": function () {
                                 new Mark($ctx4[0]).mark("lorem*ipsum", {
                                     "separateWordSearch": false,
+                                    "diacritics": false,
                                     "wildcards": "withSpaces",
                                     "done": done
                                 });

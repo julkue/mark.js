@@ -5,25 +5,31 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with ignoreJoiners and synonyms", function () {
-    var $ctx1, $ctx2;
+describe("basic mark with ignorePunctuation and synonyms", function () {
+    function getPunctuation() {
+        return ":;.,-–—‒_(){}[]!'\"+="
+            .replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&")
+            .split("");
+    }
+    var $ctx1, $ctx2,
+        punctuation = getPunctuation();
     beforeEach(function (done) {
-        loadFixtures("basic/ignore-joiners-synonyms.html");
+        loadFixtures("basic/ignore-punctuation-synonyms.html");
 
-        $ctx1 = $(".basic-ignore-joiners-synonyms > div:nth-child(1)");
-        $ctx2 = $(".basic-ignore-joiners-synonyms > div:nth-child(2)");
+        $ctx1 = $(".basic-ignore-punctuation-synonyms > div:nth-child(1)");
+        $ctx2 = $(".basic-ignore-punctuation-synonyms > div:nth-child(2)");
         new Mark($ctx1[0]).mark("Lorem", {
+            "separateWordSearch": false,
+            "diacritics": false,
+            "ignorePunctuation": punctuation,
             "synonyms": {
                 "Lorem": "ipsum"
             },
-            "separateWordSearch": false,
-            "diacritics": false,
-            "ignoreJoiners": true,
             "done": function () {
                 new Mark($ctx2[0]).mark(["one", "dos", "lüfte"], {
                     "separateWordSearch": false,
                     "diacritics": false,
-                    "ignoreJoiners": true,
+                    "ignorePunctuation": punctuation,
                     "synonyms": {
                         "ü": "ue",
                         "one": "uno",

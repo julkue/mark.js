@@ -22,14 +22,17 @@ describe("basic mark with ignorePunctuation", function () {
         $ctx3 = $(".basic-ignore-punctuation > div:nth-child(3)");
         new Mark($ctx1[0]).mark("ipsum", {
             "separateWordSearch": false,
+            "diacritics": false,
             "ignorePunctuation": punctuation,
             "done": function () {
                 new Mark($ctx2[0]).mark(["Lorem ipsum"], {
                     "separateWordSearch": false,
+                    "diacritics": false,
                     "ignorePunctuation": punctuation,
                     "done": function () {
                         new Mark($ctx3[0]).mark(["ipsum"], {
                             "separateWordSearch": false,
+                            "diacritics": false,
                             "ignorePunctuation": "",
                             "done": done
                         });

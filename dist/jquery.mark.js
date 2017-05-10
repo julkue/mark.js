@@ -87,16 +87,25 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: "createSynonymsRegExp",
             value: function createSynonymsRegExp(str) {
                 var syn = this.opt.synonyms,
-                    sens = this.opt.caseSensitive ? "" : "i";
+                    sens = this.opt.caseSensitive ? "" : "i",
+                    joinerPlaceholder = this.opt.ignoreJoiners || this.opt.ignorePunctuation.length ? "\0" : "";
                 for (var index in syn) {
                     if (syn.hasOwnProperty(index)) {
                         var value = syn[index],
                             k1 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
                             k2 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
                         if (k1 !== "" && k2 !== "") {
-                            str = str.replace(new RegExp("(" + k1 + "|" + k2 + ")", "gm" + sens), "(" + k1 + "|" + k2 + ")");
+                            str = str.replace(new RegExp("(" + k1 + "|" + k2 + ")", "gm" + sens), joinerPlaceholder + ("(" + this.processSynomyms(k1) + "|") + (this.processSynomyms(k2) + ")") + joinerPlaceholder);
                         }
                     }
+                }
+                return str;
+            }
+        }, {
+            key: "processSynomyms",
+            value: function processSynomyms(str) {
+                if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
+                    str = this.setupIgnoreJoinersRegExp(str);
                 }
                 return str;
             }
@@ -133,13 +142,14 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             key: "createJoinersRegExp",
             value: function createJoinersRegExp(str) {
                 var joiner = [];
-                if (this.opt.ignorePunctuation.length) {
-                    joiner.push(this.escapeStr(this.opt.ignorePunctuation.join("")));
+                var ignorePunctuation = this.opt.ignorePunctuation;
+                if (Array.isArray(ignorePunctuation) && ignorePunctuation.length) {
+                    joiner.push(this.escapeStr(ignorePunctuation.join("")));
                 }
                 if (this.opt.ignoreJoiners) {
                     joiner.push("\\u00ad\\u200b\\u200c\\u200d");
                 }
-                return joiner.length ? str.split("\0").join("[" + joiner.join("") + "]*") : str;
+                return joiner.length ? str.split(/\u0000+/).join("[" + joiner.join("") + "]*") : str;
             }
         }, {
             key: "createDiacriticsRegExp",

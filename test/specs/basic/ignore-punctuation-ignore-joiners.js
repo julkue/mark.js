@@ -25,11 +25,13 @@ describe("basic mark with ignorePunctuation and ignoreJoiners", function () {
         $ctx2 = $container.children("div:nth-child(2)");
         new Mark($ctx1[0]).mark("Lorem ipsum", {
             "separateWordSearch": false,
+            "diacritics": false,
             "ignoreJoiners": true,
             "ignorePunctuation": punctuation,
             "done": function () {
                 new Mark($ctx2[0]).mark(["ipsum"], {
                     "separateWordSearch": false,
+                    "diacritics": false,
                     "ignoreJoiners": true,
                     "ignorePunctuation": punctuation,
                     "done": done
