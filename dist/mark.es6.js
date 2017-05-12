@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.10.0
+ * mark.js v8.10.1
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -59,10 +59,7 @@
         }
 
         get iterator() {
-            if (!this._iterator) {
-                this._iterator = new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude, this.opt.iframesTimeout);
-            }
-            return this._iterator;
+            return new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude, this.opt.iframesTimeout);
         }
 
         log(msg, level = "debug") {
