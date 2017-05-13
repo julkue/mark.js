@@ -82,15 +82,13 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     get iterator() {
-        if(!this._iterator) {
-            this._iterator = new DOMIterator(
-                this.ctx,
-                this.opt.iframes,
-                this.opt.exclude,
-                this.opt.iframesTimeout
-            );
-        }
-        return this._iterator;
+        // always return new instance in case there were option changes
+        return new DOMIterator(
+            this.ctx,
+            this.opt.iframes,
+            this.opt.exclude,
+            this.opt.iframesTimeout
+        );
     }
 
     /**
