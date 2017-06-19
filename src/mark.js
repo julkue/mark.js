@@ -1119,6 +1119,9 @@ class Mark { // eslint-disable-line no-unused-vars
      * @property {boolean} [acrossElements=false] - Whether to find matches
      * across HTML elements. By default, only matches within single HTML
      * elements will be found
+     * @property {boolean} [ignoreJoiners=false] - Whether to ignore word
+     * joiners inside of key words. These include soft-hyphens, zero-width
+     * space, zero-width non-joiners and zero-width joiners.
      * @property {Mark~markIgnorePunctuationSetting} [ignorePunctuation]
      * @property {Mark~markEachCallback} [each]
      * @property {Mark~markNoMatchCallback} [noMatch]
