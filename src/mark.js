@@ -193,7 +193,6 @@ class Mark { // eslint-disable-line no-unused-vars
      * Setup synonyms to work with ignoreJoiners and or ignorePunctuation
      * @param {string} str - synonym key or value to process
      * @return {string} - processed synonym string
-     *
      */
     processSynomyms(str) {
         if(this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
