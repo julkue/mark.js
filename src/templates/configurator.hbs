@@ -100,6 +100,22 @@
         </select>
     </div>
 {{/inline}}
+{{#* inline "ignore-punctuation-form-group"}}
+    <div class="form-group">
+        <label>Ignore punctuation</label>
+        <div class="row ignore-punctuation">
+            <div class="col-xs-8">
+                <input class="form-control input-sm" name="ignorePunctuation[]" type="text" placeholder="(e.g. ')" pattern="[^a-zA-Z0-9]" title="Any non non alphanumeric character, e.g. !" />
+            </div>
+            <div class="col-xs-4">
+                <button type="button" class="btn btn-info btn-sm">
+                    <i class="glyphicon glyphicon-plus" data-action="add"></i>
+                    <i class="glyphicon glyphicon-minus" data-action="remove"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+{{/inline}}
 {{#* inline "class-name-form-group"}}
     <div class="form-group">
         <label for="{{prefix}}className">Class name:</label>
@@ -171,6 +187,7 @@
             <div class="col-sm-6">
                 {{> accuracy-form-group prefix="form-keyword-"}}
                 {{> class-name-form-group prefix="form-keyword-"}}
+                {{> ignore-punctuation-form-group prefix="form-keyword-"}}
                 <div class="form-group checkbox-options">
                     {{> separate-word-search-checkbox prefix="form-keyword-"}}
                     {{> diacritics-checkbox prefix="form-keyword-"}}
@@ -269,7 +286,7 @@
                 </div>
                 <div class="panel-body context">
                     <p>
-                        Lorem ipsum dolor sit āmet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, one, nò sea takimata 1 sanctus est <span class="ignore">Lorem</span> ipsum dolor sit amet. Lörem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam lor&shy;em ipsum nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est <span class="ignore">lorem</span> ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy.
+                        Lorem ipsum dolor sit āmet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, one, nò sea takimata 1 sanctus est <span class="ignore">Lorem</span> ipsum dolor sit amet. Lörem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam lor&shy;em ipsum nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est <span class="ignore">lorem</span> ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy. Lore'm ipsu%m dolor sit amet. Lo!rem ipsum.
                     </p>
                 </div>
             </div>

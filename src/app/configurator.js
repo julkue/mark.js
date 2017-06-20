@@ -30,10 +30,12 @@
             /**
              * Selectors
              */
-            var synonymsSel = ".configurator .synonyms";
-            var synonymsBtnSel = synonymsSel + " button";
-            var excludeSel = ".configurator .exclude";
-            var excludeBtnSel = excludeSel + " button";
+            var synonymsSel = ".configurator .synonyms",
+                synonymsBtnSel = synonymsSel + " button",
+                excludeSel = ".configurator .exclude",
+                excludeBtnSel = excludeSel + " button",
+                ignorePunctuationSel = ".configurator .ignore-punctuation",
+                ignorePunctuationBtnSel = ignorePunctuationSel + " button";
 
             /**
              * Returns the current type, "keyword", "array" or "regexp"
@@ -73,19 +75,19 @@
                     .find("input, select")
                     .not("[name='keyword'], [name='array'], [name='regexp']")
                     .not("[name='type'], [name='exclude[]']")
-                    .not("[name='ignoreGroups']")
+                    .not("[name='ignoreGroups'], [name='ignorePunctuation[]']")
                     .serializeArray()
                     .concat(
                         $form.find("input[type='checkbox']")
-                        .filter(":not(:checked)")
-                        .map(
-                            function () {
-                                return {
-                                    "name": this.name,
-                                    "value": "off"
+                            .filter(":not(:checked)")
+                            .map(
+                                function () {
+                                    return {
+                                        "name": this.name,
+                                        "value": "off"
+                                    }
                                 }
-                            }
-                        ).get()
+                            ).get()
                     );
             }
 
@@ -96,42 +98,51 @@
             function getOptions() {
                 var options = {
                         "synonyms": {},
-                        "exclude": []
+                        "exclude": [],
+                        "ignorePunctuation": []
                     },
                     inputValues = getSerializedForm();
+
                 // Set option values
                 $.each(inputValues, function (i, input) {
                     var name = input.name;
                     var value = input.value;
-                    if(value === "on") {
+                    if (value === "on") {
                         value = true;
-                    } else if(value === "off") {
+                    } else if (value === "off") {
                         value = false;
-                    } else if(!value) {
+                    } else if (!value) {
                         return;
                     }
                     options[name] = value;
                 });
                 // Map correct synonyms
                 $.each(options, function (key, value) {
-                    if(key.indexOf("synonym") > -1 && key.indexOf("key") > -1) {
+                    if (key.indexOf("synonym") > -1 && key.indexOf("key") > -1) {
                         var spl = key.split("_");
                         var valueName = spl[0] + "_" + spl[1] + "_value";
-                        if(options[valueName] && value) {
+                        if (options[valueName] && value) {
                             options["synonyms"][value] = options[valueName];
                         }
                         delete options[key];
                         delete options[valueName];
                     }
                 });
-                if($.isEmptyObject(options["synonyms"])) {
+                if ($.isEmptyObject(options["synonyms"])) {
                     delete options["synonyms"];
                 }
                 // Map correct exclude values
                 getCurrentForm().find("[name='exclude[]']").each(function () {
                     var val = $(this).val().trim();
-                    if(val) {
+                    if (val) {
                         options["exclude"].push(val);
+                    }
+                });
+                // Map correct exclude values
+                getCurrentForm().find("[name='ignorePunctuation[]']").each(function () {
+                    var val = $(this).val().trim();
+                    if (val) {
+                        options["ignorePunctuation"].push(val);
                     }
                 });
                 var $iGroups = getCurrentForm().find("[name='ignoreGroups']");
@@ -159,15 +170,16 @@
                         "acrossElements": false,
                         "caseSensitive": false,
                         "ignoreJoiners": false,
+                        "ignorePunctuation": [],
                         "ignoreGroups": 0,
                         "wildcards": "disabled",
                         "debug": false
                     };
-                for(var opt in options) {
-                    if(options.hasOwnProperty(opt)) {
+                for (var opt in options) {
+                    if (options.hasOwnProperty(opt)) {
                         var a = JSON.stringify(options[opt]);
                         var b = JSON.stringify(defaults[opt]);
-                        if(a != b) {
+                        if (a != b) {
                             ret[opt] = options[opt];
                         }
                     }
@@ -184,13 +196,13 @@
             function updateCodeExample(method, searchTerm, options) {
                 $codeExampleMethod.text(method);
                 $codeExampleValue.text(searchTerm);
-                if(!$.isEmptyObject(options)) {
+                if (!$.isEmptyObject(options)) {
                     var optVal = JSON.stringify(options, null, 4);
                 } else {
                     var optVal = "";
                 }
                 $codeExampleOptions.text(optVal);
-                if(optVal) {
+                if (optVal) {
                     $codeExampleDelimiter.show();
                 } else {
                     $codeExampleDelimiter.hide();
@@ -205,15 +217,15 @@
              * @return {string|string[]|RegExp}
              */
             function serializeSearchValue(val, type) {
-                switch(type) {
-                case "keyword":
-                default:
-                    return val;
-                case "array":
-                    return eval(val);
-                case "regexp":
-                    var match = val.match(new RegExp("^/(.*?)/([gimy]*)$"));
-                    return new RegExp(match[1], match[2]);
+                switch (type) {
+                    case "keyword":
+                    default:
+                        return val;
+                    case "array":
+                        return eval(val);
+                    case "regexp":
+                        var match = val.match(new RegExp("^/(.*?)/([gimy]*)$"));
+                        return new RegExp(match[1], match[2]);
                 }
             }
 
@@ -228,19 +240,19 @@
                 var method = type === "regexp" ? "markRegExp" : "mark";
                 try {
                     var serialize = serializeSearchValue(term, type);
-                } catch(e) {
+                } catch (e) {
                     return;
                 }
                 $markContext.unmark();
                 try {
                     $markContext[method](serialize, options);
-                } catch(e) {
+                } catch (e) {
                     // this can be thrown when e.g. the exclude selector is "."
                     console.debug(e);
                 }
-                if(typeof serialize === "string") {
+                if (typeof serialize === "string") {
                     term = '"' + term + '"';
-                } else if(Array.isArray(serialize)) {
+                } else if (Array.isArray(serialize)) {
                     term = '["' + serialize.join('", "') + '"]';
                 } else {
                     term = serialize.toString();
@@ -268,7 +280,7 @@
                 // pattern attribute, it is only necessary to stop the redirect
                 // action when the form is valid
                 $forms.on("submit", function (event) {
-                    if(this.checkValidity()) {
+                    if (this.checkValidity()) {
                         event.preventDefault();
                     }
                 });
@@ -282,7 +294,7 @@
                 $body.on("click", synonymsBtnSel, function () {
                     var $this = $(this);
                     var $closest = $this.closest(synonymsSel);
-                    if($this.find("[data-action='add']").is(":visible")) {
+                    if ($this.find("[data-action='add']").is(":visible")) {
                         ++counter;
                         var $clone = $closest.clone();
                         var $inputs = $clone.find("input[name^='synonym']");
@@ -310,7 +322,25 @@
                 $body.on("click", excludeBtnSel, function () {
                     var $this = $(this);
                     var $closest = $this.closest(excludeSel);
-                    if($this.find("[data-action='add']").is(":visible")) {
+                    if ($this.find("[data-action='add']").is(":visible")) {
+                        var $clone = $closest.clone();
+                        $clone.find("[data-action='add']").hide();
+                        $clone.find("[data-action='remove']").show();
+                        $clone.insertAfter($closest);
+                    } else {
+                        $closest.remove();
+                    }
+                });
+            }
+
+            /**
+             * Initializes dynamic ignorePunctuation addition/deletion
+             */
+            function initDynamicIgnorePunctuation() {
+                $body.on("click", ignorePunctuationBtnSel, function () {
+                    var $this = $(this);
+                    var $closest = $this.closest(ignorePunctuationSel);
+                    if ($this.find("[data-action='add']").is(":visible")) {
                         var $clone = $closest.clone();
                         $clone.find("[data-action='add']").hide();
                         $clone.find("[data-action='remove']").show();
@@ -336,10 +366,11 @@
              * Initializes configurator events
              */
             function initEvents() {
-                if($configurator.length) {
+                if ($configurator.length) {
                     initFormToggle();
                     initDynamicSynonyms();
                     initDynamicExclude();
+                    initDynamicIgnorePunctuation();
                     initFormValidation();
                     initConfigurator();
                 }
