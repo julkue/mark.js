@@ -44,6 +44,12 @@ module.exports = config => {
             platform: "Windows 10",
             version: "40"
         },
+        "SL_Win_Firefox_50": {
+            base: "SauceLabs",
+            browserName: "firefox",
+            platform: "Windows 10",
+            version: "50"
+        },
         "SL_Win_Firefox_Latest": {
             base: "SauceLabs",
             browserName: "firefox",
