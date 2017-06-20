@@ -1,5 +1,5 @@
 /*!***************************************************
- * mark.js v8.10.1
+ * mark.js v8.11.0
  * https://github.com/julmot/mark.js
  * Copyright (c) 2014–2017, Julian Motz
  * Released under the MIT license https://git.io/vwTVl
@@ -44,6 +44,7 @@
                 "caseSensitive": false,
                 "ignoreJoiners": false,
                 "ignoreGroups": 0,
+                "ignorePunctuation": [],
                 "wildcards": "disabled",
                 "each": () => {},
                 "noMatch": () => {},
@@ -84,15 +85,15 @@
             if (Object.keys(this.opt.synonyms).length) {
                 str = this.createSynonymsRegExp(str);
             }
-            if (this.opt.ignoreJoiners) {
+            if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
                 str = this.setupIgnoreJoinersRegExp(str);
             }
             if (this.opt.diacritics) {
                 str = this.createDiacriticsRegExp(str);
             }
             str = this.createMergedBlanksRegExp(str);
-            if (this.opt.ignoreJoiners) {
-                str = this.createIgnoreJoinersRegExp(str);
+            if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
+                str = this.createJoinersRegExp(str);
             }
             if (this.opt.wildcards !== "disabled") {
                 str = this.createWildcardsRegExp(str);
@@ -103,16 +104,24 @@
 
         createSynonymsRegExp(str) {
             const syn = this.opt.synonyms,
-                  sens = this.opt.caseSensitive ? "" : "i";
+                  sens = this.opt.caseSensitive ? "" : "i",
+                  joinerPlaceholder = this.opt.ignoreJoiners || this.opt.ignorePunctuation.length ? "\u0000" : "";
             for (let index in syn) {
                 if (syn.hasOwnProperty(index)) {
                     const value = syn[index],
                           k1 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
                           k2 = this.opt.wildcards !== "disabled" ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
                     if (k1 !== "" && k2 !== "") {
-                        str = str.replace(new RegExp(`(${k1}|${k2})`, `gm${sens}`), `(${k1}|${k2})`);
+                        str = str.replace(new RegExp(`(${k1}|${k2})`, `gm${sens}`), joinerPlaceholder + `(${this.processSynomyms(k1)}|` + `${this.processSynomyms(k2)})` + joinerPlaceholder);
                     }
                 }
+            }
+            return str;
+        }
+
+        processSynomyms(str) {
+            if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
+                str = this.setupIgnoreJoinersRegExp(str);
             }
             return str;
         }
@@ -143,8 +152,16 @@
             });
         }
 
-        createIgnoreJoinersRegExp(str) {
-            return str.split("\u0000").join("[\\u00ad|\\u200b|\\u200c|\\u200d]?");
+        createJoinersRegExp(str) {
+            let joiner = [];
+            const ignorePunctuation = this.opt.ignorePunctuation;
+            if (Array.isArray(ignorePunctuation) && ignorePunctuation.length) {
+                joiner.push(this.escapeStr(ignorePunctuation.join("")));
+            }
+            if (this.opt.ignoreJoiners) {
+                joiner.push("\\u00ad\\u200b\\u200c\\u200d");
+            }
+            return joiner.length ? str.split(/\u0000+/).join(`[${joiner.join("")}]*`) : str;
         }
 
         createDiacriticsRegExp(str) {
