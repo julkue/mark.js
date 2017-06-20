@@ -63,10 +63,10 @@ describe("mark with range filter callback", function () {
                 ) {
                     termCount++;
                     if (
-                      item.start === range.start &&
-                      item.length === range.length &&
-                      // check extra data
-                      range.foo === "bar" + item.index
+                        item.start === range.start &&
+                        item.length === range.length &&
+                        // check extra data
+                        range.foo === "bar" + item.index
                     ) {
                         rangeCount++;
                     }

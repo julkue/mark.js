@@ -66,6 +66,7 @@
         "max-depth": [
             "error",
             8
-        ]
+        ],
+        "no-useless-escape": "warn"
     }
 }

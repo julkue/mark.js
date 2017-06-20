@@ -115,6 +115,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     escapeStr(str) {
+        // eslint-disable-next-line no-useless-escape
         return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     }
 
@@ -491,7 +492,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * @property {boolean} valid - boolean value indicating that the start and
      * calculated end range is valid
      */
-     /**
+    /**
       * Initial validation of ranges for markRanges. Preliminary checks are done
       * to ensure the start and length values exist and are not zero or non-
       * numeric
@@ -881,9 +882,9 @@ class Mark { // eslint-disable-line no-unused-vars
             const originalLength = dict.value.length;
             ranges.forEach((range, counter) => {
                 let {start, end, valid} = this.checkWhitespaceRanges(
-                      range,
-                      originalLength,
-                      dict.value
+                    range,
+                    originalLength,
+                    dict.value
                 );
                 if (valid) {
                     this.wrapRangeInMappedTextNode(dict, start, end, node => {
