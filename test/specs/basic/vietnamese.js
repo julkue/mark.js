@@ -5,15 +5,15 @@
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 "use strict";
-describe("basic mark with diacritics", function () {
+describe("basic mark with diacritics for Vietnamese", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic/diacritics.html");
+        loadFixtures("basic/vietnamese.html");
 
-        $ctx = $(".basic-diacritics");
+        $ctx = $(".basic-vietnamese");
         // including a term with a "s" and a whitespace to check "merge blanks"
         // behavior in combination with diacritics
-        new Mark($ctx[0]).mark(["dolor", "amet", "justo", "lores ipsum"], {
+        new Mark($ctx[0]).mark(["truong", "am", "ac"], {
             "separateWordSearch": false,
             "done": function () {
                 done();
@@ -22,6 +22,6 @@ describe("basic mark with diacritics", function () {
     });
 
     it("should treat normal and diacritic characters equally", function () {
-        expect($ctx.find("mark")).toHaveLength(15);
+        expect($ctx.find("mark")).toHaveLength(9);
     });
 });

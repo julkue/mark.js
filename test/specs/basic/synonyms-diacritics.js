@@ -30,7 +30,7 @@ describe("basic mark with synonyms and diacritics", function () {
     });
 
     it("should find synonyms with diacritics", function () {
-        expect($ctx1.find("mark")).toHaveLength(13);
-        expect($ctx2.find("mark")).toHaveLength(7);
+        expect($ctx1.find("mark")).toHaveLength(14);
+        expect($ctx2.find("mark")).toHaveLength(8);
     });
 });
