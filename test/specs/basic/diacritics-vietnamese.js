@@ -8,16 +8,14 @@
 describe("basic mark with diacritics for Vietnamese", function () {
     var $ctx;
     beforeEach(function (done) {
-        loadFixtures("basic/vietnamese.html");
+        loadFixtures("basic/diacritics-vietnamese.html");
 
-        $ctx = $(".basic-vietnamese");
+        $ctx = $(".basic-diacritics-vietnamese");
         // including a term with a "s" and a whitespace to check "merge blanks"
         // behavior in combination with diacritics
         new Mark($ctx[0]).mark(["truong", "am", "ac"], {
             "separateWordSearch": false,
-            "done": function () {
-                done();
-            }
+            "done": done
         });
     });
 
