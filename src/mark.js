@@ -765,30 +765,43 @@ class Mark { // eslint-disable-line no-unused-vars
      * @access protected
      */
     wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-        const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
+        const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+            wrapGroups = (node, pos, len) => {
+                node = this.wrapRangeInTextNode(node, pos, pos + len);
+                eachCb(node.previousSibling);
+                return node;
+            };
         this.getTextNodes(dict => {
             dict.nodes.forEach(node => {
                 node = node.node;
-                let match;
+                let match, matchLen;
                 while(
                     (match = regex.exec(node.textContent)) !== null &&
                     match[matchIdx] !== ""
                 ) {
-                    if(!filterCb(match[matchIdx], node)) {
-                        continue;
-                    }
-                    let pos = match.index;
-                    if(matchIdx !== 0) {
-                        for(let i = 1; i < matchIdx; i++) {
-                            pos += match[i].length;
+                    if (this.opt.separateGroups) {
+                        matchLen = match.length;
+                        for (let i = 1; i < matchLen; i++) {
+                            let pos = node.textContent.indexOf(match[i]);
+                            if (match[i] && pos > -1) {
+                                if(!filterCb(match[i], node)) {
+                                    continue;
+                                }
+                                node = wrapGroups(node, pos, match[i].length);
+                            }
                         }
+                    } else {
+                        if(!filterCb(match[matchIdx], node)) {
+                            continue;
+                        }
+                        let pos = match.index;
+                        if(matchIdx !== 0) {
+                            for(let i = 1; i < matchIdx; i++) {
+                                pos += match[i].length;
+                            }
+                        }
+                        node = wrapGroups(node, pos, match[matchIdx].length);
                     }
-                    node = this.wrapRangeInTextNode(
-                        node,
-                        pos,
-                        pos + match[matchIdx].length
-                    );
-                    eachCb(node.previousSibling);
                     // reset index of last match as the node changed and the
                     // index isn't valid anymore http://tinyurl.com/htsudjd
                     regex.lastIndex = 0;
@@ -966,7 +979,7 @@ class Mark { // eslint-disable-line no-unused-vars
      * Elements matching those selectors will be ignored
      * @property {boolean} [iframes=false] - Whether to search inside iframes
      * @property {Mark~commonDoneCallback} [done]
-     * @property {boolean} [debug=false] - Wheter to log messages
+     * @property {boolean} [debug=false] - Whether to log messages
      * @property {object} [log=window.console] - Where to log messages (only if
      * debug is true)
      */
@@ -992,6 +1005,8 @@ class Mark { // eslint-disable-line no-unused-vars
      * {@link Mark~commonOptions}
      * @typedef Mark~markRegExpOptions
      * @type {object.<string>}
+     * @property {boolean} [separateGroups] - Whether to mark each regular
+     * expression group as a separate match
      * @property {Mark~markRegExpEachCallback} [each]
      * @property {Mark~markRegExpNoMatchCallback} [noMatch]
      * @property {Mark~markRegExpFilterCallback} [filter]
@@ -1678,7 +1693,7 @@ class DOMIterator {
     /**
      * Checks if an iframe wasn't handled already and if so, calls
      * {@link DOMIterator#compareNodeIframe} to check if it should be handled.
-     * Information wheter an iframe was or wasn't handled is given within the
+     * Information whether an iframe was or wasn't handled is given within the
      * <code>ifr</code> dictionary
      * @param {HTMLElement} node - The node that should occur after the iframe
      * @param {HTMLElement} prevNode - The node that should occur before the
