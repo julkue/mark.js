@@ -23,7 +23,7 @@
                 $content = $("main"),
                 $links = $body.find("a"),
                 $anchorLinks = $links.filter("a[href*='#']:not([href='#'])"),
-                $downloadLinks = $links.filter("a[href$='.zip']"),
+                $downloadLinks = $links.filter("[data-download]"),
                 $tables = $content.find("table"),
                 $nav = $("nav"),
                 $navList = $nav.find("> ul"),
