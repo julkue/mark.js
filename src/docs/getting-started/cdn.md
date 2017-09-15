@@ -10,4 +10,4 @@ available on:
 
 [cdn]: https://en.wikipedia.org/wiki/Content_delivery_network
 [cdnjs]: https://cdnjs.com/libraries/{{defaults.title}}/
-[jsdelivr]: {{{defaults.download}}}
+[jsdelivr]: https://www.jsdelivr.com/package/npm/mark.js?path=dist
