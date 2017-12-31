@@ -17,7 +17,7 @@
   "license": "MIT",
   "homepage": "https://markjs.io/",
   "author": {
-    "name": "Julian Motz",
+    "name": "Julian Kühnel",
     "url": "https://github.com/julmot"
   },
   "description": "Highlight keywords using JavaScript. Intended for every use case. Can e.g. be used to mark text in search results.",

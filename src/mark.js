@@ -1,7 +1,7 @@
 /*!***************************************************
  * mark.js v8.11.0
  * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2017, Julian Motz
+ * Copyright (c) 2014–2018, Julian Kühnel
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 /**
@@ -1146,9 +1146,9 @@ class Mark { // eslint-disable-line no-unused-vars
             fn = "wrapMatches";
 
         const {
-            keywords: kwArr,
-            length: kwArrLen
-        } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
+                keywords: kwArr,
+                length: kwArrLen
+            } = this.getSeparatedKeywords(typeof sv === "string" ? [sv] : sv),
             sens = this.opt.caseSensitive ? "" : "i",
             handler = kw => { // async function calls as iframes are async too
                 let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),

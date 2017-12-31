@@ -1,7 +1,7 @@
 /*!***************************************************
  * mark.js v8.11.0
  * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2017, Julian Motz
+ * Copyright (c) 2014–2018, Julian Kühnel
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
 
