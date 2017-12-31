@@ -1,7 +1,7 @@
 /*!***************************************************
  * wabp
  * https://github.com/julmot/wabp
- * Copyright (c) 2015–2016, Julian Motz
+ * Copyright (c) 2015–2016, Julian Kühnel
  * Released under the MIT license https://git.io/vadUA
  *****************************************************/
 module.exports = function (grunt) {

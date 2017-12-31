@@ -10,11 +10,11 @@
     "mark.js",
     "markjs"
   ],
-  "author": "Julian Motz",
+  "author": "Julian Kühnel",
   "license": "LicenseRef-LICENSE",
   "contributors": [
     {
-      "name": "Julian Motz",
+      "name": "Julian Kühnel",
       "url": "https://github.com/julmot"
     }
   ],
@@ -49,5 +49,5 @@
     "ncp": "^2.0.0"
   },
   "private": true,
-  "copyrightYear": "2016–2017"
+  "copyrightYear": "2016–2018"
 }
