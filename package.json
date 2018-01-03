@@ -30,12 +30,13 @@
     "test": "echo \"Error: Use Grunt tasks\" && exit 1"
   },
   "devDependencies": {
-    "babel-eslint": "^7.2.3",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.1.2",
     "babel-plugin-transform-object-assign": "^6.22.0",
-    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-env": "^1.6.1",
     "eslint-plugin-jasmine-jquery": "^1.0.0",
     "grunt": "^1.0.1",
-    "grunt-babel": "^6.0.0",
+    "grunt-babel": "^7.0.0",
     "grunt-banner": "^0.6.0",
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-uglify": "^3.0.1",
@@ -45,13 +46,14 @@
     "grunt-karma": "^2.0.0",
     "jasmine-core": "^2.6.4",
     "jit-grunt": "^0.10.0",
-    "karma": "^1.7.0",
+    "jquery": "^3.2.1",
+    "karma": "^2.0.0",
     "karma-coverage": "^1.1.1",
     "karma-jasmine": "^1.1.0",
     "karma-jasmine-jquery": "^0.1.1",
     "karma-phantomjs-launcher": "^1.0.4",
     "karma-sauce-launcher": "^1.1.0",
-    "karma-spec-reporter": "^0.0.31",
+    "karma-spec-reporter": "^0.0.32",
     "karma-summary-reporter": "^1.3.3",
     "phantomjs-prebuilt": "^2.1.14"
   }

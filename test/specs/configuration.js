@@ -4,7 +4,7 @@
  * Copyright (c) 2014–2018, Julian Kühnel
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
-"use strict";
+'use strict';
 // Configuration for Jasmine or other components related to the specs
-jasmine.getFixtures().fixturesPath = "base/test/fixtures";
+jasmine.getFixtures().fixturesPath = 'base/test/fixtures';
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;

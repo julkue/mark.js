@@ -4,31 +4,31 @@
  * Copyright (c) 2014–2018, Julian Kühnel
  * Released under the MIT license https://git.io/vwTVl
  *****************************************************/
-"use strict";
-describe("basic unmark with exclude", function () {
-    var $ctx;
-    beforeEach(function (done) {
-        loadFixtures("basic/unmark-exclude.html");
+'use strict';
+describe('basic unmark with exclude', function() {
+  var $ctx;
+  beforeEach(function(done) {
+    loadFixtures('basic/unmark-exclude.html');
 
-        $ctx = $(".basic-unmark-exclude");
-        new Mark($ctx[0]).mark("lorem ipsum", {
-            "diacritics": false,
-            "separateWordSearch": false,
-            "done": function () {
-                new Mark($ctx[0]).unmark({
-                    "exclude": [
-                        "*[data-ignore] *",
-                        ".ignore *"
-                    ],
-                    "done": function(){
-                        done();
-                    }
-                });
-            }
+    $ctx = $('.basic-unmark-exclude');
+    new Mark($ctx[0]).mark('lorem ipsum', {
+      'diacritics': false,
+      'separateWordSearch': false,
+      'done': function() {
+        new Mark($ctx[0]).unmark({
+          'exclude': [
+            '*[data-ignore] *',
+            '.ignore *'
+          ],
+          'done': function(){
+            done();
+          }
         });
+      }
     });
+  });
 
-    it("should not unmark inside exclude selectors", function () {
-        expect($ctx.find("mark")).toHaveLength(2);
-    });
+  it('should not unmark inside exclude selectors', function() {
+    expect($ctx.find('mark')).toHaveLength(2);
+  });
 });

@@ -9,48 +9,48 @@
  *****************************************************/
 -->
 <head>
-    <meta charset="utf-8">
-    <title>mark.js manual test (dev purposes)</title>
-    <style>
-        mark {
-            background: yellow;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>mark.js manual test (dev purposes)</title>
+  <style>
+    mark {
+      background: yellow;
+    }
+  </style>
 </head>
 <body>
-    <div id="context"></div>
-    <script src="../vendor/jquery/dist/jquery.min.js"></script>
-    <script src="../src/mark.js"></script>
-    <script>
-        var $ctx = $("#context");
-        $ctx.load("fixtures/basic/large-document.html", function() {
-            // mark
-            var start = new Date(),
-                instance = new Mark($ctx.get());
-            instance.mark("lorem", {
-                debug: true,
-                done: function(counter) {
-                    var end = new Date(),
-                        time = end.getTime() - start.getTime();
-                    console.log(
-                        "Time elapsed: " + time + "ms.",
-                        "Elements: " + counter
-                    );
-                    // unmark
-                    setTimeout(function(){
-                        start = new Date();
-                        instance.unmark({
-                            debug: true,
-                            done: function(){
-                                var end = new Date(),
-                                    time = end.getTime() - start.getTime();
-                                console.log("Time elapsed: " + time + "ms.");
-                            }
-                        });
-                    }, 2000);
-                }
-            });
-        });
-    </script>
+<div id="context"></div>
+<script src="../node_modules/jquery/dist/jquery.min.js"></script>
+<script src="../src/mark.js"></script>
+<script>
+  var $ctx = $("#context");
+  $ctx.load("fixtures/basic/large-document.html", function () {
+    // mark
+    var start = new Date(),
+      instance = new Mark($ctx.get());
+    instance.mark("lorem", {
+      debug: true,
+      done: function (counter) {
+        var end = new Date(),
+          time = end.getTime() - start.getTime();
+        console.log(
+          "Time elapsed: " + time + "ms.",
+          "Elements: " + counter
+        );
+        // unmark
+        setTimeout(function () {
+          start = new Date();
+          instance.unmark({
+            debug: true,
+            done: function () {
+              var end = new Date(),
+                time = end.getTime() - start.getTime();
+              console.log("Time elapsed: " + time + "ms.");
+            }
+          });
+        }, 2000);
+      }
+    });
+  });
+</script>
 </body>
 </html>
