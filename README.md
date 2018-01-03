@@ -1,5 +1,7 @@
 # mark.js
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/julmot/mark.js.svg)](https://greenkeeper.io/)
+
 #### :sparkles: formerly known as jquery.mark or jmHighlight :sparkles:
 
 ##### Highlight keywords using JavaScript. Intended for every use case. <br> Can e.g. be used to mark text in search results.
