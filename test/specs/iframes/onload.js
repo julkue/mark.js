@@ -1,9 +1,3 @@
-/*!***************************************************
- * mark.js
- * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2018, Julian Kühnel
- * Released under the MIT license https://git.io/vwTVl
- *****************************************************/
 'use strict';
 describe('mark with iframes where onload was not fired yet', function() {
   // Note that in Chrome the onload event will already be fired. Reason

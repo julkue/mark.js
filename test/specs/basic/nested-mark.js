@@ -1,9 +1,3 @@
-/*!***************************************************
- * mark.js
- * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2018, Julian Kühnel
- * Released under the MIT license https://git.io/vwTVl
- *****************************************************/
 'use strict';
 describe(
   'basic mark in already marked element',

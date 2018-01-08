@@ -12,7 +12,7 @@
 [![jsDelivr Hits][jsdelivr-image]][jsdelivr]
 [![Greenkeeper][greenkeeper-image]][greenkeeper]  
 <a href="https://saucelabs.com/u/markjs">
-  <img src="https://saucelabs.com/browser-matrix/markjs.svg" alt="Sauce Test Status" width="600" />
+  <img src="https://saucelabs.com/browser-matrix/markjs.svg" alt="Sauce Test Status" width="741" />
 </a>
 
 ## Documentation and Further Information

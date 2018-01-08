@@ -1,9 +1,3 @@
-/*!***************************************************
- * mark.js
- * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2018, Julian Kühnel
- * Released under the MIT license https://git.io/vwTVl
- *****************************************************/
 'use strict';
 describe('mark with range across elements', function() {
   var $ctx, txt, ranges, index;

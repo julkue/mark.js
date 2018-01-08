@@ -1,9 +1,3 @@
-/*!***************************************************
- * mark.js
- * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2018, Julian Kühnel
- * Released under the MIT license https://git.io/vwTVl
- *****************************************************/
 'use strict';
 describe('mark with regular expression with infinite results', function() {
   var $ctx1, $ctx2, errorThrown1, errorThrown2;

@@ -1,9 +1,3 @@
-/*!***************************************************
- * mark.js
- * https://github.com/julmot/mark.js
- * Copyright (c) 2014–2018, Julian Kühnel
- * Released under the MIT license https://git.io/vwTVl
- *****************************************************/
 'use strict';
 module.exports = config => {
   // Define Sauce Labs browsers
@@ -153,7 +147,7 @@ module.exports = config => {
     },
   };
   config.set({
-    basePath: '',
+    basePath: '../',
     frameworks: ['jasmine-jquery', 'jasmine'],
     files: [
       'node_modules/jquery/dist/jquery.min.js',
@@ -221,7 +215,7 @@ module.exports = config => {
       'dist/mark.js': ['coverage']
     },
     coverageReporter: {
-      dir: 'build/coverage/',
+      dir: './build/coverage/',
       reporters: [{
         type: 'html'
       }, {
