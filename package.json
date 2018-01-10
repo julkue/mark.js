@@ -33,6 +33,7 @@
     "jsdoc": "jsdoc src/lib/ -d build/doc -R README.md -P package.json -r",
     "compile": "rollup -c build/rollup.config.js",
     "build": "npm run eslint && npm run compile && npm run karma && npm run jsdoc",
+    "dev": "nodemon --exec \"npm run eslint && npm run compile\" --watch src/ --watch test/ -e js,html",
     "test": "npm run build"
   },
   "devDependencies": {
@@ -55,6 +56,7 @@
     "karma-sauce-launcher": "^1.2.0",
     "karma-spec-reporter": "0.0.32",
     "karma-summary-reporter": "^1.4.0",
+    "nodemon": "^1.14.10",
     "phantomjs-prebuilt": "^2.1.16",
     "rollup": "^0.53.3",
     "rollup-plugin-babel": "^3.0.3",
