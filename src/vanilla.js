@@ -1,6 +1,6 @@
 import MarkJS from './lib/mark';
 
-export function Mark(ctx) {
+export default function Mark(ctx) {
   const instance = new MarkJS(ctx);
   this.mark = (sv, opt) => {
     instance.mark(sv, opt);

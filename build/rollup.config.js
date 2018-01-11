@@ -11,7 +11,10 @@ import {minify} from 'uglify-es';
 
 // Shared config
 const output = {
-    name: 'window',
+    name: (() => {
+      const str = pkg.name.split('/').pop().replace('.js', '');
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    })(),
     file: pkg.main,
     format: 'umd',
     extend: true,

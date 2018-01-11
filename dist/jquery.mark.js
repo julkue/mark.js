@@ -1,14 +1,14 @@
 /*!***************************************************
-* mark.js v8.11.0
+* mark.js v8.11.1
 * https://markjs.io/
 * Copyright (c) 2014–2018, Julian Kühnel
 * Released under the MIT license https://git.io/vwTVl
 *****************************************************/
 
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('jquery')) :
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('jquery')) :
 	typeof define === 'function' && define.amd ? define(['jquery'], factory) :
-	(factory(global.jQuery));
+	(global.Mark = factory(global.jQuery));
 }(this, (function ($) { 'use strict';
 
 $ = $ && $.hasOwnProperty('default') ? $['default'] : $;
@@ -1058,5 +1058,7 @@ $.fn.unmark = function (opt) {
   new Mark(this.get()).unmark(opt);
   return this;
 };
+
+return $;
 
 })));

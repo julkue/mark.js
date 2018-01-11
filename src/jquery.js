@@ -17,3 +17,5 @@ $.fn.unmark = function(opt) {
   new Mark(this.get()).unmark(opt);
   return this;
 };
+
+export default $;
