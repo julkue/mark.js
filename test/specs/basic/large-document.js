@@ -1,6 +1,22 @@
 'use strict';
 describe('basic mark in large documents', function() {
   var $ctx, err, start, end, diff;
+
+  var browser = {
+    isIe: function() {
+      return navigator.appVersion.indexOf('MSIE') != -1;
+    },
+    navigator: navigator.appVersion,
+    getVersion: function() {
+      var version = 999; // we assume a sane browser
+      if (navigator.appVersion.indexOf('MSIE') != -1) {
+        version = parseFloat(navigator.appVersion.split('MSIE')[1]);
+      }
+      return version;
+    }
+  };
+  var time = browser.isIe() && browser.getVersion() <= 9 ? 30000 : 10000;
+
   beforeEach(function(done) {
     loadFixtures('basic/large-document.html');
 
@@ -28,8 +44,7 @@ describe('basic mark in large documents', function() {
   it('should wrap matches', function() {
     expect($ctx.find('mark')).toHaveLength(9569);
   });
-  it('should be faster than 15 seconds', function() {
-    // normally 10 seconds, but IE9 needs more time -.-
-    expect(diff).toBeLessThan(15000);
+  it('should be faster than ' + time + ' ms', function() {
+    expect(diff).toBeLessThan(time);
   });
 });

@@ -395,7 +395,7 @@ class Mark {
         if (k1 !== '' && k2 !== '') {
           str = str.replace(
             new RegExp(
-              `(${k1}|${k2})`,
+              `(${this.escapeStr(k1)}|${this.escapeStr(k2)})`,
               `gm${sens}`
             ),
             joinerPlaceholder +

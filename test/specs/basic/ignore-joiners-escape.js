@@ -12,7 +12,8 @@ describe('basic mark with ignoreJoiners and special characters', function() {
         'sit*',
         'amet?',
         '$50',
-        '{no}'
+        '{no}',
+        'www.happy.com\\'
       ], {
         'separateWordSearch': false,
         'ignoreJoiners': true,
@@ -26,6 +27,6 @@ describe('basic mark with ignoreJoiners and special characters', function() {
 
   it('should find matches', function() {
     expect(err).toBe(false);
-    expect($ctx.find('mark')).toHaveLength(8);
+    expect($ctx.find('mark')).toHaveLength(9);
   });
 });
