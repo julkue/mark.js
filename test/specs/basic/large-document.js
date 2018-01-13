@@ -4,12 +4,12 @@ describe('basic mark in large documents', function() {
 
   var browser = {
     isIe: function() {
-      return navigator.appVersion.indexOf('MSIE') != -1;
+      return navigator.appVersion.indexOf('MSIE') !== -1;
     },
     navigator: navigator.appVersion,
     getVersion: function() {
       var version = 999; // we assume a sane browser
-      if (navigator.appVersion.indexOf('MSIE') != -1) {
+      if (navigator.appVersion.indexOf('MSIE') !== -1) {
         version = parseFloat(navigator.appVersion.split('MSIE')[1]);
       }
       return version;

@@ -1,13 +1,16 @@
 import DOMIterator from './domiterator';
+import RegExpCreator from './regexpcreator';
 
 /**
  * Marks search terms in DOM elements
  * @example
- * new Mark(document.querySelector(".context")).mark("lorem ipsum");
+ * new Mark(document.querySelector('.context')).mark('lorem ipsum');
  * @example
- * new Mark(document.querySelector(".context")).markRegExp(/lorem/gmi);
+ * new Mark(document.querySelector('.context')).markRegExp(/lorem/gmi);
+ * @example
+ * new Mark('.context').markRanges([{start:10,length:0}]);
  */
-export default class Mark { // eslint-disable-line no-unused-vars
+class Mark {
 
   /**
    * @param {HTMLElement|HTMLElement[]|NodeList|string} ctx - The context DOM
@@ -50,15 +53,8 @@ export default class Mark { // eslint-disable-line no-unused-vars
       'iframes': false,
       'iframesTimeout': 5000,
       'separateWordSearch': true,
-      'diacritics': true,
-      'synonyms': {},
-      'accuracy': 'partially',
       'acrossElements': false,
-      'caseSensitive': false,
-      'ignoreJoiners': false,
       'ignoreGroups': 0,
-      'ignorePunctuation': [],
-      'wildcards': 'disabled',
       'each': () => {},
       'noMatch': () => {},
       'filter': () => true,
@@ -101,281 +97,6 @@ export default class Mark { // eslint-disable-line no-unused-vars
     }
     if (typeof log === 'object' && typeof log[level] === 'function') {
       log[level](`mark.js: ${msg}`);
-    }
-  }
-
-  /**
-   * Escapes a string for usage within a regular expression
-   * @param {string} str - The string to escape
-   * @return {string}
-   * @access protected
-   */
-  escapeStr(str) {
-    // eslint-disable-next-line no-useless-escape
-    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
-  }
-
-  /**
-   * Creates a regular expression string to match the specified search
-   * term including synonyms, diacritics and accuracy if defined
-   * @param  {string} str - The search term to be used
-   * @return {string}
-   * @access protected
-   */
-  createRegExp(str) {
-    if (this.opt.wildcards !== 'disabled') {
-      str = this.setupWildcardsRegExp(str);
-    }
-    str = this.escapeStr(str);
-    if (Object.keys(this.opt.synonyms).length) {
-      str = this.createSynonymsRegExp(str);
-    }
-    if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
-      str = this.setupIgnoreJoinersRegExp(str);
-    }
-    if (this.opt.diacritics) {
-      str = this.createDiacriticsRegExp(str);
-    }
-    str = this.createMergedBlanksRegExp(str);
-    if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
-      str = this.createJoinersRegExp(str);
-    }
-    if (this.opt.wildcards !== 'disabled') {
-      str = this.createWildcardsRegExp(str);
-    }
-    str = this.createAccuracyRegExp(str);
-    return str;
-  }
-
-  /**
-   * Creates a regular expression string to match the defined synonyms
-   * @param  {string} str - The search term to be used
-   * @return {string}
-   * @access protected
-   */
-  createSynonymsRegExp(str) {
-    const syn = this.opt.synonyms,
-      sens = this.opt.caseSensitive ? '' : 'i',
-      // add replacement character placeholder before and after the
-      // synonym group
-      joinerPlaceholder = this.opt.ignoreJoiners ||
-                this.opt.ignorePunctuation.length ? '\u0000' : '';
-    for (let index in syn) {
-      if (syn.hasOwnProperty(index)) {
-        const value = syn[index],
-          k1 = this.opt.wildcards !== 'disabled' ?
-            this.setupWildcardsRegExp(index) :
-            this.escapeStr(index),
-          k2 = this.opt.wildcards !== 'disabled' ?
-            this.setupWildcardsRegExp(value) :
-            this.escapeStr(value);
-        if (k1 !== '' && k2 !== '') {
-          str = str.replace(
-            new RegExp(
-              `(${this.escapeStr(k1)}|${this.escapeStr(k2)})`,
-              `gm${sens}`
-            ),
-            joinerPlaceholder +
-            `(${this.processSynomyms(k1)}|` +
-            `${this.processSynomyms(k2)})` +
-            joinerPlaceholder
-          );
-        }
-      }
-    }
-    return str;
-  }
-
-  /**
-   * Setup synonyms to work with ignoreJoiners and or ignorePunctuation
-   * @param {string} str - synonym key or value to process
-   * @return {string} - processed synonym string
-   */
-  processSynomyms(str) {
-    if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
-      str = this.setupIgnoreJoinersRegExp(str);
-    }
-    return str;
-  }
-
-  /**
-   * Sets up the regular expression string to allow later insertion of
-   * wildcard regular expression matches
-   * @param  {string} str - The search term to be used
-   * @return {string}
-   * @access protected
-   */
-  setupWildcardsRegExp(str) {
-    // replace single character wildcard with unicode 0001
-    str = str.replace(/(?:\\)*\?/g, val => {
-      return val.charAt(0) === '\\' ? '?' : '\u0001';
-    });
-    // replace multiple character wildcard with unicode 0002
-    return str.replace(/(?:\\)*\*/g, val => {
-      return val.charAt(0) === '\\' ? '*' : '\u0002';
-    });
-  }
-
-  /**
-   * Sets up the regular expression string to allow later insertion of
-   * wildcard regular expression matches
-   * @param  {string} str - The search term to be used
-   * @return {string}
-   * @access protected
-   */
-  createWildcardsRegExp(str) {
-    // default to "enable" (i.e. to not include spaces)
-    // "withSpaces" uses `[\\S\\s]` instead of `.` because the latter
-    // does not match new line characters
-    let spaces = this.opt.wildcards === 'withSpaces';
-    return str
-    // replace unicode 0001 with a RegExp class to match any single
-    // character, or any single non-whitespace character depending
-    // on the setting
-      .replace(/\u0001/g, spaces ? '[\\S\\s]?' : '\\S?')
-    // replace unicode 0002 with a RegExp class to match zero or
-    // more characters, or zero or more non-whitespace characters
-    // depending on the setting
-      .replace(/\u0002/g, spaces ? '[\\S\\s]*?' : '\\S*');
-  }
-
-  /**
-   * Sets up the regular expression string to allow later insertion of
-   * designated characters (soft hyphens & zero width characters)
-   * @param  {string} str - The search term to be used
-   * @return {string}
-   * @access protected
-   */
-  setupIgnoreJoinersRegExp(str) {
-    // adding a "null" unicode character as it will not be modified by the
-    // other "create" regular expression functions
-    return str.replace(/[^(|)\\]/g, (val, indx, original) => {
-      // don't add a null after an opening "(", around a "|" or before
-      // a closing "(", or between an escapement (e.g. \+)
-      let nextChar = original.charAt(indx + 1);
-      if (/[(|)\\]/.test(nextChar) || nextChar === '') {
-        return val;
-      } else {
-        return val + '\u0000';
-      }
-    });
-  }
-
-  /**
-   * Creates a regular expression string to allow ignoring of designated
-   * characters (soft hyphens, zero width characters & punctuation) based on
-   * the specified option values of <code>ignorePunctuation</code> and
-   * <code>ignoreJoiners</code>
-   * @param  {string} str - The search term to be used
-   * @return {string}
-   * @access protected
-   */
-  createJoinersRegExp(str) {
-    let joiner = [];
-    const ignorePunctuation = this.opt.ignorePunctuation;
-    if (Array.isArray(ignorePunctuation) && ignorePunctuation.length) {
-      joiner.push(this.escapeStr(ignorePunctuation.join('')));
-    }
-    if (this.opt.ignoreJoiners) {
-      // u+00ad = soft hyphen
-      // u+200b = zero-width space
-      // u+200c = zero-width non-joiner
-      // u+200d = zero-width joiner
-      joiner.push('\\u00ad\\u200b\\u200c\\u200d');
-    }
-    return joiner.length ?
-      str.split(/\u0000+/).join(`[${joiner.join('')}]*`) :
-      str;
-  }
-
-  /**
-   * Creates a regular expression string to match diacritics
-   * @param  {string} str - The search term to be used
-   * @return {string}
-   * @access protected
-   */
-  createDiacriticsRegExp(str) {
-    const sens = this.opt.caseSensitive ? '' : 'i',
-      dct = this.opt.caseSensitive ? [
-        'aàáảãạăằắẳẵặâầấẩẫậäåāą', 'AÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÄÅĀĄ',
-        'cçćč', 'CÇĆČ', 'dđď', 'DĐĎ',
-        'eèéẻẽẹêềếểễệëěēę', 'EÈÉẺẼẸÊỀẾỂỄỆËĚĒĘ',
-        'iìíỉĩịîïī', 'IÌÍỈĨỊÎÏĪ', 'lł', 'LŁ', 'nñňń',
-        'NÑŇŃ', 'oòóỏõọôồốổỗộơởỡớờợöøō', 'OÒÓỎÕỌÔỒỐỔỖỘƠỞỠỚỜỢÖØŌ',
-        'rř', 'RŘ', 'sšśșş', 'SŠŚȘŞ',
-        'tťțţ', 'TŤȚŢ', 'uùúủũụưừứửữựûüůū', 'UÙÚỦŨỤƯỪỨỬỮỰÛÜŮŪ',
-        'yýỳỷỹỵÿ', 'YÝỲỶỸỴŸ', 'zžżź', 'ZŽŻŹ'
-      ] : [
-        'aàáảãạăằắẳẵặâầấẩẫậäåāąAÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÄÅĀĄ', 'cçćčCÇĆČ',
-        'dđďDĐĎ', 'eèéẻẽẹêềếểễệëěēęEÈÉẺẼẸÊỀẾỂỄỆËĚĒĘ',
-        'iìíỉĩịîïīIÌÍỈĨỊÎÏĪ', 'lłLŁ', 'nñňńNÑŇŃ',
-        'oòóỏõọôồốổỗộơởỡớờợöøōOÒÓỎÕỌÔỒỐỔỖỘƠỞỠỚỜỢÖØŌ', 'rřRŘ',
-        'sšśșşSŠŚȘŞ', 'tťțţTŤȚŢ',
-        'uùúủũụưừứửữựûüůūUÙÚỦŨỤƯỪỨỬỮỰÛÜŮŪ', 'yýỳỷỹỵÿYÝỲỶỸỴŸ', 'zžżźZŽŻŹ'
-      ];
-    let handled = [];
-    str.split('').forEach(ch => {
-      dct.every(dct => {
-        // Check if the character is inside a diacritics list
-        if (dct.indexOf(ch) !== -1) {
-          // Check if the related diacritics list was not
-          // handled yet
-          if (handled.indexOf(dct) > -1) {
-            return false;
-          }
-          // Make sure that the character OR any other
-          // character in the diacritics list will be matched
-          str = str.replace(
-            new RegExp(`[${dct}]`, `gm${sens}`), `[${dct}]`
-          );
-          handled.push(dct);
-        }
-        return true;
-      });
-    });
-    return str;
-  }
-
-  /**
-   * Creates a regular expression string that merges whitespace characters
-   * including subsequent ones into a single pattern, one or multiple
-   * whitespaces
-   * @param  {string} str - The search term to be used
-   * @return {string}
-   * @access protected
-   */
-  createMergedBlanksRegExp(str) {
-    return str.replace(/[\s]+/gmi, '[\\s]+');
-  }
-
-  /**
-   * Creates a regular expression string to match the specified string with
-   * the defined accuracy. As in the regular expression of "exactly" can be
-   * a group containing a blank at the beginning, all regular expressions will
-   * be created with two groups. The first group can be ignored (may contain
-   * the said blank), the second contains the actual match
-   * @param  {string} str - The searm term to be used
-   * @return {str}
-   * @access protected
-   */
-  createAccuracyRegExp(str) {
-    const chars = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~¡¿';
-    let acc = this.opt.accuracy,
-      val = typeof acc === 'string' ? acc : acc.value,
-      ls = typeof acc === 'string' ? [] : acc.limiters,
-      lsJoin = '';
-    ls.forEach(limiter => {
-      lsJoin += `|${this.escapeStr(limiter)}`;
-    });
-    switch (val) {
-    case 'partially':
-    default:
-      return `()(${str})`;
-    case 'complementary':
-      lsJoin = '\\s' + (lsJoin ? lsJoin : this.escapeStr(chars));
-      return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
-    case 'exactly':
-      return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
     }
   }
 
@@ -436,6 +157,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * @property {number} length - The length of the string to mark within the
    * composite value.
    */
+
   /**
    * @typedef Mark~setOfRanges
    * @type {object[]}
@@ -456,7 +178,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
     // quick validity check of the first entry only
     if (
       !Array.isArray(array) ||
-      Object.prototype.toString.call( array[0] ) !== '[object Object]'
+      Object.prototype.toString.call(array[0]) !== '[object Object]'
     ) {
       this.log('markRanges() will only accept an array of objects');
       this.opt.noMatch(array);
@@ -465,8 +187,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
     const stack = [];
     let last = 0;
     array
-    // acending sort to ensure there is no overlap in start & end
-    // offsets
+    // ensure there is no overlap in start & end offsets
       .sort((a, b) => {
         return a.start - b.start;
       })
@@ -493,14 +214,14 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * calculated end range is valid
    */
   /**
-    * Initial validation of ranges for markRanges. Preliminary checks are done
-    * to ensure the start and length values exist and are not zero or non-
-    * numeric
-    * @param {Mark~rangeObject} range - the current range object
-    * @param {number} last - last index of range
-    * @return {Mark~validObject}
-    * @access protected
-    */
+   * Initial validation of ranges for markRanges. Preliminary checks are done
+   * to ensure the start and length values exist and are not zero or non-
+   * numeric
+   * @param {Mark~rangeObject} range - the current range object
+   * @param {number} last - last index of range
+   * @return {Mark~validObject}
+   * @access protected
+   */
   callNoMatchOnInvalidRanges(range, last) {
     let start, end,
       valid = false;
@@ -518,7 +239,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
       } else {
         this.log(
           'Ignoring invalid or overlapping range: ' +
-                    `${JSON.stringify(range)}`
+          `${JSON.stringify(range)}`
         );
         this.opt.noMatch(range);
       }
@@ -566,7 +287,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
     } else if (string.substring(start, end).replace(/\s+/g, '') === '') {
       valid = false;
       // whitespace only; even if wrapped it is not visible
-      this.log('Skipping whitespace only range: ' +JSON.stringify(range));
+      this.log('Skipping whitespace only range: ' + JSON.stringify(range));
       this.opt.noMatch(range);
     }
     return {
@@ -587,6 +308,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * value
    * @property {HTMLElement} nodes.node - The DOM text node element
    */
+
   /**
    * Callback
    * @callback Mark~getTextNodesCallback
@@ -638,8 +360,8 @@ export default class Mark { // eslint-disable-line no-unused-vars
   }
 
   /**
-   * Wraps the instance element and class around matches that fit the start
-   * and end positions within the node
+   * Wraps the instance element and class around matches that fit the start and
+   * end positions within the node
    * @param  {HTMLElement} node - The DOM text node
    * @param  {number} start - The position where to start wrapping
    * @param  {number} end - The position where to end wrapping
@@ -679,6 +401,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * @param {number} lastIndex - The last matching position within the
    * composite value of text nodes
    */
+
   /**
    * Filter callback
    * @callback Mark~wrapMatchesFilterCallback
@@ -744,6 +467,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * @callback Mark~wrapMatchesEachCallback
    * @param {HTMLElement} element - The marked DOM element
    */
+
   /**
    * Callback on end
    * @callback Mark~wrapMatchesEndCallback
@@ -804,6 +528,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * @param {string} match - The matching string
    * @param {HTMLElement} node - The text node where the match occurs
    */
+
   /**
    * Callback on end
    * @callback Mark~wrapMatchesAcrossElementsEndCallback
@@ -865,6 +590,7 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * @param {string} match - string extracted from the matching range
    * @param {number} counter - A counter indicating the number of all marks
    */
+
   /**
    * Callback on end
    * @callback Mark~wrapRangeFromIndexEndCallback
@@ -905,8 +631,8 @@ export default class Mark { // eslint-disable-line no-unused-vars
 
   /**
    * Unwraps the specified DOM node with its content (text nodes or HTML)
-   * without destroying possibly present events (using innerHTML) and
-   * normalizes the parent at the end (merge splitted text nodes)
+   * without destroying possibly present events (using innerHTML) and normalizes
+   * the parent at the end (merge splitted text nodes)
    * @param  {HTMLElement} node - The DOM node to unwrap
    * @access protected
    */
@@ -948,6 +674,16 @@ export default class Mark { // eslint-disable-line no-unused-vars
   }
 
   /**
+   * Callback for each marked element
+   * @callback Mark~markEachCallback
+   * @param {HTMLElement} element - The marked DOM element
+   */
+  /**
+   * Callback if there were no matches
+   * @callback Mark~markNoMatchCallback
+   * @param {RegExp} term - The search term that was not found
+   */
+  /**
    * Callback when finished
    * @callback Mark~commonDoneCallback
    * @param {number} totalMatches - The number of marked elements
@@ -960,15 +696,17 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * @property {string[]} [exclude] - An array with exclusion selectors.
    * Elements matching those selectors will be ignored
    * @property {boolean} [iframes=false] - Whether to search inside iframes
+   * @property {number} [iframesTimeout=5000] - Maximum ms to wait for a load
+   * event of an iframe
+   * @property {boolean} [acrossElements=false] - Whether to find matches
+   * across HTML elements. By default, only matches within single HTML
+   * elements will be found
+   * @property {Mark~markEachCallback} [each]
+   * @property {Mark~markNoMatchCallback} [noMatch]
    * @property {Mark~commonDoneCallback} [done]
    * @property {boolean} [debug=false] - Wheter to log messages
    * @property {object} [log=window.console] - Where to log messages (only if
    * debug is true)
-   */
-  /**
-   * Callback for each marked element
-   * @callback Mark~markRegExpEachCallback
-   * @param {HTMLElement} element - The marked DOM element
    */
   /**
    * Callback if there were no matches
@@ -982,12 +720,14 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * @param {string} match - The matching string for the RegExp
    * @param {number} counter - A counter indicating the number of all marks
    */
+
   /**
    * These options also include the common options from
    * {@link Mark~commonOptions}
    * @typedef Mark~markRegExpOptions
    * @type {object.<string>}
-   * @property {Mark~markRegExpEachCallback} [each]
+   * @property {number} [ignoreGroups=0] - A number indicating the amount of
+   * RegExp matching groups to ignore
    * @property {Mark~markRegExpNoMatchCallback} [noMatch]
    * @property {Mark~markRegExpFilterCallback} [filter]
    */
@@ -1020,16 +760,6 @@ export default class Mark { // eslint-disable-line no-unused-vars
   }
 
   /**
-   * Callback for each marked element
-   * @callback Mark~markEachCallback
-   * @param {HTMLElement} element - The marked DOM element
-   */
-  /**
-   * Callback if there were no matches
-   * @callback Mark~markNoMatchCallback
-   * @param {RegExp} term - The search term that was not found
-   */
-  /**
    * Callback to filter matches
    * @callback Mark~markFilterCallback
    * @param {HTMLElement} textNode - The text node which includes the match
@@ -1039,99 +769,21 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * @param {number} termCounter - A counter indicating the number of marks
    * for the specific match
    */
-  /**
-   * @typedef Mark~markAccuracyObject
-   * @type {object.<string>}
-   * @property {string} value - A accuracy string value
-   * @property {string[]} limiters - A custom array of limiters. For example
-   * <code>["-", ","]</code>
-   */
-  /**
-   * @typedef Mark~markAccuracySetting
-   * @type {string}
-   * @property {"partially"|"complementary"|"exactly"|Mark~markAccuracyObject}
-   * [accuracy="partially"] - Either one of the following string values:
-   * <ul>
-   *   <li><i>partially</i>: When searching for "lor" only "lor" inside
-   *   "lorem" will be marked</li>
-   *   <li><i>complementary</i>: When searching for "lor" the whole word
-   *   "lorem" will be marked</li>
-   *   <li><i>exactly</i>: When searching for "lor" only those exact words
-   *   will be marked. In this example nothing inside "lorem". This value
-   *   is equivalent to the previous option <i>wordBoundary</i></li>
-   * </ul>
-   * Or an object containing two properties:
-   * <ul>
-   *   <li><i>value</i>: One of the above named string values</li>
-   *   <li><i>limiters</i>: A custom array of string limiters for accuracy
-   *   "exactly" or "complementary"</li>
-   * </ul>
-   */
-  /**
-   * @typedef Mark~markWildcardsSetting
-   * @type {string}
-   * @property {"disabled"|"enabled"|"withSpaces"}
-   * [wildcards="disabled"] - Set to any of the following string values:
-   * <ul>
-   *   <li><i>disabled</i>: Disable wildcard usage</li>
-   *   <li><i>enabled</i>: When searching for "lor?m", the "?" will match zero
-   *   or one non-space character (e.g. "lorm", "loram", "lor3m", etc). When
-   *   searching for "lor*m", the "*" will match zero or more non-space
-   *   characters (e.g. "lorm", "loram", "lor123m", etc).</li>
-   *   <li><i>withSpaces</i>: When searching for "lor?m", the "?" will
-   *   match zero or one space or non-space character (e.g. "lor m", "loram",
-   *   etc). When searching for "lor*m", the "*" will match zero or more space
-   *   or non-space characters (e.g. "lorm", "lore et dolor ipsum", "lor: m",
-   *   etc).</li>
-   * </ul>
-   */
-  /**
-   * @typedef Mark~markIgnorePunctuationSetting
-   * @type {string[]}
-   * @property {string} The strings in this setting will contain punctuation
-   * marks that will be ignored:
-   * <ul>
-   *   <li>These punctuation marks can be between any characters, e.g. setting
-   *   this option to <code>["'"]</code> would match "Worlds", "World's" and
-   *   "Wo'rlds"</li>
-   *   <li>One or more apostrophes between the letters would still produce a
-   *   match (e.g. "W'o''r'l'd's").</li>
-   *   <li>A typical setting for this option could be as follows:
-   *   <pre>ignorePunctuation: ":;.,-–—‒_(){}[]!'\"+=".split(""),</pre> This
-   *   setting includes common punctuation as well as a minus, en-dash,
-   *   em-dash and figure-dash
-   *   ({@link https://en.wikipedia.org/wiki/Dash#Figure_dash ref}), as well
-   *   as an underscore.</li>
-   * </ul>
-   */
+
   /**
    * These options also include the common options from
-   * {@link Mark~commonOptions}
+   * {@link Mark~commonOptions} and the options from
+   * {@link RegExpCreator~options}
    * @typedef Mark~markOptions
    * @type {object.<string>}
    * @property {boolean} [separateWordSearch=true] - Whether to search for
    * each word separated by a blank instead of the complete term
-   * @property {boolean} [diacritics=true] - If diacritic characters should be
-   * matched. ({@link https://en.wikipedia.org/wiki/Diacritic Diacritics})
-   * @property {object} [synonyms] - An object with synonyms. The key will be
-   * a synonym for the value and the value for the key
-   * @property {Mark~markAccuracySetting} [accuracy]
-   * @property {Mark~markWildcardsSetting} [wildcards]
-   * @property {boolean} [acrossElements=false] - Whether to find matches
-   * across HTML elements. By default, only matches within single HTML
-   * elements will be found
-   * @property {boolean} [ignoreJoiners=false] - Whether to ignore word
-   * joiners inside of key words. These include soft-hyphens, zero-width
-   * space, zero-width non-joiners and zero-width joiners.
-   * @property {Mark~markIgnorePunctuationSetting} [ignorePunctuation]
-   * @property {Mark~markEachCallback} [each]
-   * @property {Mark~markNoMatchCallback} [noMatch]
    * @property {Mark~markFilterCallback} [filter]
    */
   /**
    * Marks the specified search terms
-   * @param {string|string[]} [sv] - Search value, either a search string or
-   * an array containing multiple search strings
+   * @param {string|string[]} [sv] - Search value, either a search string or an
+   * array containing multiple search strings
    * @param  {Mark~markOptions} [opt] - Optional options object
    * @access public
    */
@@ -1139,15 +791,13 @@ export default class Mark { // eslint-disable-line no-unused-vars
     this.opt = opt;
     let totalMatches = 0,
       fn = 'wrapMatches';
-
     const {
         keywords: kwArr,
         length: kwArrLen
       } = this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv),
-      sens = this.opt.caseSensitive ? '' : 'i',
       handler = kw => { // async function calls as iframes are async too
-        let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),
-          matches = 0;
+        const regex = new RegExpCreator(this.opt).create(kw);
+        let matches = 0;
         this.log(`Searching with expression "${regex}"`);
         this[fn](regex, 1, (term, node) => {
           return this.opt.filter(node, kw, totalMatches, matches);
@@ -1196,9 +846,10 @@ export default class Mark { // eslint-disable-line no-unused-vars
    * @param {string} match - string extracted from the matching range
    * @param {number} counter - A counter indicating the number of all marks
    */
+
   /**
    * These options also include the common options from
-   * {@link Mark~commonOptions}
+   * {@link Mark~commonOptions} without the each and noMatch callback
    * @typedef Mark~markRangesOptions
    * @type {object.<string>}
    * @property {Mark~markRangesEachCallback} [each]
@@ -1240,7 +891,8 @@ export default class Mark { // eslint-disable-line no-unused-vars
   /**
    * Removes all marked elements inside the context with their HTML and
    * normalizes the parent at the end
-   * @param  {Mark~commonOptions} [opt] - Optional options object
+   * @param  {Mark~commonOptions} [opt] - Optional options object without each,
+   * noMatch and acrossElements properties
    * @access public
    */
   unmark(opt) {
@@ -1264,3 +916,5 @@ export default class Mark { // eslint-disable-line no-unused-vars
     }, this.opt.done);
   }
 }
+
+export default Mark;

@@ -297,64 +297,19 @@ class DOMIterator {
   }
 }
 
-class Mark {
-  constructor(ctx) {
-    this.ctx = ctx;
-    this.ie = false;
-    const ua = window.navigator.userAgent;
-    if (ua.indexOf('MSIE') > -1 || ua.indexOf('Trident') > -1) {
-      this.ie = true;
-    }
-  }
-  set opt(val) {
-    this._opt = Object.assign({}, {
-      'element': '',
-      'className': '',
-      'exclude': [],
-      'iframes': false,
-      'iframesTimeout': 5000,
-      'separateWordSearch': true,
+class RegExpCreator {
+  constructor(options) {
+    this.opt = Object.assign({}, {
       'diacritics': true,
       'synonyms': {},
       'accuracy': 'partially',
-      'acrossElements': false,
       'caseSensitive': false,
       'ignoreJoiners': false,
-      'ignoreGroups': 0,
       'ignorePunctuation': [],
-      'wildcards': 'disabled',
-      'each': () => {},
-      'noMatch': () => {},
-      'filter': () => true,
-      'done': () => {},
-      'debug': false,
-      'log': window.console
-    }, val);
+      'wildcards': 'disabled'
+    }, options);
   }
-  get opt() {
-    return this._opt;
-  }
-  get iterator() {
-    return new DOMIterator(
-      this.ctx,
-      this.opt.iframes,
-      this.opt.exclude,
-      this.opt.iframesTimeout
-    );
-  }
-  log(msg, level = 'debug') {
-    const log = this.opt.log;
-    if (!this.opt.debug) {
-      return;
-    }
-    if (typeof log === 'object' && typeof log[level] === 'function') {
-      log[level](`mark.js: ${msg}`);
-    }
-  }
-  escapeStr(str) {
-    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
-  }
-  createRegExp(str) {
+  create(str) {
     if (this.opt.wildcards !== 'disabled') {
       str = this.setupWildcardsRegExp(str);
     }
@@ -376,13 +331,16 @@ class Mark {
       str = this.createWildcardsRegExp(str);
     }
     str = this.createAccuracyRegExp(str);
-    return str;
+    return new RegExp(str, `gm${this.opt.caseSensitive ? '' : 'i'}`);
+  }
+  escapeStr(str) {
+    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
   }
   createSynonymsRegExp(str) {
     const syn = this.opt.synonyms,
       sens = this.opt.caseSensitive ? '' : 'i',
       joinerPlaceholder = this.opt.ignoreJoiners ||
-                this.opt.ignorePunctuation.length ? '\u0000' : '';
+      this.opt.ignorePunctuation.length ? '\u0000' : '';
     for (let index in syn) {
       if (syn.hasOwnProperty(index)) {
         const value = syn[index],
@@ -399,8 +357,8 @@ class Mark {
               `gm${sens}`
             ),
             joinerPlaceholder +
-            `(${this.processSynomyms(k1)}|` +
-            `${this.processSynomyms(k2)})` +
+            `(${this.processSynonyms(k1)}|` +
+            `${this.processSynonyms(k2)})` +
             joinerPlaceholder
           );
         }
@@ -408,7 +366,7 @@ class Mark {
     }
     return str;
   }
-  processSynomyms(str) {
+  processSynonyms(str) {
     if (this.opt.ignoreJoiners || this.opt.ignorePunctuation.length) {
       str = this.setupIgnoreJoinersRegExp(str);
     }
@@ -500,14 +458,63 @@ class Mark {
       lsJoin += `|${this.escapeStr(limiter)}`;
     });
     switch (val) {
-    case 'partially':
-    default:
-      return `()(${str})`;
-    case 'complementary':
-      lsJoin = '\\s' + (lsJoin ? lsJoin : this.escapeStr(chars));
-      return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
-    case 'exactly':
-      return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
+      case 'partially':
+      default:
+        return `()(${str})`;
+      case 'complementary':
+        lsJoin = '\\s' + (lsJoin ? lsJoin : this.escapeStr(chars));
+        return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
+      case 'exactly':
+        return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
+    }
+  }
+}
+
+class Mark {
+  constructor(ctx) {
+    this.ctx = ctx;
+    this.ie = false;
+    const ua = window.navigator.userAgent;
+    if (ua.indexOf('MSIE') > -1 || ua.indexOf('Trident') > -1) {
+      this.ie = true;
+    }
+  }
+  set opt(val) {
+    this._opt = Object.assign({}, {
+      'element': '',
+      'className': '',
+      'exclude': [],
+      'iframes': false,
+      'iframesTimeout': 5000,
+      'separateWordSearch': true,
+      'acrossElements': false,
+      'ignoreGroups': 0,
+      'each': () => {},
+      'noMatch': () => {},
+      'filter': () => true,
+      'done': () => {},
+      'debug': false,
+      'log': window.console
+    }, val);
+  }
+  get opt() {
+    return this._opt;
+  }
+  get iterator() {
+    return new DOMIterator(
+      this.ctx,
+      this.opt.iframes,
+      this.opt.exclude,
+      this.opt.iframesTimeout
+    );
+  }
+  log(msg, level = 'debug') {
+    const log = this.opt.log;
+    if (!this.opt.debug) {
+      return;
+    }
+    if (typeof log === 'object' && typeof log[level] === 'function') {
+      log[level](`mark.js: ${msg}`);
     }
   }
   getSeparatedKeywords(sv) {
@@ -538,7 +545,7 @@ class Mark {
   checkRanges(array) {
     if (
       !Array.isArray(array) ||
-      Object.prototype.toString.call( array[0] ) !== '[object Object]'
+      Object.prototype.toString.call(array[0]) !== '[object Object]'
     ) {
       this.log('markRanges() will only accept an array of objects');
       this.opt.noMatch(array);
@@ -577,7 +584,7 @@ class Mark {
       } else {
         this.log(
           'Ignoring invalid or overlapping range: ' +
-                    `${JSON.stringify(range)}`
+          `${JSON.stringify(range)}`
         );
         this.opt.noMatch(range);
       }
@@ -609,7 +616,7 @@ class Mark {
       this.opt.noMatch(range);
     } else if (string.substring(start, end).replace(/\s+/g, '') === '') {
       valid = false;
-      this.log('Skipping whitespace only range: ' +JSON.stringify(range));
+      this.log('Skipping whitespace only range: ' + JSON.stringify(range));
       this.opt.noMatch(range);
     }
     return {
@@ -827,10 +834,9 @@ class Mark {
         keywords: kwArr,
         length: kwArrLen
       } = this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv),
-      sens = this.opt.caseSensitive ? '' : 'i',
       handler = kw => {
-        let regex = new RegExp(this.createRegExp(kw), `gm${sens}`),
-          matches = 0;
+        const regex = new RegExpCreator(this.opt).create(kw);
+        let matches = 0;
         this.log(`Searching with expression "${regex}"`);
         this[fn](regex, 1, (term, node) => {
           return this.opt.filter(node, kw, totalMatches, matches);

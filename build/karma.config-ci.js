@@ -1,7 +1,7 @@
 'use strict';
 module.exports = config => {
   // Define Sauce Labs browsers
-  var customLaunchers = {
+  const customLaunchers = {
     'SL_Win_Chrome_30': {
       base: 'SauceLabs',
       browserName: 'chrome',

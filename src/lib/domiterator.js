@@ -18,7 +18,7 @@
  * });
  * @todo Outsource into separate repository
  */
-export default class DOMIterator {
+class DOMIterator {
 
   /**
    * @param {HTMLElement|HTMLElement[]|NodeList|string} ctx - The context DOM
@@ -567,3 +567,5 @@ export default class DOMIterator {
    * @type {number}
    */
 }
+
+export default DOMIterator;

@@ -24,9 +24,8 @@
 See the [contribution guidelines][contributing].
 
 ## Changelog
+
 Changes are documented in [release][releases] descriptions.  
-You want to be notified about new releases? Click the "Subscribe to releases"
-button on [libraries.io][libraries].
 
 ---
 
@@ -51,4 +50,3 @@ Happy hacking!
 [website]: https://markjs.io/
 [contributing]: https://github.com/julmot/mark.js/blob/master/CONTRIBUTING.md
 [releases]: https://github.com/julmot/mark.js/releases
-[libraries]: https://libraries.io/bower/mark.js/
