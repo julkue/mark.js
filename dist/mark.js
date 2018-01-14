@@ -573,7 +573,7 @@ var RegExpCreator = function () {
   return RegExpCreator;
 }();
 
-var Mark$1 = function () {
+var Mark = function () {
   function Mark(ctx) {
     classCallCheck(this, Mark);
 
@@ -799,23 +799,41 @@ var Mark$1 = function () {
     value: function wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
       var _this5 = this;
 
-      var matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
+      var matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+          wrapGroups = function wrapGroups(node, pos, len) {
+        node = _this5.wrapRangeInTextNode(node, pos, pos + len);
+        eachCb(node.previousSibling);
+        return node;
+      };
       this.getTextNodes(function (dict) {
         dict.nodes.forEach(function (node) {
           node = node.node;
-          var match = void 0;
+          var match = void 0,
+              matchLen = void 0;
           while ((match = regex.exec(node.textContent)) !== null && match[matchIdx] !== '') {
-            if (!filterCb(match[matchIdx], node)) {
-              continue;
-            }
-            var pos = match.index;
-            if (matchIdx !== 0) {
-              for (var i = 1; i < matchIdx; i++) {
-                pos += match[i].length;
+            if (_this5.opt.separateGroups) {
+              matchLen = match.length;
+              for (var i = 1; i < matchLen; i++) {
+                var pos = node.textContent.indexOf(match[i]);
+                if (match[i] && pos > -1) {
+                  if (!filterCb(match[i], node)) {
+                    continue;
+                  }
+                  node = wrapGroups(node, pos, match[i].length);
+                }
               }
+            } else {
+              if (!filterCb(match[matchIdx], node)) {
+                continue;
+              }
+              var _pos = match.index;
+              if (matchIdx !== 0) {
+                for (var _i = 1; _i < matchIdx; _i++) {
+                  _pos += match[_i].length;
+                }
+              }
+              node = wrapGroups(node, _pos, match[matchIdx].length);
             }
-            node = _this5.wrapRangeInTextNode(node, pos, pos + match[matchIdx].length);
-            eachCb(node.previousSibling);
             regex.lastIndex = 0;
           }
         });
@@ -1051,10 +1069,10 @@ var Mark$1 = function () {
   return Mark;
 }();
 
-function Mark(ctx) {
+function Mark$1(ctx) {
   var _this = this;
 
-  var instance = new Mark$1(ctx);
+  var instance = new Mark(ctx);
   this.mark = function (sv, opt) {
     instance.mark(sv, opt);
     return _this;
@@ -1074,6 +1092,6 @@ function Mark(ctx) {
   return this;
 }
 
-return Mark;
+return Mark$1;
 
 })));

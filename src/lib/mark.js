@@ -484,30 +484,44 @@ class Mark {
    * @access protected
    */
   wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
+    /* eslint-disable complexity */
+    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+      wrapGroups = (node, pos, len) => {
+        node = this.wrapRangeInTextNode(node, pos, pos + len);
+        eachCb(node.previousSibling);
+        return node;
+      };
     this.getTextNodes(dict => {
       dict.nodes.forEach(node => {
         node = node.node;
-        let match;
+        let match, matchLen;
         while (
           (match = regex.exec(node.textContent)) !== null &&
           match[matchIdx] !== ''
         ) {
-          if (!filterCb(match[matchIdx], node)) {
-            continue;
-          }
-          let pos = match.index;
-          if (matchIdx !== 0) {
-            for (let i = 1; i < matchIdx; i++) {
-              pos += match[i].length;
+          if (this.opt.separateGroups) {
+            matchLen = match.length;
+            for (let i = 1; i < matchLen; i++) {
+              let pos = node.textContent.indexOf(match[i]);
+              if (match[i] && pos > -1) {
+                if (!filterCb(match[i], node)) {
+                  continue;
+                }
+                node = wrapGroups(node, pos, match[i].length);
+              }
             }
+          } else {
+            if (!filterCb(match[matchIdx], node)) {
+              continue;
+            }
+            let pos = match.index;
+            if (matchIdx !== 0) {
+              for (let i = 1; i < matchIdx; i++) {
+                pos += match[i].length;
+              }
+            }
+            node = wrapGroups(node, pos, match[matchIdx].length);
           }
-          node = this.wrapRangeInTextNode(
-            node,
-            pos,
-            pos + match[matchIdx].length
-          );
-          eachCb(node.previousSibling);
           // reset index of last match as the node changed and the
           // index isn't valid anymore http://tinyurl.com/htsudjd
           regex.lastIndex = 0;
@@ -515,6 +529,7 @@ class Mark {
       });
       endCb();
     });
+    /* eslint-enable complexity */
   }
 
   /**
@@ -704,7 +719,7 @@ class Mark {
    * @property {Mark~markEachCallback} [each]
    * @property {Mark~markNoMatchCallback} [noMatch]
    * @property {Mark~commonDoneCallback} [done]
-   * @property {boolean} [debug=false] - Wheter to log messages
+   * @property {boolean} [debug=false] - Whether to log messages
    * @property {object} [log=window.console] - Where to log messages (only if
    * debug is true)
    */
@@ -728,6 +743,8 @@ class Mark {
    * @type {object.<string>}
    * @property {number} [ignoreGroups=0] - A number indicating the amount of
    * RegExp matching groups to ignore
+   * @property {boolean} [separateGroups] - Whether to mark each regular
+   * expression group as a separate match
    * @property {Mark~markRegExpNoMatchCallback} [noMatch]
    * @property {Mark~markRegExpFilterCallback} [filter]
    */

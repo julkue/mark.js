@@ -468,7 +468,7 @@ class RegExpCreator {
   }
 }
 
-class Mark$1 {
+class Mark {
   constructor(ctx) {
     this.ctx = ctx;
     this.ie = false;
@@ -696,30 +696,43 @@ class Mark$1 {
     });
   }
   wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
+    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+      wrapGroups = (node, pos, len) => {
+        node = this.wrapRangeInTextNode(node, pos, pos + len);
+        eachCb(node.previousSibling);
+        return node;
+      };
     this.getTextNodes(dict => {
       dict.nodes.forEach(node => {
         node = node.node;
-        let match;
+        let match, matchLen;
         while (
           (match = regex.exec(node.textContent)) !== null &&
           match[matchIdx] !== ''
         ) {
-          if (!filterCb(match[matchIdx], node)) {
-            continue;
-          }
-          let pos = match.index;
-          if (matchIdx !== 0) {
-            for (let i = 1; i < matchIdx; i++) {
-              pos += match[i].length;
+          if (this.opt.separateGroups) {
+            matchLen = match.length;
+            for (let i = 1; i < matchLen; i++) {
+              let pos = node.textContent.indexOf(match[i]);
+              if (match[i] && pos > -1) {
+                if (!filterCb(match[i], node)) {
+                  continue;
+                }
+                node = wrapGroups(node, pos, match[i].length);
+              }
             }
+          } else {
+            if (!filterCb(match[matchIdx], node)) {
+              continue;
+            }
+            let pos = match.index;
+            if (matchIdx !== 0) {
+              for (let i = 1; i < matchIdx; i++) {
+                pos += match[i].length;
+              }
+            }
+            node = wrapGroups(node, pos, match[matchIdx].length);
           }
-          node = this.wrapRangeInTextNode(
-            node,
-            pos,
-            pos + match[matchIdx].length
-          );
-          eachCb(node.previousSibling);
           regex.lastIndex = 0;
         }
       });
@@ -907,8 +920,8 @@ class Mark$1 {
   }
 }
 
-function Mark(ctx) {
-  const instance = new Mark$1(ctx);
+function Mark$1(ctx) {
+  const instance = new Mark(ctx);
   this.mark = (sv, opt) => {
     instance.mark(sv, opt);
     return this;
@@ -928,6 +941,6 @@ function Mark(ctx) {
   return this;
 }
 
-return Mark;
+return Mark$1;
 
 })));

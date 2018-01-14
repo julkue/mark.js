@@ -406,7 +406,7 @@ class DOMIterator {
   /**
    * Checks if an iframe wasn't handled already and if so, calls
    * {@link DOMIterator#compareNodeIframe} to check if it should be handled.
-   * Information wheter an iframe was or wasn't handled is given within the
+   * Information whether an iframe was or wasn't handled is given within the
    * <code>ifr</code> dictionary
    * @param {HTMLElement} node - The node that should occur after the iframe
    * @param {HTMLElement} prevNode - The node that should occur before the
