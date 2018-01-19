@@ -695,32 +695,39 @@ class Mark {
       return true;
     });
   }
+  wrapGroups(node, pos, len, eachCb) {
+    node = this.wrapRangeInTextNode(node, pos, pos + len);
+    eachCb(node.previousSibling);
+    return node;
+  }
+  separateGroups(node, match, matchIdx, filterCb, eachCb) {
+    let matchLen = match.length;
+    for (let i = 1; i < matchLen; i++) {
+      let pos = node.textContent.indexOf(match[i]);
+      if (match[i] && pos > -1 && filterCb(match[i], node)) {
+        node = this.wrapGroups(node, pos, match[i].length, eachCb);
+      }
+    }
+    return node;
+  }
   wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
-      wrapGroups = (node, pos, len) => {
-        node = this.wrapRangeInTextNode(node, pos, pos + len);
-        eachCb(node.previousSibling);
-        return node;
-      };
+    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
     this.getTextNodes(dict => {
       dict.nodes.forEach(node => {
         node = node.node;
-        let match, matchLen;
+        let match;
         while (
           (match = regex.exec(node.textContent)) !== null &&
           match[matchIdx] !== ''
         ) {
           if (this.opt.separateGroups) {
-            matchLen = match.length;
-            for (let i = 1; i < matchLen; i++) {
-              let pos = node.textContent.indexOf(match[i]);
-              if (match[i] && pos > -1) {
-                if (!filterCb(match[i], node)) {
-                  continue;
-                }
-                node = wrapGroups(node, pos, match[i].length);
-              }
-            }
+            node = this.separateGroups(
+              node,
+              match,
+              matchIdx,
+              filterCb,
+              eachCb
+            );
           } else {
             if (!filterCb(match[matchIdx], node)) {
               continue;
@@ -731,7 +738,7 @@ class Mark {
                 pos += match[i].length;
               }
             }
-            node = wrapGroups(node, pos, match[matchIdx].length);
+            node = this.wrapGroups(node, pos, match[matchIdx].length, eachCb);
           }
           regex.lastIndex = 0;
         }

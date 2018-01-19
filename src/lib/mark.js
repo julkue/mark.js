@@ -457,6 +457,37 @@ class Mark {
   }
 
   /**
+  * @param {HTMLElement} node - The text node where the match occurs
+  * @param {number} pos - The current position of the match within the node
+  * @param {number} len - The length of the current match within the node
+  * @param {Mark~wrapMatchesEachCallback} eachCb
+  */
+  wrapGroups(node, pos, len, eachCb) {
+    node = this.wrapRangeInTextNode(node, pos, pos + len);
+    eachCb(node.previousSibling);
+    return node;
+  }
+
+  /**
+   * Separate groups
+   * @param {HTMLElement} node - The text node where the match occurs
+   * @param {array} match - The current match
+   * @param {number} matchIdx - The start of the match based on ignoreGroups
+   * @param {Mark~wrapMatchesFilterCallback} filterCb
+   * @param {Mark~wrapMatchesEachCallback} eachCb
+   */
+  separateGroups(node, match, matchIdx, filterCb, eachCb) {
+    let matchLen = match.length;
+    for (let i = 1; i < matchLen; i++) {
+      let pos = node.textContent.indexOf(match[i]);
+      if (match[i] && pos > -1 && filterCb(match[i], node)) {
+        node = this.wrapGroups(node, pos, match[i].length, eachCb);
+      }
+    }
+    return node;
+  }
+
+  /**
    * Filter callback before each wrapping
    * @callback Mark~wrapMatchesFilterCallback
    * @param {string} match - The matching string
@@ -484,32 +515,23 @@ class Mark {
    * @access protected
    */
   wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-    /* eslint-disable complexity */
-    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
-      wrapGroups = (node, pos, len) => {
-        node = this.wrapRangeInTextNode(node, pos, pos + len);
-        eachCb(node.previousSibling);
-        return node;
-      };
+    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
     this.getTextNodes(dict => {
       dict.nodes.forEach(node => {
         node = node.node;
-        let match, matchLen;
+        let match;
         while (
           (match = regex.exec(node.textContent)) !== null &&
           match[matchIdx] !== ''
         ) {
           if (this.opt.separateGroups) {
-            matchLen = match.length;
-            for (let i = 1; i < matchLen; i++) {
-              let pos = node.textContent.indexOf(match[i]);
-              if (match[i] && pos > -1) {
-                if (!filterCb(match[i], node)) {
-                  continue;
-                }
-                node = wrapGroups(node, pos, match[i].length);
-              }
-            }
+            node = this.separateGroups(
+              node,
+              match,
+              matchIdx,
+              filterCb,
+              eachCb
+            );
           } else {
             if (!filterCb(match[matchIdx], node)) {
               continue;
@@ -520,7 +542,7 @@ class Mark {
                 pos += match[i].length;
               }
             }
-            node = wrapGroups(node, pos, match[matchIdx].length);
+            node = this.wrapGroups(node, pos, match[matchIdx].length, eachCb);
           }
           // reset index of last match as the node changed and the
           // index isn't valid anymore http://tinyurl.com/htsudjd
@@ -529,7 +551,6 @@ class Mark {
       });
       endCb();
     });
-    /* eslint-enable complexity */
   }
 
   /**
