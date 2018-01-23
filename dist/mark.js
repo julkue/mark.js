@@ -573,7 +573,7 @@ var RegExpCreator = function () {
   return RegExpCreator;
 }();
 
-var Mark$1 = function () {
+var Mark = function () {
   function Mark(ctx) {
     classCallCheck(this, Mark);
 
@@ -1051,10 +1051,10 @@ var Mark$1 = function () {
   return Mark;
 }();
 
-function Mark(ctx) {
+function Mark$1(ctx) {
   var _this = this;
 
-  var instance = new Mark$1(ctx);
+  var instance = new Mark(ctx);
   this.mark = function (sv, opt) {
     instance.mark(sv, opt);
     return _this;
@@ -1074,6 +1074,6 @@ function Mark(ctx) {
   return this;
 }
 
-return Mark;
+return Mark$1;
 
 })));

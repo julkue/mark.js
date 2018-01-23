@@ -468,7 +468,7 @@ class RegExpCreator {
   }
 }
 
-class Mark$1 {
+class Mark {
   constructor(ctx) {
     this.ctx = ctx;
     this.ie = false;
@@ -907,8 +907,8 @@ class Mark$1 {
   }
 }
 
-function Mark(ctx) {
-  const instance = new Mark$1(ctx);
+function Mark$1(ctx) {
+  const instance = new Mark(ctx);
   this.mark = (sv, opt) => {
     instance.mark(sv, opt);
     return this;
@@ -928,6 +928,6 @@ function Mark(ctx) {
   return this;
 }
 
-return Mark;
+return Mark$1;
 
 })));
