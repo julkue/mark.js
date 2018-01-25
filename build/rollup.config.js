@@ -7,7 +7,6 @@ import commonjs from 'rollup-plugin-commonjs';
 import cleanup from 'rollup-plugin-cleanup';
 import babel from 'rollup-plugin-babel';
 import uglify from 'rollup-plugin-uglify';
-import {minify} from 'uglify-es';
 
 // Shared config
 const output = {
@@ -77,7 +76,7 @@ const output = {
       output: {
         comments: /^!/
       }
-    }, minify));
+    }));
     return newPlugins;
   })(),
   minifyPluginsES5 = (() => {
@@ -87,7 +86,7 @@ const output = {
       output: {
         comments: /^!/
       }
-    }, minify));
+    }));
     return newPlugins;
   })();
 
