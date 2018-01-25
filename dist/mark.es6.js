@@ -695,6 +695,21 @@ class Mark {
       return true;
     });
   }
+  wrapGroups(node, pos, len, eachCb) {
+    node = this.wrapRangeInTextNode(node, pos, pos + len);
+    eachCb(node.previousSibling);
+    return node;
+  }
+  separateGroups(node, match, matchIdx, filterCb, eachCb) {
+    let matchLen = match.length;
+    for (let i = 1; i < matchLen; i++) {
+      let pos = node.textContent.indexOf(match[i]);
+      if (match[i] && pos > -1 && filterCb(match[i], node)) {
+        node = this.wrapGroups(node, pos, match[i].length, eachCb);
+      }
+    }
+    return node;
+  }
   wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
     const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
     this.getTextNodes(dict => {
@@ -705,21 +720,26 @@ class Mark {
           (match = regex.exec(node.textContent)) !== null &&
           match[matchIdx] !== ''
         ) {
-          if (!filterCb(match[matchIdx], node)) {
-            continue;
-          }
-          let pos = match.index;
-          if (matchIdx !== 0) {
-            for (let i = 1; i < matchIdx; i++) {
-              pos += match[i].length;
+          if (this.opt.separateGroups) {
+            node = this.separateGroups(
+              node,
+              match,
+              matchIdx,
+              filterCb,
+              eachCb
+            );
+          } else {
+            if (!filterCb(match[matchIdx], node)) {
+              continue;
             }
+            let pos = match.index;
+            if (matchIdx !== 0) {
+              for (let i = 1; i < matchIdx; i++) {
+                pos += match[i].length;
+              }
+            }
+            node = this.wrapGroups(node, pos, match[matchIdx].length, eachCb);
           }
-          node = this.wrapRangeInTextNode(
-            node,
-            pos,
-            pos + match[matchIdx].length
-          );
-          eachCb(node.previousSibling);
           regex.lastIndex = 0;
         }
       });

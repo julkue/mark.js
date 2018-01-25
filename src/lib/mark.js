@@ -457,6 +457,37 @@ class Mark {
   }
 
   /**
+  * @param {HTMLElement} node - The text node where the match occurs
+  * @param {number} pos - The current position of the match within the node
+  * @param {number} len - The length of the current match within the node
+  * @param {Mark~wrapMatchesEachCallback} eachCb
+  */
+  wrapGroups(node, pos, len, eachCb) {
+    node = this.wrapRangeInTextNode(node, pos, pos + len);
+    eachCb(node.previousSibling);
+    return node;
+  }
+
+  /**
+   * Separate groups
+   * @param {HTMLElement} node - The text node where the match occurs
+   * @param {array} match - The current match
+   * @param {number} matchIdx - The start of the match based on ignoreGroups
+   * @param {Mark~wrapMatchesFilterCallback} filterCb
+   * @param {Mark~wrapMatchesEachCallback} eachCb
+   */
+  separateGroups(node, match, matchIdx, filterCb, eachCb) {
+    let matchLen = match.length;
+    for (let i = 1; i < matchLen; i++) {
+      let pos = node.textContent.indexOf(match[i]);
+      if (match[i] && pos > -1 && filterCb(match[i], node)) {
+        node = this.wrapGroups(node, pos, match[i].length, eachCb);
+      }
+    }
+    return node;
+  }
+
+  /**
    * Filter callback before each wrapping
    * @callback Mark~wrapMatchesFilterCallback
    * @param {string} match - The matching string
@@ -493,21 +524,26 @@ class Mark {
           (match = regex.exec(node.textContent)) !== null &&
           match[matchIdx] !== ''
         ) {
-          if (!filterCb(match[matchIdx], node)) {
-            continue;
-          }
-          let pos = match.index;
-          if (matchIdx !== 0) {
-            for (let i = 1; i < matchIdx; i++) {
-              pos += match[i].length;
+          if (this.opt.separateGroups) {
+            node = this.separateGroups(
+              node,
+              match,
+              matchIdx,
+              filterCb,
+              eachCb
+            );
+          } else {
+            if (!filterCb(match[matchIdx], node)) {
+              continue;
             }
+            let pos = match.index;
+            if (matchIdx !== 0) {
+              for (let i = 1; i < matchIdx; i++) {
+                pos += match[i].length;
+              }
+            }
+            node = this.wrapGroups(node, pos, match[matchIdx].length, eachCb);
           }
-          node = this.wrapRangeInTextNode(
-            node,
-            pos,
-            pos + match[matchIdx].length
-          );
-          eachCb(node.previousSibling);
           // reset index of last match as the node changed and the
           // index isn't valid anymore http://tinyurl.com/htsudjd
           regex.lastIndex = 0;
@@ -704,7 +740,7 @@ class Mark {
    * @property {Mark~markEachCallback} [each]
    * @property {Mark~markNoMatchCallback} [noMatch]
    * @property {Mark~commonDoneCallback} [done]
-   * @property {boolean} [debug=false] - Wheter to log messages
+   * @property {boolean} [debug=false] - Whether to log messages
    * @property {object} [log=window.console] - Where to log messages (only if
    * debug is true)
    */
@@ -728,6 +764,8 @@ class Mark {
    * @type {object.<string>}
    * @property {number} [ignoreGroups=0] - A number indicating the amount of
    * RegExp matching groups to ignore
+   * @property {boolean} [separateGroups] - Whether to mark each regular
+   * expression group as a separate match
    * @property {Mark~markRegExpNoMatchCallback} [noMatch]
    * @property {Mark~markRegExpFilterCallback} [filter]
    */
