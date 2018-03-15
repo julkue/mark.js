@@ -58,7 +58,7 @@
     "karma-summary-reporter": "^1.4.0",
     "nodemon": "^1.14.10",
     "phantomjs-prebuilt": "^2.1.16",
-    "rollup": "^0.56.0",
+    "rollup": "^0.57.0",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-cleanup": "^2.0.0",
     "rollup-plugin-commonjs": "^9.0.0",
