@@ -46,6 +46,7 @@
     "global-require": "error",
     "no-var": "error",
     "no-useless-escape": "warn",
+    "no-control-regex": "off",
     "indent": [
       "error",
       2,
