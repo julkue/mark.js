@@ -110,11 +110,6 @@ module.exports = config => {
       platform: 'Windows 10',
       version: 'latest'
     },
-    'SL_iOS_8': {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '8.4'
-    },
     'SL_iOS_9': {
       base: 'SauceLabs',
       browserName: 'iphone',
