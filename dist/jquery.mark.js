@@ -437,7 +437,14 @@
     }, {
       key: 'escapeStr',
       value: function escapeStr(str) {
-        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+        var regexp = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g;
+        var replace = function replace(s) {
+          return s.replace(regexp, '\\$&');
+        };
+        if (Array.isArray(str)) {
+          return str.map(replace).join('|');
+        }
+        return replace(str);
       }
     }, {
       key: 'createSynonymsRegExp',

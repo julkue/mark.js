@@ -135,13 +135,18 @@ class RegExpCreator {
   }
 
   /**
-   * Escapes a string for usage within a regular expression
-   * @param {string} str - The string to escape
+   * Escapes a string or array for use within a regular expression
+   * @param {string|string[]} str - The string or array to escape
    * @return {string}
    */
   escapeStr(str) {
     // eslint-disable-next-line no-useless-escape
-    return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+    const regexp = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g;
+    const replace = s => s.replace(regexp, '\\$&');
+    if (Array.isArray(str)) {
+      return str.map(replace).join('|');
+    }
+    return replace(str);
   }
 
   /**
