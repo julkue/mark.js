@@ -142,7 +142,7 @@ class RegExpCreator {
   escapeStr(str) {
     // eslint-disable-next-line no-useless-escape
     const regexp = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g;
-    const replace = s => s.replace(regexp, '\\$&');
+    const replace = (s) => s.replace(regexp, '\\$&');
     if (Array.isArray(str)) {
       return str.map(replace).join('|');
     }
