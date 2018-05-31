@@ -332,7 +332,12 @@
       return new RegExp(str, `gm${this.opt.caseSensitive ? '' : 'i'}`);
     }
     escapeStr(str) {
-      return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+      const regexp = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g;
+      const replace = (s) => s.replace(regexp, '\\$&');
+      if (Array.isArray(str)) {
+        return str.map(replace).join('|');
+      }
+      return replace(str);
     }
     createSynonymsRegExp(str) {
       const syn = this.opt.synonyms,
