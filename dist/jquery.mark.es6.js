@@ -343,22 +343,23 @@
         this.opt.ignorePunctuation.length ? '\u0000' : '';
       for (let index in syn) {
         if (syn.hasOwnProperty(index)) {
-          const value = syn[index],
-            k1 = this.opt.wildcards !== 'disabled' ?
-              this.escapeStr(this.setupWildcardsRegExp(index)) :
-              this.escapeStr(index),
-            k2 = this.opt.wildcards !== 'disabled' ?
-              this.escapeStr(this.setupWildcardsRegExp(value)) :
-              this.escapeStr(value);
-          if (k1 !== '' && k2 !== '') {
+          let keys = Array.isArray(syn[index]) ? syn[index] : [syn[index]];
+          keys.unshift(index);
+          keys = keys.map(key => {
+            if (this.opt.wildcards !== 'disabled') {
+              key = this.setupWildcardsRegExp(key);
+            }
+            key = this.escapeStr(key);
+            return key;
+          }).filter(k => k !== '');
+          if (keys.length > 1) {
             str = str.replace(
               new RegExp(
-                `(${this.escapeStr(k1)}|${this.escapeStr(k2)})`,
+                `(${keys.map(k => this.escapeStr(k)).join('|')})`,
                 `gm${sens}`
               ),
               joinerPlaceholder +
-              `(${this.processSynonyms(k1)}|` +
-              `${this.processSynonyms(k2)})` +
+              `(${keys.map(k => this.processSynonyms(k)).join('|')})` +
               joinerPlaceholder
             );
           }
