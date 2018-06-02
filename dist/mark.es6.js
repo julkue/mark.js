@@ -343,10 +343,10 @@
         if (syn.hasOwnProperty(index)) {
           const value = syn[index],
             k1 = this.opt.wildcards !== 'disabled' ?
-              this.setupWildcardsRegExp(index) :
+              this.escapeStr(this.setupWildcardsRegExp(index)) :
               this.escapeStr(index),
             k2 = this.opt.wildcards !== 'disabled' ?
-              this.setupWildcardsRegExp(value) :
+              this.escapeStr(this.setupWildcardsRegExp(value)) :
               this.escapeStr(value);
           if (k1 !== '' && k2 !== '') {
             str = str.replace(

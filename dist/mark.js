@@ -446,8 +446,8 @@
         for (var index in syn) {
           if (syn.hasOwnProperty(index)) {
             var value = syn[index],
-                k1 = this.opt.wildcards !== 'disabled' ? this.setupWildcardsRegExp(index) : this.escapeStr(index),
-                k2 = this.opt.wildcards !== 'disabled' ? this.setupWildcardsRegExp(value) : this.escapeStr(value);
+                k1 = this.opt.wildcards !== 'disabled' ? this.escapeStr(this.setupWildcardsRegExp(index)) : this.escapeStr(index),
+                k2 = this.opt.wildcards !== 'disabled' ? this.escapeStr(this.setupWildcardsRegExp(value)) : this.escapeStr(value);
             if (k1 !== '' && k2 !== '') {
               str = str.replace(new RegExp('(' + this.escapeStr(k1) + '|' + this.escapeStr(k2) + ')', 'gm' + sens), joinerPlaceholder + ('(' + this.processSynonyms(k1) + '|') + (this.processSynonyms(k2) + ')') + joinerPlaceholder);
             }
