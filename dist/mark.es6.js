@@ -336,9 +336,7 @@
     }
     createSynonymsRegExp(str) {
       const syn = this.opt.synonyms,
-        sens = this.opt.caseSensitive ? '' : 'i',
-        joinerPlaceholder = this.opt.ignoreJoiners ||
-        this.opt.ignorePunctuation.length ? '\u0000' : '';
+        sens = this.opt.caseSensitive ? '' : 'i';
       for (let index in syn) {
         if (syn.hasOwnProperty(index)) {
           let keys = Array.isArray(syn[index]) ? syn[index] : [syn[index]];
@@ -356,9 +354,7 @@
                 `(${keys.map(k => this.escapeStr(k)).join('|')})`,
                 `gm${sens}`
               ),
-              joinerPlaceholder +
-              `(${keys.map(k => this.processSynonyms(k)).join('|')})` +
-              joinerPlaceholder
+              `(${keys.map(k => this.processSynonyms(k)).join('|')})`
             );
           }
         }
@@ -386,14 +382,24 @@
         .replace(/\u0002/g, spaces ? '[\\S\\s]*?' : '\\S*');
     }
     setupIgnoreJoinersRegExp(str) {
-      return str.replace(/[^(|)\\]/g, (val, indx, original) => {
-        let nextChar = original.charAt(indx + 1);
-        if (/[(|)\\]/.test(nextChar) || nextChar === '') {
-          return val;
-        } else {
+      return str.replace(
+        new RegExp(
+          '(' + '\\((?:\\?[:=!])?|\\|' + ')|' +
+          '(' + '\\\\(?:[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|.)' + '|' +
+          '[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|.' + ')',
+          'g'
+        ),
+        (val, skip, pass, indx, original) => {
+          if (typeof skip !== 'undefined') {
+            return val;
+          }
+          const postContext = original.slice(indx + val.length);
+          if (/^(?:[)|]|$)/.test(postContext)) {
+            return val;
+          }
           return val + '\u0000';
         }
-      });
+      );
     }
     createJoinersRegExp(str) {
       let joiner = [];

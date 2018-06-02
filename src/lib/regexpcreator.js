@@ -151,11 +151,7 @@ class RegExpCreator {
    */
   createSynonymsRegExp(str) {
     const syn = this.opt.synonyms,
-      sens = this.opt.caseSensitive ? '' : 'i',
-      // add replacement character placeholder before and after the
-      // synonym group
-      joinerPlaceholder = this.opt.ignoreJoiners ||
-      this.opt.ignorePunctuation.length ? '\u0000' : '';
+      sens = this.opt.caseSensitive ? '' : 'i';
     for (let index in syn) {
       if (syn.hasOwnProperty(index)) {
         let keys = Array.isArray(syn[index]) ? syn[index] : [syn[index]];
@@ -173,9 +169,7 @@ class RegExpCreator {
               `(${keys.map(k => this.escapeStr(k)).join('|')})`,
               `gm${sens}`
             ),
-            joinerPlaceholder +
-            `(${keys.map(k => this.processSynonyms(k)).join('|')})` +
-            joinerPlaceholder
+            `(${keys.map(k => this.processSynonyms(k)).join('|')})`
           );
         }
       }
@@ -241,18 +235,31 @@ class RegExpCreator {
    * @return {string}
    */
   setupIgnoreJoinersRegExp(str) {
-    // adding a "null" unicode character as it will not be modified by the
+    // Use \u0000 as placeholder as it will not be modified by the
     // other "create" regular expression functions
-    return str.replace(/[^(|)\\]/g, (val, indx, original) => {
-      // don't add a null after an opening "(", around a "|" or before
-      // a closing "(", or between an escapement (e.g. \+)
-      let nextChar = original.charAt(indx + 1);
-      if (/[(|)\\]/.test(nextChar) || nextChar === '') {
-        return val;
-      } else {
+    return str.replace(
+      // such chars should not appear in str without escaped: []{}*+?.
+      new RegExp(
+        // skip "(" "(?:" "(?=" "(?!" "|"
+        '(' + '\\((?:\\?[:=!])?|\\|' + ')|' + 
+        // pass an escaped RegExp char or another char
+        // (don't interrupt a UTF-16 surrogate pair)
+        '(' + '\\\\(?:[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|.)' + '|' + 
+        '[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|.' + ')',
+        'g'
+      ),
+      (val, skip, pass, indx, original) => {
+        if (typeof skip !== 'undefined') {
+          return val;
+        }
+        const postContext = original.slice(indx + val.length);
+        // do not insert before ")" "|" or at end
+        if (/^(?:[)|]|$)/.test(postContext)) {
+          return val;
+        }
         return val + '\u0000';
       }
-    });
+    );
   }
 
   /**

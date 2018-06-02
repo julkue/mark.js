@@ -445,8 +445,7 @@
         var _this = this;
 
         var syn = this.opt.synonyms,
-            sens = this.opt.caseSensitive ? '' : 'i',
-            joinerPlaceholder = this.opt.ignoreJoiners || this.opt.ignorePunctuation.length ? '\0' : '';
+            sens = this.opt.caseSensitive ? '' : 'i';
         for (var index in syn) {
           if (syn.hasOwnProperty(index)) {
             var keys = Array.isArray(syn[index]) ? syn[index] : [syn[index]];
@@ -463,9 +462,9 @@
             if (keys.length > 1) {
               str = str.replace(new RegExp('(' + keys.map(function (k) {
                 return _this.escapeStr(k);
-              }).join('|') + ')', 'gm' + sens), joinerPlaceholder + ('(' + keys.map(function (k) {
+              }).join('|') + ')', 'gm' + sens), '(' + keys.map(function (k) {
                 return _this.processSynonyms(k);
-              }).join('|') + ')') + joinerPlaceholder);
+              }).join('|') + ')');
             }
           }
         }
@@ -498,13 +497,15 @@
     }, {
       key: 'setupIgnoreJoinersRegExp',
       value: function setupIgnoreJoinersRegExp(str) {
-        return str.replace(/[^(|)\\]/g, function (val, indx, original) {
-          var nextChar = original.charAt(indx + 1);
-          if (/[(|)\\]/.test(nextChar) || nextChar === '') {
+        return str.replace(new RegExp('(' + '\\((?:\\?[:=!])?|\\|' + ')|' + '(' + '\\\\(?:[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|.)' + '|' + '[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|.' + ')', 'g'), function (val, skip, pass, indx, original) {
+          if (typeof skip !== 'undefined') {
             return val;
-          } else {
-            return val + '\0';
           }
+          var postContext = original.slice(indx + val.length);
+          if (/^(?:[)|]|$)/.test(postContext)) {
+            return val;
+          }
+          return val + '\0';
         });
       }
     }, {
