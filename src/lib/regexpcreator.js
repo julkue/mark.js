@@ -77,8 +77,8 @@ class RegExpCreator {
    * @type {object.<string>}
    * @property {boolean} [diacritics=true] - If diacritic characters should be
    * matched. ({@link https://en.wikipedia.org/wiki/Diacritic Diacritics})
-   * @property {object} [synonyms] - An object with synonyms. The key will be
-   * a synonym for the value and the value for the key
+   * @property {object.<string|string[]>} [synonyms] - An object with synonyms.
+   * The key will be a synonym for the value and the value for the key
    * @property {RegExpCreator~accuracy} [accuracy]
    * @property {boolean} [caseSensitive=false] - Whether to search case
    * sensitive
