@@ -6,7 +6,7 @@ import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import cleanup from 'rollup-plugin-cleanup';
 import babel from 'rollup-plugin-babel';
-import uglify from 'rollup-plugin-uglify';
+import {terser} from "rollup-plugin-terser";
 
 // Shared config
 const output = {
@@ -71,8 +71,7 @@ const output = {
   })(),
   minifyPlugins = (() => {
     const newPlugins = plugins.slice();
-    newPlugins.push(uglify({
-      warnings: true,
+    newPlugins.push(terser({
       output: {
         comments: /^!/
       }
@@ -81,8 +80,7 @@ const output = {
   })(),
   minifyPluginsES5 = (() => {
     const newPlugins = pluginsES5.slice();
-    newPlugins.push(uglify({
-      warnings: true,
+    newPlugins.push(terser({
       output: {
         comments: /^!/
       }
