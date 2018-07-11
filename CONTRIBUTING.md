@@ -14,7 +14,7 @@ For each issue please provide:
 2. What kind of mark.js version you are using
 3. A detailed description
 4. The exact steps to reproduce (bugs and problems)
-5. A [fiddle][jsfiddle] that demonstrates your issue (if possible)
+5. **A [fiddle][jsfiddle] that demonstrates your issue**
 
 ### 1.2 Feature Requests
 
