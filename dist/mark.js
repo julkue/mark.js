@@ -433,6 +433,13 @@
         return new RegExp(str, 'gm' + (this.opt.caseSensitive ? '' : 'i'));
       }
     }, {
+      key: 'sortByLength',
+      value: function sortByLength(arry) {
+        return arry.sort(function (a, b) {
+          return a.length === b.length ? a > b ? 1 : -1 : b.length - a.length;
+        });
+      }
+    }, {
       key: 'escapeStr',
       value: function escapeStr(str) {
         return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
@@ -449,7 +456,7 @@
           if (syn.hasOwnProperty(index)) {
             var keys = Array.isArray(syn[index]) ? syn[index] : [syn[index]];
             keys.unshift(index);
-            keys = keys.map(function (key) {
+            keys = this.sortByLength(keys).map(function (key) {
               if (_this.opt.wildcards !== 'disabled') {
                 key = _this.setupWildcardsRegExp(key);
               }

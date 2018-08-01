@@ -331,6 +331,12 @@
       str = this.createAccuracyRegExp(str);
       return new RegExp(str, `gm${this.opt.caseSensitive ? '' : 'i'}`);
     }
+    sortByLength(arry) {
+      return arry.sort((a, b) => a.length === b.length ?
+        (a > b ? 1 : -1) :
+        b.length - a.length
+      );
+    }
     escapeStr(str) {
       return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
     }
@@ -343,7 +349,7 @@
         if (syn.hasOwnProperty(index)) {
           let keys = Array.isArray(syn[index]) ? syn[index] : [syn[index]];
           keys.unshift(index);
-          keys = keys.map(key => {
+          keys = this.sortByLength(keys).map(key => {
             if (this.opt.wildcards !== 'disabled') {
               key = this.setupWildcardsRegExp(key);
             }

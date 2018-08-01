@@ -135,6 +135,19 @@ class RegExpCreator {
   }
 
   /**
+   * Sort array from longest entry to shortest
+   * @param {array} arry - The array to sort
+   * @return {array}
+   */
+  sortByLength(arry) {
+    return arry.sort((a, b) => a.length === b.length ?
+      // sort a-z for same length elements
+      (a > b ? 1 : -1) :
+      b.length - a.length
+    );
+  }
+
+  /**
    * Escapes a string for usage within a regular expression
    * @param {string} str - The string to escape
    * @return {string}
@@ -160,7 +173,7 @@ class RegExpCreator {
       if (syn.hasOwnProperty(index)) {
         let keys = Array.isArray(syn[index]) ? syn[index] : [syn[index]];
         keys.unshift(index);
-        keys = keys.map(key => {
+        keys = this.sortByLength(keys).map(key => {
           if (this.opt.wildcards !== 'disabled') {
             key = this.setupWildcardsRegExp(key);
           }

@@ -1,11 +1,12 @@
 'use strict';
 describe('basic mark with synonyms in an array', function() {
-  var $ctx1, $ctx2;
+  var $ctx1, $ctx2, $ctx3;
   beforeEach(function(done) {
     loadFixtures('basic/synonyms-array.html');
 
     $ctx1 = $('.basic-synonyms-array > div:nth-child(1)');
     $ctx2 = $('.basic-synonyms-array > div:nth-child(2)');
+    $ctx3 = $('.basic-synonyms-array > div:nth-child(3)');
     new Mark($ctx1[0]).mark('1', {
       accuracy: 'exactly',
       synonyms: {
@@ -18,7 +19,14 @@ describe('basic mark with synonyms in an array', function() {
             'i*m': ['lorem', 'do?or']
           },
           wildcards: 'enabled',
-          'done': done
+          'done': function() {
+            new Mark($ctx3[0]).mark('been', {
+              synonyms: {
+                'am': ['be', 'is', 'are', 'were', 'was', 'being', 'been', 'am']
+              },
+              'done': done
+            });
+          }
         });
       }
     });
@@ -30,5 +38,9 @@ describe('basic mark with synonyms in an array', function() {
 
   it('wildcards in synonym array should work', function() {
     expect($ctx2.find('mark')).toHaveLength(4);
+  });
+
+  it('finds all synonyms in the array', function() {
+    expect($ctx3.find('mark')).toHaveLength(8);
   });
 });
