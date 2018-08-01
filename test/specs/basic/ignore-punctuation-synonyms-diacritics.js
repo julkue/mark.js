@@ -4,6 +4,7 @@ describe(
   function() {
     function getPunctuation() {
       return ':;.,-–—‒_(){}[]!\'"+='
+        // eslint-disable-next-line no-useless-escape
         .replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&')
         .split('');
     }
