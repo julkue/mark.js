@@ -478,7 +478,7 @@ class Mark {
    */
   separateGroups(node, match, matchIdx, filterCb, eachCb) {
     let matchLen = match.length;
-    for (let i = 0; i < matchLen; i++) {
+    for (let i = 1; i < matchLen; i++) {
       let pos = node.textContent.indexOf(match[i]);
       if (match[i] && pos > -1 && filterCb(match[i], node)) {
         node = this.wrapGroups(node, pos, match[i].length, eachCb);
