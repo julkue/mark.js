@@ -525,13 +525,17 @@ class Mark {
           match[matchIdx] !== ''
         ) {
           if (this.opt.separateGroups) {
-            node = this.separateGroups(
-              node,
-              match,
-              matchIdx,
-              filterCb,
-              eachCb
-            );
+	    if(match.length !== 1){
+	      node = this.separateGroups(
+		  node,
+		  match,
+		  matchIdx,
+		  filterCb,
+		  eachCb
+              );
+            }else{
+              break;
+            }
           } else {
             if (!filterCb(match[matchIdx], node)) {
               continue;
