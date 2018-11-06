@@ -58,13 +58,13 @@ const output = {
     newPlugins.push(babel({
       exclude: 'node_modules/**',
       'presets': [
-        ['env', {
+        ['@babel/preset-env', {
           'modules': false
         }]
       ],
       'plugins': [
-        'external-helpers',
-        'transform-object-assign'
+        '@babel/plugin-external-helpers',
+        '@babel/plugin-transform-object-assign'
       ]
     }));
     return newPlugins;
