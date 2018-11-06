@@ -6,11 +6,11 @@ describe('mark with range filter callback', function() {
     // term to filter out
     skip = 'elitr';
 
-    // in case the fixture whitespace is altered
+  // in case the fixture whitespace is altered
   function getRange($el, string) {
     var start = $el.text().indexOf(string),
       length = string.length;
-    return start > -1 ? { 'start': start, 'length': length } : null;
+    return start > -1 ? {'start': start, 'length': length} : null;
   }
 
   beforeEach(function(done) {
@@ -51,16 +51,16 @@ describe('mark with range filter callback', function() {
         // because the values within "terms" may not be in order
         if (
           item &&
-                    item.index === range.index &&
-                    // make sure we're getting a counter value
-                    (counter === filterCalled - 1)
+          item.index === range.index &&
+          // make sure we're getting a counter value
+          (counter === filterCalled - 1)
         ) {
           termCount++;
           if (
             item.start === range.start &&
-                        item.length === range.length &&
-                        // check extra data
-                        range.foo === 'bar' + item.index
+            item.length === range.length &&
+            // check extra data
+            range.foo === 'bar' + item.index
           ) {
             rangeCount++;
           }
