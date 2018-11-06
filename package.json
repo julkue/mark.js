@@ -44,10 +44,10 @@
     "eslint": "^5.0.0",
     "eslint-plugin-jasmine-jquery": "^1.0.0",
     "handlebars": "^4.0.11",
-    "jasmine-core": "^2.8.0",
+    "jasmine-core": "^3.2.0",
     "jquery": "^3.2.1",
     "jsdoc": "^3.5.5",
-    "karma": "^2.0.0",
+    "karma": "^3.0.0",
     "karma-cli": "^1.0.1",
     "karma-coverage": "^1.1.1",
     "karma-jasmine": "^1.1.1",
@@ -58,11 +58,11 @@
     "karma-summary-reporter": "^1.4.0",
     "nodemon": "^1.14.10",
     "phantomjs-prebuilt": "^2.1.16",
-    "rollup": "^0.63.0",
-    "rollup-plugin-babel": "^3.0.3",
+    "rollup": "^0.66.0",
+    "rollup-plugin-babel": "^4.0.1",
     "rollup-plugin-cleanup": "^3.0.0",
     "rollup-plugin-commonjs": "^9.0.0",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-terser": "^1.0.1"
+    "rollup-plugin-terser": "^2.0.0"
   }
 }

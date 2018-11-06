@@ -16,6 +16,8 @@ For each issue please provide:
 4. The exact steps to reproduce (bugs and problems)
 5. **A [fiddle][jsfiddle] that demonstrates your issue**
 
+__NOTE__: Your issue will be closed immediately, if you don't provide all required points.
+
 ### 1.2 Feature Requests
 
 Please provide the following information:
