@@ -5,7 +5,7 @@ describe('mark with range', function() {
     // [single word, characters spanning spaces, anything]
     terms = ['nonumy', 'nt ut labor', 'vero'];
 
-    // in case the fixture whitespace is altered
+  // in case the fixture whitespace is altered
   function getRange($el, string) {
     var start = $el.text().indexOf(string),
       length = string.length;
@@ -47,9 +47,9 @@ describe('mark with range', function() {
       'each': each,
       'done': function() {
         new Mark($ctx2[0]).markRanges([
-          { start: 10, length: 0 },
-          { start: 20, length: 0 },
-          { start: 30, length: 0.6 }
+          {start: 10, length: 0},
+          {start: 20, length: 0},
+          {start: 30, length: 0.6}
         ], {
           'noMatch': function(item) {
             notFound = notFound.concat(item);
@@ -86,9 +86,9 @@ describe('mark with range', function() {
   });
   it('should ignore ranges with length of zero', function() {
     expect(JSON.stringify(notFound)).toBe(JSON.stringify([
-      { start: 10, length: 0 },
-      { start: 20, length: 0 },
-      { start: 30, length: 0.6 }
+      {start: 10, length: 0},
+      {start: 20, length: 0},
+      {start: 30, length: 0.6}
     ]));
   });
 });
