@@ -5,7 +5,7 @@ module.exports = config => {
     'SL_Win_Chrome_30': {
       base: 'SauceLabs',
       browserName: 'chrome',
-      platform: 'Windows 10',
+      platform: 'Windows 8.1',
       version: '30'
     },
     'SL_Win_Chrome_40': {
@@ -77,8 +77,8 @@ module.exports = config => {
     'SL_macOS_Safari_11': {
       base: 'SauceLabs',
       browserName: 'safari',
-      platform: 'macOS 10.13',
-      version: '11.0'
+      platform: 'macOS 10.12',
+      version: '11'
     },
     'SL_Win_IE_9': {
       base: 'SauceLabs',
