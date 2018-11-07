@@ -2,24 +2,6 @@
 module.exports = config => {
   // Define Sauce Labs browsers
   const customLaunchers = {
-    'SL_Win_Chrome_30': {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 10',
-      version: '30'
-    },
-    'SL_Win_Chrome_40': {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 10',
-      version: '40'
-    },
-    'SL_Win_Chrome_50': {
-      base: 'SauceLabs',
-      browserName: 'chrome',
-      platform: 'Windows 10',
-      version: '50'
-    },
     'SL_Win_Chrome_60': {
       base: 'SauceLabs',
       browserName: 'chrome',
@@ -32,23 +14,11 @@ module.exports = config => {
       platform: 'Windows 10',
       version: 'latest'
     },
-    'SL_Win_Firefox_30': {
+    'SL_Win_Firefox_60': {
       base: 'SauceLabs',
       browserName: 'firefox',
       platform: 'Windows 10',
-      version: '30'
-    },
-    'SL_Win_Firefox_40': {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      platform: 'Windows 10',
-      version: '40'
-    },
-    'SL_Win_Firefox_50': {
-      base: 'SauceLabs',
-      browserName: 'firefox',
-      platform: 'Windows 10',
-      version: '50'
+      version: '60'
     },
     'SL_Win_Firefox_Latest': {
       base: 'SauceLabs',
@@ -56,47 +26,17 @@ module.exports = config => {
       platform: 'Windows 10',
       version: 'latest'
     },
-    'SL_OS_X_Safari_8': {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'OS X 10.10',
-      version: '8.0'
-    },
-    'SL_OS_X_Safari_9': {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'OS X 10.11',
-      version: '9.0'
-    },
-    'SL_OS_X_Safari_10': {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'OS X 10.11',
-      version: '10.0'
-    },
-    'SL_macOS_Safari_11': {
-      base: 'SauceLabs',
-      browserName: 'safari',
-      platform: 'macOS 10.13',
-      version: '11.0'
-    },
-    'SL_Win_IE_9': {
-      base: 'SauceLabs',
-      browserName: 'internet explorer',
-      platform: 'Windows 7',
-      version: '9'
-    },
     'SL_Win_IE_10': {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      platform: 'Windows 7',
+      platform: 'Windows 8',
       version: '10'
     },
     'SL_Win_IE_11': {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      platform: 'Windows 7',
-      version: '11'
+      platform: 'Windows 10',
+      version: '11.103'
     },
     'SL_Win_Edge_13': {
       base: 'SauceLabs',
@@ -110,10 +50,23 @@ module.exports = config => {
       platform: 'Windows 10',
       version: 'latest'
     },
-    'SL_iOS_9': {
+    'SL_OS_X_Safari_10': {
       base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '9.3'
+      browserName: 'safari',
+      platform: 'OS X 10.11',
+      version: '10.0'
+    },
+    'SL_macOS_Safari_11': {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'macOS 10.12',
+      version: '11'
+    },
+    'SL_macOS_Safari_12': {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'macOS 10.13',
+      version: '12'
     },
     'SL_iOS_10': {
       base: 'SauceLabs',
@@ -139,7 +92,7 @@ module.exports = config => {
       base: 'SauceLabs',
       browserName: 'android',
       version: '6.0'
-    },
+    }
   };
   config.set({
     basePath: '../',
