@@ -89,14 +89,14 @@ module.exports = config => {
     'SL_Win_IE_10': {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      platform: 'Windows 7',
+      platform: 'Windows 8',
       version: '10'
     },
     'SL_Win_IE_11': {
       base: 'SauceLabs',
       browserName: 'internet explorer',
-      platform: 'Windows 7',
-      version: '11'
+      platform: 'Windows 10',
+      version: '11.103'
     },
     'SL_Win_Edge_13': {
       base: 'SauceLabs',
