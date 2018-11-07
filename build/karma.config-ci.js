@@ -78,11 +78,6 @@ module.exports = config => {
       browserName: 'iphone',
       version: '11.1'
     },
-    'SL_iOS_12': {
-      base: 'SauceLabs',
-      browserName: 'iphone',
-      version: '12'
-    },
     'SL_Android_4': {
       base: 'SauceLabs',
       browserName: 'android',
