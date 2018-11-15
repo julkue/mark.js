@@ -50,7 +50,7 @@
     "karma": "^3.0.0",
     "karma-cli": "^1.0.1",
     "karma-coverage": "^1.1.1",
-    "karma-jasmine": "^1.1.1",
+    "karma-jasmine": "^2.0.0",
     "karma-jasmine-jquery": "^0.1.1",
     "karma-phantomjs-launcher": "^1.0.4",
     "karma-sauce-launcher": "^1.2.0",
