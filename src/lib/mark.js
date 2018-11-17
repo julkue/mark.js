@@ -524,18 +524,14 @@ class Mark {
           (match = regex.exec(node.textContent)) !== null &&
           match[matchIdx] !== ''
         ) {
-          if (this.opt.separateGroups) {
-	    if(match.length !== 1){
-	      node = this.separateGroups(
-		  node,
-		  match,
-		  matchIdx,
-		  filterCb,
-		  eachCb
-              );
-            }else{
-              break;
-            }
+          if (this.opt.separateGroups && match.length !== 1){
+            node = this.separateGroups(
+              node,
+              match,
+              matchIdx,
+              filterCb,
+              eachCb
+            );
           } else {
             if (!filterCb(match[matchIdx], node)) {
               continue;
