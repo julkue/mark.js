@@ -524,7 +524,7 @@ class Mark {
           (match = regex.exec(node.textContent)) !== null &&
           match[matchIdx] !== ''
         ) {
-          if (this.opt.separateGroups) {
+          if (this.opt.separateGroups && match.length !== 1){
             node = this.separateGroups(
               node,
               match,

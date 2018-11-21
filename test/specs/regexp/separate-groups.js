@@ -1,12 +1,13 @@
 'use strict';
 describe('mark with regular expression and separateGroups', function() {
-  var $ctx1, $ctx2, $ctx3;
+  var $ctx1, $ctx2, $ctx3, $ctx4;
   beforeEach(function(done) {
     loadFixtures('regexp/separate-groups.html');
 
     $ctx1 = $('.regexp-separate-groups > div:nth-child(1)');
     $ctx2 = $('.regexp-separate-groups > div:nth-child(2)');
     $ctx3 = $('.regexp-separate-groups > div:nth-child(3)');
+    $ctx4 = $('.regexp-separate-groups > div:nth-child(4)');
     new Mark($ctx1[0]).markRegExp(/(?:\[%)([a-z_]+):(\w+?)(?:%])/g, {
       separateGroups: true,
       done: function() {
@@ -15,7 +16,12 @@ describe('mark with regular expression and separateGroups', function() {
           done: function() {
             new Mark($ctx3[0]).markRegExp(/(\w+)-(\w+)/g, {
               separateGroups: false,
-              done: done
+              done: function() {
+                new Mark($ctx4[0]).markRegExp(/\w+-\w+/g, {
+                  separateGroups: true,
+                  done: done
+                });
+              }
             });
           }
         });
@@ -44,5 +50,8 @@ describe('mark with regular expression and separateGroups', function() {
   });
   it('should not separate groups when disabled', function() {
     expect($ctx3.find('mark')).toHaveLength(4);
+  });
+  it('should not cause an infinite loop with no groups in regexp', function() {
+    expect($ctx4.find('mark')).toHaveLength(4);
   });
 });
