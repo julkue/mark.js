@@ -77,12 +77,12 @@ TODO         text
 *.tmpl       text
 
 ## LINTERS
-.csslintrc    text
-.eslintrc     text
-.jscsrc       text
-.jshintrc     text
-.jshintignore text
-.stylelintrc  text
+.csslintrc     text
+.eslintrc.json text
+.jscsrc        text
+.jshintrc      text
+.jshintignore  text
+.stylelintrc   text
 
 ## CONFIGS
 *.bowerrc      text
