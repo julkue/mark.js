@@ -67,7 +67,7 @@ instance.markRanges([{
     start: 15,
     length: 5
 }, {
-    start: 25:
+    start: 25,
     length: 8
 }]); // marks matches with ranges 15-20 and 25-33
 </code></pre>
@@ -78,7 +78,7 @@ jQuery:
     start: 15,
     length: 5
 }, {
-    start: 25:
+    start: 25,
     length: 8
 }]); // marks matches with ranges 15-20 and 25-33
 </code></pre>
@@ -125,7 +125,7 @@ instance.markRanges([{
     start: 15,
     length: 5
 }, {
-    start: 25:
+    start: 25,
     length: 8
 }], options);
 </code></pre>
@@ -136,7 +136,7 @@ jQuery:
     start: 15,
     length: 5
 }, {
-    start: 25:
+    start: 25,
     length: 8
 }], options);
 </code></pre>
