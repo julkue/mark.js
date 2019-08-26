@@ -4,7 +4,6 @@
 
 ##### Highlight keywords using JavaScript. Intended for every use case. <br> Can e.g. be used to mark text in search results.
 
-[![Build Status][build-status-image]][build-status]
 [![License][license-image]][license]
 [![jsDelivr Hits][jsdelivr-image]][jsdelivr]
 [![Greenkeeper][greenkeeper-image]][greenkeeper]  
@@ -25,12 +24,10 @@ Changes are documented in [release][releases] descriptions.
 
 Happy hacking!
 
-[build-status]: https://travis-ci.org/julmot/mark.js
 [license]: https://raw.githubusercontent.com/julmot/mark.js/master/LICENSE
 [jsdelivr]: https://www.jsdelivr.com/package/npm/mark.js
 [greenkeeper]: https://github.com/julmot/mark.js
 
-[build-status-image]: https://img.shields.io/travis/julmot/mark.js/master.svg?label=test
 [license-image]: https://img.shields.io/badge/license-MIT-blue.svg
 [jsdelivr-image]: https://data.jsdelivr.com/v1/package/npm/mark.js/badge?style=rounded
 [greenkeeper-image]: https://badges.greenkeeper.io/julmot/mark.js.svg
