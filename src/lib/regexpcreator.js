@@ -44,12 +44,20 @@ class RegExpCreator {
    *   <li><i>enabled</i>: When searching for "lor?m", the "?" will match zero
    *   or one non-space character (e.g. "lorm", "loram", "lor3m", etc). When
    *   searching for "lor*m", the "*" will match zero or more non-space
-   *   characters (e.g. "lorm", "loram", "lor123m", etc).</li>
+   *   characters (e.g. "lorm", "loram", "lor123m", etc). When searching for
+   *   "lor%m", the "%" will match exactly one non-space character (e.g.
+   *   "lorem", "loram", etc, but not "lorm"). When searching for "lor+m", the
+   *   "+" will match one or more non-space characters (e.g. "lorem", "loram"
+   *   , "lor123m", etc, but not "lorm").</li>
    *   <li><i>withSpaces</i>: When searching for "lor?m", the "?" will
-   *   match zero or one space or non-space character (e.g. "lor m", "loram",
+   *   match zero or one space or non-space character (e.g. "lor m", "lorm",
    *   etc). When searching for "lor*m", the "*" will match zero or more space
    *   or non-space characters (e.g. "lorm", "lore et dolor ipsum", "lor: m",
-   *   etc).</li>
+   *   etc). When searching for lor%m", the "%" will match exactly one space or
+   *   non-space character (e.g. "lor m", "loram", etc, but not "lorm"). When
+   *   searching for "lor+m", the "+" will match one or more space or non-space
+   *   characters (e.g. "lorem", "lore et dolor ipsum", "lor: m", etc but not
+   *   "lorm").</li>
    * </ul>
    */
   /**
@@ -220,8 +228,16 @@ class RegExpCreator {
       return val.charAt(0) === '\\' ? '?' : '\u0001';
     });
     // replace multiple character wildcard with unicode 0002
-    return str.replace(/(?:\\)*\*/g, val => {
+    str = str.replace(/(?:\\)*\*/g, val => {
       return val.charAt(0) === '\\' ? '*' : '\u0002';
+    });
+    // replace exactly one character wildcard with unicode 0003
+    str = str.replace(/(?:\\)*%/g, val => {
+      return val.charAt(0) === '\\' ? '%' : '\u0003';
+    });
+    // replace one or more character wildcard with unicode 0004
+    return str.replace(/(?:\\)*\+/g, val => {
+      return val.charAt(0) === '\\' ? '+' : '\u0004';
     });
   }
 
@@ -237,14 +253,22 @@ class RegExpCreator {
     // does not match new line characters
     let spaces = this.opt.wildcards === 'withSpaces';
     return str
-    // replace unicode 0001 with a RegExp class to match any single
-    // character, or any single non-whitespace character depending
-    // on the setting
+      // replace unicode 0001 with a RegExp class to match any single
+      // character, or any single non-whitespace character depending
+      // on the setting
       .replace(/\u0001/g, spaces ? '[\\S\\s]?' : '\\S?')
       // replace unicode 0002 with a RegExp class to match zero or
       // more characters, or zero or more non-whitespace characters
       // depending on the setting
-      .replace(/\u0002/g, spaces ? '[\\S\\s]*?' : '\\S*');
+      .replace(/\u0002/g, spaces ? '[\\S\\s]*?' : '\\S*?')
+      // replace unicode 0003 with a RegExp class to match exactly one
+      // character, or exactly one  non-whitespace character depending
+      // on the setting
+      .replace(/\u0003/g, spaces ? '[\\S\\s]' : '\\S')
+      // replace unicode 0004 with a RegExp class to match one or
+      // more characters, or one or more non-whitespace characters
+      // depending on the setting
+      .replace(/\u0004/g, spaces ? '[\\S\\s]+' : '\\S+');
   }
 
   /**
