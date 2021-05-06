@@ -1,7 +1,7 @@
 /*!***************************************************
 * mark.js v9.0.0
 * https://markjs.io/
-* Copyright (c) 2014–2018, Julian Kühnel
+* Copyright (c) 2014–2021, Julian Kühnel
 * Released under the MIT license https://git.io/vwTVl
 *****************************************************/
 
@@ -383,15 +383,23 @@
       str = str.replace(/(?:\\)*\?/g, val => {
         return val.charAt(0) === '\\' ? '?' : '\u0001';
       });
-      return str.replace(/(?:\\)*\*/g, val => {
+      str = str.replace(/(?:\\)*\*/g, val => {
         return val.charAt(0) === '\\' ? '*' : '\u0002';
+      });
+      str = str.replace(/(?:\\)*%/g, val => {
+        return val.charAt(0) === '\\' ? '%' : '\u0003';
+      });
+      return str.replace(/(?:\\)*\+/g, val => {
+        return val.charAt(0) === '\\' ? '+' : '\u0004';
       });
     }
     createWildcardsRegExp(str) {
       let spaces = this.opt.wildcards === 'withSpaces';
       return str
         .replace(/\u0001/g, spaces ? '[\\S\\s]?' : '\\S?')
-        .replace(/\u0002/g, spaces ? '[\\S\\s]*?' : '\\S*');
+        .replace(/\u0002/g, spaces ? '[\\S\\s]*?' : '\\S*?')
+        .replace(/\u0003/g, spaces ? '[\\S\\s]' : '\\S')
+        .replace(/\u0004/g, spaces ? '[\\S\\s]+' : '\\S+');
     }
     setupIgnoreJoinersRegExp(str) {
       return str.replace(/[^(|)\\]/g, (val, indx, original) => {
@@ -729,7 +737,7 @@
             (match = regex.exec(node.textContent)) !== null &&
             match[matchIdx] !== ''
           ) {
-            if (this.opt.separateGroups) {
+            if (this.opt.separateGroups && match.length !== 1){
               node = this.separateGroups(
                 node,
                 match,

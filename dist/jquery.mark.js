@@ -1,7 +1,7 @@
 /*!***************************************************
 * mark.js v9.0.0
 * https://markjs.io/
-* Copyright (c) 2014–2018, Julian Kühnel
+* Copyright (c) 2014–2021, Julian Kühnel
 * Released under the MIT license https://git.io/vwTVl
 *****************************************************/
 
@@ -14,6 +14,8 @@
   $ = $ && $.hasOwnProperty('default') ? $['default'] : $;
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
@@ -67,9 +69,7 @@
     return _extends.apply(this, arguments);
   }
 
-  var DOMIterator =
-  /*#__PURE__*/
-  function () {
+  var DOMIterator = /*#__PURE__*/function () {
     function DOMIterator(ctx) {
       var iframes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
       var exclude = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
@@ -439,9 +439,7 @@
     return DOMIterator;
   }();
 
-  var RegExpCreator =
-  /*#__PURE__*/
-  function () {
+  var RegExpCreator = /*#__PURE__*/function () {
     function RegExpCreator(options) {
       _classCallCheck(this, RegExpCreator);
 
@@ -553,15 +551,21 @@
         str = str.replace(/(?:\\)*\?/g, function (val) {
           return val.charAt(0) === '\\' ? '?' : "\x01";
         });
-        return str.replace(/(?:\\)*\*/g, function (val) {
+        str = str.replace(/(?:\\)*\*/g, function (val) {
           return val.charAt(0) === '\\' ? '*' : "\x02";
+        });
+        str = str.replace(/(?:\\)*%/g, function (val) {
+          return val.charAt(0) === '\\' ? '%' : "\x03";
+        });
+        return str.replace(/(?:\\)*\+/g, function (val) {
+          return val.charAt(0) === '\\' ? '+' : "\x04";
         });
       }
     }, {
       key: "createWildcardsRegExp",
       value: function createWildcardsRegExp(str) {
         var spaces = this.opt.wildcards === 'withSpaces';
-        return str.replace(/\u0001/g, spaces ? '[\\S\\s]?' : '\\S?').replace(/\u0002/g, spaces ? '[\\S\\s]*?' : '\\S*');
+        return str.replace(/\u0001/g, spaces ? '[\\S\\s]?' : '\\S?').replace(/\u0002/g, spaces ? '[\\S\\s]*?' : '\\S*?').replace(/\u0003/g, spaces ? '[\\S\\s]' : '\\S').replace(/\u0004/g, spaces ? '[\\S\\s]+' : '\\S+');
       }
     }, {
       key: "setupIgnoreJoinersRegExp",
@@ -651,9 +655,7 @@
     return RegExpCreator;
   }();
 
-  var Mark =
-  /*#__PURE__*/
-  function () {
+  var Mark = /*#__PURE__*/function () {
     function Mark(ctx) {
       _classCallCheck(this, Mark);
 
@@ -924,7 +926,7 @@
             var match;
 
             while ((match = regex.exec(node.textContent)) !== null && match[matchIdx] !== '') {
-              if (_this5.opt.separateGroups) {
+              if (_this5.opt.separateGroups && match.length !== 1) {
                 node = _this5.separateGroups(node, match, matchIdx, filterCb, eachCb);
               } else {
                 if (!filterCb(match[matchIdx], node)) {
