@@ -497,7 +497,7 @@ class Mark {
   * @param {HTMLElement} node - The wrapped DOM element
   * @param {number} lastIndex - The last matching position within the
   * composite value of text nodes
-  * @param {number} nodeIndex - The index of node when match is spread
+  * @param {number} nodeIndex - The index of mark node when match is spread
   * across elements
   */
 
@@ -719,8 +719,8 @@ class Mark {
    * Callback for each wrapped element
    * @callback Mark~wrapMatchesAcrossElementsEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {Object} match - result of RegExp exec() method
-   * @param {number} nodeIndex - The index of node when match is spread
+   * @param {Object} match - The result of RegExp exec() method
+   * @param {number} nodeIndex - The index of mark node when match is spread
    * across elements
    */
   /**
@@ -876,8 +876,8 @@ class Mark {
    * Callback for each marked element
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {Object} regMatch - result of RegExp exec() method
-   * @param {number} nodeIndex - The index of node when match is spread
+   * @param {Object} regMatch - The result of RegExp exec() method
+   * @param {number} nodeIndex - The index of mark node when match is spread
    * across elements
    */
   /**
