@@ -1,7 +1,7 @@
 /*!***************************************************
 * mark.js v9.0.0
 * https://markjs.io/
-* Copyright (c) 2014–2018, Julian Kühnel
+* Copyright (c) 2014–2021, Julian Kühnel
 * Released under the MIT license https://git.io/vwTVl
 *****************************************************/
 
@@ -630,6 +630,77 @@
         valid: valid
       };
     }
+    getTextNodesAcrossElements(cb) {
+      let val = '', start, text, addSpace, offset, nodes = [];
+      const blockTags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR',
+        'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE',
+        'FIGCAPTION', 'FIGURE', 'PRE', 'HR', 'TABLE', 'THEAD', 'TBODY', 'TFOOT',
+        'INPUT', 'IMAGE', 'IMG', 'LINK', 'META', 'NAV', 'MENU', 'MENUITEM',
+        'CAPTION', 'COL', 'COLGROUP', 'DETAILS', 'DATALIST', 'FORM', 'BODY',
+        'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'HEADER', 'FOOTER', 'OPTGROUP',
+        'OPTION', 'QUOTE', 'ADDRESS', 'APPLET', 'AREA', 'AUDIO', 'BASE',
+        'BASEFONT', 'BGSOUND', 'CANVAS', 'DESC', 'DIALOG', 'DIR', 'EMBED',
+        'FIELDSET', 'FONT', 'FOREIGNOBJECT', 'FRAME', 'FRAMESET', 'HGROUP',
+        'IFRAME', 'ISINDEX', 'KEYGEN', 'LEGEND', 'LISTING', 'MARQUEE', 'MATH',
+        'MI', 'MN', 'MO', 'MS', 'MTEXT', 'NOBR', 'NOSCRIPT', 'NOEMBED',
+        'NOFRAMES', 'OBJECT', 'PARAM', 'PICTURE', 'SELECT', 'SOURCE', 'SVG',
+        'TEMPLATE', 'TEXTAREA', 'TRACK', 'VIDEO', 'XMP'];
+      function isSpaceRequired(node) {
+        if (node === node.parentNode.lastChild) {
+          return blockTags.indexOf(node.parentNode.nodeName) !== -1;
+        }
+        let next = node.nextSibling;
+        if (next) {
+          if (next.nodeType === 1) {
+            if (blockTags.indexOf(next.nodeName) !== -1) {
+              return true;
+            } else if (next.firstChild) {
+              if (next.firstChild.nodeType === 1) {
+                if (blockTags.indexOf(next.firstChild.nodeName) !== -1) {
+                  return true;
+                }
+                return isSpaceRequired(next.firstChild);
+              } else if (next.firstChild.nodeType === 3) {
+                return /[\s]/.test(next.firstChild.textContent[0]);
+              }
+            }
+          }
+        }
+        return  blockTags.indexOf(node.parentNode.nodeName) !== -1;
+      }
+      this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
+        addSpace = false;
+        offset = 0;
+        start = val.length;
+        text = node.textContent;
+        if ( !/\s/.test(text[text.length-1])) {
+          addSpace = isSpaceRequired(node);
+        }
+        if (addSpace) {
+          val += text + ' ';
+          offset = 1;
+        } else {
+          val += text;
+        }
+        nodes.push({
+          start: start,
+          end: val.length - offset,
+          offset : offset,
+          node
+        });
+      }, node => {
+        if (this.matchesExclude(node.parentNode)) {
+          return NodeFilter.FILTER_REJECT;
+        } else {
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }, () => {
+        cb({
+          value: val,
+          nodes: nodes
+        });
+      });
+    }
     getTextNodes(cb) {
       let val = '',
         nodes = [];
@@ -669,6 +740,28 @@
       repl.textContent = startNode.textContent;
       startNode.parentNode.replaceChild(repl, startNode);
       return ret;
+    }
+    wrapMatchesInMappedTextNode(dict, start, end, filterCb, eachCb) {
+      let nodeIndex = 0;
+      dict.nodes.every((n, i) => {
+        const sibl = dict.nodes[i + 1];
+        if (typeof sibl === 'undefined' || sibl.start > start) {
+          if (!filterCb(n.node)) {
+            return false;
+          }
+          const s = start - n.start,
+            e = (end > n.end ? n.end : end) - n.start;
+          n.node = this.wrapRangeInTextNode(n.node, s, e);
+          eachCb(n.node.previousSibling, end, nodeIndex++);
+          n.start += e;
+          if (end > n.end) {
+            start = n.end + n.offset;
+          } else {
+            return false;
+          }
+        }
+        return true;
+      });
     }
     wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
       dict.nodes.every((n, i) => {
@@ -727,7 +820,7 @@
             (match = regex.exec(node.textContent)) !== null &&
             match[matchIdx] !== ''
           ) {
-            if (this.opt.separateGroups) {
+            if (this.opt.separateGroups && match.length !== 1){
               node = this.separateGroups(
                 node,
                 match,
@@ -755,7 +848,7 @@
     }
     wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
       const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
-      this.getTextNodes(dict => {
+      this.getTextNodesAcrossElements(dict => {
         let match;
         while (
           (match = regex.exec(dict.value)) !== null &&
@@ -768,11 +861,11 @@
             }
           }
           const end = start + match[matchIdx].length;
-          this.wrapRangeInMappedTextNode(dict, start, end, node => {
+          this.wrapMatchesInMappedTextNode(dict, start, end, node => {
             return filterCb(match[matchIdx], node);
-          }, (node, lastIndex) => {
+          }, (node, lastIndex, nodeIndex) => {
             regex.lastIndex = lastIndex;
-            eachCb(node);
+            eachCb(node, match, nodeIndex);
           });
         }
         endCb();
@@ -832,12 +925,16 @@
     }
     markRegExp(regexp, opt) {
       this.opt = opt;
+      if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
+        let flags = regexp.flags ? 'g' + regexp.flags : 'g';
+        regexp = new RegExp(regexp.source, flags);
+      }
       this.log(`Searching with expression "${regexp}"`);
       let totalMatches = 0,
         fn = 'wrapMatches';
-      const eachCb = element => {
+      const eachCb = (element, rm, nodeIndex) => {
         totalMatches++;
-        this.opt.each(element);
+        this.opt.each(element, rm, nodeIndex);
       };
       if (this.opt.acrossElements) {
         fn = 'wrapMatchesAcrossElements';

@@ -298,6 +298,103 @@ class Mark {
   }
 
   /**
+  * @typedef Mark~getTextNodesAcrossElements
+  * @type {object.<string>}
+  * @property {string} value - The composite value of all text nodes
+  * @property {object[]} nodes - An array of objects
+  * @property {number} nodes.start - The start position within the composite
+  * value
+  * @property {number} nodes.end - The end position within the composite
+  * value
+  * @property {number} nodes.offset - The offset correct position if space
+  * is added to the end of the text node
+  * @property {HTMLElement} nodes.node - The DOM text node element
+  */
+
+  /**
+  * Callback
+  * @callback Mark~getTextNodesCallback
+  * @param {Mark~getTextNodesDict}
+  */
+  /**
+  * Calls the callback with an object containing all text nodes (including
+  * iframe text nodes) with start and end positions and the composite value
+  * of them (string)
+  * @param {Mark~getTextNodesCallback} cb - Callback
+  * @access protected
+  */
+  getTextNodesAcrossElements(cb) {
+    let val = '', start, text, addSpace, offset, nodes = [];
+    const blockTags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR',
+      'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE',
+      'FIGCAPTION', 'FIGURE', 'PRE', 'HR', 'TABLE', 'THEAD', 'TBODY', 'TFOOT',
+      'INPUT', 'IMAGE', 'IMG', 'LINK', 'META', 'NAV', 'MENU', 'MENUITEM',
+      'CAPTION', 'COL', 'COLGROUP', 'DETAILS', 'DATALIST', 'FORM', 'BODY',
+      'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'HEADER', 'FOOTER', 'OPTGROUP',
+      'OPTION', 'QUOTE', 'ADDRESS', 'APPLET', 'AREA', 'AUDIO', 'BASE',
+      'BASEFONT', 'BGSOUND', 'CANVAS', 'DESC', 'DIALOG', 'DIR', 'EMBED',
+      'FIELDSET', 'FONT', 'FOREIGNOBJECT', 'FRAME', 'FRAMESET', 'HGROUP',
+      'IFRAME', 'ISINDEX', 'KEYGEN', 'LEGEND', 'LISTING', 'MARQUEE', 'MATH',
+      'MI', 'MN', 'MO', 'MS', 'MTEXT', 'NOBR', 'NOSCRIPT', 'NOEMBED',
+      'NOFRAMES', 'OBJECT', 'PARAM', 'PICTURE', 'SELECT', 'SOURCE', 'SVG',
+      'TEMPLATE', 'TEXTAREA', 'TRACK', 'VIDEO', 'XMP'];
+    function isSpaceRequired(node) {
+      if (node === node.parentNode.lastChild) {
+        return blockTags.indexOf(node.parentNode.nodeName) !== -1;
+      }
+      let next = node.nextSibling;
+      if (next) {
+        if (next.nodeType === 1) {
+          if (blockTags.indexOf(next.nodeName) !== -1) {
+            return true;
+          } else if (next.firstChild) {
+            if (next.firstChild.nodeType === 1) {
+              if (blockTags.indexOf(next.firstChild.nodeName) !== -1) {
+                return true;
+              }
+              return isSpaceRequired(next.firstChild);
+            } else if (next.firstChild.nodeType === 3) {
+              return /[\s]/.test(next.firstChild.textContent[0]);
+            }
+          }
+        }
+      }
+      return  blockTags.indexOf(node.parentNode.nodeName) !== -1;
+    }
+    this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
+      addSpace = false;
+      offset = 0;
+      start = val.length;
+      text = node.textContent;
+      if ( !/\s/.test(text[text.length-1])) {
+        addSpace = isSpaceRequired(node);
+      }
+      if (addSpace) {
+        val += text + ' ';
+        offset = 1;
+      } else {
+        val += text;
+      }
+      nodes.push({
+        start: start,
+        end: val.length - offset,
+        offset : offset,
+        node
+      });
+    }, node => {
+      if (this.matchesExclude(node.parentNode)) {
+        return NodeFilter.FILTER_REJECT;
+      } else {
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    }, () => {
+      cb({
+        value: val,
+        nodes: nodes
+      });
+    });
+  }
+  /**
    * @typedef Mark~getTextNodesDict
    * @type {object.<string>}
    * @property {string} value - The composite value of all text nodes
@@ -381,6 +478,71 @@ class Mark {
     repl.textContent = startNode.textContent;
     startNode.parentNode.replaceChild(repl, startNode);
     return ret;
+  }
+
+  /**
+  * @typedef Mark~wrapRangeInMappedTextNodeDict
+  * @type {object.<string>}
+  * @property {string} value - The composite value of all text nodes
+  * @property {object[]} nodes - An array of objects
+  * @property {number} nodes.start - The start position within the composite
+  * value
+  * @property {number} nodes.end - The end position within the composite
+  * value
+  * @property {HTMLElement} nodes.node - The DOM text node element
+  */
+  /**
+  * Each callback
+  * @callback Mark~wrapMatchesEachCallback
+  * @param {HTMLElement} node - The wrapped DOM element
+  * @param {number} lastIndex - The last matching position within the
+  * composite value of text nodes
+  * @param {number} nodeIndex - The index of node when match is spread
+  * across elements
+  */
+
+  /**
+  * Filter callback
+  * @callback Mark~wrapMatchesFilterCallback
+  * @param {HTMLElement} node - The matching text node DOM element
+  */
+  /**
+  * Determines matches by start and end positions using the text node
+  * dictionary even across text nodes and calls
+  * {@link Mark#wrapRangeInTextNode} to wrap them
+  * @param  {Mark~wrapRangeInMappedTextNodeDict} dict - The dictionary
+  * @param  {number} start - The start position of the match
+  * @param  {number} end - The end position of the match
+  * @param  {Mark~wrapMatchesFilterCallback} filterCb - Filter callback
+  * @param  {Mark~wrapMatchesEachCallback} eachCb - Each callback
+  * @access protected
+  */
+  wrapMatchesInMappedTextNode(dict, start, end, filterCb, eachCb) {
+    let nodeIndex = 0;
+    // iterate over all text nodes to find the one matching the positions
+    dict.nodes.every((n, i) => {
+      const sibl = dict.nodes[i + 1];
+      if (typeof sibl === 'undefined' || sibl.start > start) {
+        if (!filterCb(n.node)) {
+          return false;
+        }
+        // map range from dict.value to text node
+        const s = start - n.start,
+          e = (end > n.end ? n.end : end) - n.start;
+        n.node = this.wrapRangeInTextNode(n.node, s, e);
+        eachCb(n.node.previousSibling, end, nodeIndex++);
+        //correct node start index just in case of next match in the
+        // same text node.
+        n.start += e;
+
+        if (end > n.end) {
+          start = n.end + n.offset;
+        } else {
+          return false;
+        }
+      }
+      return true;
+    });
   }
 
   /**
@@ -557,6 +719,9 @@ class Mark {
    * Callback for each wrapped element
    * @callback Mark~wrapMatchesAcrossElementsEachCallback
    * @param {HTMLElement} element - The marked DOM element
+   * @param {Object} match - result of RegExp exec() method
+   * @param {number} nodeIndex - The index of node when match is spread
+   * across elements
    */
   /**
    * Filter callback before each wrapping
@@ -582,7 +747,7 @@ class Mark {
    */
   wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
     const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
-    this.getTextNodes(dict => {
+    this.getTextNodesAcrossElements(dict => {
       let match;
       while (
         (match = regex.exec(dict.value)) !== null &&
@@ -596,14 +761,12 @@ class Mark {
           }
         }
         const end = start + match[matchIdx].length;
-        // note that dict will be updated automatically, as it'll change
-        // in the wrapping process, due to the fact that text
-        // nodes will be splitted
-        this.wrapRangeInMappedTextNode(dict, start, end, node => {
+
+        this.wrapMatchesInMappedTextNode(dict, start, end, node => {
           return filterCb(match[matchIdx], node);
-        }, (node, lastIndex) => {
+        }, (node, lastIndex, nodeIndex) => {
           regex.lastIndex = lastIndex;
-          eachCb(node);
+          eachCb(node, match, nodeIndex);
         });
       }
       endCb();
@@ -713,6 +876,9 @@ class Mark {
    * Callback for each marked element
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
+   * @param {Object} regMatch - result of RegExp exec() method
+   * @param {number} nodeIndex - The index of node when match is spread
+   * across elements
    */
   /**
    * Callback if there were no matches
@@ -777,12 +943,18 @@ class Mark {
    */
   markRegExp(regexp, opt) {
     this.opt = opt;
+    // if across elements, make sure that user regexp has global
+    // or at list sticky flag to enable regexp.lastIndex
+    if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
+      let flags = 'g' + (regexp.flags ? regexp.flags : '');
+      regexp = new RegExp(regexp.source, flags);
+    }
     this.log(`Searching with expression "${regexp}"`);
     let totalMatches = 0,
       fn = 'wrapMatches';
-    const eachCb = element => {
+    const eachCb = (element, regMatch, nodeIndex) => {
       totalMatches++;
-      this.opt.each(element);
+      this.opt.each(element, regMatch, nodeIndex);
     };
     if (this.opt.acrossElements) {
       fn = 'wrapMatchesAcrossElements';
