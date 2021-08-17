@@ -867,7 +867,7 @@
             return filterCb(match[matchIdx], node);
           }, (node, lastIndex, nodeIndex) => {
             regex.lastIndex = lastIndex;
-            eachCb(node, match, nodeIndex);
+            eachCb(node, nodeIndex, match);
           });
         }
         endCb();
@@ -928,15 +928,15 @@
     markRegExp(regexp, opt) {
       this.opt = opt;
       if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
-        let flags = regexp.flags ? 'g' + regexp.flags : 'g';
+        let flags = 'g' + (regexp.flags ? regexp.flags : '');
         regexp = new RegExp(regexp.source, flags);
       }
       this.log(`Searching with expression "${regexp}"`);
       let totalMatches = 0,
         fn = 'wrapMatches';
-      const eachCb = (element, rm, nodeIndex) => {
+      const eachCb = (element, nodeIndex, regMatch) => {
         totalMatches++;
-        this.opt.each(element, rm, nodeIndex);
+        this.opt.each(element, nodeIndex, regMatch);
       };
       if (this.opt.acrossElements) {
         fn = 'wrapMatchesAcrossElements';
@@ -964,10 +964,10 @@
           this.log(`Searching with expression "${regex}"`);
           this[fn](regex, 1, (term, node) => {
             return this.opt.filter(node, kw, totalMatches, matches);
-          }, element => {
+          }, (element, nodeIndex) => {
             matches++;
             totalMatches++;
-            this.opt.each(element);
+            this.opt.each(element, nodeIndex);
           }, () => {
             if (matches === 0) {
               this.opt.noMatch(kw);

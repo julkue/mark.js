@@ -1,16 +1,19 @@
+
 'use strict';
-describe('markRegExp with acrossElements and count words&phrases', function() {
+describe('mark with acrossElements and count words & phrases', function() {
   var $ctx;
   beforeEach(function() {
-    loadFixtures('across-elements/regexp/count.html');
+    loadFixtures('across-elements/basic/count.html');
     
     $ctx = $('.across-elements-count');
   });
-
+  
   it('should correctly count phrases across elements', function(done) {
     var phraseCount = 0;
     
-    new Mark($ctx[0]).markRegExp(/\bLorem\s+ipsum\b/gi, {
+    new Mark($ctx[0]).mark('Lorem ipsum', {
+      'diacritics' : false,
+      'separateWordSearch' : false,
       'acrossElements' : true,
       each : function(elem, nodeIndex) {
         if (nodeIndex === 0) {
@@ -24,10 +27,12 @@ describe('markRegExp with acrossElements and count words&phrases', function() {
       }
     });
   });
-
+  
   it('should correctly count whole words across elements', function(done) {
     var wordCount = 0;
-    new Mark($ctx[0]).markRegExp(/\b(?:Lorem|ipsum)\b/i, {
+    new Mark($ctx[0]).mark(['Lorem', 'ipsum'], {
+      'diacritics' : false,
+      'separateWordSearch' : true,
       'acrossElements' : true,
       'each' : function(elem, nodeIndex) {
         if (nodeIndex === 0) {
@@ -42,3 +47,26 @@ describe('markRegExp with acrossElements and count words&phrases', function() {
     });
   });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

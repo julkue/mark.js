@@ -719,9 +719,9 @@ class Mark {
    * Callback for each wrapped element
    * @callback Mark~wrapMatchesAcrossElementsEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {Object} match - The result of RegExp exec() method
    * @param {number} nodeIndex - The index of mark node when match is spread
    * across elements
+   * @param {Object} match - The result of RegExp exec() method
    */
   /**
    * Filter callback before each wrapping
@@ -766,7 +766,7 @@ class Mark {
           return filterCb(match[matchIdx], node);
         }, (node, lastIndex, nodeIndex) => {
           regex.lastIndex = lastIndex;
-          eachCb(node, match, nodeIndex);
+          eachCb(node, nodeIndex, match);
         });
       }
       endCb();
@@ -876,9 +876,9 @@ class Mark {
    * Callback for each marked element
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {Object} regMatch - The result of RegExp exec() method
    * @param {number} nodeIndex - The index of mark node when match is spread
    * across elements
+   * @param {Object} regMatch - The result of RegExp exec() method
    */
   /**
    * Callback if there were no matches
@@ -952,9 +952,9 @@ class Mark {
     this.log(`Searching with expression "${regexp}"`);
     let totalMatches = 0,
       fn = 'wrapMatches';
-    const eachCb = (element, regMatch, nodeIndex) => {
+    const eachCb = (element, nodeIndex, regMatch) => {
       totalMatches++;
-      this.opt.each(element, regMatch, nodeIndex);
+      this.opt.each(element, nodeIndex, regMatch);
     };
     if (this.opt.acrossElements) {
       fn = 'wrapMatchesAcrossElements';
@@ -968,7 +968,14 @@ class Mark {
       this.opt.done(totalMatches);
     });
   }
-
+  
+  /**
+   * Callback for each marked element
+   * @callback Mark~markEachCallback
+   * @param {HTMLElement} element - The marked DOM element
+   * @param {number} nodeIndex - The index of mark node when match is spread
+   * across elements
+   */
   /**
    * Callback to filter matches
    * @callback Mark~markFilterCallback
@@ -1011,10 +1018,10 @@ class Mark {
         this.log(`Searching with expression "${regex}"`);
         this[fn](regex, 1, (term, node) => {
           return this.opt.filter(node, kw, totalMatches, matches);
-        }, element => {
+        }, (element, nodeIndex) => {
           matches++;
           totalMatches++;
-          this.opt.each(element);
+          this.opt.each(element, nodeIndex);
         }, () => {
           if (matches === 0) {
             this.opt.noMatch(kw);

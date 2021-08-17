@@ -1105,7 +1105,7 @@
               return filterCb(match[matchIdx], node);
             }, function (node, lastIndex, nodeIndex) {
               regex.lastIndex = lastIndex;
-              eachCb(node, match, nodeIndex);
+              eachCb(node, nodeIndex, match);
             });
           }
 
@@ -1180,7 +1180,7 @@
         this.opt = opt;
 
         if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
-          var flags = regexp.flags ? 'g' + regexp.flags : 'g';
+          var flags = 'g' + (regexp.flags ? regexp.flags : '');
           regexp = new RegExp(regexp.source, flags);
         }
 
@@ -1188,10 +1188,10 @@
         var totalMatches = 0,
             fn = 'wrapMatches';
 
-        var eachCb = function eachCb(element, rm, nodeIndex) {
+        var eachCb = function eachCb(element, nodeIndex, regMatch) {
           totalMatches++;
 
-          _this10.opt.each(element, rm, nodeIndex);
+          _this10.opt.each(element, nodeIndex, regMatch);
         };
 
         if (this.opt.acrossElements) {
@@ -1228,11 +1228,11 @@
 
           _this11[fn](regex, 1, function (term, node) {
             return _this11.opt.filter(node, kw, totalMatches, matches);
-          }, function (element) {
+          }, function (element, nodeIndex) {
             matches++;
             totalMatches++;
 
-            _this11.opt.each(element);
+            _this11.opt.each(element, nodeIndex);
           }, function () {
             if (matches === 0) {
               _this11.opt.noMatch(kw);
