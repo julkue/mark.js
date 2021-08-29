@@ -18,13 +18,3 @@ sc-karma*.log
 # Build
 build/doc/
 build/coverage/
-
-dist/mark.js
-dist/jquery.mark.es6.js
-dist/jquery.mark.es6.min.js
-dist/jquery.mark.js
-dist/jquery.mark.min.js
-dist/mark.es6.js
-dist/mark.es6.min.js
-dist/mark.js
-dist/mark.min.js

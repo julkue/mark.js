@@ -631,7 +631,8 @@
       };
     }
     getTextNodesAcrossElements(cb) {
-      let val = '', start, text, addSpace, offset, nodes = [];
+      let val = '', start, text, addSpace, offset, nodes = [],
+        reg =/[\s.,;:?!"'`(){}[\]+*^<=>/@#$%&\\~-]/;
       const blockTags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR',
         'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE',
         'FIGCAPTION', 'FIGURE', 'PRE', 'HR', 'TABLE', 'THEAD', 'TBODY', 'TFOOT',
@@ -645,36 +646,49 @@
         'MI', 'MN', 'MO', 'MS', 'MTEXT', 'NOBR', 'NOSCRIPT', 'NOEMBED',
         'NOFRAMES', 'OBJECT', 'PARAM', 'PICTURE', 'SELECT', 'SOURCE', 'SVG',
         'TEMPLATE', 'TEXTAREA', 'TRACK', 'VIDEO', 'XMP'];
-      function isSpaceRequired(node) {
-        if (node === node.parentNode.lastChild) {
-          return blockTags.indexOf(node.parentNode.nodeName) !== -1;
+      function isSpaceRequired(node, textNode) {
+        if (textNode && node === node.parentNode.lastChild) {
+          if (blockTags.indexOf(node.parentNode.nodeName) !== -1) {
+            return  true;
+          } else {
+            let parent = node.parentNode;
+            while (parent === parent.parentNode.lastChild) {
+              if (blockTags.indexOf(parent.parentNode.nodeName) !== -1) {
+                return  true;
+              }
+              parent = parent.parentNode;
+            }
+          }
         }
         let next = node.nextSibling;
         if (next) {
           if (next.nodeType === 1) {
             if (blockTags.indexOf(next.nodeName) !== -1) {
               return true;
-            } else if (next.firstChild) {
-              if (next.firstChild.nodeType === 1) {
-                if (blockTags.indexOf(next.firstChild.nodeName) !== -1) {
-                  return true;
+            } else {
+              let firstChild = next.firstChild;
+              if (firstChild) {
+                if (firstChild.nodeType === 1) {
+                  if (blockTags.indexOf(firstChild.nodeName) !== -1) {
+                    return true;
+                  }
+                  return isSpaceRequired(firstChild, false);
+                } else if (firstChild.nodeType === 3) {
+                  return /^[\s]/.test(firstChild.textContent);
                 }
-                return isSpaceRequired(next.firstChild);
-              } else if (next.firstChild.nodeType === 3) {
-                return /[\s]/.test(next.firstChild.textContent[0]);
               }
             }
           }
         }
-        return  blockTags.indexOf(node.parentNode.nodeName) !== -1;
+        return blockTags.indexOf(node.parentNode.nodeName) !== -1;
       }
       this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
         addSpace = false;
         offset = 0;
         start = val.length;
         text = node.textContent;
-        if ( !/\s/.test(text[text.length-1])) {
-          addSpace = isSpaceRequired(node);
+        if ( !reg.test(text[text.length-1])) {
+          addSpace = isSpaceRequired(node, true);
         }
         if (addSpace) {
           val += text + ' ';
@@ -741,7 +755,7 @@
       startNode.parentNode.replaceChild(repl, startNode);
       return ret;
     }
-    wrapMatchesInMappedTextNode(dict, start, end, filterCb, eachCb) {
+    wrapMatchInMappedTextNode(dict, start, end, filterCb, eachCb) {
       let nodeIndex = 0;
       dict.nodes.every((n, i) => {
         const sibl = dict.nodes[i + 1];
@@ -861,7 +875,7 @@
             }
           }
           const end = start + match[matchIdx].length;
-          this.wrapMatchesInMappedTextNode(dict, start, end, node => {
+          this.wrapMatchInMappedTextNode(dict, start, end, node => {
             return filterCb(match[matchIdx], node);
           }, (node, lastIndex, nodeIndex) => {
             regex.lastIndex = lastIndex;

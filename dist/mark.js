@@ -835,12 +835,25 @@
             text,
             addSpace,
             offset,
-            nodes = [];
+            nodes = [],
+            reg = /[\s.,;:?!"'`(){}[\]+*^<=>/@#$%&\\~-]/;
         var blockTags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR', 'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'FIGCAPTION', 'FIGURE', 'PRE', 'HR', 'TABLE', 'THEAD', 'TBODY', 'TFOOT', 'INPUT', 'IMAGE', 'IMG', 'LINK', 'META', 'NAV', 'MENU', 'MENUITEM', 'CAPTION', 'COL', 'COLGROUP', 'DETAILS', 'DATALIST', 'FORM', 'BODY', 'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'HEADER', 'FOOTER', 'OPTGROUP', 'OPTION', 'QUOTE', 'ADDRESS', 'APPLET', 'AREA', 'AUDIO', 'BASE', 'BASEFONT', 'BGSOUND', 'CANVAS', 'DESC', 'DIALOG', 'DIR', 'EMBED', 'FIELDSET', 'FONT', 'FOREIGNOBJECT', 'FRAME', 'FRAMESET', 'HGROUP', 'IFRAME', 'ISINDEX', 'KEYGEN', 'LEGEND', 'LISTING', 'MARQUEE', 'MATH', 'MI', 'MN', 'MO', 'MS', 'MTEXT', 'NOBR', 'NOSCRIPT', 'NOEMBED', 'NOFRAMES', 'OBJECT', 'PARAM', 'PICTURE', 'SELECT', 'SOURCE', 'SVG', 'TEMPLATE', 'TEXTAREA', 'TRACK', 'VIDEO', 'XMP'];
 
-        function isSpaceRequired(node) {
-          if (node === node.parentNode.lastChild) {
-            return blockTags.indexOf(node.parentNode.nodeName) !== -1;
+        function isSpaceRequired(node, textNode) {
+          if (textNode && node === node.parentNode.lastChild) {
+            if (blockTags.indexOf(node.parentNode.nodeName) !== -1) {
+              return true;
+            } else {
+              var parent = node.parentNode;
+
+              while (parent === parent.parentNode.lastChild) {
+                if (blockTags.indexOf(parent.parentNode.nodeName) !== -1) {
+                  return true;
+                }
+
+                parent = parent.parentNode;
+              }
+            }
           }
 
           var next = node.nextSibling;
@@ -849,15 +862,19 @@
             if (next.nodeType === 1) {
               if (blockTags.indexOf(next.nodeName) !== -1) {
                 return true;
-              } else if (next.firstChild) {
-                if (next.firstChild.nodeType === 1) {
-                  if (blockTags.indexOf(next.firstChild.nodeName) !== -1) {
-                    return true;
-                  }
+              } else {
+                var firstChild = next.firstChild;
 
-                  return isSpaceRequired(next.firstChild);
-                } else if (next.firstChild.nodeType === 3) {
-                  return /[\s]/.test(next.firstChild.textContent[0]);
+                if (firstChild) {
+                  if (firstChild.nodeType === 1) {
+                    if (blockTags.indexOf(firstChild.nodeName) !== -1) {
+                      return true;
+                    }
+
+                    return isSpaceRequired(firstChild, false);
+                  } else if (firstChild.nodeType === 3) {
+                    return /^[\s]/.test(firstChild.textContent);
+                  }
                 }
               }
             }
@@ -872,8 +889,8 @@
           start = val.length;
           text = node.textContent;
 
-          if (!/\s/.test(text[text.length - 1])) {
-            addSpace = isSpaceRequired(node);
+          if (!reg.test(text[text.length - 1])) {
+            addSpace = isSpaceRequired(node, true);
           }
 
           if (addSpace) {
@@ -951,8 +968,8 @@
         return ret;
       }
     }, {
-      key: "wrapMatchesInMappedTextNode",
-      value: function wrapMatchesInMappedTextNode(dict, start, end, filterCb, eachCb) {
+      key: "wrapMatchInMappedTextNode",
+      value: function wrapMatchInMappedTextNode(dict, start, end, filterCb, eachCb) {
         var _this5 = this;
 
         var nodeIndex = 0;
@@ -1099,7 +1116,7 @@
 
             var end = start + match[matchIdx].length;
 
-            _this8.wrapMatchesInMappedTextNode(dict, start, end, function (node) {
+            _this8.wrapMatchInMappedTextNode(dict, start, end, function (node) {
               return filterCb(match[matchIdx], node);
             }, function (node, lastIndex, nodeIndex) {
               regex.lastIndex = lastIndex;

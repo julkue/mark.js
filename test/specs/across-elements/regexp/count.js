@@ -18,8 +18,8 @@ describe('markRegExp with acrossElements and count words&phrases', function() {
         }
       },
       'done' : function(total) {
-        expect(phraseCount).toBe(9);
-        expect(total).toBe(15);
+        expect(phraseCount).toBe(14);
+        expect(total).toBe(24);
         done();
       }
     });
@@ -35,8 +35,8 @@ describe('markRegExp with acrossElements and count words&phrases', function() {
         }
       },
       'done' : function(total) {
-        expect(wordCount).toBe(18);
-        expect(total).toBe(21);
+        expect(wordCount).toBe(28);
+        expect(total).toBe(31);
         done();
       }
     });
