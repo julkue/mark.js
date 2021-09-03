@@ -301,7 +301,6 @@ class Mark {
   * @param {HTMLElement} textNode - The DOM text node element
   * @param {string[]} tags - An array of strings
   * @return {boolean}
-  * @access protected
   */ 
   checkParents(textNode, tags) {
     if (textNode === textNode.parentNode.lastChild) {
@@ -328,19 +327,18 @@ class Mark {
   }
 
   /**
-  * @param {HTMLElement} next - The DOM node element
+  * @param {HTMLElement} node - The DOM node element
   * @param {string[]} tags - An array of strings
   * @return {boolean}
-  * @access protected
   */ 
-  checkNextNodes(next, tags) {
-    if (next && next.nodeType === 1) {
-      if (tags.indexOf(next.nodeName) !== -1) {
+  checkNextNodes(node, tags) {
+    if (node && node.nodeType === 1) {
+      if (tags.indexOf(node.nodeName) !== -1) {
         return true;
         
-      } else if (next.firstChild) {
+      } else if (node.firstChild) {
         // loop through firstChilds until condition is met
-        let prevNode, child = next.firstChild;
+        let prevNode, child = node.firstChild;
         while (child) {
           if (child.nodeType === 1) {
             if (tags.indexOf(child.nodeName) !== -1) {
@@ -356,11 +354,12 @@ class Mark {
         // prevNode is empty node so check nextSibling
         return this.checkNextNodes(prevNode.nextSibling, tags);
       }
-      // when next sibling has no child nodes check parent
-      // e.g. <p>Lorem<span class="img"></span></p>ipsum
-      if (next === next.parentNode.lastChild 
-        && tags.indexOf(next.parentNode.nodeName) !== -1) {
-        return  true;
+      // node has no child nodes - check nextSibling
+      if (node !== node.parentNode.lastChild) {
+        return this.checkNextNodes(node.nextSibling, tags);
+        
+      } else if (tags.indexOf(node.parentNode.nodeName) !== -1) {
+        return true;
       }
     }
     return  false;
@@ -396,8 +395,8 @@ class Mark {
     let val = '', start, text, addSpace, offset, nodes = [],
       reg =/[\s.,;:?!"'`(){}[\]+*^<=>/@#$%&\\~-]/;
 
-    // the space can be safely added to the end of a text node, when checks
-    // find nodes with those names
+    // the space can be safely added to the end of a text node, when node checks
+    // run across element with one of those names
     const tags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR',
       'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'HR',
       'FIGCAPTION', 'FIGURE', 'PRE', 'TABLE', 'THEAD', 'TBODY', 'TFOOT',
@@ -413,8 +412,8 @@ class Mark {
       start = val.length;
       text = node.textContent;
 
-      // a space can be added only to the end of a text
-      // and 'lookahead' is only way to check parents and siblings
+      // in this implementation a space can be added only to the end of a text
+      // and 'lookahead' is only way to check parents and siblings 
       if ( !reg.test(text[text.length-1])) {
         addSpace = this.checkParents(node, tags)
           || this.checkNextNodes(node.nextSibling, tags);
@@ -997,7 +996,7 @@ class Mark {
     this.opt = opt;
     // if option across elements is set, this ensure that user regexp has global
     // or at list sticky flag to enable regexp.lastIndex
-    // This will not affect any previous Markjs versions.
+    // This will not affect any code that uses previous Markjs versions.
     if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
       let flags = 'g' + (regexp.flags ? regexp.flags : '');
       regexp = new RegExp(regexp.source, flags);

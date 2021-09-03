@@ -650,12 +650,12 @@
       }
       return false;
     }
-    checkNextNodes(next, tags) {
-      if (next && next.nodeType === 1) {
-        if (tags.indexOf(next.nodeName) !== -1) {
+    checkNextNodes(node, tags) {
+      if (node && node.nodeType === 1) {
+        if (tags.indexOf(node.nodeName) !== -1) {
           return true;
-        } else if (next.firstChild) {
-          let prevNode, child = next.firstChild;
+        } else if (node.firstChild) {
+          let prevNode, child = node.firstChild;
           while (child) {
             if (child.nodeType === 1) {
               if (tags.indexOf(child.nodeName) !== -1) {
@@ -669,9 +669,10 @@
           }
           return this.checkNextNodes(prevNode.nextSibling, tags);
         }
-        if (next === next.parentNode.lastChild
-          && tags.indexOf(next.parentNode.nodeName) !== -1) {
-          return  true;
+        if (node !== node.parentNode.lastChild) {
+          return this.checkNextNodes(node.nextSibling, tags);
+        } else if (tags.indexOf(node.parentNode.nodeName) !== -1) {
+          return true;
         }
       }
       return  false;

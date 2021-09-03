@@ -854,13 +854,13 @@
       }
     }, {
       key: "checkNextNodes",
-      value: function checkNextNodes(next, tags) {
-        if (next && next.nodeType === 1) {
-          if (tags.indexOf(next.nodeName) !== -1) {
+      value: function checkNextNodes(node, tags) {
+        if (node && node.nodeType === 1) {
+          if (tags.indexOf(node.nodeName) !== -1) {
             return true;
-          } else if (next.firstChild) {
+          } else if (node.firstChild) {
             var prevNode,
-                child = next.firstChild;
+                child = node.firstChild;
 
             while (child) {
               if (child.nodeType === 1) {
@@ -879,7 +879,9 @@
             return this.checkNextNodes(prevNode.nextSibling, tags);
           }
 
-          if (next === next.parentNode.lastChild && tags.indexOf(next.parentNode.nodeName) !== -1) {
+          if (node !== node.parentNode.lastChild) {
+            return this.checkNextNodes(node.nextSibling, tags);
+          } else if (tags.indexOf(node.parentNode.nodeName) !== -1) {
             return true;
           }
         }
