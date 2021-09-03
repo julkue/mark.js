@@ -630,65 +630,71 @@
         valid: valid
       };
     }
+    checkParents(textNode, tags) {
+      if (textNode === textNode.parentNode.lastChild) {
+        if (tags.indexOf(textNode.parentNode.nodeName) !== -1) {
+          return true;
+        } else {
+          let parent = textNode.parentNode;
+          while (parent === parent.parentNode.lastChild) {
+            if (tags.indexOf(parent.parentNode.nodeName) !== -1) {
+              return true;
+            }
+            parent = parent.parentNode;
+          }
+        }
+        let node = textNode.parentNode.nextSibling;
+        if (node && node.nodeType === 1 && tags.indexOf(node.nodeName) !== -1) {
+          return true;
+        }
+      }
+      return false;
+    }
+    checkNextNodes(next, tags) {
+      if (next && next.nodeType === 1) {
+        if (tags.indexOf(next.nodeName) !== -1) {
+          return true;
+        } else if (next.firstChild) {
+          let prevNode, child = next.firstChild;
+          while (child) {
+            if (child.nodeType === 1) {
+              if (tags.indexOf(child.nodeName) !== -1) {
+                return true;
+              }
+              prevNode = child;
+              child = child.firstChild;
+              continue;
+            }
+            return false;
+          }
+          return this.checkNextNodes(prevNode.nextSibling, tags);
+        }
+        if (next === next.parentNode.lastChild
+          && tags.indexOf(next.parentNode.nodeName) !== -1) {
+          return  true;
+        }
+      }
+      return  false;
+    }
     getTextNodesAcrossElements(cb) {
       let val = '', start, text, addSpace, offset, nodes = [],
         reg =/[\s.,;:?!"'`(){}[\]+*^<=>/@#$%&\\~-]/;
-      const blockTags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR',
-        'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE',
-        'FIGCAPTION', 'FIGURE', 'PRE', 'HR', 'TABLE', 'THEAD', 'TBODY', 'TFOOT',
-        'INPUT', 'IMAGE', 'IMG', 'LINK', 'META', 'NAV', 'MENU', 'MENUITEM',
-        'CAPTION', 'COL', 'COLGROUP', 'DETAILS', 'DATALIST', 'FORM', 'BODY',
-        'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'HEADER', 'FOOTER', 'OPTGROUP',
-        'OPTION', 'QUOTE', 'ADDRESS', 'APPLET', 'AREA', 'AUDIO', 'BASE',
-        'BASEFONT', 'BGSOUND', 'CANVAS', 'DESC', 'DIALOG', 'DIR', 'EMBED',
-        'FIELDSET', 'FONT', 'FOREIGNOBJECT', 'FRAME', 'FRAMESET', 'HGROUP',
-        'IFRAME', 'ISINDEX', 'KEYGEN', 'LEGEND', 'LISTING', 'MARQUEE', 'MATH',
-        'MI', 'MN', 'MO', 'MS', 'MTEXT', 'NOBR', 'NOSCRIPT', 'NOEMBED',
-        'NOFRAMES', 'OBJECT', 'PARAM', 'PICTURE', 'SELECT', 'SOURCE', 'SVG',
-        'TEMPLATE', 'TEXTAREA', 'TRACK', 'VIDEO', 'XMP'];
-      function isSpaceRequired(node, textNode) {
-        if (textNode && node === node.parentNode.lastChild) {
-          if (blockTags.indexOf(node.parentNode.nodeName) !== -1) {
-            return  true;
-          } else {
-            let parent = node.parentNode;
-            while (parent === parent.parentNode.lastChild) {
-              if (blockTags.indexOf(parent.parentNode.nodeName) !== -1) {
-                return  true;
-              }
-              parent = parent.parentNode;
-            }
-          }
-        }
-        let next = node.nextSibling;
-        if (next) {
-          if (next.nodeType === 1) {
-            if (blockTags.indexOf(next.nodeName) !== -1) {
-              return true;
-            } else {
-              let firstChild = next.firstChild;
-              if (firstChild) {
-                if (firstChild.nodeType === 1) {
-                  if (blockTags.indexOf(firstChild.nodeName) !== -1) {
-                    return true;
-                  }
-                  return isSpaceRequired(firstChild, false);
-                } else if (firstChild.nodeType === 3) {
-                  return /^[\s]/.test(firstChild.textContent);
-                }
-              }
-            }
-          }
-        }
-        return blockTags.indexOf(node.parentNode.nodeName) !== -1;
-      }
+      const tags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR',
+        'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'HR',
+        'FIGCAPTION', 'FIGURE', 'PRE', 'TABLE', 'THEAD', 'TBODY', 'TFOOT',
+        'INPUT', 'LABEL', 'IMAGE', 'IMG', 'NAV', 'DETAILS', 'FORM', 'SELECT',
+        'BODY', 'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'PICTURE', 'BUTTON',
+        'HEADER', 'FOOTER', 'QUOTE', 'ADDRESS', 'AREA', 'CANVAS', 'MAP',
+        'FIELDSET', 'TEXTAREA', 'TRACK', 'VIDEO', 'AUDIO', 'METER',
+        'IFRAME', 'MARQUEE', 'OBJECT', 'SVG'];
       this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
         addSpace = false;
         offset = 0;
         start = val.length;
         text = node.textContent;
         if ( !reg.test(text[text.length-1])) {
-          addSpace = isSpaceRequired(node, true);
+          addSpace = this.checkParents(node, tags)
+            || this.checkNextNodes(node.nextSibling, tags);
         }
         if (addSpace) {
           val += text + ' ';
@@ -766,7 +772,7 @@
           const s = start - n.start,
             e = (end > n.end ? n.end : end) - n.start;
           n.node = this.wrapRangeInTextNode(n.node, s, e);
-          eachCb(n.node.previousSibling, end, nodeIndex++);
+          eachCb(n.node.previousSibling, nodeIndex++);
           n.start += e;
           if (end > n.end) {
             start = n.end + n.offset;
@@ -874,11 +880,10 @@
               start += match[i].length;
             }
           }
-          const end = start + match[matchIdx].length;
+          const end = regex.lastIndex;
           this.wrapMatchInMappedTextNode(dict, start, end, node => {
             return filterCb(match[matchIdx], node);
-          }, (node, lastIndex, nodeIndex) => {
-            regex.lastIndex = lastIndex;
+          }, (node, nodeIndex) => {
             eachCb(node, nodeIndex, match);
           });
         }
@@ -976,10 +981,10 @@
           this.log(`Searching with expression "${regex}"`);
           this[fn](regex, 1, (term, node) => {
             return this.opt.filter(node, kw, totalMatches, matches);
-          }, (element, nodeIndex) => {
+          }, element => {
             matches++;
             totalMatches++;
-            this.opt.each(element, nodeIndex);
+            this.opt.each(element);
           }, () => {
             if (matches === 0) {
               this.opt.noMatch(kw);

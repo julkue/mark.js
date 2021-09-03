@@ -826,6 +826,67 @@
         };
       }
     }, {
+      key: "checkParents",
+      value: function checkParents(textNode, tags) {
+        if (textNode === textNode.parentNode.lastChild) {
+          if (tags.indexOf(textNode.parentNode.nodeName) !== -1) {
+            return true;
+          } else {
+            var parent = textNode.parentNode;
+
+            while (parent === parent.parentNode.lastChild) {
+              if (tags.indexOf(parent.parentNode.nodeName) !== -1) {
+                return true;
+              }
+
+              parent = parent.parentNode;
+            }
+          }
+
+          var node = textNode.parentNode.nextSibling;
+
+          if (node && node.nodeType === 1 && tags.indexOf(node.nodeName) !== -1) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+    }, {
+      key: "checkNextNodes",
+      value: function checkNextNodes(next, tags) {
+        if (next && next.nodeType === 1) {
+          if (tags.indexOf(next.nodeName) !== -1) {
+            return true;
+          } else if (next.firstChild) {
+            var prevNode,
+                child = next.firstChild;
+
+            while (child) {
+              if (child.nodeType === 1) {
+                if (tags.indexOf(child.nodeName) !== -1) {
+                  return true;
+                }
+
+                prevNode = child;
+                child = child.firstChild;
+                continue;
+              }
+
+              return false;
+            }
+
+            return this.checkNextNodes(prevNode.nextSibling, tags);
+          }
+
+          if (next === next.parentNode.lastChild && tags.indexOf(next.parentNode.nodeName) !== -1) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+    }, {
       key: "getTextNodesAcrossElements",
       value: function getTextNodesAcrossElements(cb) {
         var _this3 = this;
@@ -837,52 +898,7 @@
             offset,
             nodes = [],
             reg = /[\s.,;:?!"'`(){}[\]+*^<=>/@#$%&\\~-]/;
-        var blockTags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR', 'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'FIGCAPTION', 'FIGURE', 'PRE', 'HR', 'TABLE', 'THEAD', 'TBODY', 'TFOOT', 'INPUT', 'IMAGE', 'IMG', 'LINK', 'META', 'NAV', 'MENU', 'MENUITEM', 'CAPTION', 'COL', 'COLGROUP', 'DETAILS', 'DATALIST', 'FORM', 'BODY', 'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'HEADER', 'FOOTER', 'OPTGROUP', 'OPTION', 'QUOTE', 'ADDRESS', 'APPLET', 'AREA', 'AUDIO', 'BASE', 'BASEFONT', 'BGSOUND', 'CANVAS', 'DESC', 'DIALOG', 'DIR', 'EMBED', 'FIELDSET', 'FONT', 'FOREIGNOBJECT', 'FRAME', 'FRAMESET', 'HGROUP', 'IFRAME', 'ISINDEX', 'KEYGEN', 'LEGEND', 'LISTING', 'MARQUEE', 'MATH', 'MI', 'MN', 'MO', 'MS', 'MTEXT', 'NOBR', 'NOSCRIPT', 'NOEMBED', 'NOFRAMES', 'OBJECT', 'PARAM', 'PICTURE', 'SELECT', 'SOURCE', 'SVG', 'TEMPLATE', 'TEXTAREA', 'TRACK', 'VIDEO', 'XMP'];
-
-        function isSpaceRequired(node, textNode) {
-          if (textNode && node === node.parentNode.lastChild) {
-            if (blockTags.indexOf(node.parentNode.nodeName) !== -1) {
-              return true;
-            } else {
-              var parent = node.parentNode;
-
-              while (parent === parent.parentNode.lastChild) {
-                if (blockTags.indexOf(parent.parentNode.nodeName) !== -1) {
-                  return true;
-                }
-
-                parent = parent.parentNode;
-              }
-            }
-          }
-
-          var next = node.nextSibling;
-
-          if (next) {
-            if (next.nodeType === 1) {
-              if (blockTags.indexOf(next.nodeName) !== -1) {
-                return true;
-              } else {
-                var firstChild = next.firstChild;
-
-                if (firstChild) {
-                  if (firstChild.nodeType === 1) {
-                    if (blockTags.indexOf(firstChild.nodeName) !== -1) {
-                      return true;
-                    }
-
-                    return isSpaceRequired(firstChild, false);
-                  } else if (firstChild.nodeType === 3) {
-                    return /^[\s]/.test(firstChild.textContent);
-                  }
-                }
-              }
-            }
-          }
-
-          return blockTags.indexOf(node.parentNode.nodeName) !== -1;
-        }
-
+        var tags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR', 'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'HR', 'FIGCAPTION', 'FIGURE', 'PRE', 'TABLE', 'THEAD', 'TBODY', 'TFOOT', 'INPUT', 'LABEL', 'IMAGE', 'IMG', 'NAV', 'DETAILS', 'FORM', 'SELECT', 'BODY', 'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'PICTURE', 'BUTTON', 'HEADER', 'FOOTER', 'QUOTE', 'ADDRESS', 'AREA', 'CANVAS', 'MAP', 'FIELDSET', 'TEXTAREA', 'TRACK', 'VIDEO', 'AUDIO', 'METER', 'IFRAME', 'MARQUEE', 'OBJECT', 'SVG'];
         this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
           addSpace = false;
           offset = 0;
@@ -890,7 +906,7 @@
           text = node.textContent;
 
           if (!reg.test(text[text.length - 1])) {
-            addSpace = isSpaceRequired(node, true);
+            addSpace = _this3.checkParents(node, tags) || _this3.checkNextNodes(node.nextSibling, tags);
           }
 
           if (addSpace) {
@@ -984,7 +1000,7 @@
             var s = start - n.start,
                 e = (end > n.end ? n.end : end) - n.start;
             n.node = _this5.wrapRangeInTextNode(n.node, s, e);
-            eachCb(n.node.previousSibling, end, nodeIndex++);
+            eachCb(n.node.previousSibling, nodeIndex++);
             n.start += e;
 
             if (end > n.end) {
@@ -1114,12 +1130,11 @@
               }
             }
 
-            var end = start + match[matchIdx].length;
+            var end = regex.lastIndex;
 
             _this8.wrapMatchInMappedTextNode(dict, start, end, function (node) {
               return filterCb(match[matchIdx], node);
-            }, function (node, lastIndex, nodeIndex) {
-              regex.lastIndex = lastIndex;
+            }, function (node, nodeIndex) {
               eachCb(node, nodeIndex, match);
             });
           }
@@ -1243,11 +1258,11 @@
 
           _this11[fn](regex, 1, function (term, node) {
             return _this11.opt.filter(node, kw, totalMatches, matches);
-          }, function (element, nodeIndex) {
+          }, function (element) {
             matches++;
             totalMatches++;
 
-            _this11.opt.each(element, nodeIndex);
+            _this11.opt.each(element);
           }, function () {
             if (matches === 0) {
               _this11.opt.noMatch(kw);

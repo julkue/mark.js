@@ -328,7 +328,7 @@ class Mark {
   }
 
   /**
-  * @param {HTMLElement} next - The DOM node element
+  * @param {HTMLElement} textNode - The DOM text node element
   * @param {string[]} tags - An array of strings
   * @return {boolean}
   * @access protected
@@ -356,8 +356,8 @@ class Mark {
         // prevNode is empty node so check nextSibling
         return this.checkNextNodes(prevNode.nextSibling, tags);
       }
-      // when next sibling has no child nodes check parent
-      // e.g. <p>Lorem<span class="img"></span></p>ipsum
+      // when next sibling is empty node like this
+      // <p>Lorem<span class="img"></span></p>ipsum
       if (next === next.parentNode.lastChild 
         && tags.indexOf(next.parentNode.nodeName) !== -1) {
         return  true;
@@ -407,13 +407,67 @@ class Mark {
       'FIELDSET', 'TEXTAREA', 'TRACK', 'VIDEO', 'AUDIO', 'METER',
       'IFRAME', 'MARQUEE', 'OBJECT', 'SVG'];
 
+    // if text node is last child and parent nodes last child
+    /*function checkParents(textNode) {
+      if (textNode === textNode.parentNode.lastChild) {
+        if (tags.indexOf(textNode.parentNode.nodeName) !== -1) {
+          return true;
+
+        } else {
+          // loop through textNode parent nodes which are last child
+          let parent = textNode.parentNode;
+          while (parent === parent.parentNode.lastChild) {
+            if (tags.indexOf(parent.parentNode.nodeName) !== -1) {
+              return true;
+            }
+            parent = parent.parentNode;
+          }
+        }
+        // textNode is last child of inline element so check parent nextSibling
+        return  checkNextNodes(textNode.parentNode.nextSibling, false);
+      }
+      return false;
+    }
+
+    function checkNextNodes(next, check) {
+      if (next && next.nodeType === document.ELEMENT_NODE) {
+        if (tags.indexOf(next.nodeName) !== -1) {
+          return  true;
+          
+        //} else if (check && next.firstChild) {
+        } else if (next.firstChild) {
+          // loop through firstChilds until condition is met
+          let prevNode, child = next.firstChild;
+          while (child) {
+            if (child.nodeType === document.ELEMENT_NODE) {
+              if (tags.indexOf(child.nodeName) !== -1) {
+                return true;
+              }
+              prevNode = child;
+              child = child.firstChild;
+              continue;
+            }
+            // most likely child is text node
+            return false;
+          }
+          // prevNode is empty node so check nextSibling
+          return checkNextNodes(prevNode.nextSibling, check);
+        }
+        if (next === next.parentNode.lastChild 
+          && tags.indexOf(next.parentNode.nodeName) !== -1) {
+          return  true;
+        }
+      }
+      return  false;
+    }*/
+
     this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
       addSpace = false;
       offset = 0;
       start = val.length;
       text = node.textContent;
 
-      // a space can be added only to the end of a text
+      // a space can be added only to the end of a text so test the last char
       // and 'lookahead' is only way to check parents and siblings
       if ( !reg.test(text[text.length-1])) {
         addSpace = this.checkParents(node, tags)
