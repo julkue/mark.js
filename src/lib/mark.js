@@ -545,8 +545,7 @@ class Mark {
   * Each callback
   * @callback Mark~wrapMatchesEachCallback
   * @param {HTMLElement} node - The wrapped DOM element
-  * @param {number} nodeIndex - The index of mark node when match is spread
-  * across elements
+  * @param {number} nodeIndex - The index of mark node within match
   */
 
   /**
@@ -767,9 +766,8 @@ class Mark {
    * Callback for each wrapped element
    * @callback Mark~wrapMatchesAcrossElementsEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {number} nodeIndex - The index of mark node when match is spread
-   * across elements
-   * @param {Array} match - The result of RegExp exec() function 
+   * @param {number} nodeIndex - The index of mark node within match
+   * @param {array} match - The result of RegExp exec() function 
    */
   /**
    * Filter callback before each wrapping
@@ -927,9 +925,8 @@ class Mark {
    * Callback for each marked element
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {number} nodeIndex - The index of mark node when match is spread
-   * across elements
-   * @param {Array} regMatch - The result of RegExp exec() function
+   * @param {number} nodeIndex - The index of mark node within match
+   * @param {array} regMatch - The result of RegExp exec() function
    */
   /**
    * Callback if there were no matches
@@ -1025,8 +1022,6 @@ class Mark {
    * Callback for each marked element
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {number} nodeIndex - The index of mark node when match is spread
-   * across elements
    */
   /**
    * Callback to filter matches
