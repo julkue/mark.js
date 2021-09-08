@@ -27,7 +27,7 @@ describe('markRegExp with acrossElements and count words&phrases', function() {
 
   it('should correctly count whole words across elements', function(done) {
     var wordCount = 0;
-    new Mark($ctx[0]).markRegExp(/\b(?:Lorem|ipsum)\b/i, {
+    new Mark($ctx[0]).markRegExp(/\b(?:Lorem|ipsum)\b/gi, {
       'acrossElements' : true,
       'each' : function(elem, nodeIndex) {
         if (nodeIndex === 0) {

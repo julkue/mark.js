@@ -484,7 +484,13 @@
         }
 
         str = this.createAccuracyRegExp(str);
-        return new RegExp(str, "gm".concat(this.opt.caseSensitive ? '' : 'i'));
+        return this.createRegExp(str);
+      }
+    }, {
+      key: "createRegExp",
+      value: function createRegExp(str) {
+        var flags = (this.opt.acrossElements ? 'g' : 'gm') + (this.opt.caseSensitive ? '' : 'i');
+        return new RegExp(str, flags);
       }
     }, {
       key: "sortByLength",
@@ -899,7 +905,7 @@
             addSpace,
             offset,
             nodes = [],
-            reg = /[\s.,;:?!"'`(){}[\]+*^<=>/@#$%&\\~-]/;
+            reg = /[\s.,;:?!"'`]/;
         var tags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR', 'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'HR', 'FIGCAPTION', 'FIGURE', 'PRE', 'TABLE', 'THEAD', 'TBODY', 'TFOOT', 'INPUT', 'LABEL', 'IMAGE', 'IMG', 'NAV', 'DETAILS', 'FORM', 'SELECT', 'BODY', 'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'PICTURE', 'BUTTON', 'HEADER', 'FOOTER', 'QUOTE', 'ADDRESS', 'AREA', 'CANVAS', 'MAP', 'FIELDSET', 'TEXTAREA', 'TRACK', 'VIDEO', 'AUDIO', 'METER', 'IFRAME', 'MARQUEE', 'OBJECT', 'SVG'];
         this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
           addSpace = false;
@@ -1212,8 +1218,7 @@
         this.opt = opt;
 
         if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
-          var flags = 'g' + (regexp.flags ? regexp.flags : '');
-          regexp = new RegExp(regexp.source, flags);
+          throw new Error('RegExp must have "g" or "y" flags');
         }
 
         this.log("Searching with expression \"".concat(regexp, "\""));
@@ -1260,11 +1265,11 @@
 
           _this11[fn](regex, 1, function (term, node) {
             return _this11.opt.filter(node, kw, totalMatches, matches);
-          }, function (element) {
+          }, function (element, nodeIndex) {
             matches++;
             totalMatches++;
 
-            _this11.opt.each(element);
+            _this11.opt.each(element, nodeIndex);
           }, function () {
             if (matches === 0) {
               _this11.opt.noMatch(kw);

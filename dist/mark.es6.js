@@ -329,7 +329,12 @@
         str = this.createWildcardsRegExp(str);
       }
       str = this.createAccuracyRegExp(str);
-      return new RegExp(str, `gm${this.opt.caseSensitive ? '' : 'i'}`);
+      return this.createRegExp(str);
+    }
+    createRegExp(str) {
+      let flags = (this.opt.acrossElements ? 'g' : 'gm') +
+        (this.opt.caseSensitive ? '' : 'i');
+      return new RegExp(str, flags);
     }
     sortByLength(arry) {
       return arry.sort((a, b) => a.length === b.length ?
@@ -679,7 +684,7 @@
     }
     getTextNodesAcrossElements(cb) {
       let val = '', start, text, addSpace, offset, nodes = [],
-        reg =/[\s.,;:?!"'`(){}[\]+*^<=>/@#$%&\\~-]/;
+        reg =/[\s.,;:?!"'`]/;
       const tags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR',
         'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'HR',
         'FIGCAPTION', 'FIGURE', 'PRE', 'TABLE', 'THEAD', 'TBODY', 'TFOOT',
@@ -694,8 +699,8 @@
         start = val.length;
         text = node.textContent;
         if ( !reg.test(text[text.length-1])) {
-          addSpace = this.checkParents(node, tags)
-            || this.checkNextNodes(node.nextSibling, tags);
+          addSpace = this.checkParents(node, tags) ||
+            this.checkNextNodes(node.nextSibling, tags);
         }
         if (addSpace) {
           val += text + ' ';
@@ -946,8 +951,7 @@
     markRegExp(regexp, opt) {
       this.opt = opt;
       if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
-        let flags = 'g' + (regexp.flags ? regexp.flags : '');
-        regexp = new RegExp(regexp.source, flags);
+        throw new Error('RegExp must have "g" or "y" flags');
       }
       this.log(`Searching with expression "${regexp}"`);
       let totalMatches = 0,
@@ -982,10 +986,10 @@
           this.log(`Searching with expression "${regex}"`);
           this[fn](regex, 1, (term, node) => {
             return this.opt.filter(node, kw, totalMatches, matches);
-          }, element => {
+          }, (element, nodeIndex) => {
             matches++;
             totalMatches++;
-            this.opt.each(element);
+            this.opt.each(element, nodeIndex);
           }, () => {
             if (matches === 0) {
               this.opt.noMatch(kw);

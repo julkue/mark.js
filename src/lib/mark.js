@@ -317,7 +317,7 @@ class Mark {
           parent = parent.parentNode;
         }
       }
-      // textNode is last child of inline element so check parent nextSibling
+      // textNode is last child of inline element so check parent next sibling
       let node = textNode.parentNode.nextSibling;
       if (node && node.nodeType === 1 && tags.indexOf(node.nodeName) !== -1) {
         return true;
@@ -351,11 +351,11 @@ class Mark {
           // most likely child is text node
           return false;
         }
-        // prevNode is empty node so check nextSibling
+        // prevNode has no child nodes so check next sibling
         return this.checkNextNodes(prevNode.nextSibling, tags);
       }
-      // node has no child nodes - check nextSibling
       if (node !== node.parentNode.lastChild) {
+        // node has no child nodes so check next sibling
         return this.checkNextNodes(node.nextSibling, tags);
         
       } else if (tags.indexOf(node.parentNode.nodeName) !== -1) {
@@ -393,7 +393,8 @@ class Mark {
   */
   getTextNodesAcrossElements(cb) {
     let val = '', start, text, addSpace, offset, nodes = [],
-      reg =/[\s.,;:?!"'`(){}[\]+*^<=>/@#$%&\\~-]/;
+      //reg =/[\s.,;:?!"'`(){}[\]+*^<=>/@#$%&\\~-]/;
+      reg =/[\s.,;:?!"'`]/;
 
     // the space can be safely added to the end of a text node, when node checks
     // run across element with one of those names
@@ -415,8 +416,8 @@ class Mark {
       // in this implementation a space can be added only to the end of a text
       // and 'lookahead' is only way to check parents and siblings 
       if ( !reg.test(text[text.length-1])) {
-        addSpace = this.checkParents(node, tags)
-          || this.checkNextNodes(node.nextSibling, tags);
+        addSpace = this.checkParents(node, tags) ||
+          this.checkNextNodes(node.nextSibling, tags);
       }
       if (addSpace) {
         val += text + ' ';
@@ -545,7 +546,7 @@ class Mark {
   * Each callback
   * @callback Mark~wrapMatchesEachCallback
   * @param {HTMLElement} node - The wrapped DOM element
-  * @param {number} nodeIndex - The index of mark node within match
+  * @param {number} nodeIndex - The index of marked element within match
   */
 
   /**
@@ -766,7 +767,7 @@ class Mark {
    * Callback for each wrapped element
    * @callback Mark~wrapMatchesAcrossElementsEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {number} nodeIndex - The index of mark node within match
+   * @param {number} nodeIndex - The index of marked element within match
    * @param {array} match - The result of RegExp exec() function 
    */
   /**
@@ -813,8 +814,9 @@ class Mark {
         }, (node, nodeIndex) => {
           // there's no need to set regex.lastIndex, it's already set internally
 
-          // nodeIndex and match parameters added to callback for each
-          // wrapped element. They will not affect any previous Markjs versions
+          // mark node index within match and match parameters added
+          // to callback for each wrapped element.
+          // they won't break any code that uses previous mark.js versions
           eachCb(node, nodeIndex, match);
         });
       }
@@ -925,7 +927,7 @@ class Mark {
    * Callback for each marked element
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {number} nodeIndex - The index of mark node within match
+   * @param {number} nodeIndex - The index of marked element within match
    * @param {array} regMatch - The result of RegExp exec() function
    */
   /**
@@ -991,12 +993,10 @@ class Mark {
    */
   markRegExp(regexp, opt) {
     this.opt = opt;
-    // if option across elements is set, this ensure that user regexp has global
-    // or at list sticky flag to enable regexp.lastIndex
-    // This will not affect any code that uses previous Markjs versions.
+    // 'wrapMatchesAcrossElements' requires that custom regexp must have
+    // global or sticky flag to enable regexp.lastIndex
     if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
-      let flags = 'g' + (regexp.flags ? regexp.flags : '');
-      regexp = new RegExp(regexp.source, flags);
+      throw new Error('RegExp must have \'g\' or \'y\' flags');
     }
     this.log(`Searching with expression "${regexp}"`);
     let totalMatches = 0,
@@ -1022,6 +1022,7 @@ class Mark {
    * Callback for each marked element
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
+   * @param {number} nodeIndex - The index of marked element within match
    */
   /**
    * Callback to filter matches
@@ -1065,10 +1066,10 @@ class Mark {
         this.log(`Searching with expression "${regex}"`);
         this[fn](regex, 1, (term, node) => {
           return this.opt.filter(node, kw, totalMatches, matches);
-        }, element => {
+        }, (element, nodeIndex) => {
           matches++;
           totalMatches++;
-          this.opt.each(element);
+          this.opt.each(element, nodeIndex);
         }, () => {
           if (matches === 0) {
             this.opt.noMatch(kw);
