@@ -331,12 +331,7 @@
         str = this.createWildcardsRegExp(str);
       }
       str = this.createAccuracyRegExp(str);
-      return this.createRegExp(str);
-    }
-    createRegExp(str) {
-      let flags = (this.opt.acrossElements ? 'g' : 'gm') +
-        (this.opt.caseSensitive ? '' : 'i');
-      return new RegExp(str, flags);
+      return new RegExp(str, `gm${this.opt.caseSensitive ? '' : 'i'}`);
     }
     sortByLength(arry) {
       return arry.sort((a, b) => a.length === b.length ?
@@ -682,7 +677,7 @@
           return true;
         }
       }
-      return  false;
+      return false;
     }
     getTextNodesAcrossElements(cb) {
       let val = '', start, text, addSpace, offset, nodes = [],
@@ -838,6 +833,29 @@
       }
       return node;
     }
+    wrapMatchGroups(dict, match, ignoreGroups, filterCb, eachCb) {
+      let startIndex = match.index,
+        start, end,
+        i = ignoreGroups >= 0 && ignoreGroups < match.length ? ignoreGroups : 0;
+      while (++i < match.length) {
+        let group = match[i];
+        if ( !group) {
+          continue;
+        }
+        start = dict.value.indexOf(group, startIndex);
+        if (start !== -1) {
+          end = start + group.length;
+          this.wrapMatchInMappedTextNode(dict, start, end, function(node) {
+            return filterCb(group, node);
+          }, (node, nodeIndex) => {
+            eachCb(node, nodeIndex);
+          });
+          startIndex += group.length;
+        } else {
+          break;
+        }
+      }
+    }
     wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
       const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
       this.getTextNodes(dict => {
@@ -878,22 +896,27 @@
       const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
       this.getTextNodesAcrossElements(dict => {
         let match;
-        while (
-          (match = regex.exec(dict.value)) !== null &&
-          match[matchIdx] !== ''
-        ) {
-          let start = match.index;
-          if (matchIdx !== 0) {
-            for (let i = 1; i < matchIdx; i++) {
-              start += match[i].length;
+        while ((match = regex.exec(dict.value)) !== null && match[matchIdx]) {
+          if (this.opt.separateGroups && match.length > 1) {
+            this.wrapMatchGroups(dict, match, ignoreGroups, (group, node) => {
+              return filterCb(group, node);
+            }, (node, nodeIndex) => {
+              eachCb(node, nodeIndex, match);
+            });
+          } else {
+            let start = match.index;
+            if (matchIdx !== 0) {
+              for (let i = 1; i < matchIdx; i++) {
+                start += match[i].length;
+              }
             }
+            const end = regex.lastIndex;
+            this.wrapMatchInMappedTextNode(dict, start, end, node => {
+              return filterCb(match[matchIdx], node);
+            }, (node, nodeIndex) => {
+              eachCb(node, nodeIndex, match);
+            });
           }
-          const end = regex.lastIndex;
-          this.wrapMatchInMappedTextNode(dict, start, end, node => {
-            return filterCb(match[matchIdx], node);
-          }, (node, nodeIndex) => {
-            eachCb(node, nodeIndex, match);
-          });
         }
         endCb();
       });
@@ -953,7 +976,7 @@
     markRegExp(regexp, opt) {
       this.opt = opt;
       if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
-        throw new Error('RegExp must have "g" or "y" flags');
+        throw new Error('RegExp must have \'g\' or \'y\' flags');
       }
       this.log(`Searching with expression "${regexp}"`);
       let totalMatches = 0,

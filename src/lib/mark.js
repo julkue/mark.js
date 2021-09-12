@@ -362,7 +362,7 @@ class Mark {
         return true;
       }
     }
-    return  false;
+    return false;
   }
 
   /**
@@ -574,7 +574,7 @@ class Mark {
         if (!filterCb(n.node)) {
           return false;
         }
-        // map range from dict.value to text node
+        // map match from dict.value to text node
         const s = start - n.start,
           e = (end > n.end ? n.end : end) - n.start;
         n.node = this.wrapRangeInTextNode(n.node, s, e);
@@ -698,6 +698,44 @@ class Mark {
   }
 
   /**
+  * Mark separate groups of the current match across elements
+  * @param {Mark~wrapMatchesAcrossElementsDict} dict - The dictionary
+  * @param {array} match - The current match
+  * @param {Mark~wrapMatchesAcrossElementsFilterCallback} filterCb - Filter
+  * callback
+  * @param {Mark~wrapMatchesAcrossElementsEachCallback} eachCb - Each callback
+  */ 
+  wrapMatchGroups(dict, match, ignoreGroups, filterCb, eachCb) {
+    let startIndex = match.index,
+      start, end,
+      i = ignoreGroups >= 0 && ignoreGroups < match.length ? ignoreGroups : 0;
+
+    while (++i < match.length) {
+      let group = match[i];
+      // if group is undefined don't break
+      if ( !group) {
+        continue;
+      }
+
+      start = dict.value.indexOf(group, startIndex);
+
+      if (start !== -1) {
+        end = start + group.length;
+        this.wrapMatchInMappedTextNode(dict, start, end, function(node) {
+          return filterCb(group, node);
+
+        }, (node, nodeIndex) => {
+          eachCb(node, nodeIndex);
+        });
+        startIndex += group.length;
+
+      } else {
+        break;
+      }
+    }
+  }
+
+  /**
    * Filter callback before each wrapping
    * @callback Mark~wrapMatchesFilterCallback
    * @param {string} match - The matching string
@@ -796,29 +834,38 @@ class Mark {
     const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
     this.getTextNodesAcrossElements(dict => {
       let match;
-      while (
-        (match = regex.exec(dict.value)) !== null &&
-        match[matchIdx] !== ''
-      ) {
-        // calculate range inside dict.value
-        let start = match.index;
-        if (matchIdx !== 0) {
-          for (let i = 1; i < matchIdx; i++) {
-            start += match[i].length;
+      while ((match = regex.exec(dict.value)) !== null && match[matchIdx]) {
+        if (this.opt.separateGroups && match.length > 1) {
+          this.wrapMatchGroups(dict, match, ignoreGroups, (group, node) => {
+            return filterCb(group, node);
+
+          }, (node, nodeIndex) => {
+            eachCb(node, nodeIndex, match);
+          });
+
+        } else {
+          // calculate range inside dict.value
+          let start = match.index;
+          if (matchIdx !== 0) {
+            // WRONG TODO - /.+?(gr1)(gr2)/g
+            for (let i = 1; i < matchIdx; i++) {
+              start += match[i].length;
+            }
           }
+          const end = regex.lastIndex;
+          
+          this.wrapMatchInMappedTextNode(dict, start, end, node => {
+            return filterCb(match[matchIdx], node);
+          }, (node, nodeIndex) => {
+            // there's no need to set regex.lastIndex, it's already set
+            // internally
+
+            // marked node index within match and match parameters added
+            // to callback for each wrapped element.
+            // they won't break any code that uses previous mark.js versions
+            eachCb(node, nodeIndex, match);
+          });
         }
-        const end = regex.lastIndex;
-
-        this.wrapMatchInMappedTextNode(dict, start, end, node => {
-          return filterCb(match[matchIdx], node);
-        }, (node, nodeIndex) => {
-          // there's no need to set regex.lastIndex, it's already set internally
-
-          // mark node index within match and match parameters added
-          // to callback for each wrapped element.
-          // they won't break any code that uses previous mark.js versions
-          eachCb(node, nodeIndex, match);
-        });
       }
       endCb();
     });
