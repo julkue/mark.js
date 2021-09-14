@@ -1,4 +1,3 @@
-
 'use strict';
 describe('mark with acrossElements and count words & phrases', function() {
   var $ctx;
@@ -17,12 +16,14 @@ describe('mark with acrossElements and count words & phrases', function() {
       'acrossElements' : true,
       'each' : function(elem, nodeIndex) {
         if (nodeIndex === 0) {
+          elem.className = 'word-1';
           wordCount++;
         }
       },
       'done' : function(total) {
+        expect($ctx.find('mark.word-1')).toHaveLength(wordCount);
         expect(wordCount).toBe(52);
-        expect(total).toBe(55);
+        expect($ctx.find('mark')).toHaveLength(total);
         done();
       }
     });
@@ -38,15 +39,16 @@ describe('mark with acrossElements and count words & phrases', function() {
       'acrossElements' : true,
       each : function(elem, nodeIndex) {
         if (nodeIndex === 0) {
+          elem.className = 'phrase-1';
           phraseCount++;
         }
       },
       'done' : function(total) {
+        expect($ctx.find('mark.phrase-1')).toHaveLength(phraseCount);
         expect(phraseCount).toBe(25);
-        expect(total).toBe(48);
+        expect($ctx.find('mark')).toHaveLength(total);
         done();
       }
     });
   });
-  
 });

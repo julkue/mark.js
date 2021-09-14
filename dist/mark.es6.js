@@ -831,22 +831,28 @@
       }
       return node;
     }
-    wrapMatchGroups(dict, match, ignoreGroups, filterCb, eachCb) {
+    wrapMatchGroups(dict, match, matchIdx, filterCb, eachCb) {
       let startIndex = match.index,
-        start, end,
-        i = ignoreGroups >= 0 && ignoreGroups < match.length ? ignoreGroups : 0;
-      while (++i < match.length) {
-        let group = match[i];
+        len = match.length,
+        nodeIndex = -1,
+        start, end;
+      for (let index = 1; index < len; index++)  {
+        let group = match[index];
         if ( !group) {
           continue;
         }
         start = dict.value.indexOf(group, startIndex);
         if (start !== -1) {
+          if (index < matchIdx) {
+            startIndex = start + group.length;
+            continue;
+          }
+          nodeIndex++;
           end = start + group.length;
           this.wrapMatchInMappedTextNode(dict, start, end, function(node) {
             return filterCb(group, node);
-          }, (node, nodeIndex) => {
-            eachCb(node, nodeIndex);
+          }, (node, groupIndex) => {
+            eachCb(node, nodeIndex++, groupIndex, index);
           });
           startIndex += group.length;
         } else {
@@ -894,26 +900,49 @@
       const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
       this.getTextNodesAcrossElements(dict => {
         let match;
-        while ((match = regex.exec(dict.value)) !== null && match[matchIdx]) {
+        while (
+          (match = regex.exec(dict.value)) !== null &&
+          match[matchIdx] !== ''
+        ) {
           if (this.opt.separateGroups && match.length > 1) {
-            this.wrapMatchGroups(dict, match, ignoreGroups, (group, node) => {
+            this.wrapMatchGroups(dict, match, matchIdx, (group, node) => {
               return filterCb(group, node);
-            }, (node, nodeIndex) => {
-              eachCb(node, nodeIndex, match);
+            }, (node, nodeIndex, groupIndex, matchIndex) => {
+              eachCb(node, {
+                match : match,
+                matchIndex : matchIndex,
+                nodeIndex : nodeIndex,
+                groupIndex : groupIndex
+              });
             });
           } else {
             let start = match.index;
-            if (matchIdx !== 0) {
-              for (let i = 1; i < matchIdx; i++) {
-                start += match[i].length;
+            if (matchIdx > 0) {
+              let index = 0, startIndex = start;
+              while (++index < matchIdx) {
+                let group = match[index];
+                if ( !group) {
+                  continue;
+                }
+                start = dict.value.indexOf(group, startIndex);
+                if (start !== -1) {
+                  start += group.length;
+                  startIndex = start;
+                }
               }
             }
             const end = regex.lastIndex;
-            this.wrapMatchInMappedTextNode(dict, start, end, node => {
-              return filterCb(match[matchIdx], node);
-            }, (node, nodeIndex) => {
-              eachCb(node, nodeIndex, match);
-            });
+            if (end > start) {
+              this.wrapMatchInMappedTextNode(dict, start, end, node => {
+                return  filterCb(match[matchIdx], node);
+              }, (node, nodeIndex) => {
+                eachCb(node, {
+                  match : match,
+                  matchIndex : matchIdx,
+                  nodeIndex : nodeIndex
+                });
+              });
+            }
           }
         }
         endCb();
@@ -973,18 +1002,18 @@
     }
     markRegExp(regexp, opt) {
       this.opt = opt;
-      if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
-        throw new Error('RegExp must have \'g\' or \'y\' flags');
-      }
       this.log(`Searching with expression "${regexp}"`);
       let totalMatches = 0,
         fn = 'wrapMatches';
-      const eachCb = (element, nodeIndex, regMatch) => {
+      const eachCb = (element, info) => {
         totalMatches++;
-        this.opt.each(element, nodeIndex, regMatch);
+        this.opt.each(element, info);
       };
       if (this.opt.acrossElements) {
         fn = 'wrapMatchesAcrossElements';
+        if ( !regexp.global && !regexp.sticky) {
+          throw new Error('RegExp must have \'g\' or \'y\' flags');
+        }
       }
       this[fn](regexp, this.opt.ignoreGroups, (match, node) => {
         return this.opt.filter(node, match, totalMatches);
@@ -1009,10 +1038,10 @@
           this.log(`Searching with expression "${regex}"`);
           this[fn](regex, 1, (term, node) => {
             return this.opt.filter(node, kw, totalMatches, matches);
-          }, (element, nodeIndex) => {
+          }, (element, info) => {
             matches++;
             totalMatches++;
-            this.opt.each(element, nodeIndex);
+            this.opt.each(element, info ? info.nodeIndex : null);
           }, () => {
             if (matches === 0) {
               this.opt.noMatch(kw);

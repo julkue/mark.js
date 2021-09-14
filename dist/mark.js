@@ -1080,16 +1080,17 @@
       }
     }, {
       key: "wrapMatchGroups",
-      value: function wrapMatchGroups(dict, match, ignoreGroups, filterCb, eachCb) {
+      value: function wrapMatchGroups(dict, match, matchIdx, filterCb, eachCb) {
         var _this7 = this;
 
         var startIndex = match.index,
+            len = match.length,
+            nodeIndex = -1,
             start,
-            end,
-            i = ignoreGroups >= 0 && ignoreGroups < match.length ? ignoreGroups : 0;
+            end;
 
-        var _loop = function _loop() {
-          var group = match[i];
+        var _loop = function _loop(index) {
+          var group = match[index];
 
           if (!group) {
             return "continue";
@@ -1098,12 +1099,18 @@
           start = dict.value.indexOf(group, startIndex);
 
           if (start !== -1) {
+            if (index < matchIdx) {
+              startIndex = start + group.length;
+              return "continue";
+            }
+
+            nodeIndex++;
             end = start + group.length;
 
             _this7.wrapMatchInMappedTextNode(dict, start, end, function (node) {
               return filterCb(group, node);
-            }, function (node, nodeIndex) {
-              eachCb(node, nodeIndex);
+            }, function (node, groupIndex) {
+              eachCb(node, nodeIndex++, groupIndex, index);
             });
 
             startIndex += group.length;
@@ -1112,8 +1119,8 @@
           }
         };
 
-        while (++i < match.length) {
-          var _ret = _loop();
+        for (var index = 1; index < len; index++) {
+          var _ret = _loop(index);
 
           if (_ret === "continue") continue;
           if (_ret === "break") break;
@@ -1164,29 +1171,54 @@
         this.getTextNodesAcrossElements(function (dict) {
           var match;
 
-          while ((match = regex.exec(dict.value)) !== null && match[matchIdx]) {
+          while ((match = regex.exec(dict.value)) !== null && match[matchIdx] !== '') {
             if (_this9.opt.separateGroups && match.length > 1) {
-              _this9.wrapMatchGroups(dict, match, ignoreGroups, function (group, node) {
+              _this9.wrapMatchGroups(dict, match, matchIdx, function (group, node) {
                 return filterCb(group, node);
-              }, function (node, nodeIndex) {
-                eachCb(node, nodeIndex, match);
+              }, function (node, nodeIndex, groupIndex, matchIndex) {
+                eachCb(node, {
+                  match: match,
+                  matchIndex: matchIndex,
+                  nodeIndex: nodeIndex,
+                  groupIndex: groupIndex
+                });
               });
             } else {
               var start = match.index;
 
-              if (matchIdx !== 0) {
-                for (var i = 1; i < matchIdx; i++) {
-                  start += match[i].length;
+              if (matchIdx > 0) {
+                var index = 0,
+                    startIndex = start;
+
+                while (++index < matchIdx) {
+                  var group = match[index];
+
+                  if (!group) {
+                    continue;
+                  }
+
+                  start = dict.value.indexOf(group, startIndex);
+
+                  if (start !== -1) {
+                    start += group.length;
+                    startIndex = start;
+                  }
                 }
               }
 
               var end = regex.lastIndex;
 
-              _this9.wrapMatchInMappedTextNode(dict, start, end, function (node) {
-                return filterCb(match[matchIdx], node);
-              }, function (node, nodeIndex) {
-                eachCb(node, nodeIndex, match);
-              });
+              if (end > start) {
+                _this9.wrapMatchInMappedTextNode(dict, start, end, function (node) {
+                  return filterCb(match[matchIdx], node);
+                }, function (node, nodeIndex) {
+                  eachCb(node, {
+                    match: match,
+                    matchIndex: matchIdx,
+                    nodeIndex: nodeIndex
+                  });
+                });
+              }
             }
           }
 
@@ -1259,23 +1291,22 @@
         var _this11 = this;
 
         this.opt = opt;
-
-        if (this.opt.acrossElements && !regexp.global && !regexp.sticky) {
-          throw new Error('RegExp must have \'g\' or \'y\' flags');
-        }
-
         this.log("Searching with expression \"".concat(regexp, "\""));
         var totalMatches = 0,
             fn = 'wrapMatches';
 
-        var eachCb = function eachCb(element, nodeIndex, regMatch) {
+        var eachCb = function eachCb(element, info) {
           totalMatches++;
 
-          _this11.opt.each(element, nodeIndex, regMatch);
+          _this11.opt.each(element, info);
         };
 
         if (this.opt.acrossElements) {
           fn = 'wrapMatchesAcrossElements';
+
+          if (!regexp.global && !regexp.sticky) {
+            throw new Error('RegExp must have \'g\' or \'y\' flags');
+          }
         }
 
         this[fn](regexp, this.opt.ignoreGroups, function (match, node) {
@@ -1308,11 +1339,11 @@
 
           _this12[fn](regex, 1, function (term, node) {
             return _this12.opt.filter(node, kw, totalMatches, matches);
-          }, function (element, nodeIndex) {
+          }, function (element, info) {
             matches++;
             totalMatches++;
 
-            _this12.opt.each(element, nodeIndex);
+            _this12.opt.each(element, info ? info.nodeIndex : null);
           }, function () {
             if (matches === 0) {
               _this12.opt.noMatch(kw);
