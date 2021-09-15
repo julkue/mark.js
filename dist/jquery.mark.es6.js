@@ -833,34 +833,91 @@
       }
       return node;
     }
-    wrapMatchGroups(dict, match, matchIdx, filterCb, eachCb) {
-      let startIndex = match.index,
-        len = match.length,
-        nodeIndex = -1,
-        start, end;
-      for (let index = 1; index < len; index++)  {
-        let group = match[index];
+    wrapMatchGroups(dict, match, matchIdx, regex, filterCb, eachCb) {
+      let nodeIndex = -1,
+        group, start, end, max = 0;
+      for (let i = matchIdx === 0 ? 1 : matchIdx; i < match.length; i++) {
+        group = match[i];
+        if ( !group) {
+          continue;
+        }
+        start = match.indices[i][0];
+        if (start < max) {
+          continue;
+        }
+        end = match.indices[i][1];
+        if (end > max) {
+          max = end;
+        }
+        nodeIndex++;
+        this.wrapMatchInMappedTextNode(dict, start, end, function(node) {
+          return  filterCb(group, node);
+        }, function(node, groupIndex) {
+          eachCb(node, nodeIndex++, groupIndex, i);
+        });
+      }
+    }
+    wrapMatchGroups2(dict, match, matchIdx, regex, filterCb, eachCb) {
+      let nodeIndex = -1,
+        startIndex = match.index,
+        i = matchIdx === 0 ? 1 : matchIdx,
+        max = 0,
+        group, start, end;
+      for (; i < match.length; i++)  {
+        group = match[i];
         if ( !group) {
           continue;
         }
         start = dict.value.indexOf(group, startIndex);
-        if (start !== -1) {
-          if (index < matchIdx) {
-            startIndex = start + group.length;
+        end = start + group.length;
+        if (start !== -1 && end <= regex.lastIndex) {
+          startIndex = end;
+          if (start < max) {
             continue;
           }
+          if (end > max) {
+            max = end;
+          }
           nodeIndex++;
-          end = start + group.length;
           this.wrapMatchInMappedTextNode(dict, start, end, function(node) {
             return filterCb(group, node);
           }, (node, groupIndex) => {
-            eachCb(node, nodeIndex++, groupIndex, index);
+            eachCb(node, nodeIndex++, groupIndex, i);
           });
-          startIndex += group.length;
-        } else {
-          break;
         }
       }
+    }
+    findStartIndex(dict, match, matchIdx, regex) {
+      let group, indices, end, start = match.index;
+      if (regex.hasIndices) {
+        for (let i = 1; i < matchIdx; i++) {
+          indices = match.indices[i];
+          if (indices) {
+            end = indices[1];
+            if (end > start) {
+              start = end;
+            }
+          }
+        }
+      } else {
+        let index;
+        for (let i = 1; i < matchIdx; i++) {
+          group = match[i];
+          if (group) {
+            index = dict.value.indexOf(group, start);
+            if (index !== -1) {
+              index += group.length;
+              if (index > regex.lastIndex) {
+                break;
+              }
+              if (index > start) {
+                start = index;
+              }
+            }
+          }
+        }
+      }
+      return  start;
     }
     wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
       const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
@@ -906,34 +963,36 @@
           (match = regex.exec(dict.value)) !== null &&
           match[matchIdx] !== ''
         ) {
-          if (this.opt.separateGroups && match.length > 1) {
-            this.wrapMatchGroups(dict, match, matchIdx, (group, node) => {
-              return filterCb(group, node);
-            }, (node, nodeIndex, groupIndex, matchIndex) => {
-              eachCb(node, {
-                match : match,
-                matchIndex : matchIndex,
-                nodeIndex : nodeIndex,
-                groupIndex : groupIndex
+          const end = regex.lastIndex;
+          if (this.opt.separateGroups) {
+            if (regex.hasIndices) {
+              this.wrapMatchGroups(dict, match, matchIdx, regex, (gr, node) => {
+                return filterCb(gr, node);
+              }, (node, nodeIndex, groupIndex, matchIndex) => {
+                eachCb(node, {
+                  match : match,
+                  matchIndex : matchIndex,
+                  nodeIndex : nodeIndex,
+                  groupIndex : groupIndex
+                });
               });
-            });
+            } else {
+              this.wrapMatchGroups2(dict, match, matchIdx, regex, (gr, node) => {
+                return filterCb(gr, node);
+              }, (node, nodeIndex, groupIndex, matchIndex) => {
+                eachCb(node, {
+                  match : match,
+                  matchIndex : matchIndex,
+                  nodeIndex : nodeIndex,
+                  groupIndex : groupIndex
+                });
+              });
+            }
           } else {
             let start = match.index;
             if (matchIdx > 0) {
-              let index = 0, startIndex = start;
-              while (++index < matchIdx) {
-                let group = match[index];
-                if ( !group) {
-                  continue;
-                }
-                start = dict.value.indexOf(group, startIndex);
-                if (start !== -1) {
-                  start += group.length;
-                  startIndex = start;
-                }
-              }
+              start = this.findStartIndex(dict, match, matchIdx, regex);
             }
-            const end = regex.lastIndex;
             if (end > start) {
               this.wrapMatchInMappedTextNode(dict, start, end, node => {
                 return  filterCb(match[matchIdx], node);
