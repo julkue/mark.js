@@ -335,7 +335,7 @@ class Mark {
     if (node && node.nodeType === 1) {
       if (tags.indexOf(node.nodeName) !== -1) {
         return true;
-        
+
       } else if (node.firstChild) {
         // loop through firstChilds until condition is met
         let prevNode, child = node.firstChild;
@@ -357,7 +357,7 @@ class Mark {
       if (node !== node.parentNode.lastChild) {
         // node has no child nodes so check next sibling
         return this.checkNextNodes(node.nextSibling, tags);
-        
+
       } else if (tags.indexOf(node.parentNode.nodeName) !== -1) {
         return true;
       }
@@ -413,7 +413,7 @@ class Mark {
       text = node.textContent;
 
       // in this implementation a space can be added only to the end of a text
-      // and 'lookahead' is only way to check parents and siblings 
+      // and 'lookahead' is only way to check parents and siblings
       if ( !reg.test(text[text.length-1])) {
         addSpace = this.checkParents(node, tags) ||
           this.checkNextNodes(node.nextSibling, tags);
@@ -702,38 +702,39 @@ class Mark {
   * Mark separate groups of the current match across elements
   * @param {Mark~wrapMatchGroupsDict} dict - The dictionary
   * @param {array} match - The current match
-  * @param {RegExp} regex - The regular expression to be searched for
   * @param {number} matchIdx - The start of the match based on ignoreGroups
   * @param {Mark~wrapMatchGroupsFilterCallback} filterCb - Filter
   * callback
   * @param {Mark~wrapMatchGroupsEachCallback} eachCb - Each callback
   */
-  wrapMatchGroups(dict, match, matchIdx, regex, filterCb, eachCb) {
-    let nodeIndex = -1,
-      group, start, end, max = 0;
+  wrapMatchGroups(dict, match, matchIdx, filterCb, eachCb) {
+    let nodeIndex = 0,
+      i = matchIdx === 0 ? 1 : matchIdx,
+      max = 0,
+      group, start, end, isMarked;
 
-    for (let i = matchIdx === 0 ? 1 : matchIdx; i < match.length; i++) {
+    for (; i < match.length; i++) {
       group = match[i];
-      if ( !group) {
-        continue;
-      }
-      start = match.indices[i][0];
-      if (start < max) {
-        // nested group, parent group already marked
-        continue;
-      }
-      end = match.indices[i][1];
-      if (end > max) {
-        max = end;
-      }
+      if (group) {
+        start = match.indices[i][0];
+        //it prevents mark nested group - parent group is already marked
+        if (start >= max) {
+          end = match.indices[i][1];
 
-      nodeIndex++;
-      this.wrapMatchInMappedTextNode(dict, start, end, function(node) {
-        return  filterCb(group, node);
-      }, function(node, groupIndex) {
-        // it also increment nodeIndex to keep track of marked nodes
-        eachCb(node, nodeIndex++, groupIndex, i);
-      });
+          isMarked = false;
+          this.wrapMatchInMappedTextNode(dict, start, end, function(node) {
+            return  filterCb(group, node);
+          }, function(node, groupIndex) {
+            isMarked = true;
+            // it also increment nodeIndex to keep track of marked nodes
+            eachCb(node, nodeIndex++, groupIndex, i);
+          });
+          // group may be filtered out
+          if (isMarked && end > max) {
+            max = end;
+          }
+        }
+      }
     }
   }
 
@@ -741,117 +742,114 @@ class Mark {
   * Mark separate groups of the current match across elements
   * @param {Mark~wrapMatchGroups2Dict} dict - The dictionary
   * @param {array} match - The current match
-  * @param {RegExp} regex - The regular expression to be searched for
   * @param {number} matchIdx - The start of the match based on ignoreGroups
+  * @param {number} lastIndex - The end index of the match
   * @param {Mark~wrapMatchGroups2FilterCallback} filterCb - Filter
   * callback
   * @param {Mark~wrapMatchGroups2EachCallback} eachCb - Each callback
   */
-  wrapMatchGroups2(dict, match, matchIdx, regex, filterCb, eachCb) {
-    let nodeIndex = -1,
-      startIndex = match.index,
-      i = matchIdx === 0 ? 1 : matchIdx,
+  wrapMatchGroups2(dict, match, matchIdx, lastIndex, filterCb, eachCb) {
+    let nodeIndex = 0,
+      startIndex = 0,
       max = 0,
-      group, start, end;
+      i = matchIdx === 0 ? 1 : matchIdx,
+      group, start, end, isMarked;
+
+    const s = match.index,
+      text = dict.value.substring(s, lastIndex);
 
     for (; i < match.length; i++)  {
       group = match[i];
-      // if group is undefined don't break
-      if ( !group) {
-        continue;
-      }
-      // this approach to find regexp group indexes only reliable with 
-      // subsequent groups without condition and may fail with nested one
-      // e.g. (gr1)(?!..)..(gr2), with nested group (gr1..(gr2)..)..(gr3)
-      start = dict.value.indexOf(group, startIndex);
-      end = start + group.length;
+      if (group) {
+        // this approach to find regexp group indexes only reliable with
+        // subsequent groups without condition and may fail with nested one
+        // e.g. (gr1)(?!..)..(gr2), with nested group (gr1..(gr2)..)..(gr3)
+        start = text.indexOf(group, startIndex);
+        end = start + group.length;
 
-      if (start !== -1 && end <= regex.lastIndex) {
-        startIndex = end;
+        if (start !== -1) {
+          if (start < max) {
+            // nested group, parent group is already marked
+            startIndex = end;
+            continue;
+          }
 
-        if (start < max) {
-          // nested group, parent group already marked
-          continue;
+          isMarked = false;
+          this.wrapMatchInMappedTextNode(dict, s + start, s + end, (node) => {
+            return filterCb(group, node);
+          }, (node, groupIndex) => {
+            isMarked = true;
+            // it also increment nodeIndex to keep track of marked nodes
+            eachCb(node, nodeIndex++, groupIndex, i);
+          });
+          // group may be filtered out
+          if (isMarked) {
+            if (end > max) {
+              max = end;
+            }
+            startIndex = end;
+          }
         }
-        if (end > max) {
-          max = end;
-        }
-        nodeIndex++;
-        this.wrapMatchInMappedTextNode(dict, start, end, function(node) {
-          return filterCb(group, node);
-        }, (node, groupIndex) => {
-          // it also increment nodeIndex to keep track of marked nodes
-          eachCb(node, nodeIndex++, groupIndex, i);
-        });
       }
     }
   }
 
   /**
   * Find last ignore group end index
-  * @param {Mark~wrapMatchesAcrossElementsDict} dict - The dictionary
   * @param {array} match - The current match
   * @param {number} matchIdx - The start of the match based on ignoreGroups
-  * @param {RegExp} regex - The regular expression to be searched for
   * @return {number}
   */
-  findStartIndex(dict, match, matchIdx, regex) {
-    let group, indices, end, start = match.index;
-    
-    if (regex.hasIndices) {
-      // ignore groups may be nested so there's need to check all
-      for (let i = 1; i < matchIdx; i++) {
-        indices = match.indices[i];
-        if (indices) {
-          end = indices[1];
-          if (end > start) {
-            start = end;
-          }
-        }
-      }
-       
-    } else {
-      let index;
-      for (let i = 1; i < matchIdx; i++) {
-        group = match[i];
-        if (group) {
-          index = dict.value.indexOf(group, start);
-          if (index !== -1) {
-            index += group.length;
-            // index is out match boundary
-            if (index > regex.lastIndex) {
-              break; 
-            }
-            if (index > start) {
-              start = index;
-            }
-          }
-        }
+  findStartIndex(match, matchIdx) {
+    let start = match.index,
+      i = matchIdx,
+      indices;
+    // last ignore group may be undefined
+    while (--i > 0) {
+      indices = match.indices[i];
+      if (indices) {
+        start = indices[1];
+        break;
       }
     }
-    return  start; 
+    // group to mark may be nested in ignore group, if so, correct start index
+    indices = match.indices[matchIdx];
+    if (indices && indices[0] < start) {
+      start = indices[0];
+    }
+    return  start;
   }
-  /*findStartIndex(dict, match, start, end, matchIdx) {
-    let group, index;
 
-    for (let i = 1; i < matchIdx; i++) {
+  /**
+  * Find last ignore group end index
+  * @param {string} text - The current match text
+  * @param {array} match - The current match
+  * @param {number} matchIdx - The start of the match based on ignoreGroups
+  * @return {number}
+  */
+  findStartIndex2(text, match, matchIdx) {
+    let start = match.index,
+      textIndex = 0,
+      i = matchIdx,
+      group, index;
+
+    while (--i > 0) {
       group = match[i];
-      if ( !group) {
-        continue;
-      }
-
-      index = dict.value.indexOf(group, start);
-      if (index !== -1) {
-        index += group.length;
-        // index is out match boundary
-        if (index > end) {
-          break; 
+      if (group) {
+        index = text.indexOf(group);
+        if (index !== -1) {
+          textIndex = index + group.length;
+          break;
         }
-        start = index;
       }
     }
-    return  start; 
-  }*/
+    index = text.indexOf(match[matchIdx]);
+    if (index !== -1 && index < textIndex) {
+      textIndex = index;
+    }
+    start += textIndex;
+    return  start;
+  }
 
   /**
    * Filter callback before each wrapping
@@ -922,7 +920,7 @@ class Mark {
   /**
    * @typedef Mark~infoObject
    * @type {object}
-   * @property {array} match - The result of RegExp exec() method 
+   * @property {array} match - The result of RegExp exec() method
    * @property {number} matchIndex - The index of the current match group
    * @property {number} nodeIndex - The index of marked element within match
    * @property {number} groupIndex - The index of marked element within match
@@ -969,8 +967,8 @@ class Mark {
 
         if (this.opt.separateGroups) {
           if (regex.hasIndices) {
-            this.wrapMatchGroups(dict, match, matchIdx, regex, (gr, node) => {
-              return filterCb(gr, node);
+            this.wrapMatchGroups(dict, match, matchIdx, (group, node) => {
+              return filterCb(group, node);
             }, (node, nodeIndex, groupIndex, matchIndex) => {
               eachCb(node, {
                 match : match,
@@ -979,9 +977,9 @@ class Mark {
                 groupIndex : groupIndex
               });
             });
-            
+
           } else {
-            this.wrapMatchGroups2(dict, match, matchIdx, regex, (gr, node) => {
+            this.wrapMatchGroups2(dict, match, matchIdx, end, (gr, node) => {
               return filterCb(gr, node);
             }, (node, nodeIndex, groupIndex, matchIndex) => {
               eachCb(node, {
@@ -991,14 +989,20 @@ class Mark {
                 groupIndex : groupIndex
               });
             });
-          } 
+          }
 
         } else {
           // calculate range inside dict.value
           let start = match.index;
 
           if (matchIdx > 0) {
-            start = this.findStartIndex(dict, match, matchIdx, regex);
+            if (regex.hasIndices) {
+              start = this.findStartIndex(match, matchIdx);
+
+            } else {
+              let text = dict.value.substring(start, regex.lastIndex);
+              start = this.findStartIndex2(text, match, matchIdx);
+            }
           }
           // not mark zero length range
           if (end > start) {
@@ -1193,7 +1197,7 @@ class Mark {
    */
   markRegExp(regexp, opt) {
     this.opt = opt;
-    
+
     this.log(`Searching with expression "${regexp}"`);
     let totalMatches = 0,
       fn = 'wrapMatches';
@@ -1218,7 +1222,7 @@ class Mark {
       this.opt.done(totalMatches);
     });
   }
-  
+
   /**
    * Callback for each marked element
    * @callback Mark~markEachCallback
