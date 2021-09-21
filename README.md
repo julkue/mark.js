@@ -1,7 +1,5 @@
 # mark.js
 
-#### :sparkles: formerly known as jquery.mark or jmHighlight :sparkles:
-
 ##### Highlight keywords using JavaScript. Intended for every use case. <br> Can e.g. be used to mark text in search results.
 
 [![License][license-image]][license]
@@ -17,7 +15,7 @@ See the [contribution guidelines][contributing].
 
 ## Changelog
 
-Changes are documented in [release][releases] descriptions.  
+Changes are documented in [release][releases] descriptions.
 
 ---
 
