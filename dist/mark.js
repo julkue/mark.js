@@ -1,7 +1,7 @@
 /*!***************************************************
 * mark.js v9.0.0
 * https://markjs.io/
-* Copyright (c) 2014–2018, Julian Kühnel
+* Copyright (c) 2014–2021, Julian Kühnel
 * Released under the MIT license https://git.io/vwTVl
 *****************************************************/
 
@@ -12,6 +12,8 @@
 }(this, (function () { 'use strict';
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
@@ -65,9 +67,7 @@
     return _extends.apply(this, arguments);
   }
 
-  var DOMIterator =
-  /*#__PURE__*/
-  function () {
+  var DOMIterator = /*#__PURE__*/function () {
     function DOMIterator(ctx) {
       var iframes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
       var exclude = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
@@ -437,9 +437,7 @@
     return DOMIterator;
   }();
 
-  var RegExpCreator =
-  /*#__PURE__*/
-  function () {
+  var RegExpCreator = /*#__PURE__*/function () {
     function RegExpCreator(options) {
       _classCallCheck(this, RegExpCreator);
 
@@ -649,9 +647,7 @@
     return RegExpCreator;
   }();
 
-  var Mark =
-  /*#__PURE__*/
-  function () {
+  var Mark = /*#__PURE__*/function () {
     function Mark(ctx) {
       _classCallCheck(this, Mark);
 
@@ -665,6 +661,36 @@
     }
 
     _createClass(Mark, [{
+      key: "opt",
+      get: function get() {
+        return this._opt;
+      },
+      set: function set(val) {
+        this._opt = _extends({}, {
+          'element': '',
+          'className': '',
+          'exclude': [],
+          'iframes': false,
+          'iframesTimeout': 5000,
+          'separateWordSearch': true,
+          'acrossElements': false,
+          'ignoreGroups': 0,
+          'each': function each() {},
+          'noMatch': function noMatch() {},
+          'filter': function filter() {
+            return true;
+          },
+          'done': function done() {},
+          'debug': false,
+          'log': window.console
+        }, val);
+      }
+    }, {
+      key: "iterator",
+      get: function get() {
+        return new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude, this.opt.iframesTimeout);
+      }
+    }, {
       key: "log",
       value: function log(msg) {
         var level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'debug';
@@ -800,16 +826,102 @@
         };
       }
     }, {
-      key: "getTextNodes",
-      value: function getTextNodes(cb) {
+      key: "checkParents",
+      value: function checkParents(textNode, tags) {
+        if (textNode === textNode.parentNode.lastChild) {
+          if (tags.indexOf(textNode.parentNode.nodeName) !== -1) {
+            return true;
+          } else {
+            var parent = textNode.parentNode;
+
+            while (parent === parent.parentNode.lastChild) {
+              if (tags.indexOf(parent.parentNode.nodeName) !== -1) {
+                return true;
+              }
+
+              parent = parent.parentNode;
+            }
+          }
+
+          var node = textNode.parentNode.nextSibling;
+
+          if (node && node.nodeType === 1 && tags.indexOf(node.nodeName) !== -1) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+    }, {
+      key: "checkNextNodes",
+      value: function checkNextNodes(node, tags) {
+        if (node && node.nodeType === 1) {
+          if (tags.indexOf(node.nodeName) !== -1) {
+            return true;
+          } else if (node.firstChild) {
+            var prevNode,
+                child = node.firstChild;
+
+            while (child) {
+              if (child.nodeType === 1) {
+                if (tags.indexOf(child.nodeName) !== -1) {
+                  return true;
+                }
+
+                prevNode = child;
+                child = child.firstChild;
+                continue;
+              }
+
+              return false;
+            }
+
+            return this.checkNextNodes(prevNode.nextSibling, tags);
+          }
+
+          if (node !== node.parentNode.lastChild) {
+            return this.checkNextNodes(node.nextSibling, tags);
+          } else if (tags.indexOf(node.parentNode.nodeName) !== -1) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+    }, {
+      key: "getTextNodesAcrossElements",
+      value: function getTextNodesAcrossElements(cb) {
         var _this3 = this;
 
         var val = '',
-            nodes = [];
+            start,
+            text,
+            addSpace,
+            offset,
+            nodes = [],
+            reg = /[\s.,:?!"'`]/;
+        var tags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR', 'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'HR', 'FIGCAPTION', 'FIGURE', 'PRE', 'TABLE', 'THEAD', 'TBODY', 'TFOOT', 'INPUT', 'LABEL', 'IMAGE', 'IMG', 'NAV', 'DETAILS', 'FORM', 'SELECT', 'BODY', 'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'PICTURE', 'BUTTON', 'HEADER', 'FOOTER', 'QUOTE', 'ADDRESS', 'AREA', 'CANVAS', 'MAP', 'FIELDSET', 'TEXTAREA', 'TRACK', 'VIDEO', 'AUDIO', 'METER', 'IFRAME', 'MARQUEE', 'OBJECT', 'SVG'];
         this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
+          addSpace = false;
+          offset = 0;
+          start = val.length;
+          text = node.textContent;
+
+          if (!reg.test(text[text.length - 1])) {
+            addSpace = _this3.checkParents(node, tags) || _this3.checkNextNodes(node.nextSibling, tags);
+          }
+
+          if (addSpace) {
+            val += text + ' ';
+            offset = 1;
+          } else {
+            val += text;
+          }
+
           nodes.push({
-            start: val.length,
-            end: (val += node.textContent).length,
+            start: start,
+            end: val.length - offset,
+            offset: offset,
             node: node
           });
         }, function (node) {
@@ -821,7 +933,35 @@
         }, function () {
           cb({
             value: val,
-            nodes: nodes
+            nodes: nodes,
+            lastIndex: 0
+          });
+        });
+      }
+    }, {
+      key: "getTextNodes",
+      value: function getTextNodes(cb) {
+        var _this4 = this;
+
+        var val = '',
+            nodes = [];
+        this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
+          nodes.push({
+            start: val.length,
+            end: (val += node.textContent).length,
+            node: node
+          });
+        }, function (node) {
+          if (_this4.matchesExclude(node.parentNode)) {
+            return NodeFilter.FILTER_REJECT;
+          } else {
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        }, function () {
+          cb({
+            value: val,
+            nodes: nodes,
+            lastIndex: 0
           });
         });
       }
@@ -850,43 +990,40 @@
     }, {
       key: "wrapRangeInMappedTextNode",
       value: function wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
-        var _this4 = this;
+        var rangeStart = true;
 
-        dict.nodes.every(function (n, i) {
+        for (var i = dict.lastIndex; i < dict.nodes.length; i++) {
           var sibl = dict.nodes[i + 1];
 
           if (typeof sibl === 'undefined' || sibl.start > start) {
+            var n = dict.nodes[i];
+
             if (!filterCb(n.node)) {
-              return false;
+              if (i > dict.lastIndex) {
+                dict.lastIndex = i;
+              }
+
+              break;
             }
 
             var s = start - n.start,
-                e = (end > n.end ? n.end : end) - n.start,
-                startStr = dict.value.substr(0, n.start),
-                endStr = dict.value.substr(e + n.start);
-            n.node = _this4.wrapRangeInTextNode(n.node, s, e);
-            dict.value = startStr + endStr;
-            dict.nodes.forEach(function (k, j) {
-              if (j >= i) {
-                if (dict.nodes[j].start > 0 && j !== i) {
-                  dict.nodes[j].start -= e;
-                }
+                e = (end > n.end ? n.end : end) - n.start;
 
-                dict.nodes[j].end -= e;
-              }
-            });
-            end -= e;
-            eachCb(n.node.previousSibling, n.start);
+            if (e > s) {
+              n.node = this.wrapRangeInTextNode(n.node, s, e);
+              n.start += e;
+              eachCb(n.node.previousSibling, rangeStart);
+              rangeStart = false;
+            }
 
             if (end > n.end) {
-              start = n.end;
+              start = n.end + (n.offset ? n.offset : 0);
             } else {
-              return false;
+              dict.lastIndex = i;
+              break;
             }
           }
-
-          return true;
-        });
+        }
       }
     }, {
       key: "wrapGroups",
@@ -911,6 +1048,78 @@
         return node;
       }
     }, {
+      key: "wrapMatchGroups",
+      value: function wrapMatchGroups(dict, match, regex, filterCb, eachCb) {
+        var matchStart = true,
+            max = 0,
+            i = 1,
+            group,
+            start,
+            end,
+            isMarked;
+
+        for (; i < match.length; i++) {
+          group = match[i];
+
+          if (group) {
+            start = match.indices[i][0];
+
+            if (start >= max) {
+              end = match.indices[i][1];
+              isMarked = false;
+              this.wrapRangeInMappedTextNode(dict, start, end, function (node) {
+                return filterCb(group, node, i);
+              }, function (node, groupStart) {
+                isMarked = true;
+                eachCb(node, matchStart, groupStart, i);
+                matchStart = false;
+              });
+
+              if (isMarked && end > max) {
+                max = end;
+              }
+            }
+          }
+        }
+      }
+    }, {
+      key: "wrapMatchGroups2",
+      value: function wrapMatchGroups2(dict, match, regex, filterCb, eachCb) {
+        var matchStart = true,
+            startIndex = 0,
+            i = 1,
+            group,
+            start,
+            end,
+            isMarked;
+        var s = match.index,
+            text = dict.value.substring(s, regex.lastIndex);
+
+        for (; i < match.length; i++) {
+          group = match[i];
+
+          if (group) {
+            start = text.indexOf(group, startIndex);
+            end = start + group.length;
+
+            if (start !== -1) {
+              isMarked = false;
+              this.wrapRangeInMappedTextNode(dict, s + start, s + end, function (node) {
+                return filterCb(group, node, i);
+              }, function (node, groupStart) {
+                isMarked = true;
+                eachCb(node, matchStart, groupStart, i);
+                matchStart = false;
+              });
+
+              if (isMarked) {
+                startIndex = end;
+              }
+            }
+          }
+        }
+      }
+    }, {
       key: "wrapMatches",
       value: function wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
         var _this5 = this;
@@ -922,7 +1131,7 @@
             var match;
 
             while ((match = regex.exec(node.textContent)) !== null && match[matchIdx] !== '') {
-              if (_this5.opt.separateGroups) {
+              if (_this5.opt.separateGroups && match.length !== 1) {
                 node = _this5.separateGroups(node, match, matchIdx, filterCb, eachCb);
               } else {
                 if (!filterCb(match[matchIdx], node)) {
@@ -951,27 +1160,52 @@
       value: function wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
         var _this6 = this;
 
-        var matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1;
-        this.getTextNodes(function (dict) {
-          var match;
-
+        var matchIdx = ignoreGroups === 0 || this.opt.separateGroups ? 0 : ignoreGroups + 1;
+        var match, count;
+        this.getTextNodesAcrossElements(function (dict) {
           while ((match = regex.exec(dict.value)) !== null && match[matchIdx] !== '') {
-            var start = match.index;
+            count = -1;
 
-            if (matchIdx !== 0) {
-              for (var i = 1; i < matchIdx; i++) {
-                start += match[i].length;
+            if (_this6.opt.separateGroups) {
+              var fn = regex.hasIndices ? 'wrapMatchGroups' : 'wrapMatchGroups2';
+
+              _this6[fn](dict, match, regex, function (group, node, groupIndex) {
+                return filterCb(group, node, {
+                  match: match,
+                  matchStart: ++count === 0,
+                  groupIndex: groupIndex
+                });
+              }, function (node, matchStart, groupStart, groupIndex) {
+                eachCb(node, {
+                  match: match,
+                  matchStart: matchStart,
+                  groupIndex: groupIndex,
+                  groupStart: groupStart
+                });
+              });
+            } else {
+              var start = match.index;
+
+              if (matchIdx !== 0) {
+                for (var i = 1; i < matchIdx; i++) {
+                  start += match[i].length;
+                }
               }
+
+              var end = start + match[matchIdx].length;
+
+              _this6.wrapRangeInMappedTextNode(dict, start, end, function (node) {
+                return filterCb(match[matchIdx], node, {
+                  match: match,
+                  matchStart: ++count === 0
+                });
+              }, function (node, matchStart) {
+                eachCb(node, {
+                  match: match,
+                  matchStart: matchStart
+                });
+              });
             }
-
-            var end = start + match[matchIdx].length;
-
-            _this6.wrapRangeInMappedTextNode(dict, start, end, function (node) {
-              return filterCb(match[matchIdx], node);
-            }, function (node, lastIndex) {
-              regex.lastIndex = lastIndex;
-              eachCb(node);
-            });
           }
 
           endCb();
@@ -1043,22 +1277,29 @@
         var _this8 = this;
 
         this.opt = opt;
-        this.log("Searching with expression \"".concat(regexp, "\""));
         var totalMatches = 0,
             fn = 'wrapMatches';
 
-        var eachCb = function eachCb(element) {
+        var eachCb = function eachCb(element, matchInfo) {
           totalMatches++;
 
-          _this8.opt.each(element);
+          _this8.opt.each(element, matchInfo);
         };
 
         if (this.opt.acrossElements) {
           fn = 'wrapMatchesAcrossElements';
+
+          if (!regexp.global && !regexp.sticky) {
+            var splits = regexp.toString().split('/'),
+                flags = 'g' + splits[splits.length - 1];
+            regexp = new RegExp(regexp.source, flags);
+            this.log('RegExp is recompiled with g flag because it must have g flag');
+          }
         }
 
-        this[fn](regexp, this.opt.ignoreGroups, function (match, node) {
-          return _this8.opt.filter(node, match, totalMatches);
+        this.log("Searching with expression \"".concat(regexp, "\""));
+        this[fn](regexp, this.opt.ignoreGroups, function (match, node, filterInfo) {
+          return _this8.opt.filter(node, match, totalMatches, filterInfo);
         }, eachCb, function () {
           if (totalMatches === 0) {
             _this8.opt.noMatch(regexp);
@@ -1074,6 +1315,7 @@
 
         this.opt = opt;
         var totalMatches = 0,
+            matchStart,
             fn = 'wrapMatches';
 
         var _this$getSeparatedKey = this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv),
@@ -1087,11 +1329,12 @@
 
           _this9[fn](regex, 1, function (term, node) {
             return _this9.opt.filter(node, kw, totalMatches, matches);
-          }, function (element) {
+          }, function (element, matchInfo) {
             matches++;
             totalMatches++;
+            matchStart = matchInfo ? matchInfo.matchStart : matchStart;
 
-            _this9.opt.each(element);
+            _this9.opt.each(element, matchStart);
           }, function () {
             if (matches === 0) {
               _this9.opt.noMatch(kw);
@@ -1165,36 +1408,6 @@
             return NodeFilter.FILTER_ACCEPT;
           }
         }, this.opt.done);
-      }
-    }, {
-      key: "opt",
-      set: function set(val) {
-        this._opt = _extends({}, {
-          'element': '',
-          'className': '',
-          'exclude': [],
-          'iframes': false,
-          'iframesTimeout': 5000,
-          'separateWordSearch': true,
-          'acrossElements': false,
-          'ignoreGroups': 0,
-          'each': function each() {},
-          'noMatch': function noMatch() {},
-          'filter': function filter() {
-            return true;
-          },
-          'done': function done() {},
-          'debug': false,
-          'log': window.console
-        }, val);
-      },
-      get: function get() {
-        return this._opt;
-      }
-    }, {
-      key: "iterator",
-      get: function get() {
-        return new DOMIterator(this.ctx, this.opt.iframes, this.opt.exclude, this.opt.iframesTimeout);
       }
     }]);
 
