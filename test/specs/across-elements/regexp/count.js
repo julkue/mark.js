@@ -13,7 +13,7 @@ describe('markRegExp with acrossElements and count words&phrases', function() {
       className : 'word',
       'acrossElements' : true,
       'each' : function(elem, info) {
-        if (info.nodeIndex === 0) {
+        if (info.matchNodeIndex === 0) {
           elem.className = 'word-1';
           wordCount++;
         }
@@ -34,7 +34,7 @@ describe('markRegExp with acrossElements and count words&phrases', function() {
       className : 'phrase',
       'acrossElements' : true,
       each : function(elem, info) {
-        if (info.nodeIndex === 0) {
+        if (info.matchNodeIndex === 0) {
           elem.className = 'phrase-1';
           phraseCount++;
         }

@@ -681,7 +681,7 @@
     }
     getTextNodesAcrossElements(cb) {
       let val = '', start, text, addSpace, offset, nodes = [],
-        reg =/[\s.,;:?!"'`]/;
+        reg =/[\s.,:?!"'`]/;
       const tags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR',
         'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'HR',
         'FIGCAPTION', 'FIGURE', 'PRE', 'TABLE', 'THEAD', 'TBODY', 'TFOOT',
@@ -720,7 +720,8 @@
       }, () => {
         cb({
           value: val,
-          nodes: nodes
+          nodes: nodes,
+          lastIndex : 0
         });
       });
     }
@@ -742,7 +743,8 @@
       }, () => {
         cb({
           value: val,
-          nodes: nodes
+          nodes: nodes,
+          lastIndex : 0
         });
       });
     }
@@ -764,59 +766,30 @@
       startNode.parentNode.replaceChild(repl, startNode);
       return ret;
     }
-    wrapMatchInMappedTextNode(dict, start, end, filterCb, eachCb) {
+    wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
       let nodeIndex = 0;
-      dict.nodes.every((n, i) => {
+      for (let i = dict.lastIndex; i < dict.nodes.length; i++)  {
         const sibl = dict.nodes[i + 1];
         if (typeof sibl === 'undefined' || sibl.start > start) {
+          let n = dict.nodes[i];
           if (!filterCb(n.node)) {
-            return false;
+            break;
           }
           const s = start - n.start,
             e = (end > n.end ? n.end : end) - n.start;
-          n.node = this.wrapRangeInTextNode(n.node, s, e);
-          eachCb(n.node.previousSibling, nodeIndex++);
-          n.start += e;
+          if (e > s) {
+            n.node = this.wrapRangeInTextNode(n.node, s, e);
+            n.start += e;
+            eachCb(n.node.previousSibling, nodeIndex++);
+          }
           if (end > n.end) {
-            start = n.end + n.offset;
+            start = n.end + (n.offset ? n.offset : 0);
           } else {
-            return false;
+            dict.lastIndex = i;
+            break;
           }
         }
-        return true;
-      });
-    }
-    wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
-      dict.nodes.every((n, i) => {
-        const sibl = dict.nodes[i + 1];
-        if (typeof sibl === 'undefined' || sibl.start > start) {
-          if (!filterCb(n.node)) {
-            return false;
-          }
-          const s = start - n.start,
-            e = (end > n.end ? n.end : end) - n.start,
-            startStr = dict.value.substr(0, n.start),
-            endStr = dict.value.substr(e + n.start);
-          n.node = this.wrapRangeInTextNode(n.node, s, e);
-          dict.value = startStr + endStr;
-          dict.nodes.forEach((k, j) => {
-            if (j >= i) {
-              if (dict.nodes[j].start > 0 && j !== i) {
-                dict.nodes[j].start -= e;
-              }
-              dict.nodes[j].end -= e;
-            }
-          });
-          end -= e;
-          eachCb(n.node.previousSibling, n.start);
-          if (end > n.end) {
-            start = n.end;
-          } else {
-            return false;
-          }
-        }
-        return true;
-      });
+      }
     }
     wrapGroups(node, pos, len, eachCb) {
       node = this.wrapRangeInTextNode(node, pos, pos + len);
@@ -845,7 +818,7 @@
           if (start >= max) {
             end = match.indices[i][1];
             isMarked = false;
-            this.wrapMatchInMappedTextNode(dict, start, end, function(node) {
+            this.wrapRangeInMappedTextNode(dict, start, end, function(node) {
               return  filterCb(group, node);
             }, function(node, groupIndex) {
               isMarked = true;
@@ -877,7 +850,7 @@
               continue;
             }
             isMarked = false;
-            this.wrapMatchInMappedTextNode(dict, s + start, s + end, (node) => {
+            this.wrapRangeInMappedTextNode(dict, s + start, s + end, (node) => {
               return filterCb(group, node);
             }, (node, groupIndex) => {
               isMarked = true;
@@ -981,23 +954,23 @@
             if (regex.hasIndices) {
               this.wrapMatchGroups(dict, match, matchIdx, (group, node) => {
                 return filterCb(group, node);
-              }, (node, nodeIndex, groupIndex, matchIndex) => {
+              }, (node, mNodeIndex, grNodeIndex, index) => {
                 eachCb(node, {
                   match : match,
-                  matchIndex : matchIndex,
-                  nodeIndex : nodeIndex,
-                  groupIndex : groupIndex
+                  index : index,
+                  matchNodeIndex : mNodeIndex,
+                  groupNodeIndex : grNodeIndex
                 });
               });
             } else {
               this.wrapMatchGroups2(dict, match, matchIdx, end, (gr, node) => {
                 return filterCb(gr, node);
-              }, (node, nodeIndex, groupIndex, matchIndex) => {
+              }, (node, mNodeIndex, grNodeIndex, index) => {
                 eachCb(node, {
                   match : match,
-                  matchIndex : matchIndex,
-                  nodeIndex : nodeIndex,
-                  groupIndex : groupIndex
+                  index : index,
+                  matchNodeIndex : mNodeIndex,
+                  groupNodeIndex : grNodeIndex
                 });
               });
             }
@@ -1012,13 +985,13 @@
               }
             }
             if (end > start) {
-              this.wrapMatchInMappedTextNode(dict, start, end, node => {
+              this.wrapRangeInMappedTextNode(dict, start, end, node => {
                 return  filterCb(match[matchIdx], node);
-              }, (node, nodeIndex) => {
+              }, (node, mNodeIndex) => {
                 eachCb(node, {
                   match : match,
-                  matchIndex : matchIdx,
-                  nodeIndex : nodeIndex
+                  index : matchIdx,
+                  matchNodeIndex : mNodeIndex
                 });
               });
             }
@@ -1084,9 +1057,9 @@
       this.log(`Searching with expression "${regexp}"`);
       let totalMatches = 0,
         fn = 'wrapMatches';
-      const eachCb = (element, info) => {
+      const eachCb = (element, matchInfo) => {
         totalMatches++;
-        this.opt.each(element, info);
+        this.opt.each(element, matchInfo);
       };
       if (this.opt.acrossElements) {
         fn = 'wrapMatchesAcrossElements';
@@ -1106,6 +1079,7 @@
     mark(sv, opt) {
       this.opt = opt;
       let totalMatches = 0,
+        nodeIndex,
         fn = 'wrapMatches';
       const {
           keywords: kwArr,
@@ -1117,10 +1091,11 @@
           this.log(`Searching with expression "${regex}"`);
           this[fn](regex, 1, (term, node) => {
             return this.opt.filter(node, kw, totalMatches, matches);
-          }, (element, info) => {
+          }, (element, matchInfo) => {
             matches++;
             totalMatches++;
-            this.opt.each(element, info ? info.nodeIndex : null);
+            nodeIndex = matchInfo ? matchInfo.matchNodeIndex : nodeIndex;
+            this.opt.each(element, nodeIndex);
           }, () => {
             if (matches === 0) {
               this.opt.noMatch(kw);
