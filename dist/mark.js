@@ -828,15 +828,17 @@
     }, {
       key: "checkParents",
       value: function checkParents(textNode, tags) {
+        var value = 0;
+
         if (textNode === textNode.parentNode.lastChild) {
-          if (tags.indexOf(textNode.parentNode.nodeName) !== -1) {
-            return true;
+          if (value = tags[textNode.parentNode.nodeName]) {
+            return value;
           } else {
             var parent = textNode.parentNode;
 
             while (parent === parent.parentNode.lastChild) {
-              if (tags.indexOf(parent.parentNode.nodeName) !== -1) {
-                return true;
+              if (value = tags[parent.parentNode.nodeName]) {
+                return value;
               }
 
               parent = parent.parentNode;
@@ -845,27 +847,29 @@
 
           var node = textNode.parentNode.nextSibling;
 
-          if (node && node.nodeType === 1 && tags.indexOf(node.nodeName) !== -1) {
-            return true;
+          if (node && node.nodeType === 1 && (value = tags[node.nodeName])) {
+            return value;
           }
         }
 
-        return false;
+        return -1;
       }
     }, {
       key: "checkNextNodes",
       value: function checkNextNodes(node, tags) {
+        var value = 0;
+
         if (node && node.nodeType === 1) {
-          if (tags.indexOf(node.nodeName) !== -1) {
-            return true;
+          if (value = tags[node.nodeName]) {
+            return value;
           } else if (node.firstChild) {
             var prevNode,
                 child = node.firstChild;
 
             while (child) {
               if (child.nodeType === 1) {
-                if (tags.indexOf(child.nodeName) !== -1) {
-                  return true;
+                if (value = tags[child.nodeName]) {
+                  return value;
                 }
 
                 prevNode = child;
@@ -873,7 +877,7 @@
                 continue;
               }
 
-              return false;
+              return -1;
             }
 
             return this.checkNextNodes(prevNode.nextSibling, tags);
@@ -881,12 +885,12 @@
 
           if (node !== node.parentNode.lastChild) {
             return this.checkNextNodes(node.nextSibling, tags);
-          } else if (tags.indexOf(node.parentNode.nodeName) !== -1) {
-            return true;
+          } else if (value = tags[node.parentNode.nodeName]) {
+            return value;
           }
         }
 
-        return false;
+        return -1;
       }
     }, {
       key: "getTextNodesAcrossElements",
@@ -896,25 +900,101 @@
         var val = '',
             start,
             text,
-            addSpace,
+            number,
             offset,
             nodes = [],
-            reg = /[\s.,:?!"'`]/;
-        var tags = ['DIV', 'P', 'LI', 'TD', 'TR', 'TH', 'UL', 'OL', 'BR', 'DD', 'DL', 'DT', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'BLOCKQUOTE', 'HR', 'FIGCAPTION', 'FIGURE', 'PRE', 'TABLE', 'THEAD', 'TBODY', 'TFOOT', 'INPUT', 'LABEL', 'IMAGE', 'IMG', 'NAV', 'DETAILS', 'FORM', 'SELECT', 'BODY', 'MAIN', 'SECTION', 'ARTICLE', 'ASIDE', 'PICTURE', 'BUTTON', 'HEADER', 'FOOTER', 'QUOTE', 'ADDRESS', 'AREA', 'CANVAS', 'MAP', 'FIELDSET', 'TEXTAREA', 'TRACK', 'VIDEO', 'AUDIO', 'METER', 'IFRAME', 'MARQUEE', 'OBJECT', 'SVG'];
+            reg = /\s/;
+        var tags = {
+          DIV: 2,
+          P: 2,
+          LI: 2,
+          TD: 2,
+          TR: 2,
+          TH: 2,
+          UL: 2,
+          OL: 2,
+          BR: 1,
+          DD: 2,
+          DL: 2,
+          DT: 2,
+          H1: 2,
+          H2: 2,
+          H3: 2,
+          H4: 2,
+          H5: 2,
+          H6: 2,
+          HR: 2,
+          BLOCKQUOTE: 2,
+          FIGCAPTION: 2,
+          FIGURE: 2,
+          PRE: 2,
+          TABLE: 2,
+          THEAD: 2,
+          TBODY: 2,
+          TFOOT: 2,
+          INPUT: 2,
+          IMG: 2,
+          NAV: 2,
+          DETAILS: 2,
+          LABEL: 2,
+          FORM: 2,
+          SELECT: 2,
+          MENU: 2,
+          MENUITEM: 2,
+          MAIN: 2,
+          SECTION: 2,
+          ARTICLE: 2,
+          ASIDE: 2,
+          PICTURE: 2,
+          OUTPUT: 2,
+          BUTTON: 2,
+          HEADER: 2,
+          FOOTER: 2,
+          ADDRESS: 2,
+          AREA: 2,
+          CANVAS: 2,
+          MAP: 2,
+          FIELDSET: 2,
+          TEXTAREA: 2,
+          TRACK: 2,
+          VIDEO: 2,
+          AUDIO: 2,
+          BODY: 2,
+          IFRAME: 2,
+          METER: 2,
+          OBJECT: 2,
+          svg: 1
+        };
         this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
-          addSpace = false;
           offset = 0;
           start = val.length;
           text = node.textContent;
+          number = _this3.checkParents(node, tags);
 
-          if (!reg.test(text[text.length - 1])) {
-            addSpace = _this3.checkParents(node, tags) || _this3.checkNextNodes(node.nextSibling, tags);
+          if (number < 0) {
+            number = _this3.checkNextNodes(node.nextSibling, tags);
           }
 
-          if (addSpace) {
-            val += text + ' ';
-            offset = 1;
-          } else {
+          if (number > 0) {
+            if (number === 2 && !_this3.opt.blockElementsBoundary) {
+              number = 1;
+            }
+
+            if (!reg.test(text[text.length - 1])) {
+              if (number === 1) {
+                val += text + ' ';
+                offset = 1;
+              } else if (number === 2) {
+                val += text + ' \x01 ';
+                offset = 3;
+              }
+            } else if (number === 2) {
+              val += text + '\x01 ';
+              offset = 2;
+            }
+          }
+
+          if (offset === 0) {
             val += text;
           }
 
