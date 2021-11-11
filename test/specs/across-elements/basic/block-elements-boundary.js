@@ -34,6 +34,32 @@ describe('mark with acrossElements and block elements boundary', function() {
     });
   });
 
+  it(message + 'of phrases with custom blockElements', function(done) {
+    var phraseCount = 0;
+
+    new Mark($ctx[0]).mark('block elements boundary', {
+      'diacritics' : false,
+      'separateWordSearch' : false,
+      'accuracy' : 'exactly',
+      'acrossElements' : true,
+      'blockElementsBoundary' : true,
+      'blockElements' : ['Div', 'p', 'H1', 'h2'],
+      each : function(elem, matchStart) {
+        if (matchStart) {
+          // elem in this case is the first marked element of the match
+          elem.className = 'phrase-1';
+          phraseCount++;
+        }
+      },
+      'done' : function() {
+        var count = testMarkedText($ctx, /^blockelementsboundary$/);
+        expect(count).toBe(phraseCount);
+        expect(count).toBe(4);
+        done();
+      }
+    });
+  });
+
   function testMarkedText($ctx, reg) {
     var count = 0,
       marks = $ctx.find('mark');

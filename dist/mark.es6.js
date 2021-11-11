@@ -633,19 +633,20 @@
     checkParents(textNode, tags) {
       let value = 0;
       if (textNode === textNode.parentNode.lastChild) {
-        if ((value = tags[textNode.parentNode.nodeName])) {
+        if ((value = tags[textNode.parentNode.nodeName.toLowerCase()])) {
           return value;
         } else {
           let parent = textNode.parentNode;
           while (parent === parent.parentNode.lastChild) {
-            if ((value = tags[parent.parentNode.nodeName])) {
+            if ((value = tags[parent.parentNode.nodeName.toLowerCase()])) {
               return value;
             }
             parent = parent.parentNode;
           }
         }
         let node = textNode.parentNode.nextSibling;
-        if (node && node.nodeType === 1 && ((value = tags[node.nodeName]))) {
+        if (node && node.nodeType === 1
+          && ((value = tags[node.nodeName.toLowerCase()]))) {
           return value;
         }
       }
@@ -654,13 +655,13 @@
     checkNextNodes(node, tags) {
       let value = 0;
       if (node && node.nodeType === 1) {
-        if ((value = tags[node.nodeName])) {
+        if ((value = tags[node.nodeName.toLowerCase()])) {
           return value;
         } else if (node.firstChild) {
           let prevNode, child = node.firstChild;
           while (child) {
             if (child.nodeType === 1) {
-              if ((value = tags[child.nodeName])) {
+              if ((value = tags[child.nodeName.toLowerCase()])) {
                 return value;
               }
               prevNode = child;
@@ -673,24 +674,45 @@
         }
         if (node !== node.parentNode.lastChild) {
           return this.checkNextNodes(node.nextSibling, tags);
-        } else if ((value = tags[node.parentNode.nodeName])) {
+        } else if ((value = tags[node.parentNode.nodeName.toLowerCase()])) {
           return value;
         }
       }
       return -1;
     }
     getTextNodesAcrossElements(cb) {
-      let val = '', start, text, number, offset, nodes = [], reg = /\s/;
-      let tags = { DIV : 2, P : 2, LI : 2, TD : 2, TR : 2, TH : 2, UL : 2,
-        OL : 2, BR : 1, DD : 2, DL : 2, DT : 2, H1 : 2, H2 : 2, H3 : 2, H4 : 2,
-        H5 : 2, H6 : 2, HR : 2, BLOCKQUOTE : 2, FIGCAPTION : 2, FIGURE : 2,
-        PRE : 2, TABLE : 2, THEAD : 2, TBODY : 2, TFOOT : 2, INPUT : 2,
-        IMG : 2, NAV : 2, DETAILS : 2, LABEL : 2, FORM : 2, SELECT : 2, MENU : 2,
-        MENUITEM : 2,
-        MAIN : 2, SECTION : 2, ARTICLE : 2, ASIDE : 2, PICTURE : 2, OUTPUT : 2,
-        BUTTON : 2, HEADER : 2, FOOTER : 2, ADDRESS : 2, AREA : 2, CANVAS : 2,
-        MAP : 2, FIELDSET : 2, TEXTAREA : 2, TRACK : 2, VIDEO : 2, AUDIO : 2,
-        BODY : 2, IFRAME : 2, METER : 2, OBJECT : 2, svg : 1 };
+      let val = '', start, text, number, offset, nodes = [],
+        reg = /\s/,
+        ch = this.opt.boundaryChar ? this.opt.boundaryChar.charAt(0) : '\u0001',
+        str = ch + ' ', str2 = ' ' + ch + ' ';
+      let tags = { div : 1, p : 1, li : 1, td : 1, tr : 1, th : 1, ul : 1,
+        ol : 1, br : 1, dd : 1, dl : 1, dt : 1, h1 : 1, h2 : 1, h3 : 1, h4 : 1,
+        h5 : 1, h6 : 1, hr : 1, blockquote : 1, figcaption : 1, figure : 1,
+        pre : 1, table : 1, thead : 1, tbody : 1, tfoot : 1, input : 1,
+        img : 1, nav : 1, details : 1, label : 1, form : 1, select : 1, menu : 1,
+        menuitem : 1,
+        main : 1, section : 1, article : 1, aside : 1, picture : 1, output : 1,
+        button : 1, header : 1, footer : 1, address : 1, area : 1, canvas : 1,
+        map : 1, fieldset : 1, textarea : 1, track : 1, video : 1, audio : 1,
+        body : 1, iframe : 1, meter : 1, object : 1, svg : 1 };
+      if (this.opt.blockElementsBoundary) {
+        if (this.opt.blockElements && this.opt.blockElements.length) {
+          let elements = {};
+          for (let key in this.opt.blockElements) {
+            elements[this.opt.blockElements[key].toLowerCase()] = 1;
+          }
+          for (let key in elements) {
+            tags[key] = 2;
+          }
+        } else {
+          let tags2 = { br: 1, svg: 1 };
+          for (let key in tags) {
+            if ( !tags2[key]) {
+              tags[key] = 2;
+            }
+          }
+        }
+      }
       this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
         offset = 0;
         start = val.length;
@@ -700,19 +722,16 @@
           number = this.checkNextNodes(node.nextSibling, tags);
         }
         if (number > 0) {
-          if (number === 2 && !this.opt.blockElementsBoundary) {
-            number = 1;
-          }
           if ( !reg.test(text[text.length - 1])) {
             if (number === 1) {
               val += text + ' ';
               offset = 1;
             } else if (number === 2) {
-              val += text + ' \x01 ';
+              val += text + str2;
               offset = 3;
             }
           } else if (number === 2) {
-            val += text + '\x01 ';
+            val += text + str;
             offset = 2;
           }
         }

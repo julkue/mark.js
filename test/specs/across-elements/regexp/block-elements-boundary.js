@@ -30,6 +30,29 @@ describe('markRegExp with acrossElements and block boundary', function() {
     });
   });
 
+  it(message + 'of phrases with custom blockElements', function(done) {
+    var matchCount = 0;
+
+    new Mark($ctx[0]).markRegExp(/\bblock\s+elements\s+boundary\b/gi, {
+      'acrossElements' : true,
+      'blockElementsBoundary' : true,
+      'blockElements' : ['Div', 'p', 'H1', 'h2'],
+      'boundaryChar' : '|',
+      'each' : function(elem, info) {
+        if (info.matchStart) {
+          elem.className = 'start-1';
+          matchCount++;
+        }
+      },
+      'done' : function() {
+        var count = testMarkedText($ctx, /^blockelementsboundary$/);
+        expect(count).toBe(matchCount);
+        expect(count).toBe(4);
+        done();
+      }
+    });
+  });
+
   function testMarkedText($ctx, reg) {
     var count = 0,
       marks = $ctx.find('mark');
