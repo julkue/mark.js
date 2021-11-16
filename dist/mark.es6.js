@@ -683,8 +683,9 @@
     getTextNodesAcrossElements(cb) {
       let val = '', start, text, number, offset, nodes = [],
         reg = /\s/,
-        ch = this.opt.boundaryChar ? this.opt.boundaryChar.charAt(0) : '\u0001',
-        str = ch + ' ', str2 = ' ' + ch + ' ';
+        str = this.opt.boundaryChar
+          ? this.opt.boundaryChar.charAt(0) + ' ' : '\u0001 ',
+        str2 = ' ' + str;
       let tags = { div : 1, p : 1, li : 1, td : 1, tr : 1, th : 1, ul : 1,
         ol : 1, br : 1, dd : 1, dl : 1, dt : 1, h1 : 1, h2 : 1, h3 : 1, h4 : 1,
         h5 : 1, h6 : 1, hr : 1, blockquote : 1, figcaption : 1, figure : 1,
@@ -705,7 +706,7 @@
             tags[key] = 2;
           }
         } else {
-          let tags2 = { br: 1, svg: 1 };
+          let tags2 = { br: 1, svg : 1 };
           for (let key in tags) {
             if ( !tags2[key]) {
               tags[key] = 2;
@@ -873,26 +874,22 @@
       let matchStart = true,
         startIndex = 0,
         i = 1,
-        group, start, end, isMarked;
+        group, start, end;
       const s = match.index,
         text = dict.value.substring(s, regex.lastIndex);
-      for (; i < match.length; i++)  {
+      for (; i < match.length; i++) {
         group = match[i];
         if (group) {
           start = text.indexOf(group, startIndex);
           end = start + group.length;
           if (start !== -1) {
-            isMarked = false;
             this.wrapRangeInMappedTextNode(dict, s + start, s + end, (node) => {
               return filterCb(group, node, i);
             }, (node, groupStart) => {
-              isMarked = true;
               eachCb(node, matchStart, groupStart, i);
               matchStart = false;
             });
-            if (isMarked) {
-              startIndex = end;
-            }
+            startIndex = end;
           }
         }
       }
@@ -969,6 +966,7 @@
             const end = start + match[matchIdx].length;
             this.wrapRangeInMappedTextNode(dict, start, end, node => {
               return filterCb(match[matchIdx], node, {
+                regex: regex,
                 match : match,
                 matchStart : ++count === 0,
               });
@@ -1067,7 +1065,6 @@
     mark(sv, opt) {
       this.opt = opt;
       let totalMatches = 0,
-        matchStart,
         fn = 'wrapMatches';
       const {
           keywords: kwArr,
@@ -1077,13 +1074,12 @@
           const regex = new RegExpCreator(this.opt).create(kw);
           let matches = 0;
           this.log(`Searching with expression "${regex}"`);
-          this[fn](regex, 1, (term, node) => {
-            return this.opt.filter(node, kw, totalMatches, matches);
+          this[fn](regex, 1, (term, node, filterInfo) => {
+            return this.opt.filter(node, kw, totalMatches, matches, filterInfo);
           }, (element, matchInfo) => {
             matches++;
             totalMatches++;
-            matchStart = matchInfo ? matchInfo.matchStart : matchStart;
-            this.opt.each(element, matchStart);
+            this.opt.each(element, matchInfo);
           }, () => {
             if (matches === 0) {
               this.opt.noMatch(kw);

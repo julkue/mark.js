@@ -71,28 +71,6 @@ describe('markRegExp with acrossElements and separateGroups', function() {
     });
   });
 
-  it(message + 'with nested group in filtered out one', function(done) {
-    new Mark($ctx[0]).markRegExp(nestedGr, {
-      'acrossElements' : true,
-      'separateGroups' : true,
-      filter : function(node, group) {
-        // current group matching string. Note: if group lays across several
-        // elements the matching string will be the same while the current
-        // group is wrapping
-        if (/^group1/i.test(group)) {
-          return false;
-        }
-        return true;
-      },
-      each : eachMark,
-      'done' : function() {
-        // mch, gr1, gr2, gr3,
-        test([27, 0, 27, 16]);
-        done();
-      }
-    });
-  });
-
   it(message + 'with nested group', function(done) {
     new Mark($ctx[0]).markRegExp(nestedGr, {
       'acrossElements' : true,

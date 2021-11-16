@@ -299,7 +299,7 @@ class Mark {
 
   /**
   * @param {HTMLElement} textNode - The DOM text node element
-  * @param {object} tags - An object containing HTMLElement names
+  * @param {object} tags - The object containing HTMLElement names
   * @return {number}
   */
   checkParents(textNode, tags) {
@@ -330,7 +330,7 @@ class Mark {
 
   /**
   * @param {HTMLElement} node - The DOM node element
-  * @param {object} tags - An object containing HTMLElement names
+  * @param {object} tags - The object containing HTMLElement names
   * @return {number}
   */
   checkNextNodes(node, tags) {
@@ -399,11 +399,12 @@ class Mark {
   getTextNodesAcrossElements(cb) {
     let val = '', start, text, number, offset, nodes = [],
       reg = /\s/,
-      ch = this.opt.boundaryChar ? this.opt.boundaryChar.charAt(0) : '\u0001',
-      str = ch + ' ', str2 = ' ' + ch + ' ';
+      str = this.opt.boundaryChar
+        ? this.opt.boundaryChar.charAt(0) + ' ' : '\u0001 ',
+      str2 = ' ' + str;
 
-    // the space can be safely added to the end of a text node, when node checks
-    // run across element with one of those names
+    // the space can be safely added to the end of a text node when
+    // the node checks run across element with one of those names
     let tags = { div : 1, p : 1, li : 1, td : 1, tr : 1, th : 1, ul : 1,
       ol : 1, br : 1, dd : 1, dl : 1, dt : 1, h1 : 1, h2 : 1, h3 : 1, h4 : 1,
       h5 : 1, h6 : 1, hr : 1, blockquote : 1, figcaption : 1, figure : 1,
@@ -414,7 +415,7 @@ class Mark {
       button : 1, header : 1, footer : 1, address : 1, area : 1, canvas : 1,
       map : 1, fieldset : 1, textarea : 1, track : 1, video : 1, audio : 1,
       body : 1, iframe : 1, meter : 1, object : 1, svg : 1 };
-    
+
     if (this.opt.blockElementsBoundary) {
       if (this.opt.blockElements && this.opt.blockElements.length) {
         // normalize custom blockElements names
@@ -422,12 +423,12 @@ class Mark {
         for (let key in this.opt.blockElements) {
           elements[this.opt.blockElements[key].toLowerCase()] = 1;
         }
-        // this also allow add custom element names 
+        // it also allows adding custom element names
         for (let key in elements) {
           tags[key] = 2;
         }
       } else {
-        let tags2 = { br: 1, svg: 1 };
+        let tags2 = { br: 1, svg : 1 };
         for (let key in tags) {
           if ( !tags2[key]) {
             tags[key] = 2;
@@ -721,7 +722,7 @@ class Mark {
       group = match[i];
       if (group) {
         start = match.indices[i][0];
-        //it prevents to mark nested group - parent group is already marked
+        //it prevents marking nested group - parent group is already marked
         if (start >= max) {
           end = match.indices[i][1];
 
@@ -771,32 +772,27 @@ class Mark {
     let matchStart = true,
       startIndex = 0,
       i = 1,
-      group, start, end, isMarked;
+      group, start, end;
 
     const s = match.index,
       text = dict.value.substring(s, regex.lastIndex);
 
-    for (; i < match.length; i++)  {
+    for (; i < match.length; i++) {
       group = match[i];
       if (group) {
-        // this approach to find regexp group indices only reliable with
-        // distinct groups without condition
+        // this approach only reliable with contiguous groups
+        // unwanted group(s) can be easily filtered out
         start = text.indexOf(group, startIndex);
         end = start + group.length;
 
         if (start !== -1) {
-          isMarked = false;
           this.wrapRangeInMappedTextNode(dict, s + start, s + end, (node) => {
             return filterCb(group, node, i);
           }, (node, groupStart) => {
-            isMarked = true;
             eachCb(node, matchStart, groupStart, i);
             matchStart = false;
           });
-          // a match group may be filtered out
-          if (isMarked) {
-            startIndex = end;
-          }
+          startIndex = end;
         }
       }
     }
@@ -882,6 +878,7 @@ class Mark {
   /**
    * @typedef Mark~filterInfoObject
    * @type {object}
+   * @param {RegExp} regex - The regular expression to be searched for
    * @property {array} match - The result of RegExp exec() method
    * @property {boolean} matchStart - indicate the start of match
    * @property {number} groupIndex - The group index, is only available
@@ -963,6 +960,7 @@ class Mark {
 
           this.wrapRangeInMappedTextNode(dict, start, end, node => {
             return filterCb(match[matchIdx], node, {
+              regex: regex,
               match : match,
               matchStart : ++count === 0,
             });
@@ -1081,8 +1079,8 @@ class Mark {
    * Callback for each marked element
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {boolean} matchStart - indicate the start of the current match,
-   * is only available with option 'acrossElements'
+   * @param {Mark~filterInfoObject} filterInfo - The object containing match
+   * information, is only available with 'acrossElements' option
    */
   /**
    * Callback if there were no matches
@@ -1203,6 +1201,8 @@ class Mark {
    * marks
    * @param {number} termCounter - A counter indicating the number of marks
    * for the specific match
+   * @param {Mark~filterInfoObject} filterInfo - The object containing match
+   * information, is only available with 'acrossElements' option
    */
 
   /**
@@ -1225,7 +1225,6 @@ class Mark {
   mark(sv, opt) {
     this.opt = opt;
     let totalMatches = 0,
-      matchStart,
       fn = 'wrapMatches';
     const {
         keywords: kwArr,
@@ -1235,15 +1234,12 @@ class Mark {
         const regex = new RegExpCreator(this.opt).create(kw);
         let matches = 0;
         this.log(`Searching with expression "${regex}"`);
-        this[fn](regex, 1, (term, node) => {
-          return this.opt.filter(node, kw, totalMatches, matches);
+        this[fn](regex, 1, (term, node, filterInfo) => {
+          return this.opt.filter(node, kw, totalMatches, matches, filterInfo);
         }, (element, matchInfo) => {
           matches++;
           totalMatches++;
-          // 'matchInfo' object is only available when option 'acrossElements'
-          // is enabled and only matchInfo.matchStart is useful
-          matchStart = matchInfo ? matchInfo.matchStart : matchStart;
-          this.opt.each(element, matchStart);
+          this.opt.each(element, matchInfo);
         }, () => {
           if (matches === 0) {
             this.opt.noMatch(kw);

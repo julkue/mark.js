@@ -906,9 +906,8 @@
             offset,
             nodes = [],
             reg = /\s/,
-            ch = this.opt.boundaryChar ? this.opt.boundaryChar.charAt(0) : "\x01",
-            str = ch + ' ',
-            str2 = ' ' + ch + ' ';
+            str = this.opt.boundaryChar ? this.opt.boundaryChar.charAt(0) + ' ' : "\x01 ",
+            str2 = ' ' + str;
         var tags = {
           div: 1,
           p: 1,
@@ -1197,8 +1196,7 @@
             i = 1,
             group,
             start,
-            end,
-            isMarked;
+            end;
         var s = match.index,
             text = dict.value.substring(s, regex.lastIndex);
 
@@ -1210,18 +1208,13 @@
             end = start + group.length;
 
             if (start !== -1) {
-              isMarked = false;
               this.wrapRangeInMappedTextNode(dict, s + start, s + end, function (node) {
                 return filterCb(group, node, i);
               }, function (node, groupStart) {
-                isMarked = true;
                 eachCb(node, matchStart, groupStart, i);
                 matchStart = false;
               });
-
-              if (isMarked) {
-                startIndex = end;
-              }
+              startIndex = end;
             }
           }
         }
@@ -1303,6 +1296,7 @@
 
               _this6.wrapRangeInMappedTextNode(dict, start, end, function (node) {
                 return filterCb(match[matchIdx], node, {
+                  regex: regex,
                   match: match,
                   matchStart: ++count === 0
                 });
@@ -1422,7 +1416,6 @@
 
         this.opt = opt;
         var totalMatches = 0,
-            matchStart,
             fn = 'wrapMatches';
 
         var _this$getSeparatedKey = this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv),
@@ -1434,14 +1427,13 @@
 
           _this9.log("Searching with expression \"".concat(regex, "\""));
 
-          _this9[fn](regex, 1, function (term, node) {
-            return _this9.opt.filter(node, kw, totalMatches, matches);
+          _this9[fn](regex, 1, function (term, node, filterInfo) {
+            return _this9.opt.filter(node, kw, totalMatches, matches, filterInfo);
           }, function (element, matchInfo) {
             matches++;
             totalMatches++;
-            matchStart = matchInfo ? matchInfo.matchStart : matchStart;
 
-            _this9.opt.each(element, matchStart);
+            _this9.opt.each(element, matchInfo);
           }, function () {
             if (matches === 0) {
               _this9.opt.noMatch(kw);

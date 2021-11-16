@@ -18,8 +18,8 @@ describe('mark with acrossElements and block elements boundary', function() {
       'accuracy' : 'exactly',
       'acrossElements' : true,
       'blockElementsBoundary' : true,
-      each : function(elem, matchStart) {
-        if (matchStart) {
+      each : function(elem, info) {
+        if (info.matchStart) {
           // elem in this case is the first marked element of the match
           elem.className = 'phrase-1';
           phraseCount++;
@@ -44,8 +44,8 @@ describe('mark with acrossElements and block elements boundary', function() {
       'acrossElements' : true,
       'blockElementsBoundary' : true,
       'blockElements' : ['Div', 'p', 'H1', 'h2'],
-      each : function(elem, matchStart) {
-        if (matchStart) {
+      each : function(elem, info) {
+        if (info.matchStart) {
           // elem in this case is the first marked element of the match
           elem.className = 'phrase-1';
           phraseCount++;

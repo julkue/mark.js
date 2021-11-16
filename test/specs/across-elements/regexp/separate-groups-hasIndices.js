@@ -11,8 +11,7 @@ describe(
       nestedGr = /\b(group1\b.+?\b(group2)\b@?)(?:\s+(?:\w+\s+)?(\w+3))?\b/dgi;
 
     beforeEach(function() {
-      // it used the same fixture as a spec separate-groups.js because both
-      // have identical logic
+      // it used the same fixture as a spec separate-groups.js
       loadFixtures('across-elements/regexp/separate-groups.html');
 
       $ctx = $('.across-elements-separate-groups');

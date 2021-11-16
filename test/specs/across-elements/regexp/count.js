@@ -52,7 +52,7 @@ describe('markRegExp with acrossElements and count words&phrases', function() {
         return true;
       },
       'each' : function(elem, info) {
-        // if match started
+        // if start of the match
         if (info.matchStart) {
           // elem in this case is the first marked element of the match
           elem.className = 'start-1';
