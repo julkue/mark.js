@@ -136,16 +136,16 @@ describe('markRegExp with acrossElements and separateGroups', function() {
     return count;
   }
 
-  // it aggregate text across elements
+  // it aggregates text across elements
   function getMarkedText(elem, marks) {
     var text = '', found = false;
     marks.each(function(i, el) {
       if ( !found) {
-        // start element of a group
+        // start element of the group
         if (el === elem) {
           found = true;
         }
-      // start of next group mean end of the current group
+      // start of the next group means the end of the current group
       } else if (el.className && /\b[a-z]+\d-1\b/.test(el.className)) {
         return false;
       }

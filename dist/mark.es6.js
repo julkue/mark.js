@@ -245,14 +245,8 @@
       const itr = this.createIterator(ctx, whatToShow, filterCb);
       let ifr = [],
         elements = [],
-        node, prevNode, retrieveNodes = () => {
-          ({
-            prevNode,
-            node
-          } = this.getIteratorNode(itr));
-          return node;
-        };
-      while (retrieveNodes()) {
+        node, prevNode;
+      while ((node = itr.nextNode())) {
         if (this.iframes) {
           this.forEachIframe(ctx, currIfr => {
             return this.checkIframeFilter(node, prevNode, currIfr, ifr);
@@ -263,6 +257,7 @@
           });
         }
         elements.push(node);
+        prevNode = node;
       }
       elements.forEach(node => {
         eachCb(node);
@@ -681,8 +676,7 @@
       return -1;
     }
     getTextNodesAcrossElements(cb) {
-      let val = '', start, text, number, offset, nodes = [],
-        reg = /\s/,
+      let val = '', start, text, endBySpace, number, offset, nodes = [],
         str = this.opt.boundaryChar
           ? this.opt.boundaryChar.charAt(0) + ' ' : '\u0001 ',
         str2 = ' ' + str;
@@ -706,34 +700,35 @@
             tags[key] = 2;
           }
         } else {
-          let tags2 = { br: 1, svg : 1 };
           for (let key in tags) {
-            if ( !tags2[key]) {
-              tags[key] = 2;
-            }
+            tags[key] = 2;
           }
+          tags['br'] = 1;
         }
       }
       this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
         offset = 0;
         start = val.length;
         text = node.textContent;
-        number = this.checkParents(node, tags);
-        if (number < 0) {
-          number = this.checkNextNodes(node.nextSibling, tags);
-        }
-        if (number > 0) {
-          if ( !reg.test(text[text.length - 1])) {
-            if (number === 1) {
-              val += text + ' ';
-              offset = 1;
+        endBySpace = /\s/.test(text[text.length - 1]);
+        if (this.opt.blockElementsBoundary || !endBySpace) {
+          number = this.checkParents(node, tags);
+          if (number === -1) {
+            number = this.checkNextNodes(node.nextSibling, tags);
+          }
+          if (number > 0) {
+            if ( !endBySpace) {
+              if (number === 1) {
+                val += text + ' ';
+                offset = 1;
+              } else if (number === 2) {
+                val += text + str2;
+                offset = 3;
+              }
             } else if (number === 2) {
-              val += text + str2;
-              offset = 3;
+              val += text + str;
+              offset = 2;
             }
-          } else if (number === 2) {
-            val += text + str;
-            offset = 2;
           }
         }
         if (offset === 0) {

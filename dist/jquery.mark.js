@@ -347,20 +347,12 @@
         var _this5 = this;
 
         var itr = this.createIterator(ctx, whatToShow, filterCb);
-
         var ifr = [],
             elements = [],
             node,
-            prevNode,
-            retrieveNodes = function retrieveNodes() {
-          var _this5$getIteratorNod = _this5.getIteratorNode(itr);
+            prevNode;
 
-          prevNode = _this5$getIteratorNod.prevNode;
-          node = _this5$getIteratorNod.node;
-          return node;
-        };
-
-        while (retrieveNodes()) {
+        while (node = itr.nextNode()) {
           if (this.iframes) {
             this.forEachIframe(ctx, function (currIfr) {
               return _this5.checkIframeFilter(node, prevNode, currIfr, ifr);
@@ -372,6 +364,7 @@
           }
 
           elements.push(node);
+          prevNode = node;
         }
 
         elements.forEach(function (node) {
@@ -902,10 +895,10 @@
         var val = '',
             start,
             text,
+            endBySpace,
             number,
             offset,
             nodes = [],
-            reg = /\s/,
             str = this.opt.boundaryChar ? this.opt.boundaryChar.charAt(0) + ' ' : "\x01 ",
             str2 = ' ' + str;
         var tags = {
@@ -982,16 +975,11 @@
               tags[_key] = 2;
             }
           } else {
-            var tags2 = {
-              br: 1,
-              svg: 1
-            };
-
             for (var _key2 in tags) {
-              if (!tags2[_key2]) {
-                tags[_key2] = 2;
-              }
+              tags[_key2] = 2;
             }
+
+            tags['br'] = 1;
           }
         }
 
@@ -999,24 +987,28 @@
           offset = 0;
           start = val.length;
           text = node.textContent;
-          number = _this3.checkParents(node, tags);
+          endBySpace = /\s/.test(text[text.length - 1]);
 
-          if (number < 0) {
-            number = _this3.checkNextNodes(node.nextSibling, tags);
-          }
+          if (_this3.opt.blockElementsBoundary || !endBySpace) {
+            number = _this3.checkParents(node, tags);
 
-          if (number > 0) {
-            if (!reg.test(text[text.length - 1])) {
-              if (number === 1) {
-                val += text + ' ';
-                offset = 1;
+            if (number === -1) {
+              number = _this3.checkNextNodes(node.nextSibling, tags);
+            }
+
+            if (number > 0) {
+              if (!endBySpace) {
+                if (number === 1) {
+                  val += text + ' ';
+                  offset = 1;
+                } else if (number === 2) {
+                  val += text + str2;
+                  offset = 3;
+                }
               } else if (number === 2) {
-                val += text + str2;
-                offset = 3;
+                val += text + str;
+                offset = 2;
               }
-            } else if (number === 2) {
-              val += text + str;
-              offset = 2;
             }
           }
 

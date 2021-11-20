@@ -24,7 +24,7 @@ describe('markRegExp with acrossElements and block boundary', function() {
       'done' : function() {
         var count = testMarkedText($ctx, /^blockelementsboundary$/);
         expect(count).toBe(matchCount);
-        expect(count).toBe(3);
+        expect(count).toBe(2);
         done();
       }
     });
@@ -47,7 +47,7 @@ describe('markRegExp with acrossElements and block boundary', function() {
       'done' : function() {
         var count = testMarkedText($ctx, /^blockelementsboundary$/);
         expect(count).toBe(matchCount);
-        expect(count).toBe(4);
+        expect(count).toBe(3);
         done();
       }
     });

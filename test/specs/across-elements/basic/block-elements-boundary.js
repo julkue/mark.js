@@ -28,7 +28,7 @@ describe('mark with acrossElements and block elements boundary', function() {
       'done' : function() {
         var count = testMarkedText($ctx, /^blockelementsboundary$/);
         expect(count).toBe(phraseCount);
-        expect(count).toBe(3);
+        expect(count).toBe(2);
         done();
       }
     });
@@ -54,7 +54,7 @@ describe('mark with acrossElements and block elements boundary', function() {
       'done' : function() {
         var count = testMarkedText($ctx, /^blockelementsboundary$/);
         expect(count).toBe(phraseCount);
-        expect(count).toBe(4);
+        expect(count).toBe(3);
         done();
       }
     });

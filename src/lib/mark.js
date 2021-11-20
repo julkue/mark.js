@@ -397,8 +397,7 @@ class Mark {
   * @access protected
   */
   getTextNodesAcrossElements(cb) {
-    let val = '', start, text, number, offset, nodes = [],
-      reg = /\s/,
+    let val = '', start, text, endBySpace, number, offset, nodes = [],
       str = this.opt.boundaryChar
         ? this.opt.boundaryChar.charAt(0) + ' ' : '\u0001 ',
       str2 = ' ' + str;
@@ -428,12 +427,11 @@ class Mark {
           tags[key] = 2;
         }
       } else {
-        let tags2 = { br: 1, svg : 1 };
         for (let key in tags) {
-          if ( !tags2[key]) {
-            tags[key] = 2;
-          }
+          tags[key] = 2;
         }
+        // br is inline element. Currently is under question. 
+        tags['br'] = 1;
       }
     }
 
@@ -441,25 +439,28 @@ class Mark {
       offset = 0;
       start = val.length;
       text = node.textContent;
+      endBySpace = /\s/.test(text[text.length - 1]);
 
       // in this implementation a space or string can be added only to the end
       // of a text and 'lookahead' is only way to check parents and siblings
-      number = this.checkParents(node, tags);
-      if (number < 0) {
-        number = this.checkNextNodes(node.nextSibling, tags);
-      }
-      if (number > 0) {
-        if ( !reg.test(text[text.length - 1])) {
-          if (number === 1) {
-            val += text + ' ';
-            offset = 1;
+      if (this.opt.blockElementsBoundary || !endBySpace) {
+        number = this.checkParents(node, tags);
+        if (number === -1) {
+          number = this.checkNextNodes(node.nextSibling, tags);
+        }
+        if (number > 0) {
+          if ( !endBySpace) {
+            if (number === 1) {
+              val += text + ' ';
+              offset = 1;
+            } else if (number === 2) {
+              val += text + str2;
+              offset = 3;
+            }
           } else if (number === 2) {
-            val += text + str2;
-            offset = 3;
+            val += text + str;
+            offset = 2;
           }
-        } else if (number === 2) {
-          val += text + str;
-          offset = 2;
         }
       }
       if (offset === 0) {
@@ -878,11 +879,11 @@ class Mark {
   /**
    * @typedef Mark~filterInfoObject
    * @type {object}
-   * @param {RegExp} regex - The regular expression to be searched for
+   * @property {RegExp} regex - The regular expression to be searched for
    * @property {array} match - The result of RegExp exec() method
    * @property {boolean} matchStart - indicate the start of match
    * @property {number} groupIndex - The group index, is only available
-   * with 'separateGroups' option
+   * with both 'acrossElements' and 'separateGroups' options
    */
 
   /**
@@ -898,7 +899,7 @@ class Mark {
    * @param {string} match - The matching string
    * @param {HTMLElement} node - The text node where the match occurs
    * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information, is only available with 'separateGroups' option
+   * information
    */
 
   /**
@@ -1121,7 +1122,7 @@ class Mark {
    * Callback to filter matches
    * @callback Mark~markRegExpFilterCallback
    * @param {HTMLElement} textNode - The text node which includes the match
-   * @param {string} match - The matching string for the RegExp:
+   * @param {string} match - The matching string:
    * 1) without 'ignoreGroups' and 'separateGroups' options - the whole match.
    * 2) with 'ignoreGroups' - [ignoreGroups number + 1] group matching string.
    * 3) with both 'acrossElements' and 'separateGroups' options - the current
@@ -1136,7 +1137,7 @@ class Mark {
    * @callback Mark~markRegExpEachCallback
    * @param {HTMLElement} element - The marked DOM element
    * @param {Mark~matchInfoObject} matchInfo - The object containing match
-   * information
+   * information, is only available with 'acrossElements' option
    */
 
   /**
