@@ -17,15 +17,17 @@
   <script src="../dist/jquery.mark.js"></script>
 
   <script src="specs/separate-groups-hasIndices.js"></script>
-  <script src="specs/separate-groups.js"></script>
-  <script src="specs/ignore-groups-hasIndices.js"></script>
-  <script src="specs/ignore-groups.js"></script>
+  <script src="specs/regex-groups-filter.js"></script>
   <style>
     .hide-fixture { display: none; }
   </style>
 </head>
 <body>
  
+<div class="regex-groups-filter hide-fixture">
+<h1>aaaaaaaaafaaaaaaaaabbbbbb(bb\)b[c(p\c/p)c]ddd</h1>
+</div>
+
 <div class="across-elements-separate-groups hide-fixture">
     <h2>Group1 text group2@ text group3</h2><p>Group1 text group2</p>
     <pre>Group1 text text group2

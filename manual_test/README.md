@@ -1,5 +1,5 @@
 # Why manual test
-In the current testing environment, it's not possible to test RegExp group `indices` that's why i use jasmine standalone to test specs in normal browsers.
+In the current testing environment, it's not possible to test RegExp group `indices` that why i use jasmine standalone to test specs in standard browsers.
 
 ## Use
 * Download the jasmine standalone distribution from the [releases page](https://github.com/jasmine/jasmine/releases)

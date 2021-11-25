@@ -349,8 +349,8 @@
         var itr = this.createIterator(ctx, whatToShow, filterCb);
         var ifr = [],
             elements = [],
-            node,
-            prevNode;
+            prevNode = null,
+            node;
 
         while (node = itr.nextNode()) {
           if (this.iframes) {
@@ -842,8 +842,14 @@
 
           var node = textNode.parentNode.nextSibling;
 
-          if (node && node.nodeType === 1 && (value = tags[node.nodeName.toLowerCase()])) {
-            return value;
+          if (node) {
+            if (node.nodeType === 1) {
+              if (value = tags[node.nodeName.toLowerCase()]) {
+                return value;
+              }
+            } else {
+              return -3;
+            }
           }
         }
 
@@ -858,7 +864,7 @@
           if (value = tags[node.nodeName.toLowerCase()]) {
             return value;
           } else if (node.firstChild) {
-            var prevNode,
+            var prevFirstChild,
                 child = node.firstChild;
 
             while (child) {
@@ -867,7 +873,7 @@
                   return value;
                 }
 
-                prevNode = child;
+                prevFirstChild = child;
                 child = child.firstChild;
                 continue;
               }
@@ -875,7 +881,7 @@
               return -1;
             }
 
-            return this.checkNextNodes(prevNode.nextSibling, tags);
+            return this.checkNextNodes(prevFirstChild.nextSibling, tags);
           }
 
           if (node !== node.parentNode.lastChild) {
@@ -1147,7 +1153,7 @@
       }
     }, {
       key: "wrapMatchGroups",
-      value: function wrapMatchGroups(dict, match, regex, filterCb, eachCb) {
+      value: function wrapMatchGroups(dict, match, unused, filterCb, eachCb) {
         var matchStart = true,
             max = 0,
             i = 1,
@@ -1182,7 +1188,7 @@
       }
     }, {
       key: "wrapMatchGroups2",
-      value: function wrapMatchGroups2(dict, match, regex, filterCb, eachCb) {
+      value: function wrapMatchGroups2(dict, match, params, filterCb, eachCb) {
         var matchStart = true,
             startIndex = 0,
             i = 1,
@@ -1190,9 +1196,13 @@
             start,
             end;
         var s = match.index,
-            text = dict.value.substring(s, regex.lastIndex);
+            text = dict.value.substring(s, params.regex.lastIndex);
 
         for (; i < match.length; i++) {
+          if (!params.groups[i]) {
+            continue;
+          }
+
           group = match[i];
 
           if (group) {
@@ -1210,6 +1220,64 @@
             }
           }
         }
+      }
+    }, {
+      key: "collectRegexGroups",
+      value: function collectRegexGroups(regex) {
+        var groups = {},
+            stack = [],
+            i = -1,
+            index = 1,
+            count = 0,
+            charsRange = false,
+            str = regex.source,
+            reg = /^\(\?(?:[:!=]|<[=!])/;
+
+        while (++i < str.length) {
+          switch (str[i]) {
+            case '(':
+              if (!charsRange) {
+                if (reg.test(str.substring(i))) {
+                  stack.push(0);
+                } else {
+                  stack.push(1);
+
+                  if (count === 0) {
+                    groups[index] = 1;
+                  }
+
+                  count++;
+                  index++;
+                }
+              }
+
+              break;
+
+            case ')':
+              if (!charsRange && stack.pop() === 1 && count > 0) {
+                count--;
+              }
+
+              break;
+
+            case '\\':
+              i++;
+              break;
+
+            case '[':
+              charsRange = true;
+              break;
+
+            case ']':
+              charsRange = false;
+              break;
+
+            default:
+              break;
+          }
+        }
+
+        return groups;
       }
     }, {
       key: "wrapMatches",
@@ -1252,16 +1320,20 @@
       value: function wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
         var _this6 = this;
 
-        var matchIdx = ignoreGroups === 0 || this.opt.separateGroups ? 0 : ignoreGroups + 1;
+        var separateGroups = this.opt.separateGroups,
+            matchIdx = separateGroups || ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+            fn = regex.hasIndices ? 'wrapMatchGroups' : 'wrapMatchGroups2',
+            params = separateGroups ? {
+          regex: regex,
+          groups: !regex.hasIndices ? this.collectRegexGroups(regex) : {}
+        } : {};
         var match, count;
         this.getTextNodesAcrossElements(function (dict) {
           while ((match = regex.exec(dict.value)) !== null && match[matchIdx] !== '') {
             count = -1;
 
-            if (_this6.opt.separateGroups) {
-              var fn = regex.hasIndices ? 'wrapMatchGroups' : 'wrapMatchGroups2';
-
-              _this6[fn](dict, match, regex, function (group, node, groupIndex) {
+            if (separateGroups) {
+              _this6[fn](dict, match, params, function (group, node, groupIndex) {
                 return filterCb(group, node, {
                   match: match,
                   matchStart: ++count === 0,

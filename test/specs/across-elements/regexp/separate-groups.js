@@ -4,7 +4,8 @@ describe('markRegExp with acrossElements and separateGroups', function() {
     matchCount, group1Count, group2Count, group3Count,
     message = 'should count and test content of separate groups ',
     groupReg = /\b(group1)\b.+?\b(group2)\b@?(?:\s+(?:\w+\s+)?(\w+3))?\b/gi,
-    nestedGr = /\b(group1\b.+?\b(group2)\b@?)(?:\s+(?:\w+\s+)?(\w+3))?\b/gi;
+    //nestedGr = /\b(group1\b.+?\b(group2)\b@?)(?:\s+(?:\w+\s+)?(\w+3))?\b/gi;
+    nestedGr = /\b([a-z]+1\b.+?\b(group2)\b@?)(?:\s+(?:\w+\s+)?(\w+3))?\b/gi;
 
   beforeEach(function() {
     loadFixtures('across-elements/regexp/separate-groups.html');

@@ -298,6 +298,8 @@ class Mark {
   }
 
   /**
+  * It searches through the parents of the textNode in the DOM tree until
+  * it finds a block element or text node
   * @param {HTMLElement} textNode - The DOM text node element
   * @param {object} tags - The object containing HTMLElement names
   * @return {number}
@@ -309,7 +311,7 @@ class Mark {
         return value;
 
       } else {
-        // loop through textNode parent nodes which are last child
+        // loop through textNode parent nodes which are last-child
         let parent = textNode.parentNode;
         while (parent === parent.parentNode.lastChild) {
           if ((value = tags[parent.parentNode.nodeName.toLowerCase()])) {
@@ -318,17 +320,28 @@ class Mark {
           parent = parent.parentNode;
         }
       }
-      // textNode is last child of inline element so check parent next sibling
+      // textNode is the last child of an inline element,
+      // so check parent next sibling
       let node = textNode.parentNode.nextSibling;
-      if (node && node.nodeType === 1
-        && ((value = tags[node.nodeName.toLowerCase()]))) {
-        return value;
+      if (node) {
+        if (node.nodeType === 1) {
+          if (((value = tags[node.nodeName.toLowerCase()]))) {
+            return value;
+          }
+        } else {
+          // the most likely next sibling is a text node
+          // return  -3 to avoid next sibling search
+          return  -3;
+        } 
       }
     }
     return -1;
   }
 
   /**
+  * It searches through the next sibling's firstChild in the DOM tree until
+  * it finds a block element or text node
+  * It search the DOM tree until it find a block element or text node
   * @param {HTMLElement} node - The DOM node element
   * @param {object} tags - The object containing HTMLElement names
   * @return {number}
@@ -340,25 +353,25 @@ class Mark {
         return value;
 
       } else if (node.firstChild) {
-        // loop through firstChilds until condition is met
-        let prevNode, child = node.firstChild;
+        // traverse through firstChilds until condition is met
+        let prevFirstChild, child = node.firstChild;
         while (child) {
           if (child.nodeType === 1) {
             if ((value = tags[child.nodeName.toLowerCase()])) {
               return value;
             }
-            prevNode = child;
+            prevFirstChild = child;
             child = child.firstChild;
             continue;
           }
-          // most likely child is text node
+          // the most likely child is a text node
           return -1;
         }
-        // prevNode has no child nodes so check next sibling
-        return this.checkNextNodes(prevNode.nextSibling, tags);
+        // prevFirstChild has no child nodes, so check next sibling
+        return this.checkNextNodes(prevFirstChild.nextSibling, tags);
       }
       if (node !== node.parentNode.lastChild) {
-        // node has no child nodes so check next sibling
+        // node has no child nodes, so check next sibling
         return this.checkNextNodes(node.nextSibling, tags);
 
       } else if ((value = tags[node.parentNode.nodeName.toLowerCase()])) {
@@ -430,7 +443,7 @@ class Mark {
         for (let key in tags) {
           tags[key] = 2;
         }
-        // br is inline element. Currently is under question. 
+        // br is an inline element. Currently is under question.
         tags['br'] = 1;
       }
     }
@@ -441,8 +454,8 @@ class Mark {
       text = node.textContent;
       endBySpace = /\s/.test(text[text.length - 1]);
 
-      // in this implementation a space or string can be added only to the end
-      // of a text and 'lookahead' is only way to check parents and siblings
+      // in this implementation, a space or string can be added only to the end
+      // of a text and lookahead is the only way to check parents and siblings
       if (this.opt.blockElementsBoundary || !endBySpace) {
         number = this.checkParents(node, tags);
         if (number === -1) {
@@ -626,7 +639,7 @@ class Mark {
         let n = dict.nodes[i];
 
         if (!filterCb(n.node)) {
-          // update lastIndex
+          // update the lastIndex
           if (i > dict.lastIndex) {
             dict.lastIndex = i;
           }
@@ -635,7 +648,7 @@ class Mark {
         // map range from dict.value to text node
         const s = start - n.start,
           e = (end > n.end ? n.end : end) - n.start;
-        // this check prevents create empty marked node
+        // this check prevents creating an empty marked node
         if (e > s) {
           n.node = this.wrapRangeInTextNode(n.node, s, e);
           // set new text node start index in the case of subsequent matches
@@ -646,10 +659,10 @@ class Mark {
         }
 
         if (end > n.end) {
-          // range extends to next node
+          //the range extends to the next node
           start = n.end + (n.offset ? n.offset : 0);
         } else {
-          // set last index
+          // set the last index
           dict.lastIndex = i;
           break;
         }
@@ -713,7 +726,7 @@ class Mark {
   * callback
   * @param {Mark~wrapMatchGroupsEachCallback} eachCb - Each callback
   */
-  wrapMatchGroups(dict, match, regex, filterCb, eachCb) {
+  wrapMatchGroups(dict, match, unused, filterCb, eachCb) {
     let matchStart = true,
       max = 0,
       i = 1,
@@ -745,6 +758,13 @@ class Mark {
   }
 
   /**
+  * @typedef Mark~paramsObject
+  * @type {object}
+  * @property {RegExp} regex - The regular expression to be searched for
+  * @property {object} groups - The object containing parent groups indexes
+  */
+
+  /**
   * Filter callback before each wrapping
   * @callback Mark~wrapMatchGroups2FilterCallback
   * @param {string} group - The current group matching string
@@ -769,16 +789,23 @@ class Mark {
   * callback
   * @param {Mark~wrapMatchGroups2EachCallback} eachCb - Each callback
   */
-  wrapMatchGroups2(dict, match, regex, filterCb, eachCb) {
+  wrapMatchGroups2(dict, match, params, filterCb, eachCb) {
     let matchStart = true,
       startIndex = 0,
       i = 1,
       group, start, end;
 
     const s = match.index,
-      text = dict.value.substring(s, regex.lastIndex);
+      text = dict.value.substring(s, params.regex.lastIndex);
 
     for (; i < match.length; i++) {
+      // the only way to skip nested group being searched in the indexOf method
+      // is to parse the RegExp pattern and collect parent groups indexes
+      // if params.groups doesn't contains group index - the group is nested
+      if ( !params.groups[i]) {
+        continue;
+      }
+
       group = match[i];
       if (group) {
         // this approach only reliable with contiguous groups
@@ -798,6 +825,50 @@ class Mark {
       }
     }
   }
+
+  /* eslint-disable complexity */
+  /**
+  * It parses the RegExp pattern and collects parent groups indexes
+  * @param {RegExp} regex - The regular expression to be searched for
+  * @return {object} groups - The object containing parent groups indexes
+  */
+  collectRegexGroupIndexes(regex) {
+    let groups = {}, stack = [],
+      i = -1, index = 1, count = 0, charsRange = false,
+      str = regex.source,
+      //it matches the start of non-capture groups (?:, (?!, (?=, (?<=, (?<!
+      reg = /^\(\?(?:[:!=]|<[=!])/;
+
+    while (++i < str.length) {
+      switch (str[i]) {
+        case '(' :
+          if ( !charsRange) {
+            if (reg.test(str.substring(i))) {
+              stack.push(0);
+            } else {
+              stack.push(1);
+              if (count === 0) {
+                groups[index] = 1;
+              }
+              count++;
+              index++;
+            }
+          }
+          break;
+        case ')' :
+          if ( !charsRange && stack.pop() === 1 && count > 0) {
+            count--;
+          }
+          break;
+        case '\\' : i++; break;
+        case '[' : charsRange = true; break;
+        case ']' : charsRange = false; break;
+        default : break;
+      }
+    }
+    return groups;
+  }
+  /* eslint-enable complexity */
 
   /**
    * Filter callback before each wrapping
@@ -870,9 +941,9 @@ class Mark {
    * @type {object}
    * @property {array} match - The result of RegExp exec() method
    * @property {boolean} matchStart - indicate the start of match
-   * @property {number} groupIndex - The index of match group,
-   * is only available with both 'acrossElements' and 'separateGroups' options
-   * @property {boolean} groupStart - indicate the start of group, is only
+   * @property {number} groupIndex - The index of match group. It's only
+   * available with both 'acrossElements' and 'separateGroups' options
+   * @property {boolean} groupStart - indicate the start of group. It's only
    * available with both 'acrossElements' and 'separateGroups' options
    */
 
@@ -882,7 +953,7 @@ class Mark {
    * @property {RegExp} regex - The regular expression to be searched for
    * @property {array} match - The result of RegExp exec() method
    * @property {boolean} matchStart - indicate the start of match
-   * @property {number} groupIndex - The group index, is only available
+   * @property {number} groupIndex - The group index. It's only available
    * with both 'acrossElements' and 'separateGroups' options
    */
 
@@ -920,8 +991,14 @@ class Mark {
   wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
     // check for separateGroups is necessary in case of accidental use
     // of ignoreGroups option with separateGroups
-    const matchIdx =
-      ignoreGroups === 0 || this.opt.separateGroups ? 0 : ignoreGroups + 1;
+    const separateGroups = this.opt.separateGroups,
+      matchIdx = separateGroups || ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+      fn = regex.hasIndices ? 'wrapMatchGroups' : 'wrapMatchGroups2',
+      params = separateGroups ? {
+        regex : regex,
+        //groups : !regex.hasIndices ? this.collectRegexGroups(regex) : {}
+        groups : !regex.hasIndices ? this.collectRegexGroupIndexes(regex) : {}
+      } : {};
     let match, count;
 
     this.getTextNodesAcrossElements(dict => {
@@ -931,10 +1008,8 @@ class Mark {
       ) {
         count = -1;
 
-        if (this.opt.separateGroups) {
-          let fn = regex.hasIndices ? 'wrapMatchGroups' : 'wrapMatchGroups2';
-
-          this[fn](dict, match, regex, (group, node, groupIndex) => {
+        if (separateGroups) {
+          this[fn](dict, match, params, (group, node, groupIndex) => {
             return filterCb(group, node, {
               match : match,
               matchStart : ++count === 0,
@@ -1081,7 +1156,7 @@ class Mark {
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
    * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information, is only available with 'acrossElements' option
+   * information. It's only available with 'acrossElements' option
    */
   /**
    * Callback if there were no matches
@@ -1129,7 +1204,7 @@ class Mark {
    * group matching string
    * @param {number} counter - A counter indicating the number of all marks
    * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information, is only available with 'acrossElements' option
+   * information. It's only available with 'acrossElements' option
    */
 
   /**
@@ -1137,7 +1212,7 @@ class Mark {
    * @callback Mark~markRegExpEachCallback
    * @param {HTMLElement} element - The marked DOM element
    * @param {Mark~matchInfoObject} matchInfo - The object containing match
-   * information, is only available with 'acrossElements' option
+   * information. It's only available with 'acrossElements' option
    */
 
   /**
@@ -1169,7 +1244,7 @@ class Mark {
     };
     if (this.opt.acrossElements) {
       fn = 'wrapMatchesAcrossElements';
-      // this solve backward-compatibility but open gate for new code
+      // it solves the backward-compatibility issue but open gate for new code
       // to slip in without g flag
       if ( !regexp.global && !regexp.sticky) {
         let splits = regexp.toString().split('/'),
@@ -1203,7 +1278,7 @@ class Mark {
    * @param {number} termCounter - A counter indicating the number of marks
    * for the specific match
    * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information, is only available with 'acrossElements' option
+   * information. It's only available with 'acrossElements' option
    */
 
   /**
