@@ -481,10 +481,16 @@ class DOMIterator {
     const itr = this.createIterator(ctx, whatToShow, filterCb);
     let ifr = [],
       elements = [],
-      prevNode = null, node;
-    // without 'getIteratorNode' the performance gain is ~2.5 times.
-    while ((node = itr.nextNode())) {
-      if (this.iframes) {
+      node, prevNode, retrieveNodes = () => {
+        ({
+          prevNode,
+          node
+        } = this.getIteratorNode(itr));
+        return node;
+      };
+
+    if (this.iframes) {
+      while (retrieveNodes()) {
         this.forEachIframe(ctx, currIfr => {
           // note that ifr will be manipulated here
           return this.checkIframeFilter(node, prevNode, currIfr, ifr);
@@ -493,12 +499,18 @@ class DOMIterator {
             whatToShow, ifrNode => elements.push(ifrNode), filterCb
           );
         });
+        // it's faster to call the each callback in an array loop
+        // than in this while loop
+        elements.push(node);
       }
-      // it's faster to call the each callback in an array loop
-      // than in this while loop
-      elements.push(node);
-      prevNode = node;
+
+    } else {
+      // without 'getIteratorNode' the performance gain is ~2.5 times.
+      while ((node = itr.nextNode())) {
+        elements.push(node);
+      }
     }
+
     elements.forEach(node => {
       eachCb(node);
     });

@@ -17,7 +17,7 @@ describe('mark with acrossElements and block elements boundary', function() {
       'separateWordSearch' : false,
       'accuracy' : 'exactly',
       'acrossElements' : true,
-      'blockElementsBoundary' : true,
+      'blockElementsBoundary' : {},
       each : function(elem, info) {
         if (info.matchStart) {
           // elem in this case is the first marked element of the match
@@ -42,8 +42,9 @@ describe('mark with acrossElements and block elements boundary', function() {
       'separateWordSearch' : false,
       'accuracy' : 'exactly',
       'acrossElements' : true,
-      'blockElementsBoundary' : true,
-      'blockElements' : ['Div', 'p', 'H1', 'h2'],
+      'blockElementsBoundary' : {
+        tagNames : ['Div', 'p', 'H1', 'h2'],
+      },
       each : function(elem, info) {
         if (info.matchStart) {
           // elem in this case is the first marked element of the match

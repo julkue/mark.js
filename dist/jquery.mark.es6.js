@@ -247,9 +247,15 @@
       const itr = this.createIterator(ctx, whatToShow, filterCb);
       let ifr = [],
         elements = [],
-        prevNode = null, node;
-      while ((node = itr.nextNode())) {
-        if (this.iframes) {
+        node, prevNode, retrieveNodes = () => {
+          ({
+            prevNode,
+            node
+          } = this.getIteratorNode(itr));
+          return node;
+        };
+      if (this.iframes) {
+        while (retrieveNodes()) {
           this.forEachIframe(ctx, currIfr => {
             return this.checkIframeFilter(node, prevNode, currIfr, ifr);
           }, con => {
@@ -257,9 +263,12 @@
               whatToShow, ifrNode => elements.push(ifrNode), filterCb
             );
           });
+          elements.push(node);
         }
-        elements.push(node);
-        prevNode = node;
+      } else {
+        while ((node = itr.nextNode())) {
+          elements.push(node);
+        }
       }
       elements.forEach(node => {
         eachCb(node);
@@ -627,16 +636,15 @@
         valid: valid
       };
     }
-    checkParents(textNode, tags) {
-      let value = 0;
+    checkParents(textNode, checkName) {
       if (textNode === textNode.parentNode.lastChild) {
-        if ((value = tags[textNode.parentNode.nodeName.toLowerCase()])) {
-          return value;
+        if (checkName(textNode.parentNode)) {
+          return true;
         } else {
           let parent = textNode.parentNode;
           while (parent === parent.parentNode.lastChild) {
-            if ((value = tags[parent.parentNode.nodeName.toLowerCase()])) {
-              return value;
+            if (checkName(parent.parentNode)) {
+              return true;
             }
             parent = parent.parentNode;
           }
@@ -644,49 +652,67 @@
         let node = textNode.parentNode.nextSibling;
         if (node) {
           if (node.nodeType === 1) {
-            if (((value = tags[node.nodeName.toLowerCase()]))) {
-              return value;
+            if ((checkName(node))) {
+              return true;
             }
           } else {
-            return  -3;
+            return true;
           }
         }
       }
-      return -1;
+      return false;
     }
-    checkNextNodes(node, tags) {
-      let value = 0;
+    checkNextSiblings(node, checkName) {
       if (node && node.nodeType === 1) {
-        if ((value = tags[node.nodeName.toLowerCase()])) {
-          return value;
+        if (checkName(node)) {
+          return;
         } else if (node.firstChild) {
           let prevFirstChild, child = node.firstChild;
           while (child) {
             if (child.nodeType === 1) {
-              if ((value = tags[child.nodeName.toLowerCase()])) {
-                return value;
+              if (checkName(child)) {
+                return;
               }
               prevFirstChild = child;
               child = child.firstChild;
               continue;
             }
-            return -1;
+            return;
           }
-          return this.checkNextNodes(prevFirstChild.nextSibling, tags);
+          this.checkNextSiblings(prevFirstChild.nextSibling, checkName);
         }
         if (node !== node.parentNode.lastChild) {
-          return this.checkNextNodes(node.nextSibling, tags);
-        } else if ((value = tags[node.parentNode.nodeName.toLowerCase()])) {
-          return value;
+          this.checkNextSiblings(node.nextSibling, checkName);
+        } else {
+          checkName(node.parentNode);
         }
       }
-      return -1;
+    }
+    prepare(tags) {
+      let str = '\u0001 ', boundary = this.opt.blockElementsBoundary;
+      if (boundary.tagNames && boundary.tagNames.length) {
+        let elements = {};
+        for (let key in boundary.tagNames) {
+          elements[boundary.tagNames[key].toLowerCase()] = 1;
+        }
+        for (let key in elements) {
+          tags[key] = 2;
+        }
+      } else {
+        for (let key in tags) {
+          tags[key] = 2;
+        }
+        tags['br'] = 1;
+      }
+      if (boundary.char) {
+        str = boundary.char.charAt(0) + ' ';
+      }
+      return str;
     }
     getTextNodesAcrossElements(cb) {
-      let val = '', start, text, endBySpace, number, offset, nodes = [],
-        str = this.opt.boundaryChar
-          ? this.opt.boundaryChar.charAt(0) + ' ' : '\u0001 ',
-        str2 = ' ' + str;
+      let val = '', start, text, endBySpace, type, offset, nodes = [],
+        boundary = this.opt.blockElementsBoundary,
+        str, str2;
       let tags = { div : 1, p : 1, li : 1, td : 1, tr : 1, th : 1, ul : 1,
         ol : 1, br : 1, dd : 1, dl : 1, dt : 1, h1 : 1, h2 : 1, h3 : 1, h4 : 1,
         h5 : 1, h6 : 1, hr : 1, blockquote : 1, figcaption : 1, figure : 1,
@@ -697,42 +723,36 @@
         button : 1, header : 1, footer : 1, address : 1, area : 1, canvas : 1,
         map : 1, fieldset : 1, textarea : 1, track : 1, video : 1, audio : 1,
         body : 1, iframe : 1, meter : 1, object : 1, svg : 1 };
-      if (this.opt.blockElementsBoundary) {
-        if (this.opt.blockElements && this.opt.blockElements.length) {
-          let elements = {};
-          for (let key in this.opt.blockElements) {
-            elements[this.opt.blockElements[key].toLowerCase()] = 1;
-          }
-          for (let key in elements) {
-            tags[key] = 2;
-          }
-        } else {
-          for (let key in tags) {
-            tags[key] = 2;
-          }
-          tags['br'] = 1;
-        }
+      if (boundary) {
+        str = this.prepare(tags);
+        str2 = ' ' + str;
       }
       this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
         offset = 0;
         start = val.length;
         text = node.textContent;
         endBySpace = /\s/.test(text[text.length - 1]);
-        if (this.opt.blockElementsBoundary || !endBySpace) {
-          number = this.checkParents(node, tags);
-          if (number === -1) {
-            number = this.checkNextNodes(node.nextSibling, tags);
+        if (boundary || !endBySpace) {
+          let success = this.checkParents(node, nd => {
+            type = tags[nd.nodeName.toLowerCase()];
+            return type;
+          });
+          if ( !success) {
+            this.checkNextSiblings(node.nextSibling, nd => {
+              type = tags[nd.nodeName.toLowerCase()];
+              return type;
+            });
           }
-          if (number > 0) {
+          if (type) {
             if ( !endBySpace) {
-              if (number === 1) {
+              if (type === 1) {
                 val += text + ' ';
                 offset = 1;
-              } else if (number === 2) {
+              } else if (type === 2) {
                 val += text + str2;
                 offset = 3;
               }
-            } else if (number === 2) {
+            } else if (type === 2) {
               val += text + str;
               offset = 2;
             }
@@ -846,16 +866,16 @@
       }
       return node;
     }
-    wrapMatchGroups(dict, match, unused, filterCb, eachCb) {
+    wrapMatchGroups(dict, match, params, filterCb, eachCb) {
       let matchStart = true,
-        max = 0,
-        i = 1,
+        lastIndex = 0,
+        i = 0,
         group, start, end, isMarked;
-      for (; i < match.length; i++) {
+      while (++i < match.length) {
         group = match[i];
         if (group) {
           start = match.indices[i][0];
-          if (start >= max) {
+          if (start >= lastIndex) {
             end = match.indices[i][1];
             isMarked = false;
             this.wrapRangeInMappedTextNode(dict, start, end, node => {
@@ -865,8 +885,8 @@
               eachCb(node, matchStart, groupStart, i);
               matchStart = false;
             });
-            if (isMarked && end > max) {
-              max = end;
+            if (isMarked && end > lastIndex) {
+              lastIndex = end;
             }
           }
         }
@@ -875,23 +895,20 @@
     wrapMatchGroups2(dict, match, params, filterCb, eachCb) {
       let matchStart = true,
         startIndex = 0,
-        i = 1,
-        group, start, end;
+        index, group, start, end;
       const s = match.index,
         text = dict.value.substring(s, params.regex.lastIndex);
-      for (; i < match.length; i++) {
-        if ( !params.groups[i]) {
-          continue;
-        }
-        group = match[i];
+      for (let i = 0; i < params.groups.length; i++) {
+        index = params.groups[i];
+        group = match[index];
         if (group) {
           start = text.indexOf(group, startIndex);
           end = start + group.length;
           if (start !== -1) {
             this.wrapRangeInMappedTextNode(dict, s + start, s + end, (node) => {
-              return filterCb(group, node, i);
+              return filterCb(group, node, index);
             }, (node, groupStart) => {
-              eachCb(node, matchStart, groupStart, i);
+              eachCb(node, matchStart, groupStart, index);
               matchStart = false;
             });
             startIndex = end;
@@ -899,9 +916,9 @@
         }
       }
     }
-    collectRegexGroups(regex) {
-      let groups = {}, stack = [],
-        i = -1, index = 1, count = 0, charsRange = false,
+    collectRegexGroupIndexes(regex) {
+      let groups = [], stack = [],
+        i = -1, index = 1, brackets = 0, charsRange = false,
         str = regex.source,
         reg = /^\(\?(?:[:!=]|<[=!])/;
       while (++i < str.length) {
@@ -912,17 +929,17 @@
                 stack.push(0);
               } else {
                 stack.push(1);
-                if (count === 0) {
-                  groups[index] = 1;
+                if (brackets === 0) {
+                  groups.push(index);
                 }
-                count++;
+                brackets++;
                 index++;
               }
             }
             break;
           case ')' :
-            if ( !charsRange && stack.pop() === 1 && count > 0) {
-              count--;
+            if ( !charsRange && stack.pop() === 1) {
+              brackets--;
             }
             break;
           case '\\' : i++; break;
@@ -973,10 +990,10 @@
       const separateGroups = this.opt.separateGroups,
         matchIdx = separateGroups || ignoreGroups === 0 ? 0 : ignoreGroups + 1,
         fn = regex.hasIndices ? 'wrapMatchGroups' : 'wrapMatchGroups2',
-        params = separateGroups ? {
+        params = !separateGroups || regex.hasIndices ? {} : {
           regex : regex,
-          groups : !regex.hasIndices ? this.collectRegexGroups(regex) : {}
-        } : {};
+          groups : this.collectRegexGroupIndexes(regex)
+        };
       let match, count;
       this.getTextNodesAcrossElements(dict => {
         while (
@@ -987,6 +1004,7 @@
           if (separateGroups) {
             this[fn](dict, match, params, (group, node, groupIndex) => {
               return filterCb(group, node, {
+                regex: regex,
                 match : match,
                 matchStart : ++count === 0,
                 groupIndex : groupIndex,

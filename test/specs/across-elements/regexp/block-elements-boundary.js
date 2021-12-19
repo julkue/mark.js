@@ -35,9 +35,10 @@ describe('markRegExp with acrossElements and block boundary', function() {
 
     new Mark($ctx[0]).markRegExp(/\bblock\s+elements\s+boundary\b/gi, {
       'acrossElements' : true,
-      'blockElementsBoundary' : true,
-      'blockElements' : ['Div', 'p', 'H1', 'h2'],
-      'boundaryChar' : '|',
+      'blockElementsBoundary' : {
+        tagNames : ['Div', 'p', 'H1', 'h2', 'custom'],
+        'char' : '|'
+      },
       'each' : function(elem, info) {
         if (info.matchStart) {
           elem.className = 'start-1';
