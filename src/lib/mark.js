@@ -723,7 +723,7 @@ class Mark {
   */
 
   /**
-  * Mark separate groups of the current match
+  * Mark separate groups of the current match with RegExp.hasIndices
   * @param {HTMLElement} node - The text node where the match occurs
   * @param {array} match - The current match
   * @param {Mark~paramsObject} params - The object contains two properties
@@ -843,7 +843,7 @@ class Mark {
   */
 
   /**
-  * Mark separate groups of the current match
+  * Mark separate groups of the current match with RegExp.hasIndices
   * @param {Mark~wrapMatchGroupsDDict} dict - The dictionary
   * @param {array} match - The current match
   * @param {Mark~paramsObject} params - The object contains two properties
@@ -1117,7 +1117,8 @@ class Mark {
    * @typedef Mark~filterInfoObject
    * @type {object}
    * @property {array} match - The result of RegExp exec() method
-   * @property {boolean} matchStart - indicate the start of match
+   * @property {boolean} matchStart - indicate the start of match. It isn't
+   * available in 'mark' method without 'separateGroups' option
    * @property {number} groupIndex - The group index. It's only available
    * with 'separateGroups' option
    * @property {object} execution - The helper object for early abort. Contains
@@ -1380,8 +1381,7 @@ class Mark {
    * @param {string} match - The matching string:
    * 1) without 'ignoreGroups' and 'separateGroups' options - the whole match.
    * 2) with 'ignoreGroups' - [ignoreGroups number + 1] group matching string.
-   * 3) with both 'acrossElements' and 'separateGroups' options - the current
-   * group matching string
+   * 3) with 'separateGroups' option - the current group matching string
    * @param {number} counter - A counter indicating the number of all marks
    * @param {Mark~filterInfoObject} filterInfo - The object containing match
    * information. It's only available with 'acrossElements' option
