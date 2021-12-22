@@ -52,6 +52,7 @@ describe('mark with regular expression and separateGroups', function() {
     expect($ctx3.find('mark')).toHaveLength(4);
   });
   it('should not cause an infinite loop with no groups in regexp', function() {
-    expect($ctx4.find('mark')).toHaveLength(4);
+    // if regexp doesn't contains any groups nothing should be mark
+    expect($ctx4.find('mark')).toHaveLength(0);
   });
 });

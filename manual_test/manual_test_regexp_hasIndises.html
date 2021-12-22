@@ -18,6 +18,7 @@
 
   <script src="specs/separate-groups-hasIndices.js"></script>
   <script src="specs/regex-pattern-parser.js"></script>
+  <script src="specs/regex-pattern-parser-across-elements.js"></script>
   <style>
     .hide-fixture { display: none; }
   </style>
@@ -25,7 +26,11 @@
 <body>
  
 <div class="regex-pattern-parser hide-fixture">
-<h1>aaaaaaaaafaaaaaaaaabbbbbb(bb\)b[c(p\c/p)c]ddd</h1>
+  <p>aaaafaaaafaaaaaaaaabbbbbb(bb\)b[c(p\c/p)c]ddd</p>
+</div>
+
+<div class="regex-pattern-parser-across-elements hide-fixture">
+  <p>aaaafaaaafaaaaaaaaabbbbbb(bb\)b[c(p\c/p)c]ddd</p>
 </div>
 
 <div class="across-elements-separate-groups hide-fixture">
