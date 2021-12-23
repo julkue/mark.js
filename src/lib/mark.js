@@ -700,7 +700,7 @@ class Mark {
   * @param {HTMLElement} node - The text node where the match occurs
   * @param {number} pos - The current position of the match within the node
   * @param {number} len - The length of the current match within the node
-  * @param {Mark~wrapMatchesEachCallback} eachCb
+  * @param {Mark~wrapGroupsEachCallback} eachCb
   */
   wrapGroups(node, pos, len, eachCb) {
     node = this.wrapRangeInTextNode(node, pos, pos + len);
@@ -753,6 +753,8 @@ class Mark {
             if (end > lastIndex) {
               lastIndex = end;
             }
+            // offset is used to correct the start index of the newly returned
+            // text node
             offset = end;
             isWrapped = true;
           }
@@ -1063,7 +1065,11 @@ class Mark {
                 pos += match[i].length;
               }
             }
-            node = this.wrapGroups(node, pos, match[matchIdx].length, eachCb);
+            node = this.wrapGroups(node, pos, match[matchIdx].length, node => {
+              eachCb(node, {
+                match : match
+              });
+            });
             // reset index of last match as the node changed and the
             // index isn't valid anymore http://tinyurl.com/htsudjd
             regex.lastIndex = 0;
@@ -1094,17 +1100,6 @@ class Mark {
   /**
    * Callback on end
    * @callback Mark~wrapMatchesEndCallback
-   */
-  /**
-   * Wraps the instance element and class around matches within single HTML
-   * elements in all contexts
-   * @param {RegExp} regex - The regular expression to be searched for
-   * @param {number} ignoreGroups - A number indicating the amount of RegExp
-   * matching groups to ignore
-   * @param {Mark~wrapMatchesFilterCallback} filterCb
-   * @param {Mark~wrapMatchesEachCallback} eachCb
-   * @param {Mark~wrapMatchesEndCallback} endCb
-   * @access protected
    */
 
   /**
