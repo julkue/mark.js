@@ -428,7 +428,7 @@ class Mark {
   * value
   * @property {number} nodes.end - The end position within the composite
   * value
-  * @property {number} nodes.offset - The offset used to correct position
+  * @property {number} nodes.offset - The offset is used to correct position
   * if space or string was added to the end of the text node
   * @property {HTMLElement} nodes.node - The DOM text node element
   */
@@ -626,7 +626,7 @@ class Mark {
    * value
    * @property {number} nodes.end - The end position within the composite
    * value
-   * @property {number} nodes.offset - The offset used to correct position
+   * @property {number} nodes.offset - The offset is used to correct position
    * if space or string was added to the end of the text node
    * @property {HTMLElement} nodes.node - The DOM text node element
    */
@@ -700,7 +700,7 @@ class Mark {
   * @param {HTMLElement} node - The text node where the match occurs
   * @param {number} pos - The current position of the match within the node
   * @param {number} len - The length of the current match within the node
-  * @param {Mark~wrapGroupsEachCallback} eachCb
+  * @param {Mark~wrapGroupsEachCallback} eachCb - Each callback
   */
   wrapGroups(node, pos, len, eachCb) {
     node = this.wrapRangeInTextNode(node, pos, pos + len);
@@ -746,6 +746,9 @@ class Mark {
         if (start >= lastIndex) {
           if (filterCb(group, node, i)) {
             end = match.indices[i][1];
+            // when a group is wrapping, the text node is split at the end
+            // index, so to correct the start index of the new text node,
+            // subtract the end index of the last wrapped group - offset
             node = this.wrapGroups(node, start - offset, end - start, node => {
               eachCb(node, i);
             });
@@ -753,8 +756,6 @@ class Mark {
             if (end > lastIndex) {
               lastIndex = end;
             }
-            // offset is used to correct the start index of the newly returned
-            // text node
             offset = end;
             isWrapped = true;
           }
@@ -1012,8 +1013,8 @@ class Mark {
    * @param {RegExp} regex - The regular expression to be searched for
    * @param {number} ignoreGroups - A number indicating the amount of RegExp
    * matching groups to ignore
-   * @param {Mark~wrapMatchesFilterCallback} filterCb
-   * @param {Mark~wrapMatchesEachCallback} eachCb
+   * @param {Mark~wrapMatchesFilterCallback} filterCb - Filter callback
+   * @param {Mark~wrapMatchesEachCallback} eachCb - Each callback
    * @param {Mark~wrapMatchesEndCallback} endCb
    * @access protected
    */
@@ -1086,23 +1087,6 @@ class Mark {
   }
 
   /**
-   * Filter callback before each wrapping
-   * @callback Mark~wrapMatchesFilterCallback
-   * @param {string} match - The matching string
-   * @param {HTMLElement} node - The text node where the match occurs
-   */
-  /**
-   * Callback for each wrapped element
-   * @callback Mark~wrapMatchesEachCallback
-   * @param {HTMLElement} element - The marked DOM element
-   */
-
-  /**
-   * Callback on end
-   * @callback Mark~wrapMatchesEndCallback
-   */
-
-  /**
    * @typedef Mark~paramsObject
    * @type {object}
    * @property {RegExp} regex - The regular expression to be searched for
@@ -1156,8 +1140,9 @@ class Mark {
    * @param {RegExp} regex - The regular expression to be searched for
    * @param {number} ignoreGroups - A number indicating the amount of RegExp
    * matching groups to ignore
-   * @param {Mark~wrapMatchesAcrossElementsFilterCallback} filterCb
-   * @param {Mark~wrapMatchesAcrossElementsEachCallback} eachCb
+   * @param {Mark~wrapMatchesAcrossElementsFilterCallback} filterCb - Filter
+   * callback
+   * @param {Mark~wrapMatchesAcrossElementsEachCallback} eachCb - Each callback
    * @param {Mark~wrapMatchesAcrossElementsEndCallback} endCb
    * @access protected
    */
@@ -1332,7 +1317,7 @@ class Mark {
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
    * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information. It's only available with 'acrossElements' option
+   * information.
    */
   /**
    * Callback if there were no matches
@@ -1379,7 +1364,7 @@ class Mark {
    * 3) with 'separateGroups' option - the current group matching string
    * @param {number} counter - A counter indicating the number of all marks
    * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information. It's only available with 'acrossElements' option
+   * information.
    */
 
   /**
@@ -1387,7 +1372,7 @@ class Mark {
    * @callback Mark~markRegExpEachCallback
    * @param {HTMLElement} element - The marked DOM element
    * @param {Mark~matchInfoObject} matchInfo - The object containing match
-   * information. It's only available with 'acrossElements' option
+   * information.
    */
 
   /**
@@ -1401,6 +1386,7 @@ class Mark {
    * expression group as a separate match
    * @property {Mark~markRegExpNoMatchCallback} [noMatch]
    * @property {Mark~markRegExpFilterCallback} [filter]
+   * @property {Mark~markRegExpEachCallback} [each]
    */
   /**
    * Marks a custom regular expression
@@ -1453,7 +1439,7 @@ class Mark {
    * @param {number} termCounter - A counter indicating the number of marks
    * for the specific match
    * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information. It's only available with 'acrossElements' option
+   * information.
    */
 
   /**

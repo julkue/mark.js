@@ -1042,7 +1042,11 @@
                   pos += match[i].length;
                 }
               }
-              node = this.wrapGroups(node, pos, match[matchIdx].length, eachCb);
+              node = this.wrapGroups(node, pos, match[matchIdx].length, node => {
+                eachCb(node, {
+                  match : match
+                });
+              });
               regex.lastIndex = 0;
             }
             if (execution.abort) {

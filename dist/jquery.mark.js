@@ -1419,7 +1419,11 @@
                   }
                 }
 
-                node = _this5.wrapGroups(node, pos, match[matchIdx].length, eachCb);
+                node = _this5.wrapGroups(node, pos, match[matchIdx].length, function (node) {
+                  eachCb(node, {
+                    match: match
+                  });
+                });
                 regex.lastIndex = 0;
               }
 
