@@ -1,10 +1,10 @@
 
 'use strict';
-describe('test the \'collectRegexGroupIndexes\' method', function() {
+describe('test collectRegexGroupIndexes & wrapMatchGroups methods with acrossElements option', function() {
   var $ctx,
     // this regex contains different grouping and other constructs to test
     // the RegExp pattern parser
-    reg = /(?<=f)(a(?:a(a))a(a))((?<gr5>\2)+)(b(b(?<n>b))(?:bb)(?!a))()(?:)((?:\k<n>|\(|\)|\\)+)([a-z/()[\]\\]+?)(?=d)/;
+    reg = /(?<=f)(\w(?:\w(a))a(a))((?<gr5>\2)+)(b(b(?<n>b))(?:bb)(?!a))()(?:)(?<!@)((?:\k<n>|\(|\)|\\)+)([a-z/()[\]\\]+?)(?=d)/;
 
   beforeEach(function() {
     $ctx = $('.regex-pattern-parser-across-elements');
@@ -35,7 +35,7 @@ describe('test the \'collectRegexGroupIndexes\' method', function() {
         // 9th group is empty
         expect(groupIndexes).toEqual([1, 4, 6, 10, 11]);
         expect(groupCount).toBe(3);
-        expect(content).toBe('aaaaabbbbb[c(p\\c/p)c]');
+        expect(content).toBe('zzaaabbbbb[c(p\\c/p)c]');
         done();
       }
     });
@@ -66,7 +66,7 @@ describe('test the \'collectRegexGroupIndexes\' method', function() {
         // 9th group is empty, the 5th nested group is added
         expect(groupIndexes).toEqual([1, 4, 5, 6, 10, 11]);
         expect(groupCount).toBe(3);
-        expect(content).toBe('aaaaabbbbb[c(p\\c/p)c]');
+        expect(content).toBe('zzaaabbbbb[c(p\\c/p)c]');
         done();
       }
     });

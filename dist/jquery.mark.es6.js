@@ -887,7 +887,7 @@
       return node;
     }
     separateGroups(node, match, params, filterCb, eachCb) {
-      let startIndex = 0,
+      let startIndex = match.index,
         i = -1,
         isWrapped = false,
         index, group, start;

@@ -1204,7 +1204,7 @@
     }, {
       key: "separateGroups",
       value: function separateGroups(node, match, params, filterCb, eachCb) {
-        var startIndex = 0,
+        var startIndex = match.index,
             i = -1,
             isWrapped = false,
             index,
