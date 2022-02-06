@@ -1,18 +1,19 @@
 'use strict';
 describe('mark with acrossElements and done callback', function() {
-  var $ctx, doneCalled, totalMatches;
+  var $ctx, doneCalled, totalMatches, totalMarkElements;
   beforeEach(function(done) {
     loadFixtures('across-elements/basic/main.html');
 
-    totalMatches = doneCalled = 0;
+    totalMarkElements = totalMatches = doneCalled = 0;
     $ctx = $('.across-elements');
-    new Mark($ctx[0]).mark('lorem ipsum', {
+    new Mark($ctx[0]).mark(['lorem ipsum', 'dolor sit'], {
       'diacritics': false,
       'separateWordSearch': false,
       'acrossElements': true,
-      'done': function(counter) {
+      'done': function(counter, matchCount) {
         doneCalled++;
-        totalMatches = counter;
+        totalMarkElements = counter;
+        totalMatches = matchCount;
         done();
       }
     });
@@ -25,6 +26,7 @@ describe('mark with acrossElements and done callback', function() {
     }, 3000);
   });
   it('should call the done callback with total matches', function() {
-    expect(totalMatches).toBe(6);
+    expect(totalMarkElements).toBe(11);
+    expect(totalMatches).toBe(8);
   });
 });

@@ -408,7 +408,7 @@ class Mark {
       for (let key in tags) {
         tags[key] = 2;
       }
-      // br is an inline element. Currently is under question.
+      // br is an inline element.
       tags['br'] = 1;
     }
     if (boundary.char) {
@@ -509,7 +509,7 @@ class Mark {
         start: start,
         end: val.length - offset,
         offset : offset,
-        node
+        node: node
       });
     }, node => {
       if (this.matchesExclude(node.parentNode)) {
@@ -559,7 +559,7 @@ class Mark {
       nodes.push({
         start: val.length,
         end: (val += node.textContent).length,
-        node
+        node: node
       });
     }, node => {
       if (this.matchesExclude(node.parentNode)) {
@@ -719,6 +719,7 @@ class Mark {
   * Callback for each wrapped element
   * @callback Mark~separateGroupsDEachCallback
   * @param {HTMLElement} element - The marked DOM element
+  * @param {boolean} matchStart - indicate the start of the current match
   * @param {number} i - The current group index
   */
 
@@ -726,7 +727,7 @@ class Mark {
   * Mark separate groups of the current match with RegExp.hasIndices
   * @param {HTMLElement} node - The text node where the match occurs
   * @param {array} match - The current match
-  * @param {Mark~paramsObject} params - The object contains two properties
+  * @param {Mark~paramsObject} params - The object containing a two properties
   * @param {Mark~separateGroupsDFilterCallback} filterCb - Filter callback
   * @param {Mark~separateGroupsDEachCallback} eachCb - Each callback
   */
@@ -735,6 +736,7 @@ class Mark {
       offset = 0,
       i = 0,
       isWrapped = false,
+      matchStart = true,
       group, start, end;
 
     while (++i < match.length) {
@@ -750,7 +752,8 @@ class Mark {
             // index, so to correct the start index of the new text node,
             // subtract the end index of the last wrapped group - offset
             node = this.wrapGroups(node, start - offset, end - start, node => {
-              eachCb(node, i);
+              eachCb(node, matchStart, i);
+              matchStart = false;
             });
 
             if (end > lastIndex) {
@@ -780,6 +783,7 @@ class Mark {
   * Callback for each wrapped element
   * @callback Mark~separateGroupsEachCallback
   * @param {HTMLElement} element - The marked DOM element
+  * @param {boolean} matchStart - indicate the start of the current match
   * @param {number} i - The current group index
   */
 
@@ -787,7 +791,7 @@ class Mark {
   * Separate groups
   * @param {HTMLElement} node - The text node where the match occurs
   * @param {array} match - The current match
-  * @param {Mark~paramsObject} params - The object contains two properties
+  * @param {Mark~paramsObject} params - The object containing a two properties
   * @param {Mark~separateGroupsFilterCallback} filterCb - Filter callback
   * @param {Mark~separateGroupsEachCallback} eachCb - Each callback
   */
@@ -795,6 +799,7 @@ class Mark {
     let startIndex = match.index,
       i = -1,
       isWrapped = false,
+      matchStart = true,
       index, group, start;
 
     // the only way to avoid nested group being searched by the indexOf method
@@ -809,7 +814,8 @@ class Mark {
         if (start !== -1) {
           if (filterCb(group, node, index)) {
             node = this.wrapGroups(node, start, group.length, node => {
-              eachCb(node, i);
+              eachCb(node, matchStart, i);
+              matchStart = false;
             });
             // start next search from the beginning of new node
             startIndex = 0;
@@ -849,7 +855,7 @@ class Mark {
   * Mark separate groups of the current match with RegExp.hasIndices
   * @param {Mark~wrapMatchGroupsDDict} dict - The dictionary
   * @param {array} match - The current match
-  * @param {Mark~paramsObject} params - The object contains two properties
+  * @param {Mark~paramsObject} params - The object containing a two properties
   * @param {Mark~wrapMatchGroupsDFilterCallback} filterCb - Filter callback
   * @param {Mark~wrapMatchGroupsDEachCallback} eachCb - Each callback
   */
@@ -905,7 +911,7 @@ class Mark {
   * Mark separate groups of the current match
   * @param {Mark~wrapMatchGroupsDict} dict - The dictionary
   * @param {array} match - The current match
-  * @param {Mark~paramsObject} params - The object contains two properties
+  * @param {Mark~paramsObject} params - The object containing a two properties
   * @param {Mark~wrapMatchGroupsFilterCallback} filterCb - Filter callback
   * @param {Mark~wrapMatchGroupsEachCallback} eachCb - Each callback
   */
@@ -953,26 +959,26 @@ class Mark {
     let groups = [], stack = [],
       i = -1, index = 1, brackets = 0, charsRange = false,
       str = regex.source,
-      //it matches the start of grouping constructs (?:, (?!, (?=, (?<=, (?<!
-      reg = /^\(\?(?:[:!=]|<[=!])/;
+      // matches the start of capturing groups (?<, (
+      reg = /^\(\?<(?![=!])|^\((?!\?)/;
 
     while (++i < str.length) {
       switch (str[i]) {
-        case '(' :
-          if ( !charsRange) {
+        case '(':
+          if (!charsRange) {
             if (reg.test(str.substring(i))) {
-              stack.push(0);
-            } else {
               stack.push(1);
               if (brackets === 0) {
                 groups.push(index);
               }
               brackets++;
               index++;
+            } else {
+              stack.push(0);
             }
           }
           break;
-        case ')' :
+        case ')':
           if ( !charsRange && stack.pop() === 1) {
             brackets--;
           }
@@ -999,13 +1005,14 @@ class Mark {
    * Callback for each wrapped element
    * @callback Mark~wrapMatchesEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {Mark~matchInfoObject} matchInfo - The object containing match
+   * @param {Mark~matchInfoObject} matchInfo - The object containing the match
    * information
    */
 
   /**
    * Callback on end
    * @callback Mark~wrapMatchesEndCallback
+   * @param {number} count - The number of matches
    */
   /**
    * Wraps the instance element and class around matches within single HTML
@@ -1025,8 +1032,11 @@ class Mark {
       params = !separateGroups ? {} : {
         regex : regex,
         groups : regex.hasIndices ? {} : this.collectRegexGroupIndexes(regex)
-      };
-    let match, count, execution = { abort : false };
+      },
+      execution = { abort : false },
+      filterInfo = { execution : execution };
+
+    let match, matchStart, count = 0;
 
     this.getTextNodes(dict => {
       dict.nodes.every(node => {
@@ -1035,31 +1045,34 @@ class Mark {
           (match = regex.exec(node.textContent)) !== null &&
           match[matchIdx] !== ''
         ) {
-          count = -1;
+          filterInfo.match = match;
+          matchStart = true;
 
           if (separateGroups) {
             node = this[fn](node, match, params, (group, node, groupIndex) => {
-              return filterCb(group, node, {
-                match : match,
-                matchStart: ++count === 0,
-                groupIndex : groupIndex,
-                execution : execution
-              });
-            }, (node, groupIndex) => {
+              filterInfo.matchStart = matchStart;
+              filterInfo.groupIndex = groupIndex;
+              matchStart = false;
+
+              return filterCb(group, node, filterInfo);
+
+            }, (node, matchStart, groupIndex) => {
+              if (matchStart) {
+                count++;
+              }
               eachCb(node, {
                 match : match,
+                matchStart : matchStart,
+                count : count,
                 groupIndex : groupIndex,
               });
             });
 
           } else {
-
-            if (!filterCb(match[matchIdx], node, {
-              match : match,
-              execution : execution
-            })) {
+            if (!filterCb(match[matchIdx], node, filterInfo)) {
               continue;
             }
+
             let pos = match.index;
             if (matchIdx !== 0) {
               for (let i = 1; i < matchIdx; i++) {
@@ -1067,8 +1080,10 @@ class Mark {
               }
             }
             node = this.wrapGroups(node, pos, match[matchIdx].length, node => {
+              count++;
               eachCb(node, {
-                match : match
+                match : match,
+                count : count,
               });
             });
             // reset index of last match as the node changed and the
@@ -1082,7 +1097,7 @@ class Mark {
         // break loop on custom abort
         return !execution.abort;
       });
-      endCb();
+      endCb(count);
     });
   }
 
@@ -1108,6 +1123,7 @@ class Mark {
    * @type {object}
    * @property {array} match - The result of RegExp exec() method
    * @property {boolean} matchStart - indicate the start of match
+   * @property {number} count - The current number of matches
    * @property {number} groupIndex - The index of match group. It's only
    * available with 'separateGroups' option
    * @property {boolean} groupStart - indicate the start of group. It's only
@@ -1118,7 +1134,7 @@ class Mark {
    * Callback for each wrapped element
    * @callback Mark~wrapMatchesAcrossElementsEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {Mark~matchInfoObject} matchInfo - The object containing match
+   * @param {Mark~matchInfoObject} matchInfo - The object containing the match
    * information
    */
   /**
@@ -1126,13 +1142,14 @@ class Mark {
    * @callback Mark~wrapMatchesAcrossElementsFilterCallback
    * @param {string} match - The matching string
    * @param {HTMLElement} node - The text node where the match occurs
-   * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information
+   * @param {Mark~filterInfoObject} filterInfo - The object containing
+   * the match information
    */
 
   /**
    * Callback on end
    * @callback Mark~wrapMatchesAcrossElementsEndCallback
+   * @param {number} count - The number of matches
    */
   /**
    * Wraps the instance element and class around matches across all HTML
@@ -1155,28 +1172,35 @@ class Mark {
       params = !separateGroups || regex.hasIndices ? {} : {
         regex : regex,
         groups : this.collectRegexGroupIndexes(regex)
-      };
-    let match, count, execution = { abort : false };
+      },
+      execution = { abort : false },
+      filterInfo = { execution : execution };
+
+    let match, matchStart, count = 0;
 
     this.getTextNodesAcrossElements(dict => {
       while (
         (match = regex.exec(dict.value)) !== null &&
         match[matchIdx] !== ''
       ) {
-        count = -1;
+        filterInfo.match = match;
+        matchStart = true;
 
         if (separateGroups) {
           this[fn](dict, match, params, (group, node, groupIndex) => {
-            return filterCb(group, node, {
-              match : match,
-              matchStart : ++count === 0,
-              groupIndex : groupIndex,
-              execution : execution
-            });
+            filterInfo.matchStart = matchStart;
+            filterInfo.groupIndex = groupIndex;
+            matchStart = false;
+            return filterCb(group, node, filterInfo);
+
           }, (node, matchStart, groupStart, groupIndex) => {
+            if (matchStart) {
+              count++;
+            }
             eachCb(node, {
               match : match,
               matchStart : matchStart,
+              count : count,
               groupIndex : groupIndex,
               groupStart : groupStart,
             });
@@ -1193,15 +1217,18 @@ class Mark {
           const end = start + match[matchIdx].length;
 
           this.wrapRangeInMappedTextNode(dict, start, end, node => {
-            return filterCb(match[matchIdx], node, {
-              match : match,
-              matchStart : ++count === 0,
-              execution : execution
-            });
+            filterInfo.matchStart = matchStart;
+            matchStart = false;
+            return filterCb(match[matchIdx], node, filterInfo);
+
           }, (node, matchStart) => {
+            if (matchStart) {
+              count++;
+            }
             eachCb(node, {
               match : match,
               matchStart : matchStart,
+              count : count,
             });
           });
         }
@@ -1209,7 +1236,7 @@ class Mark {
           break;
         }
       }
-      endCb();
+      endCb(count);
     });
   }
 
@@ -1316,8 +1343,8 @@ class Mark {
    * Callback for each marked element
    * @callback Mark~markEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information.
+   * @param {Mark~filterInfoObject} filterInfo - The object containing
+   * the match information.
    */
   /**
    * Callback if there were no matches
@@ -1328,6 +1355,10 @@ class Mark {
    * Callback when finished
    * @callback Mark~commonDoneCallback
    * @param {number} totalMatches - The number of marked elements
+   * @param {number} totalCount - The number of total matches when
+   * the 'acrossElements' option is enabled
+   * @param {object} termStats - An object containing an individual term's
+   * matches count for {@link Mark#mark} method.
    */
   /**
    * @typedef Mark~commonOptions
@@ -1363,15 +1394,15 @@ class Mark {
    * 2) with 'ignoreGroups' - [ignoreGroups number + 1] group matching string.
    * 3) with 'separateGroups' option - the current group matching string
    * @param {number} counter - A counter indicating the number of all marks
-   * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information.
+   * @param {Mark~filterInfoObject} filterInfo - The object containing
+   * the match information.
    */
 
   /**
    * Callback for each marked element
    * @callback Mark~markRegExpEachCallback
    * @param {HTMLElement} element - The marked DOM element
-   * @param {Mark~matchInfoObject} matchInfo - The object containing match
+   * @param {Mark~matchInfoObject} matchInfo - The object containing the match
    * information.
    */
 
@@ -1399,19 +1430,15 @@ class Mark {
 
     let totalMatches = 0,
       fn = 'wrapMatches';
-    const eachCb = (element, matchInfo) => {
-      totalMatches++;
-      this.opt.each(element, matchInfo);
-    };
+
     if (this.opt.acrossElements) {
       fn = 'wrapMatchesAcrossElements';
       // it solves the backward-compatibility issue but open gate for new code
       // to slip in without g flag
       if ( !regexp.global && !regexp.sticky) {
-        let splits = regexp.toString().split('/'),
-          flags = 'g' + splits[splits.length-1];
+        let splits = regexp.toString().split('/');
 
-        regexp = new RegExp(regexp.source, flags);
+        regexp = new RegExp(regexp.source, 'g' + splits[splits.length-1]);
         this.log(
           'RegExp is recompiled with g flag because it must have g flag'
         );
@@ -1421,11 +1448,16 @@ class Mark {
 
     this[fn](regexp, this.opt.ignoreGroups, (match, node, filterInfo) => {
       return this.opt.filter(node, match, totalMatches, filterInfo);
-    }, eachCb, () => {
-      if (totalMatches === 0) {
+
+    }, (element, matchInfo) => {
+      totalMatches++;
+      this.opt.each(element, matchInfo);
+
+    }, (totalCount) => {
+      if (totalCount === 0) {
         this.opt.noMatch(regexp);
       }
-      this.opt.done(totalMatches);
+      this.opt.done(totalMatches, totalCount);
     });
   }
 
@@ -1438,8 +1470,8 @@ class Mark {
    * marks
    * @param {number} termCounter - A counter indicating the number of marks
    * for the specific match
-   * @param {Mark~filterInfoObject} filterInfo - The object containing match
-   * information.
+   * @param {Mark~filterInfoObject} filterInfo - The object containing
+   * the match information.
    */
 
   /**
@@ -1461,40 +1493,49 @@ class Mark {
    */
   mark(sv, opt) {
     this.opt = opt;
-    let totalMatches = 0,
-      fn = 'wrapMatches';
-    const {
-        keywords: kwArr,
-        length: kwArrLen
-      } = this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv),
+
+    let index = 0, 
+      totalMatches = 0,
+      totalCount = 0;
+    const fn =
+      this.opt.acrossElements ? 'wrapMatchesAcrossElements' : 'wrapMatches',
+      termStats = {};
+
+    const { keywords, length } =
+      this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv),
       handler = kw => { // async function calls as iframes are async too
         const regex = new RegExpCreator(this.opt).create(kw);
         let matches = 0;
         this.log(`Searching with expression "${regex}"`);
+
         this[fn](regex, 1, (term, node, filterInfo) => {
           return this.opt.filter(node, kw, totalMatches, matches, filterInfo);
+
         }, (element, matchInfo) => {
           matches++;
           totalMatches++;
           this.opt.each(element, matchInfo);
-        }, () => {
-          if (matches === 0) {
+
+        }, (count) => {
+          totalCount += count;
+
+          if (count === 0) {
             this.opt.noMatch(kw);
           }
-          if (kwArr[kwArrLen - 1] === kw) {
-            this.opt.done(totalMatches);
+          termStats[kw] = count;
+
+          if (++index < length) {
+            handler(keywords[index]);
           } else {
-            handler(kwArr[kwArr.indexOf(kw) + 1]);
+            this.opt.done(totalMatches, totalCount, termStats);
           }
         });
       };
-    if (this.opt.acrossElements) {
-      fn = 'wrapMatchesAcrossElements';
-    }
-    if (kwArrLen === 0) {
-      this.opt.done(totalMatches);
+
+    if (length === 0) {
+      this.opt.done(totalMatches, 0, termStats);
     } else {
-      handler(kwArr[0]);
+      handler(keywords[index]);
     }
   }
 
