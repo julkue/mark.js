@@ -7,6 +7,30 @@ describe('mark with acrossElements', function() {
     $ctx = $('.across-elements-count');
   });
 
+  it('should mark the first match', function(done) {
+    new Mark($ctx[0]).mark('Lorem', {
+      'acrossElements' : true,
+      'filter' : function(node, kw, totalMatches, matches, info) {
+        info.execution.abort = true;
+        return true; 
+      },
+      'done' : function() {
+        expect($ctx.find('mark')).toHaveLength(1);
+
+        new Mark($ctx[0]).mark('ipsum', {
+          'filter' : function(node, kw, totalMatches, matches, info) {
+            info.execution.abort = true;
+            return true;
+          },
+          'done' : function() {
+            expect($ctx.find('mark')).toHaveLength(2);
+            done();
+          }
+        });
+      }
+    });
+  });
+
   it('should count and test content of whole words', function(done) {
     var wordCount = 0;
     new Mark($ctx[0]).mark(['Lorem', 'ipsum'], {

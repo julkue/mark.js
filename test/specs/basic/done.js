@@ -1,19 +1,19 @@
 'use strict';
 describe('basic mark with done callback', function() {
-  var $ctx, doneCalled, totalMatches, totalMarkElements, termStats = {},
+  var $ctx, doneCalled, totalMatches, totalMarks, termStats = {},
     array = ['lorem ipsum', 'dolor sit'];
 
   beforeEach(function(done) {
     loadFixtures('basic/main.html');
 
-    totalMarkElements = totalMatches = doneCalled = 0;
+    totalMarks = totalMatches = doneCalled = 0;
     $ctx = $('.basic');
     new Mark($ctx[0]).mark(array, {
       'diacritics': false,
       'separateWordSearch': false,
       'done': function(counter, matchCount, stats) {
         doneCalled++;
-        totalMarkElements = counter;
+        totalMarks = counter;
         totalMatches = matchCount;
         termStats = stats;
         done();
@@ -28,7 +28,7 @@ describe('basic mark with done callback', function() {
     }, 3000);
   });
   it('should call the done callback with total matches', function() {
-    expect(totalMarkElements).toBe(totalMatches);
+    expect(totalMarks).toBe(totalMatches);
     expect(totalMatches).toBe(8);
 
     expect(termStats[array[0]]).toBe(4);

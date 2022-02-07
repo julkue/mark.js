@@ -1134,6 +1134,7 @@
       });
     }
     wrapRangeFromIndex(ranges, filterCb, eachCb, endCb) {
+      let count = 0;
       this.getTextNodes(dict => {
         const originalLength = dict.value.length;
         ranges.forEach((range, counter) => {
@@ -1150,12 +1151,15 @@
                 dict.value.substring(start, end),
                 counter
               );
-            }, node => {
+            }, (node, rangeStart) => {
+              if (rangeStart) {
+                count++;
+              }
               eachCb(node, range);
             });
           }
         });
-        endCb();
+        endCb(count);
       });
     }
     unwrapMatches(node) {
@@ -1187,7 +1191,7 @@
     }
     markRegExp(regexp, opt) {
       this.opt = opt;
-      let totalMatches = 0,
+      let totalMarks = 0,
         fn = 'wrapMatches';
       if (this.opt.acrossElements) {
         fn = 'wrapMatchesAcrossElements';
@@ -1201,24 +1205,24 @@
       }
       this.log(`Searching with expression "${regexp}"`);
       this[fn](regexp, this.opt.ignoreGroups, (match, node, filterInfo) => {
-        return this.opt.filter(node, match, totalMatches, filterInfo);
+        return this.opt.filter(node, match, totalMarks, filterInfo);
       }, (element, matchInfo) => {
-        totalMatches++;
+        totalMarks++;
         this.opt.each(element, matchInfo);
-      }, (totalCount) => {
-        if (totalCount === 0) {
+      }, (totalMatches) => {
+        if (totalMatches === 0) {
           this.opt.noMatch(regexp);
         }
-        this.opt.done(totalMatches, totalCount);
+        this.opt.done(totalMarks, totalMatches);
       });
     }
     mark(sv, opt) {
       this.opt = opt;
-      let totalMatches = 0,
-        totalCount = 0,
-        index = 0,
-        fn =
-          this.opt.acrossElements ? 'wrapMatchesAcrossElements' : 'wrapMatches',
+      let index = 0,
+        totalMarks = 0,
+        totalMatches = 0;
+      const fn =
+        this.opt.acrossElements ? 'wrapMatchesAcrossElements' : 'wrapMatches',
         termStats = {};
       const { keywords, length } =
         this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv),
@@ -1227,13 +1231,13 @@
           let matches = 0;
           this.log(`Searching with expression "${regex}"`);
           this[fn](regex, 1, (term, node, filterInfo) => {
-            return this.opt.filter(node, kw, totalMatches, matches, filterInfo);
+            return this.opt.filter(node, kw, totalMarks, matches, filterInfo);
           }, (element, matchInfo) => {
             matches++;
-            totalMatches++;
+            totalMarks++;
             this.opt.each(element, matchInfo);
           }, (count) => {
-            totalCount += count;
+            totalMatches += count;
             if (count === 0) {
               this.opt.noMatch(kw);
             }
@@ -1241,19 +1245,19 @@
             if (++index < length) {
               handler(keywords[index]);
             } else {
-              this.opt.done(totalMatches, totalCount, termStats);
+              this.opt.done(totalMarks, totalMatches, termStats);
             }
           });
         };
       if (length === 0) {
-        this.opt.done(totalMatches, 0, termStats);
+        this.opt.done(0, 0, termStats);
       } else {
         handler(keywords[index]);
       }
     }
     markRanges(rawRanges, opt) {
       this.opt = opt;
-      let totalMatches = 0,
+      let totalMarks = 0,
         ranges = this.checkRanges(rawRanges);
       if (ranges && ranges.length) {
         this.log(
@@ -1264,14 +1268,14 @@
           ranges, (node, range, match, counter) => {
             return this.opt.filter(node, range, match, counter);
           }, (element, range) => {
-            totalMatches++;
+            totalMarks++;
             this.opt.each(element, range);
-          }, () => {
-            this.opt.done(totalMatches);
+          }, (totalMatches) => {
+            this.opt.done(totalMarks, totalMatches);
           }
         );
       } else {
-        this.opt.done(totalMatches);
+        this.opt.done(0, 0);
       }
     }
     unmark(opt) {

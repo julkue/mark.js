@@ -1,6 +1,6 @@
 'use strict';
 describe('mark with range across elements', function() {
-  var $ctx, txt, ranges, index;
+  var $ctx, txt, ranges, index, totalMatches, totalMarks;
   beforeEach(function(done) {
     loadFixtures('ranges/across-elements.html');
 
@@ -24,7 +24,11 @@ describe('mark with range across elements', function() {
       'each': function(node, range) {
         $(node).attr('data-range-start', range.start);
       },
-      'done': done
+      'done': function(counter, matchCount) {
+        totalMarks = counter;
+        totalMatches = matchCount;
+        done();
+      }
     });
   });
 
@@ -37,5 +41,7 @@ describe('mark with range across elements', function() {
       ).text().replace(/\s+/g, '');
     expect(match1).toEqual('dolor sit amet');
     expect(match2).toEqual('amet.Testing');
+    expect(totalMarks).toBe(6);
+    expect(totalMatches).toBe(2);
   });
 });
