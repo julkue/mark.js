@@ -781,7 +781,7 @@
           start = parseInt(range.start, 10);
           end = start + parseInt(range.length, 10);
 
-          if (this.isNumeric(range.start) && this.isNumeric(range.length) && end - last > 0 && end - start > 0) {
+          if (this.isNumeric(range.start) && this.isNumeric(range.length) && start >= last && end > start) {
             valid = true;
           } else {
             this.log('Ignoring invalid or overlapping range: ' + "".concat(JSON.stringify(range)));

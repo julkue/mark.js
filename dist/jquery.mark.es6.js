@@ -588,8 +588,8 @@
         if (
           this.isNumeric(range.start) &&
           this.isNumeric(range.length) &&
-          end - last > 0 &&
-          end - start > 0
+          start >= last &&
+          end > start
         ) {
           valid = true;
         } else {
@@ -957,7 +957,7 @@
           start = text.indexOf(group, startIndex);
           end = start + group.length;
           if (start !== -1) {
-            this.wrapRangeInMappedTextNode(dict, s + start, s + end, (node) => {
+            this.wrapRangeInMappedTextNode(dict, s + start, s + end, node => {
               return filterCb(group, node, index);
             }, (node, groupStart) => {
               eachCb(node, matchStart, groupStart, index);
@@ -976,7 +976,7 @@
       while (++i < str.length) {
         switch (str[i]) {
           case '(':
-            if (!charsRange) {
+            if ( !charsRange) {
               if (reg.test(str.substring(i))) {
                 stack.push(1);
                 if (brackets === 0) {
