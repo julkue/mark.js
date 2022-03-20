@@ -623,7 +623,7 @@
         valid = false;
         this.log(`Invalid range: ${JSON.stringify(range)}`);
         this.opt.noMatch(range);
-      } else if (string.substring(start, end).replace(/\s+/g, '') === '') {
+      } else if ( !/\S/.test(string.substring(start, end))) {
         valid = false;
         this.log('Skipping whitespace only range: ' + JSON.stringify(range));
         this.opt.noMatch(range);
@@ -918,14 +918,13 @@
     }
     wrapMatchGroupsD(dict, match, params, filterCb, eachCb) {
       let matchStart = true,
-        lastIndex = 0,
         i = 0,
         group, start, end, isMarked;
       while (++i < match.length) {
         group = match[i];
         if (group) {
           start = match.indices[i][0];
-          if (start >= lastIndex) {
+          if (start >= params.lastIndex) {
             end = match.indices[i][1];
             isMarked = false;
             this.wrapRangeInMappedTextNode(dict, start, end, node => {
@@ -935,8 +934,8 @@
               eachCb(node, matchStart, groupStart, i);
               matchStart = false;
             });
-            if (isMarked && end > lastIndex) {
-              lastIndex = end;
+            if (isMarked && end > params.lastIndex) {
+              params.lastIndex = end;
             }
           }
         }
@@ -1069,12 +1068,13 @@
       const separateGroups = this.opt.separateGroups,
         matchIdx = separateGroups || ignoreGroups === 0 ? 0 : ignoreGroups + 1,
         fn = regex.hasIndices ? 'wrapMatchGroupsD' : 'wrapMatchGroups',
-        params = !separateGroups || regex.hasIndices ? {} : {
-          regex : regex,
-          groups : this.collectRegexGroupIndexes(regex)
-        },
+        params = separateGroups ? { lastIndex : 0 } : {},
         execution = { abort : false },
         filterInfo = { execution : execution };
+      if (separateGroups && !regex.hasIndices) {
+        params.regex = regex;
+        params.groups = this.collectRegexGroupIndexes(regex);
+      }
       let match, matchStart, count = 0;
       this.getTextNodesAcrossElements(dict => {
         while (

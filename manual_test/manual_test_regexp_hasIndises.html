@@ -11,7 +11,7 @@
   <script src="../../lib/jasmine-3.9.0/jasmine-html.js"></script>
   <script src="../../lib/jasmine-3.9.0/boot0.js"></script>
   <!-- optional: include a file here that configures the Jasmine env -->
-  <script src="../../lib/jasmine-3.9.0/boot1.js"></script> 
+  <script src="../../lib/jasmine-3.9.0/boot1.js"></script>
 
   <script src="../node_modules/jquery/dist/jquery.min.js"></script>
   <script src="../dist/jquery.mark.js"></script>
@@ -19,12 +19,21 @@
   <script src="specs/separate-groups-hasIndices.js"></script>
   <script src="specs/regex-pattern-parser.js"></script>
   <script src="specs/regex-pattern-parser-across-elements.js"></script>
+  <script src="specs/regex-group-overlap.js"></script>
   <style>
     .hide-fixture { display: none; }
   </style>
 </head>
 <body>
- 
+
+<div class="regex-group-overlap hide-fixture">
+  <p>aa--bb--aa--ff--aa--ff--aa</p>
+</div>
+
+<div class="regex-group-overlap-across-elements hide-fixture">
+  <p>aa--bb--<b>aa</b>--ff--<b>aa</b>--ff--aa</p>
+</div>
+
 <div class="regex-pattern-parser hide-fixture">
   <p>xxaaaaaaaayyaaaaaaaafzzaaaaaaaabbbbbb(bb\)b[c(p\c/p)c]ddd</p>
 </div>

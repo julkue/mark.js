@@ -232,7 +232,7 @@ class Mark {
       if (
         this.isNumeric(range.start) &&
         this.isNumeric(range.length) &&
-        start >= last && 
+        start >= last &&
         end > start
       ) {
         valid = true;
@@ -284,7 +284,7 @@ class Mark {
       valid = false;
       this.log(`Invalid range: ${JSON.stringify(range)}`);
       this.opt.noMatch(range);
-    } else if (string.substring(start, end).replace(/\s+/g, '') === '') {
+    } else if ( !/\S/.test(string.substring(start, end))) {
       valid = false;
       // whitespace only; even if wrapped it is not visible
       this.log('Skipping whitespace only range: ' + JSON.stringify(range));
@@ -855,13 +855,12 @@ class Mark {
   * Mark separate groups of the current match with RegExp.hasIndices
   * @param {Mark~wrapMatchGroupsDDict} dict - The dictionary
   * @param {array} match - The current match
-  * @param {Mark~paramsObject} params - The object containing a two properties
+  * @param {Mark~paramsObject} params - The object containing a one property
   * @param {Mark~wrapMatchGroupsDFilterCallback} filterCb - Filter callback
   * @param {Mark~wrapMatchGroupsDEachCallback} eachCb - Each callback
   */
   wrapMatchGroupsD(dict, match, params, filterCb, eachCb) {
     let matchStart = true,
-      lastIndex = 0,
       i = 0,
       group, start, end, isMarked;
 
@@ -870,8 +869,9 @@ class Mark {
 
       if (group) {
         start = match.indices[i][0];
-        //it prevents marking nested group - parent group is already marked
-        if (start >= lastIndex) {
+        // it prevents to wrap nested group - parent group is already wrapped
+        // it also prevents to wrap overlapping groups
+        if (start >= params.lastIndex) {
           end = match.indices[i][1];
 
           isMarked = false;
@@ -883,8 +883,8 @@ class Mark {
             matchStart = false;
           });
           // group may be filtered out
-          if (isMarked && end > lastIndex) {
-            lastIndex = end;
+          if (isMarked && end > params.lastIndex) {
+            params.lastIndex = end;
           }
         }
       }
@@ -1106,6 +1106,8 @@ class Mark {
    * @type {object}
    * @property {RegExp} regex - The regular expression to be searched for
    * @property {array} groups - The array containing main groups indexes
+   * @property {number} lastIndex - The last index of the last wrapped group -
+   * prevent attempt to wrap overlapping groups
    */
   /**
    * @typedef Mark~filterInfoObject
@@ -1169,12 +1171,14 @@ class Mark {
     const separateGroups = this.opt.separateGroups,
       matchIdx = separateGroups || ignoreGroups === 0 ? 0 : ignoreGroups + 1,
       fn = regex.hasIndices ? 'wrapMatchGroupsD' : 'wrapMatchGroups',
-      params = !separateGroups || regex.hasIndices ? {} : {
-        regex : regex,
-        groups : this.collectRegexGroupIndexes(regex)
-      },
+      params = separateGroups ? { lastIndex : 0 } : {},
       execution = { abort : false },
       filterInfo = { execution : execution };
+
+    if (separateGroups && !regex.hasIndices) {
+      params.regex = regex;
+      params.groups = this.collectRegexGroupIndexes(regex);
+    }
 
     let match, matchStart, count = 0;
 

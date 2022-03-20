@@ -818,7 +818,7 @@
           valid = false;
           this.log("Invalid range: ".concat(JSON.stringify(range)));
           this.opt.noMatch(range);
-        } else if (string.substring(start, end).replace(/\s+/g, '') === '') {
+        } else if (!/\S/.test(string.substring(start, end))) {
           valid = false;
           this.log('Skipping whitespace only range: ' + JSON.stringify(range));
           this.opt.noMatch(range);
@@ -1248,7 +1248,6 @@
       key: "wrapMatchGroupsD",
       value: function wrapMatchGroupsD(dict, match, params, filterCb, eachCb) {
         var matchStart = true,
-            lastIndex = 0,
             i = 0,
             group,
             start,
@@ -1261,7 +1260,7 @@
           if (group) {
             start = match.indices[i][0];
 
-            if (start >= lastIndex) {
+            if (start >= params.lastIndex) {
               end = match.indices[i][1];
               isMarked = false;
               this.wrapRangeInMappedTextNode(dict, start, end, function (node) {
@@ -1272,8 +1271,8 @@
                 matchStart = false;
               });
 
-              if (isMarked && end > lastIndex) {
-                lastIndex = end;
+              if (isMarked && end > params.lastIndex) {
+                params.lastIndex = end;
               }
             }
           }
@@ -1457,16 +1456,21 @@
         var separateGroups = this.opt.separateGroups,
             matchIdx = separateGroups || ignoreGroups === 0 ? 0 : ignoreGroups + 1,
             fn = regex.hasIndices ? 'wrapMatchGroupsD' : 'wrapMatchGroups',
-            params = !separateGroups || regex.hasIndices ? {} : {
-          regex: regex,
-          groups: this.collectRegexGroupIndexes(regex)
-        },
+            params = separateGroups ? {
+          lastIndex: 0
+        } : {},
             execution = {
           abort: false
         },
             filterInfo = {
           execution: execution
         };
+
+        if (separateGroups && !regex.hasIndices) {
+          params.regex = regex;
+          params.groups = this.collectRegexGroupIndexes(regex);
+        }
+
         var match,
             matchStart,
             count = 0;
