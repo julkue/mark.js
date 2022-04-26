@@ -20,6 +20,9 @@
   <script src="specs/regex-pattern-parser.js"></script>
   <script src="specs/regex-pattern-parser-across-elements.js"></script>
   <script src="specs/regex-group-overlap.js"></script>
+  <script src="specs/wrap-nested-overlapped-ranges.js"></script>
+  <script src="specs/wrap-nested-overlapped-groups.js"></script>
+  <script src="specs/random.js"></script>
   <style>
     .hide-fixture { display: none; }
   </style>
@@ -40,6 +43,55 @@
 
 <div class="regex-pattern-parser-across-elements hide-fixture">
   <p>xxaaaaaaaayyaaaaaaaafzzaaaaaaaabbbbbb(bb\)b[c(p\c/p)c]ddd</p>
+</div>
+
+<div class="overlapping-groups hide-fixture">
+  <p>abcdefgh bcdefgha cdefghab</p>
+  <p>hgfedcba ahgfedcb bahgfedc</p>
+</div>
+
+<div class="nesting-groups hide-fixture">
+  <p>a1a cc22ccc33cc ee44NN55ee</p>
+</div>
+
+<div class="nested-overlapped-ranges hide-fixture">
+    <p>
+        Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+        invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+        At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+        gubergren, no sea takimata sanctus est Lorem ipsum dolor sit. Lorem ipsum
+        dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+        invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+        At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+        gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
+    </p>
+</div>
+
+<div class="ranges hide-fixture">
+    <div>
+        <p>
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+            invidunt ut<br> labore et dolore magna aliquyam erat, sed diam voluptua.
+            At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+            gubergren, no sea takimata sanctus est Lorem ipsum dolor sit. Lorem ipsum
+            dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+            invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero
+            eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+            no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </p>
+    </div>
+    <div>
+        <p>
+            Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+            invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.
+            At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd
+            gubergren, no sea takimata sanctus est Lorem ipsum dolor sit. Lorem ipsum
+            dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor
+            invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero
+            eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren,
+            no sea takimata sanctus est Lorem ipsum dolor sit amet.
+        </p>
+    </div>
 </div>
 
 <div class="across-elements-separate-groups hide-fixture">
