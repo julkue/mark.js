@@ -657,6 +657,7 @@
       _classCallCheck(this, Mark);
 
       this.ctx = ctx;
+      this.cacheDict = {};
       this.ie = false;
       var ua = window.navigator.userAgent;
 
@@ -1082,6 +1083,11 @@
       value: function getTextNodes(cb) {
         var _this4 = this;
 
+        if (this.opt.cacheTextNodes && this.cacheDict.nodes) {
+          cb(this.cacheDict);
+          return;
+        }
+
         var val = '',
             nodes = [];
         this.iterator.forEachNode(NodeFilter.SHOW_TEXT, function (node) {
@@ -1098,12 +1104,18 @@
             return NodeFilter.FILTER_ACCEPT;
           }
         }, function () {
-          cb({
+          var dict = {
             value: val,
             nodes: nodes,
             lastIndex: 0,
             lastTextIndex: 0
-          });
+          };
+
+          if (_this4.opt.cacheTextNodes) {
+            _this4.cacheDict = dict;
+          }
+
+          cb(dict);
         });
       }
     }, {

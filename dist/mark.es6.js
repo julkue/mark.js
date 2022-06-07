@@ -482,6 +482,7 @@
   class Mark {
     constructor(ctx) {
       this.ctx = ctx;
+      this.cacheDict = {};
       this.ie = false;
       const ua = window.navigator.userAgent;
       if (ua.indexOf('MSIE') > -1 || ua.indexOf('Trident') > -1) {
@@ -786,6 +787,10 @@
       });
     }
     getTextNodes(cb) {
+      if (this.opt.cacheTextNodes && this.cacheDict.nodes) {
+        cb(this.cacheDict);
+        return;
+      }
       let val = '',
         nodes = [];
       this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
@@ -802,12 +807,16 @@
           return NodeFilter.FILTER_ACCEPT;
         }
       }, () => {
-        cb({
+        const dict = {
           value: val,
           nodes: nodes,
-          lastIndex : 0,
-          lastTextIndex : 0
-        });
+          lastIndex: 0,
+          lastTextIndex: 0
+        };
+        if (this.opt.cacheTextNodes) {
+          this.cacheDict = dict;
+        }
+        cb(dict);
       });
     }
     matchesExclude(el) {

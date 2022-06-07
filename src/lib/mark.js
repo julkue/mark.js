@@ -24,6 +24,8 @@ class Mark {
      * @access protected
      */
     this.ctx = ctx;
+    // used with 'cacheTextNodes' option to increase performance
+    this.cacheDict = {};
     /**
      * Specifies if the current browser is a IE (necessary for the node
      * normalization bug workaround). See {@link Mark#unwrapMatches}
@@ -564,6 +566,12 @@ class Mark {
    * @access protected
    */
   getTextNodes(cb) {
+    // get dict from cache if it's already built
+    if (this.opt.cacheTextNodes && this.cacheDict.nodes) {
+      cb(this.cacheDict);
+      return;
+    }
+
     let val = '',
       nodes = [];
     this.iterator.forEachNode(NodeFilter.SHOW_TEXT, node => {
@@ -580,12 +588,18 @@ class Mark {
         return NodeFilter.FILTER_ACCEPT;
       }
     }, () => {
-      cb({
+      const dict = {
         value: val,
         nodes: nodes,
-        lastIndex : 0,
-        lastTextIndex : 0
-      });
+        lastIndex: 0,
+        lastTextIndex: 0
+      };
+
+      if (this.opt.cacheTextNodes) {
+        this.cacheDict = dict;
+      }
+
+      cb(dict);
     });
   }
 
