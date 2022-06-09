@@ -24,7 +24,7 @@ class Mark {
      * @access protected
      */
     this.ctx = ctx;
-    // used with 'cacheTextNodes' option to increase performance
+    // used with the 'cacheTextNodes' option to improve performance
     this.cacheDict = {};
     /**
      * Specifies if the current browser is a IE (necessary for the node
@@ -288,7 +288,7 @@ class Mark {
       end = max;
       this.log(`End range automatically set to the max value of ${max}`);
     }
-    if (start < 0 || end - start < 0 || start > max || end > max) {
+    if (start < 0 || end - start <= 0) {
       valid = false;
       this.log(`Invalid range: ${JSON.stringify(range)}`);
       this.opt.noMatch(range);
@@ -440,6 +440,8 @@ class Mark {
   * value
   * @property {number} nodes.offset - The offset is used to correct position
   * if space or string was added to the end of the text node
+  * @property {number} nodes.totalOffset - The length of spaces/strings that
+  * were added to the composite string. It has a negative value.
   * @property {HTMLElement} nodes.node - The DOM text node element
   */
 
@@ -456,7 +458,18 @@ class Mark {
   * @access protected
   */
   getTextNodesAcrossElements(cb) {
-    let val = '', start, text, endBySpace, type, offset, nodes = [],
+    // get dict from the cache if it's already built
+    if (this.opt.cacheTextNodes && this.cacheDict.nodes) {
+      // it's only requires reset two indexes
+      this.cacheDict.lastIndex = 0;
+      this.cacheDict.lastTextIndex = 0;
+
+      cb(this.cacheDict);
+      return;
+    }
+
+    let val = '', start, text, endBySpace, type, offset,
+      totalOffset = 0, nodes = [],
       boundary = this.opt.blockElementsBoundary,
       str, str2;
 
@@ -519,8 +532,10 @@ class Mark {
         start: start,
         end: val.length - offset,
         offset : offset,
+        totalOffset : totalOffset,
         node: node
       });
+      totalOffset -= offset;
     }, node => {
       if (this.matchesExclude(node.parentNode)) {
         return NodeFilter.FILTER_REJECT;
@@ -528,12 +543,18 @@ class Mark {
         return NodeFilter.FILTER_ACCEPT;
       }
     }, () => {
-      cb({
+      const dict = {
         value: val,
         nodes: nodes,
-        lastIndex : 0,
-        lastTextIndex : 0
-      });
+        lastIndex: 0,
+        lastTextIndex: 0
+      };
+
+      if (this.opt.cacheTextNodes) {
+        this.cacheDict = dict;
+      }
+
+      cb(dict);
     });
   }
 
@@ -566,7 +587,7 @@ class Mark {
    * @access protected
    */
   getTextNodes(cb) {
-    // get dict from cache if it's already built
+    // get dict from the cache if it's already built
     if (this.opt.cacheTextNodes && this.cacheDict.nodes) {
       cb(this.cacheDict);
       return;
@@ -730,6 +751,8 @@ class Mark {
    * value
    * @property {number} nodes.offset - The offset is used to correct position
    * if space or string was added to the end of the text node
+   * @property {number} nodes.totalOffset - The length of spaces/strings that
+   * were added to the composite string.
    * @property {HTMLElement} nodes.node - The DOM text node element
    */
   /**
@@ -742,7 +765,7 @@ class Mark {
   /**
    * Filter callback
    * @callback Mark~wrapRangeInMappedTextNodeFilterCallback
-   * @param {HTMLElement} node - The matching text node DOM element
+   * @param {object} n - The current processed object of the dict.nodes
    */
   /**
    * Determines matches by start and end positions using the text node
@@ -778,7 +801,7 @@ class Mark {
       if (i + 1 === dict.nodes.length || dict.nodes[i+1].start > start) {
         let n = dict.nodes[i];
 
-        if (!filterCb(n.node)) {
+        if (!filterCb(n)) {
           // update the lastIndex
           if (i > dict.lastIndex) {
             dict.lastIndex = i;
@@ -1000,8 +1023,8 @@ class Mark {
           end = match.indices[i][1];
           isWrapped = false;
 
-          this.wrapRangeInMappedTextNode(dict, start, end, node => {
-            return filterCb(group, node, i);
+          this.wrapRangeInMappedTextNode(dict, start, end, obj => {
+            return filterCb(group, obj.node, i);
           }, (node, groupStart) => {
             isWrapped = true;
             eachCb(node, groupStart, i);
@@ -1073,8 +1096,8 @@ class Mark {
 
     //a way to mark nesting groups, it first wraps the whole match as a group 0
     if (this.opt.wrapAllRanges) {
-      this.wrapRangeInMappedTextNode(dict, s, text.length, node => {
-        return filterCb(text, node, index);
+      this.wrapRangeInMappedTextNode(dict, s, text.length, obj => {
+        return filterCb(text, obj.node, index);
       }, function(node, groupStart) {
         eachCb(node, groupStart, index);
       });
@@ -1093,8 +1116,8 @@ class Mark {
         end = start + group.length;
 
         if (start !== -1) {
-          this.wrapRangeInMappedTextNode(dict, s + start, s + end, node => {
-            return filterCb(group, node, index);
+          this.wrapRangeInMappedTextNode(dict, s + start, s + end, obj => {
+            return filterCb(group, obj.node, index);
           }, (node, groupStart) => {
             eachCb(node, groupStart, index);
           });
@@ -1333,8 +1356,10 @@ class Mark {
    * with 'separateGroups' option
    * @property {object} execution - The helper object for early abort. Contains
    * boolean 'abort' property.
-   * @property {number} offset - The absolute start index of a text node.
-   * Can be used to translate the local node indexes to the absolute ones
+   * @property {number} offset - With the 'acrossElements' option: the length
+   * of spaces/strings that were added to the composite string.
+   * Without this option: the absolute start index of a text node.
+   * It needs to translate the local text node indexes to the absolute ones.
    */
   /**
    * @typedef Mark~matchInfoObject
@@ -1483,10 +1508,11 @@ class Mark {
         }
         const end = start + match[matchIdx].length;
 
-        this.wrapRangeInMappedTextNode(dict, start, end, node => {
+        this.wrapRangeInMappedTextNode(dict, start, end, obj => {
           filterInfo.matchStart = matchStart;
+          filterInfo.offset = obj.totalOffset;
           matchStart = false;
-          return filterCb(match[matchIdx], node, filterInfo);
+          return filterCb(match[matchIdx], obj.node, filterInfo);
 
         }, (node, matchStart) => {
           if (matchStart) {
@@ -1549,9 +1575,9 @@ class Mark {
           dict.value
         );
         if (valid) {
-          this.wrapRangeInMappedTextNode(dict, start, end, node => {
+          this.wrapRangeInMappedTextNode(dict, start, end, obj => {
             return filterCb(
-              node,
+              obj.node,
               range,
               dict.value.substring(start, end),
               counter

@@ -625,7 +625,7 @@
         end = max;
         this.log(`End range automatically set to the max value of ${max}`);
       }
-      if (start < 0 || end - start < 0 || start > max || end > max) {
+      if (start < 0 || end - start <= 0) {
         valid = false;
         this.log(`Invalid range: ${JSON.stringify(range)}`);
         this.opt.noMatch(range);
@@ -714,7 +714,14 @@
       return str;
     }
     getTextNodesAcrossElements(cb) {
-      let val = '', start, text, endBySpace, type, offset, nodes = [],
+      if (this.opt.cacheTextNodes && this.cacheDict.nodes) {
+        this.cacheDict.lastIndex = 0;
+        this.cacheDict.lastTextIndex = 0;
+        cb(this.cacheDict);
+        return;
+      }
+      let val = '', start, text, endBySpace, type, offset,
+        totalOffset = 0, nodes = [],
         boundary = this.opt.blockElementsBoundary,
         str, str2;
       let tags = { div : 1, p : 1, li : 1, td : 1, tr : 1, th : 1, ul : 1,
@@ -769,8 +776,10 @@
           start: start,
           end: val.length - offset,
           offset : offset,
+          totalOffset : totalOffset,
           node: node
         });
+        totalOffset -= offset;
       }, node => {
         if (this.matchesExclude(node.parentNode)) {
           return NodeFilter.FILTER_REJECT;
@@ -778,12 +787,16 @@
           return NodeFilter.FILTER_ACCEPT;
         }
       }, () => {
-        cb({
+        const dict = {
           value: val,
           nodes: nodes,
-          lastIndex : 0,
-          lastTextIndex : 0
-        });
+          lastIndex: 0,
+          lastTextIndex: 0
+        };
+        if (this.opt.cacheTextNodes) {
+          this.cacheDict = dict;
+        }
+        cb(dict);
       });
     }
     getTextNodes(cb) {
@@ -890,7 +903,7 @@
       for (i; i < dict.nodes.length; i++)  {
         if (i + 1 === dict.nodes.length || dict.nodes[i+1].start > start) {
           let n = dict.nodes[i];
-          if (!filterCb(n.node)) {
+          if (!filterCb(n)) {
             if (i > dict.lastIndex) {
               dict.lastIndex = i;
             }
@@ -998,8 +1011,8 @@
           if (this.opt.wrapAllRanges || start >= lastIndex) {
             end = match.indices[i][1];
             isWrapped = false;
-            this.wrapRangeInMappedTextNode(dict, start, end, node => {
-              return filterCb(group, node, i);
+            this.wrapRangeInMappedTextNode(dict, start, end, obj => {
+              return filterCb(group, obj.node, i);
             }, (node, groupStart) => {
               isWrapped = true;
               eachCb(node, groupStart, i);
@@ -1030,8 +1043,8 @@
       const s = match.index,
         text = match[0];
       if (this.opt.wrapAllRanges) {
-        this.wrapRangeInMappedTextNode(dict, s, text.length, node => {
-          return filterCb(text, node, index);
+        this.wrapRangeInMappedTextNode(dict, s, text.length, obj => {
+          return filterCb(text, obj.node, index);
         }, function(node, groupStart) {
           eachCb(node, groupStart, index);
         });
@@ -1043,8 +1056,8 @@
           start = text.indexOf(group, startIndex);
           end = start + group.length;
           if (start !== -1) {
-            this.wrapRangeInMappedTextNode(dict, s + start, s + end, node => {
-              return filterCb(group, node, index);
+            this.wrapRangeInMappedTextNode(dict, s + start, s + end, obj => {
+              return filterCb(group, obj.node, index);
             }, (node, groupStart) => {
               eachCb(node, groupStart, index);
             });
@@ -1232,10 +1245,11 @@
             }
           }
           const end = start + match[matchIdx].length;
-          this.wrapRangeInMappedTextNode(dict, start, end, node => {
+          this.wrapRangeInMappedTextNode(dict, start, end, obj => {
             filterInfo.matchStart = matchStart;
+            filterInfo.offset = obj.totalOffset;
             matchStart = false;
-            return filterCb(match[matchIdx], node, filterInfo);
+            return filterCb(match[matchIdx], obj.node, filterInfo);
           }, (node, matchStart) => {
             if (matchStart) {
               count++;
@@ -1264,9 +1278,9 @@
             dict.value
           );
           if (valid) {
-            this.wrapRangeInMappedTextNode(dict, start, end, node => {
+            this.wrapRangeInMappedTextNode(dict, start, end, obj => {
               return filterCb(
-                node,
+                obj.node,
                 range,
                 dict.value.substring(start, end),
                 counter
