@@ -1411,7 +1411,7 @@
             text = match[0];
 
         if (this.opt.wrapAllRanges) {
-          this.wrapRangeInMappedTextNode(dict, s, text.length, function (obj) {
+          this.wrapRangeInMappedTextNode(dict, s, s + text.length, function (obj) {
             return filterCb(text, obj.node, index);
           }, function (node, groupStart) {
             eachCb(node, groupStart, index);

@@ -1043,7 +1043,7 @@
       const s = match.index,
         text = match[0];
       if (this.opt.wrapAllRanges) {
-        this.wrapRangeInMappedTextNode(dict, s, text.length, obj => {
+        this.wrapRangeInMappedTextNode(dict, s, s + text.length, obj => {
           return filterCb(text, obj.node, index);
         }, function(node, groupStart) {
           eachCb(node, groupStart, index);
