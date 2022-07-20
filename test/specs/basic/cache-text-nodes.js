@@ -9,6 +9,18 @@ describe('cache text nodes without acrossElements option', function() {
     $ctx = $('.context');
   });
 
+  it('should mark array with cacheTextNodes option', function(done) {
+    new Mark($ctx[0]).mark(words, {
+      'cacheTextNodes' : true,
+      'accuracy' : 'exactly',
+      'done' : function(m, totalMatches) {
+        expect(totalMatches).toBe(20);
+        expect(checkWords()).toBe(true);
+        done();
+      }
+    });
+  });
+
   it('should build & wrap ranges from array', function(done) {
     var ranges = [], total = 0;
 
@@ -28,23 +40,26 @@ describe('cache text nodes without acrossElements option', function() {
       'done' : function() {
         new Mark($ctx[0]).markRanges(ranges, {
           done : function(totalMarks, totalMatches) {
-            var failed = false;
-            // it checks correctness of marked words
-            $('mark').each(function(i, elem) {
-              if (words.indexOf(elem.textContent.toLowerCase()) === -1) {
-                failed = true;
-                return false;
-              }
-              return true;
-            });
-
             expect(totalMatches).toBe(total);
             expect(totalMatches).toBe(20);
-            expect(failed).toBe(false);
+            expect(checkWords()).toBe(true);
             done();
           }
         });
       }
     });
   });
+
+  function checkWords() {
+    var success = true;
+    // it checks correctness of marked words
+    $('mark').each(function(i, elem) {
+      if (words.indexOf(elem.textContent.toLowerCase()) === -1) {
+        success = false;
+        return false;
+      }
+      return true;
+    });
+    return success;
+  }
 });

@@ -505,7 +505,6 @@
         'ignoreGroups': 0,
         'each': () => {},
         'noMatch': () => {},
-        'filterMatch': () => true,
         'filter': () => true,
         'done': () => {},
         'debug': false,
@@ -723,7 +722,7 @@
         return;
       }
       let val = '', start, text, endBySpace, type, offset,
-        totalOffset = 0, nodes = [],
+        startOffset = 0, nodes = [],
         boundary = this.opt.blockElementsBoundary,
         str, str2;
       let tags = { div : 1, p : 1, li : 1, td : 1, tr : 1, th : 1, ul : 1,
@@ -778,10 +777,10 @@
           start: start,
           end: val.length - offset,
           offset : offset,
-          totalOffset : totalOffset,
+          startOffset : startOffset,
           node: node
         });
-        totalOffset -= offset;
+        startOffset -= offset;
       }, node => {
         if (this.matchesExclude(node.parentNode)) {
           return NodeFilter.FILTER_REJECT;
@@ -856,16 +855,17 @@
       node.parentNode.replaceChild(markNode, node);
       return  markNode;
     }
-    wrapRangeInTextNodeInsert(n, s, e, start, index, nodes) {
+    wrapRangeInTextNodeInsert(dict, n, s, e, start, index) {
       let ended = e === n.node.textContent.length;
       if (s === 0 && ended) {
         let markNode = this.createMarkElement(n.node);
         n.node = markNode.childNodes[0];
-        return { retNode : n, markNode };
+        return { retNode : n, markNode, increment : 0 };
       }
       let node = n.node.splitText(s),
         restNode = node.splitText(e - s),
-        markNode = this.createMarkElement(node);
+        markNode = this.createMarkElement(node),
+        increment = 1;
       let mNode = {
           start: start,
           end: n.start + e,
@@ -879,17 +879,18 @@
           node: restNode
         };
       if (s === 0) {
-        nodes.splice(index, 1, mNode, retNode);
+        dict.nodes.splice(index, 1, mNode, retNode);
       } else {
         if (ended) {
-          nodes.splice(index + 1, 0, mNode);
+          dict.nodes.splice(index + 1, 0, mNode);
         } else {
-          nodes.splice(index + 1, 0, mNode, retNode);
+          dict.nodes.splice(index + 1, 0, mNode, retNode);
+          increment = 2;
         }
         n.end = start;
         n.offset = 0;
       }
-      return { retNode, markNode };
+      return { retNode, markNode, increment };
     }
     wrapRangeInMappedTextNode(dict, start, end, filterCb, eachCb) {
       let i = dict.lastIndex,
@@ -916,7 +917,7 @@
           if (s >= 0 && e > s) {
             if (this.opt.wrapAllRanges) {
               let ret =
-                this.wrapRangeInTextNodeInsert(n, s, e, start, i, dict.nodes);
+                this.wrapRangeInTextNodeInsert(dict, n, s, e, start, i);
               n = ret.retNode;
               eachCb(ret.markNode, rangeStart);
             } else {
@@ -1148,43 +1149,65 @@
       });
     }
     wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-      const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+      const index = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
         execution = { abort : false },
         filterInfo = { execution : execution };
-      let node, match, count = 0;
+      let info, node, match, count = 0;
       this.getTextNodes(dict => {
-        dict.nodes.every(nd => {
-          node = nd.node;
-          filterInfo.offset = nd.start;
+        for (let k = 0; k < dict.nodes.length; k++) {
+          info = dict.nodes[k];
+          node = info.node;
           while (
             (match = regex.exec(node.textContent)) !== null &&
-            match[matchIdx] !== ''
+            match[index] !== ''
           ) {
             filterInfo.match = match;
-            if (!filterCb(match[matchIdx], node, filterInfo)) {
+            filterInfo.offset = info.start;
+            if (!filterCb(match[index], node, filterInfo)) {
               continue;
             }
-            let pos = match.index;
-            if (matchIdx !== 0) {
-              for (let i = 1; i < matchIdx; i++) {
-                pos += match[i].length;
+            let len = match[index].length,
+              start = match.index;
+            if (index !== 0) {
+              for (let i = 1; i < index; i++) {
+                start += match[i].length;
               }
             }
-            node = this.wrapGroups(node, pos, match[matchIdx].length, node => {
+            if (this.opt.cacheTextNodes) {
+              const ret = this.wrapRangeInTextNodeInsert(
+                dict, info, start, start + len, info.start + start, k
+              );
               count++;
-              eachCb(node, {
+              eachCb(ret.markNode, {
                 match : match,
                 count : count,
               });
-            });
+              if (ret.increment === 0) {
+                regex.lastIndex = 0;
+                break;
+              }
+              k += ret.increment;
+              info = ret.retNode;
+              node = info.node;
+            } else {
+              node = this.wrapGroups(node, start, len, node => {
+                count++;
+                eachCb(node, {
+                  match : match,
+                  count : count,
+                });
+              });
+            }
             regex.lastIndex = 0;
             if (execution.abort) {
               break;
             }
           }
-          return !execution.abort;
-        });
-        endCb(count);
+          if (execution.abort) {
+            break;
+          }
+        }
+        endCb(count, dict);
       });
     }
     wrapGroupsAcrossElements(regex, unused, filterCb, eachCb, endCb) {
@@ -1229,29 +1252,29 @@
       });
     }
     wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
-      const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+      const index = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
         execution = { abort : false },
         filterInfo = { execution : execution };
       let match, matchStart, count = 0;
       this.getTextNodesAcrossElements(dict => {
         while (
           (match = regex.exec(dict.value)) !== null &&
-          match[matchIdx] !== ''
+          match[index] !== ''
         ) {
           filterInfo.match = match;
           matchStart = true;
           let start = match.index;
-          if (matchIdx !== 0) {
-            for (let i = 1; i < matchIdx; i++) {
+          if (index !== 0) {
+            for (let i = 1; i < index; i++) {
               start += match[i].length;
             }
           }
-          const end = start + match[matchIdx].length;
+          const end = start + match[index].length;
           this.wrapRangeInMappedTextNode(dict, start, end, obj => {
             filterInfo.matchStart = matchStart;
-            filterInfo.offset = obj.totalOffset;
+            filterInfo.offset = obj.startOffset;
             matchStart = false;
-            return filterCb(match[matchIdx], obj.node, filterInfo);
+            return filterCb(match[index], obj.node, filterInfo);
           }, (node, matchStart) => {
             if (matchStart) {
               count++;
@@ -1266,7 +1289,7 @@
             break;
           }
         }
-        endCb(count);
+        endCb(count, dict);
       });
     }
     wrapRangeFromIndex(ranges, filterCb, eachCb, endCb) {
@@ -1356,7 +1379,8 @@
       let index = 0,
         totalMarks = 0,
         totalMatches = 0;
-      const fn = this.getMethodName(opt),
+      const fn =
+        this.opt.acrossElements ? 'wrapMatchesAcrossElements' : 'wrapMatches',
         termStats = {};
       const { keywords, length } =
         this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv),

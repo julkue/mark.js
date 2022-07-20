@@ -61,7 +61,6 @@ class Mark {
       'ignoreGroups': 0,
       'each': () => {},
       'noMatch': () => {},
-      'filterMatch': () => true,
       'filter': () => true,
       'done': () => {},
       'debug': false,
@@ -440,7 +439,7 @@ class Mark {
   * value
   * @property {number} nodes.offset - The offset is used to correct position
   * if space or string was added to the end of the text node
-  * @property {number} nodes.totalOffset - The length of spaces/strings that
+  * @property {number} nodes.startOffset - The length of spaces/strings that
   * were added to the composite string. It has a negative value.
   * @property {HTMLElement} nodes.node - The DOM text node element
   */
@@ -469,7 +468,7 @@ class Mark {
     }
 
     let val = '', start, text, endBySpace, type, offset,
-      totalOffset = 0, nodes = [],
+      startOffset = 0, nodes = [],
       boundary = this.opt.blockElementsBoundary,
       str, str2;
 
@@ -532,10 +531,10 @@ class Mark {
         start: start,
         end: val.length - offset,
         offset : offset,
-        totalOffset : totalOffset,
+        startOffset : startOffset,
         node: node
       });
-      totalOffset -= offset;
+      startOffset -= offset;
     }, node => {
       if (this.matchesExclude(node.parentNode)) {
         return NodeFilter.FILTER_REJECT;
@@ -682,28 +681,29 @@ class Mark {
   /**
    * Wraps the instance element and class around matches that fit the start and
    * end positions within the node
+   * @param {Mark~wrapRangeInTextNodeInsertDict} dict - The dictionary
    * @param {object} n - The current processed object
    * @param {number} s - The position where to start wrapping
    * @param {number} e - The position where to end wrapping
    * @param {number} start - The start position of the match
    * @param {number} index - The current index of the processed object
-   * @param {object[]} nodes - An array of objects
    * @return {object} Returns the object containing data about the last
    * splitted text node
    */
-  wrapRangeInTextNodeInsert(n, s, e, start, index, nodes) {
+  wrapRangeInTextNodeInsert(dict, n, s, e, start, index) {
     let ended = e === n.node.textContent.length;
 
     // no need to inset into the nodes
     if (s === 0 && ended) {
       let markNode = this.createMarkElement(n.node);
       n.node = markNode.childNodes[0];
-      return { retNode : n, markNode };
+      return { retNode : n, markNode, increment : 0 };
     }
 
     let node = n.node.splitText(s),
       restNode = node.splitText(e - s),
-      markNode = this.createMarkElement(node);
+      markNode = this.createMarkElement(node),
+      increment = 1;
 
     let mNode = {
         start: start,
@@ -721,20 +721,21 @@ class Mark {
     // at the start/end of a text node splitText() method creates an empty node
     // this logic prevents getting objects contains empty nodes into the array
     if (s === 0) {
-      nodes.splice(index, 1, mNode, retNode);
+      dict.nodes.splice(index, 1, mNode, retNode);
 
     } else {
       if (ended) {
-        nodes.splice(index + 1, 0, mNode);
+        dict.nodes.splice(index + 1, 0, mNode);
 
       } else {
-        nodes.splice(index + 1, 0, mNode, retNode);
+        dict.nodes.splice(index + 1, 0, mNode, retNode);
+        increment = 2;
       }
       n.end = start;
       n.offset = 0;
     }
 
-    return { retNode, markNode };
+    return { retNode, markNode, increment };
   }
 
   /* eslint-disable complexity */
@@ -751,7 +752,7 @@ class Mark {
    * value
    * @property {number} nodes.offset - The offset is used to correct position
    * if space or string was added to the end of the text node
-   * @property {number} nodes.totalOffset - The length of spaces/strings that
+   * @property {number} nodes.startOffset - The length of spaces/strings that
    * were added to the composite string.
    * @property {HTMLElement} nodes.node - The DOM text node element
    */
@@ -816,7 +817,7 @@ class Mark {
         if (s >= 0 && e > s) {
           if (this.opt.wrapAllRanges) {
             let ret =
-              this.wrapRangeInTextNodeInsert(n, s, e, start, i, dict.nodes);
+              this.wrapRangeInTextNodeInsert(dict, n, s, e, start, i);
             n = ret.retNode;
             eachCb(ret.markNode, rangeStart);
 
@@ -1257,6 +1258,7 @@ class Mark {
     });
   }
 
+  /* eslint-disable complexity */
   /**
    * Filter callback before each wrapping
    * @callback Mark~wrapMatchesFilterCallback
@@ -1290,41 +1292,65 @@ class Mark {
    * @access protected
    */
   wrapMatches(regex, ignoreGroups, filterCb, eachCb, endCb) {
-    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+    const index = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
       execution = { abort : false },
       filterInfo = { execution : execution };
 
-    let node, match, count = 0;
+    let info, node, match, count = 0;
 
     this.getTextNodes(dict => {
-      dict.nodes.every(nd => {
-        node = nd.node;
-        filterInfo.offset = nd.start;
+
+      for (let k = 0; k < dict.nodes.length; k++) {
+        info = dict.nodes[k];
+        node = info.node;
 
         while (
           (match = regex.exec(node.textContent)) !== null &&
-          match[matchIdx] !== ''
+          match[index] !== ''
         ) {
           filterInfo.match = match;
+          filterInfo.offset = info.start;
 
-          if (!filterCb(match[matchIdx], node, filterInfo)) {
+          if (!filterCb(match[index], node, filterInfo)) {
             continue;
           }
 
-          let pos = match.index;
-          if (matchIdx !== 0) {
-            for (let i = 1; i < matchIdx; i++) {
-              pos += match[i].length;
+          let len = match[index].length,
+            start = match.index;
+          if (index !== 0) {
+            for (let i = 1; i < index; i++) {
+              start += match[i].length;
             }
           }
 
-          node = this.wrapGroups(node, pos, match[matchIdx].length, node => {
+          if (this.opt.cacheTextNodes) {
+            const ret = this.wrapRangeInTextNodeInsert(
+              dict, info, start, start + len, info.start + start, k
+            );
             count++;
-            eachCb(node, {
+            eachCb(ret.markNode, {
               match : match,
               count : count,
             });
-          });
+
+            // matches the whole text node
+            if (ret.increment === 0) {
+              regex.lastIndex = 0;
+              break;
+            }
+            k += ret.increment;
+            info = ret.retNode;
+            node = info.node;
+
+          } else {
+            node = this.wrapGroups(node, start, len, node => {
+              count++;
+              eachCb(node, {
+                match : match,
+                count : count,
+              });
+            });
+          }
           // reset index of last match as the node changed and the
           // index isn't valid anymore http://tinyurl.com/htsudjd
           regex.lastIndex = 0;
@@ -1333,12 +1359,14 @@ class Mark {
             break;
           }
         }
-        // break loop on custom abort
-        return !execution.abort;
-      });
-      endCb(count);
+        if (execution.abort) {
+          break;
+        }
+      }
+      endCb(count, dict);
     });
   }
+  /* eslint-enable complexity */
 
   /**
    * @typedef Mark~paramsObject
@@ -1359,7 +1387,7 @@ class Mark {
    * @property {number} offset - With the 'acrossElements' option: the length
    * of spaces/strings that were added to the composite string.
    * Without this option: the absolute start index of a text node.
-   * It needs to translate the local text node indexes to the absolute ones.
+   * It is necessary to translate the local node indexes to the absolute ones.
    */
   /**
    * @typedef Mark~matchInfoObject
@@ -1485,7 +1513,7 @@ class Mark {
    * @access protected
    */
   wrapMatchesAcrossElements(regex, ignoreGroups, filterCb, eachCb, endCb) {
-    const matchIdx = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
+    const index = ignoreGroups === 0 ? 0 : ignoreGroups + 1,
       execution = { abort : false },
       filterInfo = { execution : execution };
 
@@ -1494,25 +1522,25 @@ class Mark {
     this.getTextNodesAcrossElements(dict => {
       while (
         (match = regex.exec(dict.value)) !== null &&
-        match[matchIdx] !== ''
+        match[index] !== ''
       ) {
         filterInfo.match = match;
         matchStart = true;
 
         // calculate range inside dict.value
         let start = match.index;
-        if (matchIdx !== 0) {
-          for (let i = 1; i < matchIdx; i++) {
+        if (index !== 0) {
+          for (let i = 1; i < index; i++) {
             start += match[i].length;
           }
         }
-        const end = start + match[matchIdx].length;
+        const end = start + match[index].length;
 
         this.wrapRangeInMappedTextNode(dict, start, end, obj => {
           filterInfo.matchStart = matchStart;
-          filterInfo.offset = obj.totalOffset;
+          filterInfo.offset = obj.startOffset;
           matchStart = false;
-          return filterCb(match[matchIdx], obj.node, filterInfo);
+          return filterCb(match[index], obj.node, filterInfo);
 
         }, (node, matchStart) => {
           if (matchStart) {
@@ -1529,7 +1557,7 @@ class Mark {
           break;
         }
       }
-      endCb(count);
+      endCb(count, dict);
     });
   }
 
@@ -1794,7 +1822,8 @@ class Mark {
     let index = 0,
       totalMarks = 0,
       totalMatches = 0;
-    const fn = this.getMethodName(opt),
+    const fn =
+      this.opt.acrossElements ? 'wrapMatchesAcrossElements' : 'wrapMatches',
       termStats = {};
 
     const { keywords, length } =
