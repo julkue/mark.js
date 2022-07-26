@@ -1819,6 +1819,11 @@ class Mark {
   mark(sv, opt) {
     this.opt = opt;
 
+    if (this.opt.combinePatterns) {
+      this.markCombinePatterns(sv, opt);
+      return;
+    }
+
     let index = 0,
       totalMarks = 0,
       totalMatches = 0;
@@ -1865,8 +1870,112 @@ class Mark {
   }
 
   /**
+   * Marks the specified search terms
+   * @param {string|string[]} [sv] - Search value, either a search string or an
+   * array containing multiple search strings
+   * @param  {Mark~markOptions} [opt] - Optional options object
+   * @access protected
+   */
+  markCombinePatterns(sv, opt) {
+    this.opt = opt;
+
+    let index = 0,
+      totalMarks = 0,
+      totalMatches = 0,
+      patterns = [];
+    const fn =
+      this.opt.acrossElements ? 'wrapMatchesAcrossElements' : 'wrapMatches',
+      flags = `gm${this.opt.caseSensitive ? '' : 'i'}`,
+      termStats = {},
+      obj = this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv);
+
+    const handler = pattern => {
+      const regex = new RegExp(pattern, flags);
+      let matches = 0;
+      this.log(`Searching with expression "${regex}"`);
+
+      this[fn](regex, 1, (term, node, filterInfo) => { // filter
+        return this.opt.filter(node, term, totalMarks, matches, filterInfo);
+
+      }, (element, matchInfo) => { // each
+        matches++;
+        totalMarks++;
+        termStats[this.normalizeTerm(matchInfo.match[2])] += 1;
+        this.opt.each(element, matchInfo);
+
+      }, (count) => { // end
+        totalMatches += count;
+
+        if (count === 0) {
+          this.opt.noMatch(termStats);
+        }
+
+        if (++index < patterns.length) {
+          handler(patterns[index]);
+        } else {
+          this.opt.done(totalMarks, totalMatches, termStats);
+        }
+      });
+    };
+
+    if (obj.length === 0) {
+      this.opt.done(0, 0, termStats);
+
+    } else {
+      // initializes term statistics properties
+      obj.keywords.forEach(kw => {
+        termStats[this.normalizeTerm(kw)] = 0;
+      });
+      patterns = this.getPatterns(obj.keywords);
+      handler(patterns[index]);
+    }
+  }
+
+  /**
+   * Normalizes term spaces and character's case
+   * @param {string} term - The term to be processed
+   */
+  normalizeTerm(term) {
+    term = term.trim().replace(/\s{2,}/g, ' ');
+    return this.opt.caseSensitive ? term : term.toLowerCase();
+  }
+
+  /**
+   * Combines chunks of strings into RegExp patterns
+   * @param {array} keywords - The array of strings
+   * @return {array} - The array of combined RegExp patterns
+   */
+  getPatterns(keywords) {
+    const regexCreator = new RegExpCreator(this.opt),
+      first = regexCreator.create(keywords[0], true),
+      patterns = [];
+    let num = 10;
+
+    if (typeof this.opt.combinePatterns !== 'boolean') {
+      const int = parseInt(this.opt.combinePatterns, 10);
+      if (this.isNumeric(int)) {
+        num = int;
+      }
+    }
+
+    let count = Math.ceil(keywords.length / num);
+
+    for (let k = 0; k < count; k++)  {
+      let pattern = first.lookbehind + '(',
+        max = Math.min(k * num + num, keywords.length);
+
+      for (let i = k * num; i < max; i++)  {
+        const ptn = regexCreator.create(keywords[i], true).pattern;
+        pattern += `(?:${ptn})${i < max - 1 ? '|' : ''}`;
+      }
+      patterns.push(pattern + ')' + first.lookahead);
+    }
+    return patterns;
+  }
+
+  /**
    * Get the method name which will be called
-   * @param  {object} [opt] - Optional options object
+   * @param {object} [opt] - Optional options object
    */
   getMethodName(opt) {
     if (opt) {

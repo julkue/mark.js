@@ -89,6 +89,13 @@ class RegExpCreator {
    * @property {RegExpCreator~wildcards} [wildcards]
    */
   /**
+   * @typedef RegExpCreator~patternObj
+   * @type {object}
+   * @property {string} lookbehind - A lookbehind group
+   * @property {string} pattern - A term pattern
+   * @property {string} lookahead - A positive lookahead assertion
+   */
+  /**
    * @param {RegExpCreator~options} [options] - Optional options object
    */
   constructor(options) {
@@ -107,9 +114,11 @@ class RegExpCreator {
    * Creates a regular expression to match the specified search term considering
    * the available option settings
    * @param  {string} str - The search term to be used
-   * @return {RegExp}
+   * @param  {boolean} patterns - Whether to return an object with pattern
+   * parts or RegExp object
+   * @return {RegExp|RegExpCreator~patternObj}
    */
-  create(str) {
+  create(str, patterns) {
     if (this.opt.wildcards !== 'disabled') {
       str = this.setupWildcardsRegExp(str);
     }
@@ -130,8 +139,14 @@ class RegExpCreator {
     if (this.opt.wildcards !== 'disabled') {
       str = this.createWildcardsRegExp(str);
     }
-    str = this.createAccuracyRegExp(str);
-    return new RegExp(str, `gm${this.opt.caseSensitive ? '' : 'i'}`);
+
+    if (patterns) {
+      return this.createAccuracyRegExp(str, true);
+
+    } else {
+      str = this.createAccuracyRegExp(str, false);
+      return new RegExp(str, `gm${this.opt.caseSensitive ? '' : 'i'}`);
+    }
   }
 
   /**
@@ -359,9 +374,11 @@ class RegExpCreator {
    * created with two groups. The first group can be ignored (may contain
    * the said blank), the second contains the actual match
    * @param  {string} str - The searm term to be used
-   * @return {string}
+   * @param  {boolean} patterns - Whether to return an object with pattern
+   * parts or the whole pattern
+   * @return {string|RegExpCreator~patternObj}
    */
-  createAccuracyRegExp(str) {
+  createAccuracyRegExp(str, patterns) {
     const chars = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~¡¿';
     let acc = this.opt.accuracy,
       val = typeof acc === 'string' ? acc : acc.value,
@@ -370,15 +387,36 @@ class RegExpCreator {
     ls.forEach(limiter => {
       lsJoin += `|${this.escapeStr(limiter)}`;
     });
-    switch (val) {
-      case 'partially':
-      default:
-        return `()(${str})`;
-      case 'complementary':
-        lsJoin = '\\s' + (lsJoin ? lsJoin : this.escapeStr(chars));
-        return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
-      case 'exactly':
-        return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
+    if (patterns) {
+      let lookbehind = '()', pattern, lookahead = '';
+      switch (val) {
+        case 'partially':
+        default:
+          pattern = str;
+          break;
+        case 'complementary':
+          lsJoin = '\\s' + (lsJoin ? lsJoin : this.escapeStr(chars));
+          pattern = `[^${lsJoin}]*${str}[^${lsJoin}]*`;
+          break;
+        case 'exactly':
+          lookbehind = `(^|\\s${lsJoin})`;
+          pattern = str,
+          lookahead = `(?=$|\\s${lsJoin})`;
+          break;
+      }
+      return { lookbehind, pattern, lookahead };
+
+    } else {
+      switch (val) {
+        case 'partially':
+        default:
+          return `()(${str})`;
+        case 'complementary':
+          lsJoin = '\\s' + (lsJoin ? lsJoin : this.escapeStr(chars));
+          return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
+        case 'exactly':
+          return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
+      }
     }
   }
 }

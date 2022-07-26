@@ -313,7 +313,7 @@
         'wildcards': 'disabled'
       }, options);
     }
-    create(str) {
+    create(str, patterns) {
       if (this.opt.wildcards !== 'disabled') {
         str = this.setupWildcardsRegExp(str);
       }
@@ -334,8 +334,12 @@
       if (this.opt.wildcards !== 'disabled') {
         str = this.createWildcardsRegExp(str);
       }
-      str = this.createAccuracyRegExp(str);
-      return new RegExp(str, `gm${this.opt.caseSensitive ? '' : 'i'}`);
+      if (patterns) {
+        return this.createAccuracyRegExp(str, true);
+      } else {
+        str = this.createAccuracyRegExp(str, false);
+        return new RegExp(str, `gm${this.opt.caseSensitive ? '' : 'i'}`);
+      }
     }
     sortByLength(arry) {
       return arry.sort((a, b) => a.length === b.length ?
@@ -459,7 +463,7 @@
     createMergedBlanksRegExp(str) {
       return str.replace(/[\s]+/gmi, '[\\s]+');
     }
-    createAccuracyRegExp(str) {
+    createAccuracyRegExp(str, patterns) {
       const chars = '!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~¡¿';
       let acc = this.opt.accuracy,
         val = typeof acc === 'string' ? acc : acc.value,
@@ -468,15 +472,35 @@
       ls.forEach(limiter => {
         lsJoin += `|${this.escapeStr(limiter)}`;
       });
-      switch (val) {
-        case 'partially':
-        default:
-          return `()(${str})`;
-        case 'complementary':
-          lsJoin = '\\s' + (lsJoin ? lsJoin : this.escapeStr(chars));
-          return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
-        case 'exactly':
-          return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
+      if (patterns) {
+        let lookbehind = '()', pattern, lookahead = '';
+        switch (val) {
+          case 'partially':
+          default:
+            pattern = str;
+            break;
+          case 'complementary':
+            lsJoin = '\\s' + (lsJoin ? lsJoin : this.escapeStr(chars));
+            pattern = `[^${lsJoin}]*${str}[^${lsJoin}]*`;
+            break;
+          case 'exactly':
+            lookbehind = `(^|\\s${lsJoin})`;
+            pattern = str,
+            lookahead = `(?=$|\\s${lsJoin})`;
+            break;
+        }
+        return { lookbehind, pattern, lookahead };
+      } else {
+        switch (val) {
+          case 'partially':
+          default:
+            return `()(${str})`;
+          case 'complementary':
+            lsJoin = '\\s' + (lsJoin ? lsJoin : this.escapeStr(chars));
+            return `()([^${lsJoin}]*${str}[^${lsJoin}]*)`;
+          case 'exactly':
+            return `(^|\\s${lsJoin})(${str})(?=$|\\s${lsJoin})`;
+        }
       }
     }
   }
@@ -1376,6 +1400,10 @@
     }
     mark(sv, opt) {
       this.opt = opt;
+      if (this.opt.combinePatterns) {
+        this.markCombinePatterns(sv, opt);
+        return;
+      }
       let index = 0,
         totalMarks = 0,
         totalMatches = 0;
@@ -1412,6 +1440,77 @@
       } else {
         handler(keywords[index]);
       }
+    }
+    markCombinePatterns(sv, opt) {
+      this.opt = opt;
+      let index = 0,
+        totalMarks = 0,
+        totalMatches = 0,
+        patterns = [];
+      const fn =
+        this.opt.acrossElements ? 'wrapMatchesAcrossElements' : 'wrapMatches',
+        flags = `gm${this.opt.caseSensitive ? '' : 'i'}`,
+        termStats = {},
+        obj = this.getSeparatedKeywords(typeof sv === 'string' ? [sv] : sv);
+      const handler = pattern => {
+        const regex = new RegExp(pattern, flags);
+        let matches = 0;
+        this.log(`Searching with expression "${regex}"`);
+        this[fn](regex, 1, (term, node, filterInfo) => {
+          return this.opt.filter(node, term, totalMarks, matches, filterInfo);
+        }, (element, matchInfo) => {
+          matches++;
+          totalMarks++;
+          termStats[this.normalizeTerm(matchInfo.match[2])] += 1;
+          this.opt.each(element, matchInfo);
+        }, (count) => {
+          totalMatches += count;
+          if (count === 0) {
+            this.opt.noMatch(termStats);
+          }
+          if (++index < patterns.length) {
+            handler(patterns[index]);
+          } else {
+            this.opt.done(totalMarks, totalMatches, termStats);
+          }
+        });
+      };
+      if (obj.length === 0) {
+        this.opt.done(0, 0, termStats);
+      } else {
+        obj.keywords.forEach(kw => {
+          termStats[this.normalizeTerm(kw)] = 0;
+        });
+        patterns = this.getPatterns(obj.keywords);
+        handler(patterns[index]);
+      }
+    }
+    normalizeTerm(term) {
+      term = term.trim().replace(/\s{2,}/g, ' ');
+      return this.opt.caseSensitive ? term : term.toLowerCase();
+    }
+    getPatterns(keywords) {
+      const regexCreator = new RegExpCreator(this.opt),
+        first = regexCreator.create(keywords[0], true),
+        patterns = [];
+      let num = 10;
+      if (typeof this.opt.combinePatterns !== 'boolean') {
+        const int = parseInt(this.opt.combinePatterns, 10);
+        if (this.isNumeric(int)) {
+          num = int;
+        }
+      }
+      let count = Math.ceil(keywords.length / num);
+      for (let k = 0; k < count; k++)  {
+        let pattern = first.lookbehind + '(',
+          max = Math.min(k * num + num, keywords.length);
+        for (let i = k * num; i < max; i++)  {
+          const ptn = regexCreator.create(keywords[i], true).pattern;
+          pattern += `(?:${ptn})${i < max - 1 ? '|' : ''}`;
+        }
+        patterns.push(pattern + ')' + first.lookahead);
+      }
+      return patterns;
     }
     getMethodName(opt) {
       if (opt) {
