@@ -15,7 +15,7 @@ describe('cache text nodes without acrossElements option', function() {
       'accuracy' : 'exactly',
       'done' : function(m, totalMatches) {
         expect(totalMatches).toBe(20);
-        expect(checkWords()).toBe(true);
+        expect($ctx.find('mark')).toHaveLength(20);
         done();
       }
     });

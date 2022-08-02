@@ -1954,7 +1954,14 @@
           }, function (element, matchInfo) {
             matches++;
             totalMarks++;
-            termStats[_this12.normalizeTerm(matchInfo.match[2])] += 1;
+
+            if (_this12.opt.acrossElements) {
+              if (matchInfo.matchStart) {
+                termStats[_this12.normalizeTerm(matchInfo.match[2])] += 1;
+              }
+            } else {
+              termStats[_this12.normalizeTerm(matchInfo.match[2])] += 1;
+            }
 
             _this12.opt.each(element, matchInfo);
           }, function (count) {
