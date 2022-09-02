@@ -1,0 +1,274 @@
+<!doctype html><html lang="en"><!--
+/*!***************************************************
+ * -
+ *    Copyright (c) 2016–2018, Julian Kühnel
+ *         All Rights Reserved
+ *
+ *    App: mark.js-website
+ *    Version: 1.0.0
+ *    Build time: Wed, 03 Jan 2018 22:56:45 GMT
+ *    Contributors: - Julian Kühnel
+ * -
+ *****************************************************/
+--><head><meta http-equiv="X-UA-Compatible" content="IE=EDGE"><meta charset="UTF-8"><title>mark.js – JavaScript keyword highlight</title><meta name="description" content="Search term highlighting intended for every use case. Can be used with plain JavaScript or as jQuery plugin."><meta name="author" content="Julian Kühnel"><meta name="robots" content="index, follow"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"><link rel="apple-touch-icon" sizes="57x57" href="/assets/images/favicons/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/images/favicons/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/images/favicons/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/images/favicons/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/images/favicons/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/images/favicons/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/images/favicons/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/images/favicons/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/images/favicons/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" href="/assets/images/favicons/favicon-32x32.png" sizes="32x32"><link rel="icon" type="image/png" href="/assets/images/favicons/favicon-194x194.png" sizes="194x194"><link rel="icon" type="image/png" href="/assets/images/favicons/favicon-96x96.png" sizes="96x96"><link rel="icon" type="image/png" href="/assets/images/favicons/android-chrome-192x192.png" sizes="192x192"><link rel="icon" type="image/png" href="/assets/images/favicons/favicon-16x16.png" sizes="16x16"><link rel="manifest" href="/assets/images/favicons/manifest.json"><link rel="shortcut icon" href="/assets/images/favicons/favicon.ico"><meta name="apple-mobile-web-app-title" content="mark.js"><meta name="application-name" content="mark.js"><meta name="msapplication-TileColor" content="#ffc40d"><meta name="msapplication-TileImage" content="/assets/images/favicons/mstile-144x144.png"><meta name="msapplication-config" content="/assets/images/favicons/browserconfig.xml"><meta name="theme-color" content="#ffffff"><link rel="stylesheet" type="text/css" href="/css/app.min.css"></head><body><div class="page-container"><header class="navbar navbar-fixed-top"><div class="container"><div class="navbar-header"><button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#nav-collapse"><span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span></button> <a class="navbar-brand" href="/"><span class="logo">mark.js</span></a></div><div class="collapse navbar-collapse navbar-right" id="nav-collapse"><ul class="nav navbar-nav"><li><a href="/configurator.html">Configurator</a></li><li><a href="https://github.com/julmot/mark.js/">View on GitHub</a></li><li><a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/julmot/mark.js/tree/master/dist" data-download="true">Download</a></li></ul></div></div></header><div class="jumbotron"><div class="container"><h1><span class="logo-overlay"></span> <span class="logo">mark.js</span> JavaScript keyword highlighter</h1><h2>Search term highlighting intended for every use case. Can be used with plain JavaScript or as jQuery plugin.</h2><div class="github-buttons"><iframe src="https://ghbtns.com/github-btn.html?user=julmot&repo=mark.js&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe></div></div></div><div class="container"><div class="row"><nav class="hidden-xs col-sm-4 col-md-3"><ul class="nav nav-pills nav-stacked"><li><a href="#getting-to-know-markjs">1. Getting to Know mark.js</a></li><li><a href="#examples">2. Examples</a></li><li><a href="#getting-started">3. Getting Started</a><ul class="nav"><li><a href="#download">3.1 Download</a></li><li><a href="#cdn">3.2 CDN</a></li><li><a href="#integration">3.3 Integration</a></li><li><a href="#styling">3.4 Styling</a></li><li><a href="#plugins">3.5 Plugins</a></li></ul></li><li><a href="#api">4. API</a><ul class="nav"><li><a href="#general">4.1 General</a></li><li><a href="#mark">4.2 mark()</a></li><li><a href="#markregexp">4.3 markRegExp()</a></li><li><a href="#markranges">4.4 markRanges()</a></li><li><a href="#unmark">4.5 unmark()</a></li></ul></li><li><a href="#compatibility">5. Compatibility</a></li><li><a href="#tutorials">6. Tutorials</a><ul class="nav"><li><a href="#element-and-class-name">6.1 Element and Class Name</a></li><li><a href="#exclude">6.2 Exclude</a></li><li><a href="#separate-word-search">6.3 Separate Word Search</a></li><li><a href="#accuracy">6.4 Accuracy</a></li><li><a href="#diacritics">6.5 Diacritics</a></li><li><a href="#synonyms">6.6 Synonyms</a></li><li><a href="#filter">6.7 Filter</a></li><li><a href="#across-elements">6.8 Across Elements</a></li></ul></li><li><a href="#contribute">7. Contribute</a></li></ul></nav><main class="col-xs-12 col-sm-8 col-md-9"><section><a id="getting-to-know-markjs"></a><h2>1. Getting to Know mark.js</h2><article><p>mark.js is a text highlighter written in JavaScript. It can be used to dynamically mark search terms or custom regular expressions and offers you built-in options like diacritics support, separate word search, custom synonyms, iframes support, custom filters, accuracy definition, custom element, custom class name and more.</p></article></section><section><a id="examples"></a><h2>2. Examples</h2><article><p>Have a look at the <a href="/configurator.html">Configurator</a> to see mark.js in action.</p><p>Other examples:</p><ul><li><a href="https://jsfiddle.net/julmot/vpav6tL1/">Basic jQuery example</a></li><li><a href="https://jsfiddle.net/julmot/hdyLpy37/">Basic example with pure JavaScript</a></li><li><a href="https://jsfiddle.net/julmot/1at87fnu/">Table column highlighting</a></li><li><a href="https://jsfiddle.net/julmot/bs69vcqL/">List filtering and highlighting</a></li><li><a href="https://jsfiddle.net/julmot/973gdh8g/">Search bar with jump to matches</a></li><li><a href="https://jsfiddle.net/julmot/ova17daa/">Custom regular expression highlighting</a></li><li><a href="https://jsfiddle.net/julmot/bL6bb5oo/">URL Referrer highlighting</a></li><li><a href="https://jsfiddle.net/julmot/hexomvbL/">Animated highlighting</a></li></ul></article></section><section><a id="getting-started"></a><h2>3. Getting Started</h2><article><a id="download"></a><h3>3.1 Download</h3><p>You can either download the package using <a href="http://npmjs.com/">npm</a> by running:</p><pre><code>$ npm install mark.js --save-dev
+</code></pre><p>Or using <a href="http://bower.io/">Bower</a>:</p><pre><code>$ bower install mark.js --save-dev
+</code></pre><p>Or download the package <a href="https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/julmot/mark.js/tree/master/dist">manually</a>.</p></article><article><a id="cdn"></a><h3>3.2 CDN</h3><p>If you prefer using a <a href="https://en.wikipedia.org/wiki/Content_delivery_network">CDN</a> instead of downloading, mark.js is available on:</p><ul><li><a href="https://cdnjs.com/libraries/mark.js/">cdnjs</a></li><li><a href="https://www.jsdelivr.com/package/npm/mark.js?path=dist">jsdelivr</a></li></ul></article><article><a id="integration"></a><h3>3.3 Integration</h3><p>mark.js ships with a few files – when using Bower they&#39;re located in <code>./dist/</code>:</p><ul><li>Files for usage with pure JavaScript:<ul><li><code>mark.js</code> - Uncompressed ES5</li><li><code>mark.min.js</code> - Compressed ES5 (<strong>recommended</strong>)</li><li><code>mark.es6.js</code> - Uncompressed ES6</li><li><code>mark.es6.min.js</code> - Compressed ES6</li></ul></li><li>Files for usage as jQuery plugin:<ul><li><code>jquery.mark.js</code> - Uncompressed ES5</li><li><code>jquery.mark.min.js</code> - Compressed ES5 (<strong>recommended</strong>)</li><li><code>jquery.mark.es6.js</code> - Uncompressed ES6</li><li><code>jquery.mark.es6.min.js</code> - Compressed ES6</li></ul></li></ul><p>If you don&#39;t know what ES5 or ES6 (<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Introduction">ECMAScript</a>) is, then simply go ahead with a ES5 file as it might be in the JavaScript syntax you are using in your project.</p><p>After you have chosen the appropriate file, you need to embed it, e.g. as follows:</p><pre><code class="lang-html">&lt;script src=&quot;vendor/mark.js/dist/mark.min.js&quot;&gt;&lt;/script&gt;
+</code></pre><p>Alternatively you can load it with AMD (<a href="http://requirejs.org/">RequireJS</a>) or CommonJS.</p><p><strong>Note</strong>: mark.js requires UTF-8 encoding. If your server or environment serves files with ASCII, you can workaround this behavior by using the <a href="http://www.w3schools.com/tags/att_script_charset.asp"><code>charset</code> attribute</a> on above named <code>&lt;script&gt;</code> tag, e.g.:</p><pre><code class="lang-html">&lt;script src=&quot;vendor/mark.js/dist/mark.min.js&quot; charset=&quot;UTF-8&quot;&gt;&lt;/script&gt;
+</code></pre></article><article><a id="styling"></a><h3>3.4 Styling</h3><p>mark.js will wrap matches with a specified element and optionally with an assigned class. When not changing the default element <code>mark</code>, browsers will ensure that it looks highlighted by default. However, you may want to customize the style of it. This can be done using e.g. the following CSS:</p><pre><code class="lang-css">mark{
+    background: orange;
+    color: black;
+}
+</code></pre><p>If you&#39;ve customized the default element or class, make sure to modify the selector.</p></article><article><a id="plugins"></a><h3>3.5 Plugins</h3><p>The following plugins are available to integrate mark.js into other components:</p><ul><li><a href="http://datatables.net/">DataTables</a>: <a href="https://github.com/julmot/datatables.mark.js/">datatables.mark.js</a></li><li><a href="https://mottie.github.io/tablesorter/">tablesorter</a>: <a href="https://mottie.github.io/tablesorter/docs/example-widget-mark.html">mark.js widget</a></li></ul></article></section><section><a id="api"></a><h2>4. API</h2><article><a id="general"></a><h3>4.1 General</h3><p><strong>JavaScript</strong></p><p>Each API method below can be called on an instance object. To initialize a new instance you have to use:</p><pre><code class="lang-javascript">var instance = new Mark(context);
+</code></pre><p>The variable <code>context</code> defines where you want mark.js to search for matches. You can pass a single element (e.g. the return value of <code>document.getElementById(...)</code> or <code>document.querySelector(...)</code>), an array containing multiple single elements, or a NodeList (e.g. <code>document.querySelectorAll(...)</code>). Alternatively you can pass a string selector.</p><p>If for example you&#39;d like to highlight matches in a div with a class <code>context</code> then you&#39;d have to use:</p><pre><code class="lang-javascript">var instance = new Mark(document.querySelector(&quot;div.context&quot;));
+// or
+var instance = new Mark(&quot;div.context&quot;);
+</code></pre><p><strong>jQuery</strong></p><p>Each API method below can be called on every jQuery element, e.g. <code>$(&quot;div.test&quot;)</code>.</p></article><article><a id="mark"></a><h3>4.2 mark()</h3><p>A method to highlight custom search terms.</p><h4 id="syntax">Syntax</h4><p>JavaScript:</p><pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;);
+var instance = new Mark(context);
+instance.mark(keyword [, options]);
+</code></pre><p>jQuery:</p><pre><code class="lang-javascript">$(&quot;.context&quot;).mark(keyword [, options]);
+</code></pre><p><strong>Note</strong>: Even if this is a chaining method and therefore allows you to call further methods on the returning object, it&#39;s recommended to always use the <code>done</code> callback as mark.js works asynchronous.</p><h4 id="parameters">Parameters</h4><p><em>keyword</em></p><p>Type: <code>string</code> or <code>array</code> of <code>string</code></p><p>The keyword to be marked. Can also be an array with multiple keywords. Note that keywords will be escaped. If you need to mark unescaped keywords (e.g. containing a pattern), have a look at the <code>markRegExp()</code> method below.</p><p><em>options</em></p><p>Type: <code>object</code></p><p>Optional options:</p><div class="table-responsive"><table class="table table-bordered table-striped"><thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td>element</td><td>string</td><td>&quot;mark&quot;</td><td>HTML element to wrap matches, e.g. <code>span</code></td></tr><tr><td>className</td><td>string</td><td>&quot;&quot;</td><td>A class name that will be appended to <code>element</code></td></tr><tr><td>exclude</td><td>array</td><td>[ ]</td><td>An array with exclusion selectors. Matches inside these elements will be ignored. Example: <code>&quot;filter&quot;: [&quot;h1&quot;, &quot;.ignore&quot;]</code></td></tr><tr><td>separateWordSearch</td><td>boolean</td><td>true</td><td>Whether to search for each word separated by a blank instead of the complete term</td></tr><tr><td>accuracy</td><td>string or object</td><td>&quot;partially&quot;</td><td>Either one of the following string values:<ul><li>&quot;partially&quot;: When searching for &quot;lor&quot; only &quot;lor&quot; inside &quot;lorem&quot; will be marked</li><li>&quot;complementary&quot;: When searching for &quot;lor&quot; the whole word &quot;lorem&quot; will be marked</li><li>&quot;exactly&quot;: When searching for &quot;lor&quot; only those exact words with a word boundary will be marked. In this example nothing inside &quot;lorem&quot;. This value is equivalent to the previous option <i>wordBoundary</i></li></ul>Or an object containing two properties:<ul><li>&quot;value&quot;: One of the above named string values</li><li>&quot;limiters&quot;: A custom array of string limiters for accuracy &quot;exactly&quot; or &quot;complementary&quot;. Read more about this <a href="#accuracy">in the tutorials section</a></li></ul></td></tr><tr><td>diacritics</td><td>boolean</td><td>true</td><td>If <a href="https://en.wikipedia.org/wiki/Diacritic">diacritic</a> characters should be matched. For example &quot;piękny&quot; would also match &quot;piekny&quot; and &quot;doner&quot; would also match &quot;döner&quot;</td></tr><tr><td>synonyms</td><td>object</td><td>{ }</td><td>An object with synonyms. The key will be a synonym for the value and the value for the key. Example: <code>&quot;synonyms&quot;: {&quot;one&quot;: &quot;1&quot;}</code> will add the synonym &quot;1&quot; for &quot;one&quot; and vice versa</td></tr><tr><td>iframes</td><td>boolean</td><td>false</td><td>Whether to search also inside iframes. If you don&#39;t have permissions to some iframes (e.g. because they have a <a href="https://en.wikipedia.org/wiki/Same-origin_policy">different origin</a>) they will be silently skipped. If you don&#39;t want to search inside specific iframes (e.g. facebook share), you can pass an <code>exclude</code> selector that matches these iframes</td></tr><tr><td>iframesTimeout</td><td>number</td><td>5000</td><td>The maximum ms to wait for a <code>load</code> event before skipping an iframe. Especially important when there&#39;s no internet connection or a browser &quot;offline&quot; mode is enabled and an iframe has an online <code>src</code> – then the <code>load</code> event is never fired</td></tr><tr><td>acrossElements</td><td>boolean</td><td>false</td><td>Whether to search for matches across elements</td></tr><tr><td>caseSensitive</td><td>boolean</td><td>false</td><td>Whether to search case sensitive</td></tr><tr><td>ignoreJoiners</td><td>boolean</td><td>false</td><td>Whether to also find matches that contain soft hyphen, zero width space, zero width non-joiner and zero width joiner. They&#39;re used to indicate a point for a line break where there isn&#39;t enough space to show the full word</td></tr><tr><td>ignorePunctuation</td><td>array</td><td>[ ]</td><td>An array of punctuation mark strings. These punctuation marks can be between any characters, e.g. setting this option to <code>[&quot;&#39;&quot;]</code> would match &quot;Worlds&quot;, &quot;World&#39;s&quot; and &quot;Wo&#39;rlds&quot;. One or more apostrophes between the letters would still produce a match (e.g. &quot;W&#39;o&#39;&#39;r&#39;l&#39;d&#39;s&quot;). A typical setting for this option could be as follows: <code>&quot;:;.,-–—‒_(){}[]!&#39;\&quot;+=&quot;.split(&quot;&quot;)</code></td></tr><tr><td>wildcards</td><td>string</td><td>&quot;disabled&quot;</td><td>Set to any of the following string values:<ul><li>&quot;disabled&quot;: Disable wildcard usage</li><li>&quot;enabled&quot;: When searching for &quot;lor?m&quot;, the &quot;?&quot; will match zero or one non-space character (e.g. &quot;lorm&quot;, &quot;loram&quot;, &quot;lor3m&quot;, etc). When searching for &quot;lor*m&quot;, the &quot;*&quot; will match zero or more non-space characters (e.g. &quot;lorm&quot;, &quot;loram&quot;, &quot;lor123m&quot;, etc).</li><li>&quot;withSpaces&quot;: When searching for &quot;lor?m&quot;, the &quot;?&quot; will match zero or one space or non-space character (e.g. &quot;lor m&quot;, &quot;loram&quot;, etc). When searching for &quot;lor*m&quot;, the &quot;*&quot; will match zero or more space or non-space characters (e.g. &quot;lorm&quot;, &quot;lore et dolor ipsum&quot;, &quot;lor: m&quot;, etc).</li></ul></td></tr><tr><td>each</td><td>function</td><td></td><td>A callback for each marked element. Receives the marked DOM element as a parameter</td></tr><tr><td>filter</td><td>function</td><td></td><td>A callback to filter or limit matches. It will be called for each match and receives the following parameters:<ol><li>The text node which includes the match</li><li>The term that has been found</li><li>A counter indicating the total number of all marks at the time of the function call</li><li>A counter indicating the number of marks for the term</li></ol>The function must return false if the mark should be stopped, otherwise true</td></tr><tr><td>noMatch</td><td>function</td><td></td><td>A callback function that will be called when there are no matches. Receives the not found term as a parameter</td></tr><tr><td>done</td><td>function</td><td></td><td>A callback function after all marks are done. Receives the total number of marks as a parameter</td></tr><tr><td>debug</td><td>boolean</td><td>false</td><td>Set this option to <code>true</code> if you want to log messages</td></tr><tr><td>log</td><td>object</td><td>console</td><td>Log messages to a specific object (only if <code>debug</code> is true)</td></tr></tbody></table></div><h4 id="examples">Examples</h4><p><button data-toggle="collapse" data-target="#mark-code-overview-basic" class="btn btn-md btn-default">Basic example</button></p><div id="mark-code-overview-basic" class="collapse">JavaScript:<pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;); // requires an element with class &quot;context&quot; to exist
+var instance = new Mark(context);
+instance.mark(&quot;test&quot;); // will mark the keyword &quot;test&quot;
+</code></pre>jQuery:<pre><code class="lang-javascript">$(&quot;.context&quot;).mark(&quot;test&quot;); // will mark the keyword &quot;test&quot;, requires an element with class &quot;context&quot; to exist</code></pre></div><p><button data-toggle="collapse" data-target="#mark-code-overview-options" class="btn btn-md btn-default">Example with all above named options and their default values</button></p><div id="mark-code-overview-options" class="collapse">For both, JavaScript and jQuery:<pre><code class="lang-javascript">var options = {
+    &quot;element&quot;: &quot;mark&quot;,
+    &quot;className&quot;: &quot;&quot;,
+    &quot;exclude&quot;: [],
+    &quot;separateWordSearch&quot;: true,
+    &quot;accuracy&quot;: &quot;partially&quot;,
+    &quot;diacritics&quot;: true,
+    &quot;synonyms&quot;: {},
+    &quot;iframes&quot;: false,
+    &quot;iframesTimeout&quot;: 5000,
+    &quot;acrossElements&quot;: false,
+    &quot;caseSensitive&quot;: false,
+    &quot;ignoreJoiners&quot;: false,
+    &quot;ignorePunctuation&quot;: [],
+    &quot;wildcards&quot;: &quot;disabled&quot;,
+    &quot;each&quot;: function(node){
+        // node is the marked DOM element
+    },
+    &quot;filter&quot;: function(textNode, foundTerm, totalCounter, counter){
+        // textNode is the text node which contains the found term
+        // foundTerm is the found search term
+        // totalCounter is a counter indicating the total number of all marks
+        //              at the time of the function call
+        // counter is a counter indicating the number of marks for the found term
+        return true; // must return either true or false
+    },
+    &quot;noMatch&quot;: function(term){
+        // term is the not found term
+    },
+    &quot;done&quot;: function(counter){
+        // counter is a counter indicating the total number of all marks
+    },
+    &quot;debug&quot;: false,
+    &quot;log&quot;: window.console
+};
+</code></pre>JavaScript:<pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;); // requires an element with class &quot;context&quot; to exist
+var instance = new Mark(context);
+instance.mark(&quot;test&quot;, options); // will mark the keyword &quot;test&quot;
+</code></pre>jQuery:<pre><code class="lang-javascript">$(&quot;.context&quot;).mark(&quot;test&quot;, options); // will mark the keyword &quot;test&quot;, requires an element with class &quot;context&quot; to exist</code></pre></div></article><article><a id="markregexp"></a><h3>4.3 markRegExp()</h3><p>A method to highlight custom <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions">regular expressions</a>.</p><h4 id="syntax">Syntax</h4><p>JavaScript:</p><pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;);
+var instance = new Mark(context);
+instance.markRegExp(regexp [, options]);
+</code></pre><p>jQuery:</p><pre><code class="lang-javascript">$(&quot;.context&quot;).markRegExp(regexp [, options]);
+</code></pre><p><strong>Note</strong>: Even if this is a chaining method and therefore allows you to call further methods on the returning object, it&#39;s recommended to always use the <code>done</code> callback as mark.js works asynchronous.</p><h4 id="parameters">Parameters</h4><p><em>regexp</em></p><p>Type: <code>RegExp</code></p><p>The regular expression to be marked. Example: <code>/Lor[^]?m/gmi</code>. Note that groups will be ignored and mark.js will always find all matches, regardless of the <code>g</code> flag.</p><p><em>options</em></p><p>Type: <code>object</code></p><p>Optional options:</p><div class="table-responsive"><table class="table table-bordered table-striped"><thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td>element</td><td>string</td><td>&quot;mark&quot;</td><td>HTML element to wrap matches, e.g. <code>span</code></td></tr><tr><td>className</td><td>string</td><td>&quot;&quot;</td><td>A class name that will be appended to <code>element</code></td></tr><tr><td>exclude</td><td>array</td><td>[ ]</td><td>An array with exclusion selectors. Matches inside these elements will be ignored. Example: <code>&quot;filter&quot;: [&quot;h1&quot;, &quot;.ignore&quot;]</code></td></tr><tr><td>iframes</td><td>boolean</td><td>false</td><td>Whether to search also inside iframes. If you don&#39;t have permissions to some iframes (e.g. because they have a <a href="https://en.wikipedia.org/wiki/Same-origin_policy">different origin</a>) they will be silently skipped. If you don&#39;t want to search inside specific iframes (e.g. facebook share), you can pass an <code>exclude</code> selector that matches these iframes</td></tr><tr><td>iframesTimeout</td><td>number</td><td>5000</td><td>The maximum ms to wait for a <code>load</code> event before skipping an iframe. Especially important when there&#39;s no internet connection or a browser &quot;offline&quot; mode is enabled and an iframe has an online <code>src</code> – then the <code>load</code> event is never fired</td></tr><tr><td>acrossElements</td><td>boolean</td><td>false</td><td>Whether to search for matches across elements</td></tr><tr><td>ignoreGroups</td><td>number</td><td>0</td><td>Indicates the number of matching groups to ignore in the replacement. Can be used e.g. to implement non-capturing lookbehind groups. Note that when the value is &gt; 0 (when groups should be ignored), it expects a total amount of groups in the RegExp of <code>ignoreGroups</code> + 1</td></tr><tr><td>each</td><td>function</td><td></td><td>A callback for each marked element. Receives the marked DOM element as a parameter</td></tr><tr><td>filter</td><td>function</td><td></td><td>A callback to filter or limit matches. It will be called for each match and receives the following parameters:<ol><li>The text node which includes the match</li><li>The matching string that has been found</li><li>A counter indicating the number of all marks</li></ol>The function must return false if the mark should be stopped, otherwise true</td></tr><tr><td>noMatch</td><td>function</td><td></td><td>A callback function that will be called when there are no matches. Receives the not found term as a parameter</td></tr><tr><td>done</td><td>function</td><td></td><td>A callback function after all marks are done. Receives the total number of marks as a parameter</td></tr><tr><td>debug</td><td>boolean</td><td>false</td><td>Set this option to <code>true</code> if you want to log messages</td></tr><tr><td>log</td><td>object</td><td>console</td><td>Log messages to a specific object (only if <code>debug</code> is true)</td></tr></tbody></table></div><h4 id="examples">Examples</h4><p><button data-toggle="collapse" data-target="#markregexp-code-overview-basic" class="btn btn-md btn-default">Basic example</button></p><div id="markregexp-code-overview-basic" class="collapse">JavaScript:<pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;); // requires an element with class &quot;context&quot; to exist
+var instance = new Mark(context);
+instance.markRegExp(/lorem/gmi);
+</code></pre>jQuery:<pre><code class="lang-javascript">$(&quot;.context&quot;).markRegExp(/lorem/gmi); // requires an element with class &quot;context&quot; to exist</code></pre></div><p><button data-toggle="collapse" data-target="#markregexp-code-overview-options" class="btn btn-md btn-default">Example with all above named options and their default values</button></p><div id="markregexp-code-overview-options" class="collapse">For both, JavaScript and jQuery:<pre><code class="lang-javascript">var options = {
+    &quot;element&quot;: &quot;mark&quot;,
+    &quot;className&quot;: &quot;&quot;,
+    &quot;exclude&quot;: [],
+    &quot;iframes&quot;: false,
+    &quot;iframesTimeout&quot;: 5000,
+    &quot;acrossElements&quot;: false,
+    &quot;ignoreGroups&quot;: 0,
+    &quot;each&quot;: function(node){
+        // node is the marked DOM element
+    },
+    &quot;filter&quot;: function(textNode, foundTerm, totalCounter){
+        // textNode is the text node which contains the found term
+        // foundTerm is the found search term
+        // totalCounter is a counter indicating the total number of all marks
+        //              at the time of the function call
+        return true; // must return either true or false
+    },
+    &quot;noMatch&quot;: function(term){
+        // term is the not found term
+    },
+    &quot;done&quot;: function(counter){
+        // counter is a counter indicating the total number of all marks
+    },
+    &quot;debug&quot;: false,
+    &quot;log&quot;: window.console
+};
+</code></pre>JavaScript:<pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;); // requires an element with class &quot;context&quot; to exist
+var instance = new Mark(context);
+instance.markRegExp(/test/gmi, options);
+</code></pre>jQuery:<pre><code class="lang-javascript">$(&quot;.context&quot;).markRegExp(/test/gmi, options); // requires an element with class &quot;context&quot; to exist</code></pre></div></article><article><a id="markranges"></a><h3>4.4 markRanges()</h3><p>A method to mark ranges with a start position and length. They will be applied to text nodes in the specified context.</p><h4 id="syntax">Syntax</h4><p>JavaScript:</p><pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;);
+var instance = new Mark(context);
+instance.markRanges(ranges [, options]);
+</code></pre><p>jQuery:</p><pre><code class="lang-javascript">$(&quot;.context&quot;).markRanges(ranges [, options]);
+</code></pre><p><strong>Note</strong>: Even if this is a chaining method and therefore allows you to call further methods on the returning object, it&#39;s recommended to always use the <code>done</code> callback as mark.js works asynchronous.</p><h4 id="parameters">Parameters</h4><p><em>ranges</em></p><p>Type: <code>array</code></p><p>An array of objects with a <code>start</code> and <code>length</code> property. Note that the start positions must be specified including whitespace characters.</p><p><em>options</em></p><p>Type: <code>object</code></p><p>Optional options:</p><div class="table-responsive"><table class="table table-bordered table-striped"><thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td>element</td><td>string</td><td>&quot;mark&quot;</td><td>HTML element to wrap matches, e.g. <code>span</code></td></tr><tr><td>className</td><td>string</td><td>&quot;&quot;</td><td>A class name that will be appended to <code>element</code></td></tr><tr><td>exclude</td><td>array</td><td>[ ]</td><td>An array with exclusion selectors. Matches inside these elements will be ignored. Example: <code>&quot;filter&quot;: [&quot;h1&quot;, &quot;.ignore&quot;]</code></td></tr><tr><td>iframes</td><td>boolean</td><td>false</td><td>Whether to search also inside iframes. If you don&#39;t have permissions to some iframes (e.g. because they have a [different origin][SOP]) they will be silently skipped. If you don&#39;t want to search inside specific iframes (e.g. facebook share), you can pass an <code>exclude</code> selector that matches these iframes</td></tr><tr><td>iframesTimeout</td><td>number</td><td>5000</td><td>The maximum ms to wait for a <code>load</code> event before skipping an iframe. Especially important when there&#39;s no internet connection or a browser &quot;offline&quot; mode is enabled and an iframe has an online <code>src</code> – then the <code>load</code> event is never fired</td></tr><tr><td>each</td><td>function</td><td></td><td>A callback for each marked element. Receives the marked DOM element and the corresponding range as a parameter</td></tr><tr><td>filter</td><td>function</td><td></td><td>A callback to filter or limit matches. It will be called for each match and receives the following parameters:<ol><li>The text node which includes the range</li><li>The current range</li><li>The extracted term from the matching range</li><li>A counter indicating the total number of all marks at the time of the function call</li></ol>The function must return false if the mark should be stopped, otherwise true</td></tr><tr><td>noMatch</td><td>function</td><td></td><td>A callback function that will be called when there are no matches. Receives the not found range as a parameter</td></tr><tr><td>done</td><td>function</td><td></td><td>A callback function after all marks are done. Receives the total number of marks as a parameter</td></tr><tr><td>debug</td><td>boolean</td><td>false</td><td>Set this option to <code>true</code> if you want to log messages</td></tr><tr><td>log</td><td>object</td><td>console</td><td>Log messages to a specific object (only if <code>debug</code> is true)</td></tr></tbody></table></div><h4 id="examples">Examples</h4><p><button data-toggle="collapse" data-target="#markranges-code-overview-basic" class="btn btn-md btn-default">Basic example</button></p><div id="markranges-code-overview-basic" class="collapse">JavaScript:<pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;); // requires an element with class &quot;context&quot; to exist
+var instance = new Mark(context);
+instance.markRanges([{
+    start: 15,
+    length: 5
+}, {
+    start: 25:
+    length: 8
+}]); // marks matches with ranges 15-20 and 25-33
+</code></pre>jQuery:<pre><code class="lang-javascript">$(&quot;.context&quot;).markRanges([{
+    start: 15,
+    length: 5
+}, {
+    start: 25:
+    length: 8
+}]); // marks matches with ranges 15-20 and 25-33
+</code></pre></div><p><button data-toggle="collapse" data-target="#markranges-code-overview-options" class="btn btn-md btn-default">Example with all above named options and their default values</button></p><div id="markranges-code-overview-options" class="collapse">For both, JavaScript and jQuery:<pre><code class="lang-javascript">var options = {
+    &quot;element&quot;: &quot;mark&quot;,
+    &quot;className&quot;: &quot;&quot;,
+    &quot;exclude&quot;: [],
+    &quot;iframes&quot;: false,
+    &quot;iframesTimeout&quot;: 5000,
+    &quot;each&quot;: function(node, range){
+        // node is the marked DOM element
+        // range is the corresponding range
+    },
+    &quot;filter&quot;: function(textNode, range, term, counter){
+        // textNode is the text node which contains the found term
+        // range is the found range
+        // term is the extracted term from the matching range
+        // counter is a counter indicating the number of marks for the found term
+        return true; // must return either true or false
+    },
+    &quot;noMatch&quot;: function(range){
+        // the not found range
+    },
+    &quot;done&quot;: function(counter){
+        // counter is a counter indicating the total number of all marks
+    },
+    &quot;debug&quot;: false,
+    &quot;log&quot;: window.console
+};
+</code></pre>JavaScript:<pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;); // requires an element with class &quot;context&quot; to exist
+var instance = new Mark(context);
+instance.markRanges([{
+    start: 15,
+    length: 5
+}, {
+    start: 25:
+    length: 8
+}], options);
+</code></pre>jQuery:<pre><code class="lang-javascript">$(&quot;.context&quot;).markRanges([{
+    start: 15,
+    length: 5
+}, {
+    start: 25:
+    length: 8
+}], options);
+</code></pre></div></article><article><a id="unmark"></a><h3>4.5 unmark()</h3><p>A method to remove highlights created by mark.js.</p><h4 id="syntax">Syntax</h4><p>JavaScript:</p><pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;);
+var instance = new Mark(context);
+instance.unmark(options);
+</code></pre><p>jQuery:</p><pre><code class="lang-javascript">$(&quot;.context&quot;).unmark(options);
+</code></pre><p><strong>Note</strong>: Even if this is a chaining method and therefore allows you to call further methods on the returning object, it&#39;s recommended to always use the <code>done</code> callback as mark.js works asynchronous.</p><h4 id="parameters">Parameters</h4><p><em>options</em></p><p>Type: <code>object</code></p><p>Optional options:</p><div class="table-responsive"><table class="table table-bordered table-striped"><thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td>element</td><td>string</td><td>&quot;&quot;</td><td>Will remove only marked elements with this specific element</td></tr><tr><td>className</td><td>string</td><td>&quot;&quot;</td><td>Will remove only marked elements with this specific class name</td></tr><tr><td>exclude</td><td>array</td><td>[ ]</td><td>An array with exclusion selectors. These elements will be ignored. Example: <code>&quot;filter&quot;: [&quot;h1&quot;, &quot;.ignore&quot;]</code></td></tr><tr><td>iframes</td><td>boolean</td><td>false</td><td>Whether to search also inside iframes. If you don&#39;t have permissions to some iframes (e.g. because they have a <a href="https://en.wikipedia.org/wiki/Same-origin_policy">different origin</a>) they will be silently skipped. If you don&#39;t want to search inside specific iframes (e.g. facebook share), you can pass an <code>exclude</code> selector that matches these iframes</td></tr><tr><td>iframesTimeout</td><td>number</td><td>5000</td><td>The maximum ms to wait for a <code>load</code> event before skipping an iframe. Especially important when there&#39;s no internet connection or a browser &quot;offline&quot; mode is enabled and an iframe has an online <code>src</code> – then the <code>load</code> event is never fired</td></tr><tr><td>done</td><td>function</td><td></td><td>A callback function after all marked elements were removed</td></tr><tr><td>debug</td><td>boolean</td><td>false</td><td>Set this option to <code>true</code> if you want to log messages</td></tr><tr><td>log</td><td>object</td><td>console</td><td>Log messages to a specific object (only if <code>debug</code> is true)</td></tr></tbody></table></div><p><button data-toggle="collapse" data-target="#unmark-code-overview-basic" class="btn btn-md btn-default">Basic example</button></p><div id="unmark-code-overview-basic" class="collapse">JavaScript:<pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;); // requires an element with class &quot;context&quot; to exist
+var instance = new Mark(context);
+instance.unmark();
+</code></pre>jQuery:<pre><code class="lang-javascript">$(&quot;.context&quot;).unmark(); // requires an element with class &quot;context&quot; to exist</code></pre></div><p><button data-toggle="collapse" data-target="#unmark-code-overview-options" class="btn btn-md btn-default">Example with all above named options and their default values</button></p><div id="unmark-code-overview-options" class="collapse">For both, JavaScript and jQuery:<pre><code class="lang-javascript">var options = {
+    &quot;element&quot;: &quot;&quot;,
+    &quot;className&quot;: &quot;&quot;,
+    &quot;exclude&quot;: [],
+    &quot;iframes&quot;: false,
+    &quot;iframesTimeout&quot;: 5000,
+    &quot;done&quot;: function(){},
+    &quot;debug&quot;: false,
+    &quot;log&quot;: window.console
+};
+</code></pre>JavaScript:<pre><code class="lang-javascript">var context = document.querySelector(&quot;.context&quot;); // requires an element with class &quot;context&quot; to exist
+var instance = new Mark(context);
+instance.unmark(options);
+</code></pre>jQuery:<pre><code class="lang-javascript">$(&quot;.context&quot;).unmark(options); // requires an element with class &quot;context&quot; to exist</code></pre></div></article></section><section><a id="compatibility"></a><h2>5. Compatibility</h2><article><p>mark.js works in all modern browsers.<br>It is intensively tested in:</p><ul><li>Firefox (30+)</li><li>Chrome (30+)</li><li>Safari (7+)</li><li>Edge (13+)</li><li>IE (9+)</li></ul><p><img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/archive/firefox_3.5-22/firefox_3.5-22_48x48.png" alt="Firefox"> <img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/archive/chrome_12-48/chrome_12-48_48x48.png" alt="Chrome"> <img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/archive/safari_1-7/safari_1-7_48x48.png" alt="Safari"> <img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/edge/edge_48x48.png" alt="Edge"> <img src="https://cdnjs.cloudflare.com/ajax/libs/browser-logos/42.1.1/archive/internet-explorer_9-11/internet-explorer_9-11_48x48.png" alt="IE9-11"></p></article></section><section><a id="tutorials"></a><h2>6. Tutorials</h2><article><p>Below is an explanation of options that might not be self explanatory.</p></article><article><a id="element-and-class-name"></a><h3>6.1 Element and Class Name</h3><p>You may ask yourself how mark.js works generally or how to wrap matches with a custom element and class name. Take this simple DOM fragment as an example:</p><pre><code class="lang-html">&lt;div class=&quot;context&quot;&gt;
+    &lt;p&gt;My text content&lt;/p&gt;
+&lt;/div&gt;
+</code></pre><p>When you&#39;re calling mark.js on <code>div.context</code> – whether by <code>mark()</code> or by <code>markRegExp()</code> – it will find matches and wraps them with a defined element (tag name) and optionally with a class assigned to that element. So assuming we&#39;d like to highlight &quot;text&quot; with a <code>span</code> tag and a class <code>highlight</code> assigned, then this could be done e.g. as follows:</p><p>With JavaScript:</p><pre><code class="lang-javascript">var instance = new Mark(document.querySelector(&quot;div.context&quot;));
+instance.mark(&quot;text&quot;, {
+    &quot;element&quot;: &quot;span&quot;,
+    &quot;className&quot;: &quot;highlight&quot;
+});
+</code></pre><p>With jQuery:</p><pre><code class="lang-javascript">$(&quot;div.context&quot;).mark(&quot;text&quot;, {
+    &quot;element&quot;: &quot;span&quot;,
+    &quot;className&quot;: &quot;highlight&quot;
+});
+</code></pre><p>The generated DOM fragment would then look like:</p><pre><code class="lang-html">&lt;div class=&quot;context&quot;&gt;
+    &lt;p&gt;My &lt;span class=&quot;highlight&quot;&gt;text&lt;/span&gt; content&lt;/p&gt;
+&lt;/div&gt;
+</code></pre></article><article><a id="exclude"></a><h3>6.2 Exclude</h3><p>When having a context that contains multiple elements and you need to ignore matches in some of them, the option <code>exclude</code> may be worth gold. You can pass an array of exclusion selectors and matches within these selectors will be ignored from highlighting.</p><p>Assuming you have the following DOM fragment:</p><pre><code class="lang-html">&lt;div class=&quot;context&quot;&gt;
+    &lt;article&gt;
+        &lt;header&gt;
+            &lt;h1&gt;Article Text Headline&lt;/h1&gt;
+            &lt;div class=&quot;byline&quot;&gt;
+                &lt;address class=&quot;author&quot;&gt;
+                    By &lt;a rel=&quot;author&quot; href=&quot;demo/link&quot;&gt;John Doe&lt;/a&gt;
+                &lt;/address&gt;
+                on
+                &lt;time pubdate datetime=&quot;2016-30-05&quot; title=&quot;May 30th, 2016&quot;&gt;5/30/16&lt;/time&gt;
+            &lt;/div&gt;
+        &lt;/header&gt;
+        &lt;div class=&quot;article-content&quot;&gt;
+            Article text content
+        &lt;/div&gt;
+    &lt;/article&gt;
+&lt;/div&gt;
+</code></pre><p>And you want to highlight all &quot;text&quot; matches, but only in the actual article content. Then you can either initialize mark.js directly on the <code>div</code> containing the article&#39;s content (in this case <code>div.article-content</code>), or specify a <code>exclude</code> array matching the elements that should be ignored, e.g. as follows:</p><p>With JavaScript:</p><pre><code class="lang-javascript">var instance = new Mark(document.querySelector(&quot;div.context&quot;));
+instance.mark(&quot;text&quot;, {
+    &quot;exclude&quot;: [
+        &quot;h1&quot;,
+        &quot;.byline *&quot;
+    ]
+});
+</code></pre><p>With jQuery:</p><pre><code class="lang-javascript">$(&quot;div.context&quot;).mark(&quot;text&quot;, {
+    &quot;exclude&quot;: [
+        &quot;h1&quot;,
+        &quot;.byline *&quot;
+    ]
+});
+</code></pre><p>This would ignore matches inside <code>&lt;h1&gt;</code> elements and those having a class <code>byline</code> assigned.</p></article><article><a id="separate-word-search"></a><h3>6.3 Separate Word Search</h3><p><em>Constraint: Only available in the <code>mark()</code> method</em></p><p>Regardless of whether you are highlighting an array of search terms or just a single one, it makes sense to search for each word separately. Assuming you have a search term &quot;lorem ipsum dolor&quot;, then this option will make mark.js search for &quot;lorem&quot;, &quot;ipsum&quot; and &quot;dolor&quot; separately.</p></article><article><a id="accuracy"></a><h3>6.4 Accuracy</h3><p><em>Constraint: Only available in the <code>mark()</code> method</em></p><p>As the name suggests, the <code>accuracy</code> option allows you to specify the accuracy of mark.js.</p><p>To demonstrate this, we&#39;re taking the following DOM fragment as a basis for all examples below:</p><pre><code class="lang-html">&lt;div class=&quot;context&quot;&gt;
+    &lt;p&gt;highlight high&lt;/p&gt;
+&lt;/div&gt;
+</code></pre><p>By default, the provided search term will be highlighted, regardless if it&#39;s a substring of a word or a own standing one. This option value is called <code>partially</code>. When searching for &quot;high&quot; inside above named DOM fragment, the following will be generated:</p><pre><code class="lang-html">&lt;div class=&quot;context&quot;&gt;
+    &lt;p&gt;&lt;mark&gt;high&lt;/mark&gt;light &lt;mark&gt;high&lt;/mark&gt;&lt;/p&gt;
+&lt;/div&gt;
+</code></pre><p>However, there might be cases where you want to ignore partial matches and only highlight matches for entire words with a word boundary (see <a href="http://grammar.about.com/od/tz/g/Word-Boundary.htm">what is a word boundary</a>). Then the option value <code>exactly</code> is what you&#39;re looking for. When searching for &quot;high&quot;, only whole words &quot;high&quot; will be highlighted:</p><pre><code class="lang-html">&lt;div class=&quot;context&quot;&gt;
+    &lt;p&gt;highlight &lt;mark&gt;high&lt;/mark&gt;&lt;/p&gt;
+&lt;/div&gt;
+</code></pre><p>Last but not least, the option value <code>complementary</code> will complement matches. When searching for &quot;high&quot; inside above named DOM fragment, the following will be generated:</p><pre><code class="lang-html">&lt;div class=&quot;context&quot;&gt;
+    &lt;p&gt;&lt;mark&gt;highlight&lt;/mark&gt; &lt;mark&gt;high&lt;/mark&gt;&lt;/p&gt;
+&lt;/div&gt;
+</code></pre><p>The option value <code>complementary</code> highlights the search term and all surrounding characters until a blank or the start/end of the search context occurs. The option value <code>exactly</code> highlights only whole words that match the specified search term separated by a blank or the start/end of the search context.</p><p>But there might be cases where you might want to use accuracy <code>exactly</code>, but highlight also words that are followed by punctuation marks e.g. a <code>,</code> or a <code>.</code>. Or when using accuracy <code>complementary</code> you might not want to highlight a <code>,</code> or a <code>.</code> following a word. In these cases you can pass an array of custom limiters, e.g. as follows:</p><pre><code class="lang-javascript">var options = {
+    &quot;accuracy&quot;: {
+        &quot;value&quot;: &quot;exactly&quot;,
+        &quot;limiters&quot;: [&quot;,&quot;, &quot;.&quot;]
+    }
+};
+</code></pre><p>This will highlight words that are preceded and followed by a blank, the end/start of the search context (default), <code>.</code> or <code>,</code> (custom).</p></article><article><a id="diacritics"></a><h3>6.5 Diacritics</h3><p>The option <code>diacritics</code> will map normal and <a href="https://en.wikipedia.org/wiki/Diacritic">diacritic characters</a>. Assuming you would like to highlight either &quot;piekny&quot; or &quot;piękny&quot; in the following DOM fragment:</p><pre><code class="lang-html">&lt;div class=&quot;context&quot;&gt;
+    &lt;p&gt;My piekny or piękny text&lt;/p&gt;
+&lt;/div&gt;
+</code></pre><p>Then both &quot;piękny&quot; and &quot;piekny&quot; will be highlighted.</p></article><article><a id="synonyms"></a><h3>6.6 Synonyms</h3><p>There might be cases where highlighting synonyms for words is helpful for users. Take &quot;one&quot; and &quot;1&quot; as an example. When a user searches for &quot;one last todo&quot;, he might expect to highlight also &quot;1 last todo&quot;. In German languages, you could also map <a href="https://en.wikipedia.org/wiki/Germanic_umlaut">umlauts</a>, e.g. &quot;ü&quot; with &quot;ue&quot; or &quot;ö&quot; with &quot;oe&quot;.</p><p>The following example will add the synonym &quot;1&quot; for &quot;one&quot;, &quot;2&quot; for &quot;two&quot; and vice versa:</p><pre><code class="lang-javascript">var options = {
+    &quot;synonyms&quot;: {
+        &quot;one&quot;: &quot;1&quot;,
+        &quot;two&quot;: &quot;2&quot;
+    }
+};
+</code></pre></article><article><a id="filter"></a><h3>6.7 Filter</h3><p>The callback option <code>filter</code> can be used to filter highlights yourself. For example you could use it to limit highlights for specific words or generally to a specific amount. Or you could check if the match is inside a complex HTML construct which can not be expressed in a exclusion selector. Just be creative!</p><p>Here is an example to limit matches for a word &quot;the&quot; to a maximum of 10:</p><pre><code class="lang-javascript">var options = {
+    &quot;filter&quot;: function(node, term, totalCounter, counter){
+        if(term === &quot;the&quot; &amp;&amp; counter &gt;= 10){
+            return false;
+        } else {
+            return true;
+        }
+    }
+};
+</code></pre></article><article><a id="across-elements"></a><h3>6.8 Across Elements</h3><p>In some cases you need to highlight matches even if they occur in multiple elements. Let&#39;s say the following is the context where you&#39;d like to highlight the search term &quot;Highlight Text&quot;:</p><pre><code class="lang-html">&lt;div class=&quot;context&quot;&gt;
+    &lt;b&gt;Highlight&lt;/b&gt;
+    Text
+&lt;/div&gt;
+</code></pre><p>Then &quot;Highlight&quot; and &quot;Text&quot; are only highlighted when you haven&#39;t disabled <code>separateWordSearch</code>, as this will cause a separated search for words.<br>If you have disabled <code>separateWordSearch</code> nothing will be highlighted. This appears due to the fact that the two words included in the search term aren&#39;t located within the same text node. As you can see above &quot;Highlight&quot; is wrapped in a separate <code>&lt;b&gt;</code> element.<br>To make sure matches will be found across multiple elements – in this example across <code>&lt;b&gt;</code> – you&#39;ll have to enable the <code>acrossElements</code> option with the value <code>true</code>.</p><p>This option <code>acrossElements</code> will find matches even if the matching search term is located across multiple HTML elements or even iframes (if enabled).</p></article></section><section><a id="contribute"></a><h2>7. Contribute</h2><article><p>If you are having any questions, would like to submit a feature request or found a bug, please don&#39;t hesitate to <a href="https://github.com/julmot/mark.js/issues/new">open an issue</a> on GitHub!</p><p>Before submitting pull requests or creating issues, please read the <a href="https://github.com/julmot/mark.js/blob/master/CONTRIBUTING.md">guidelines for contributing</a>.</p></article></section></main></div></div><footer><div class="container"><div class="row"><div class="col-sm-6"><div class="col-inner"><p>&copy;<script>var startYear=2016,year=(new Date).getFullYear();document.write(year>startYear?startYear+"–"+year:year)</script>, <a href="https://github.com/julmot">Julian Kühnel</a>. All rights reserved.<br>The plugin mark.js itself is licensed under <a href="https://git.io/vwTVl">the MIT license</a></p></div></div><div class="col-sm-6"><div class="col-inner"><div class="github-buttons"><iframe src="https://ghbtns.com/github-btn.html?user=julmot&repo=mark.js&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe></div></div></div></div></div></footer></div><div id="downloadModal" class="modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal">&times;</button><h4 class="modal-title">Download mark.js</h4></div><div class="modal-body text-center"><p class="lead">If mark.js made you happy then give a thanks with a star.</p><p><iframe src="https://ghbtns.com/github-btn.html?user=julmot&repo=mark.js&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe></p></div><div class="modal-footer"><div class="row"><div class="col-xs-6"><button type="button" class="btn btn-primary pull-left" data-action="download">Download</button></div><div class="col-xs-6"><button type="button" class="btn btn-default pull-right" data-dismiss="modal">Close</button></div></div></div></div></div></div><noscript><div class="noscript">Please activate JavaScript in order to use all features of this website!</div></noscript><script type="text/javascript" src="/js/app.min.js"></script></body></html>
